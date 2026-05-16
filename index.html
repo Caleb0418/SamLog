@@ -3494,6 +3494,64 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </button>
     </div>
 
+    <!-- 학년도·백업·초기화 카드 -->
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-top:8px;margin-bottom:16px;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- ① 학년도 관리 -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-primary);">학년도 관리</div>
+          <button class="btn-small secondary" onclick="startNewYear()" style="display:flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            새 학년도 시작
+          </button>
+        </div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">학년도를 눌러 전환해요. 최근 3개 학년도 데이터가 보관돼요.</div>
+        <div id="year-manager-ui"></div>
+      </div>
+
+      <div style="height:1px;background:var(--border);"></div>
+
+      <!-- ② 데이터 백업 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">데이터 백업</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">현재 학년도 데이터를 내 컴퓨터에 저장해두세요.</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;justify-content:space-between;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-small primary" onclick="backupData()" style="display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              백업하기
+            </button>
+            <button class="btn-small secondary" onclick="document.getElementById('restore-backup-input').click()" style="display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              백업 불러오기
+            </button>
+            <input type="file" id="restore-backup-input" accept=".json" style="display:none;" onchange="if(this.files.length)restoreBackup(this.files[0]);this.value='';">
+          </div>
+          <div id="backup-last-time" style="font-size:11px;color:var(--text-tertiary);"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <span style="font-size:11px;color:var(--text-tertiary);">자동 백업:</span>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="manual" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">수동</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="daily" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">매일</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="weekly" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">매주</label>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border);"></div>
+
+      <!-- ③ 전체 초기화 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">전체 초기화</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">모든 학년도의 데이터를 완전히 지우고 처음 상태로 되돌려요. 되돌릴 수 없으니 백업 먼저 해두세요.</div>
+        <button onclick="resetAllData()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;border:1.5px solid #e53e3e;background:transparent;color:#e53e3e;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          전체 데이터 초기화
+        </button>
+      </div>
+
+    </div>
+
   </div>
 
   <!-- ═══════════════════════════════════════════
@@ -3616,58 +3674,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </div>
 
-        <!-- ③ 데이터 백업 -->
-        <div class="class-master-title" style="margin-bottom:8px;margin-top:20px;">데이터 백업</div>
-        <div class="class-master-sub" style="margin-bottom:12px;">학생 기록과 수업 데이터를 내 컴퓨터에 저장해두세요. 브라우저를 초기화하거나 다른 기기로 옮길 때 복원할 수 있어요.</div>
-
-        <!-- 백업 버튼 + 마지막 백업 시간 -->
-        <div style="background:var(--bg-elevated);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">지금 백업하기</div>
-              <div id="backup-last-time" style="font-size:11px;color:var(--text-tertiary);">마지막 백업: 없음</div>
-            </div>
-            <button class="btn-small primary" onclick="backupData()" style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              백업하기
-            </button>
-          </div>
-        </div>
-
-        <!-- 복원 버튼 -->
-        <div style="background:var(--bg-elevated);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">백업 파일로 복원하기</div>
-              <div style="font-size:11px;color:var(--text-tertiary);">이전에 저장한 백업 파일을 불러와요</div>
-            </div>
-            <button class="btn-small secondary" onclick="document.getElementById('restore-backup-input').click()" style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              백업 불러오기
-            </button>
-            <input type="file" id="restore-backup-input" accept=".json" style="display:none;" onchange="if(this.files.length)restoreBackup(this.files[0]);this.value='';">
-          </div>
-        </div>
-
-        <!-- 자동 백업 주기 -->
-        <div style="background:var(--bg-elevated);border-radius:10px;padding:14px 16px;">
-          <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px;">자동 백업 주기</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="auto-backup-options">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-primary);">
-              <input type="radio" name="auto-backup-cycle" value="manual" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">
-              수동 (직접 백업)
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-primary);">
-              <input type="radio" name="auto-backup-cycle" value="daily" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">
-              매일 앱 열 때 자동 저장
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-primary);">
-              <input type="radio" name="auto-backup-cycle" value="weekly" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">
-              매주 월요일 자동 저장
-            </label>
-          </div>
-          <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);">자동 저장 시 파일 다운로드 창이 열려요.</div>
-        </div>
       </div>
     </div>
   </div>
@@ -4491,10 +4497,9 @@ var TAG_POOL = JSON.parse(JSON.stringify(TAG_POOL_DEFAULT));
 
 function loadTagPool(){
   try{
-    var s = localStorage.getItem('ht2_tag_pool');
+    var s = _getYearLS('ht2_tag_pool');
     if(s){
       var parsed = JSON.parse(s);
-      // 기본 키가 빠져있으면 기본값으로 채움 (마이그레이션 안전망)
       ['observation','consultation','life','parent'].forEach(function(k){
         if(!Array.isArray(parsed[k])) parsed[k] = TAG_POOL_DEFAULT[k].slice();
       });
@@ -4503,7 +4508,7 @@ function loadTagPool(){
   }catch(e){ console.warn('태그 로드 실패', e); }
 }
 function saveTagPool(){
-  try{ localStorage.setItem('ht2_tag_pool', JSON.stringify(TAG_POOL)); }catch(e){}
+  try{ localStorage.setItem('ht2_tag_pool_' + getActiveYear(), JSON.stringify(TAG_POOL)); }catch(e){}
 }
 function resetTagPool(type){
   if(type && TAG_POOL_DEFAULT[type]){
@@ -4835,30 +4840,135 @@ function getActiveTab(){
 }
 
 /* ═══════════════════════════════════════════
+   학년도 관리
+═══════════════════════════════════════════ */
+var MAX_YEARS = 3;
+var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool'];
+
+function getActiveYear(){
+  return localStorage.getItem('ht2_active_year') || String(new Date().getFullYear());
+}
+function getAvailableYears(){
+  try{ var s = localStorage.getItem('ht2_years_list'); if(s) return JSON.parse(s); }catch(e){}
+  return [];
+}
+function _saveYearsList(list){ localStorage.setItem('ht2_years_list', JSON.stringify(list)); }
+function _addYearToList(year){
+  var list = getAvailableYears();
+  if(list.indexOf(String(year)) === -1){ list.push(String(year)); list.sort(); _saveYearsList(list); }
+  return list;
+}
+function _getYearLS(key){
+  var v = localStorage.getItem(key + '_' + getActiveYear());
+  return v !== null ? v : localStorage.getItem(key); // legacy fallback
+}
+
+function switchYear(year){
+  year = String(year);
+  if(year === getActiveYear()) return;
+  saveAll();
+  localStorage.setItem('ht2_active_year', year);
+  showToast(year + '학년도로 이동해요');
+  setTimeout(function(){ location.reload(); }, 900);
+}
+
+function startNewYear(){
+  var yr = String(new Date().getFullYear());
+  var candidate = String(parseInt(getActiveYear()) + 1);
+  var input = prompt('새 학년도를 입력하세요 (예: ' + candidate + ')', candidate);
+  if(!input) return;
+  var year = String(parseInt(input));
+  if(isNaN(parseInt(input)) || year.length !== 4){ alert('올바른 연도를 입력해주세요.'); return; }
+  if(year === getActiveYear()){ alert('현재 학년도와 같아요.'); return; }
+
+  if(!confirm(year + '학년도를 새로 시작합니다.\n현재 학년도 데이터는 보관되고, 새 학년도는 빈 데이터로 시작해요.\n계속하시겠어요?')) return;
+
+  saveAll(); saveTagPool();
+  var list = _addYearToList(year);
+  // MAX_YEARS 초과 시 가장 오래된 연도 삭제
+  if(list.length > MAX_YEARS){
+    list.sort();
+    var oldest = list.shift();
+    YEAR_KEYS.forEach(function(k){ localStorage.removeItem(k + '_' + oldest); });
+    _saveYearsList(list);
+  }
+  localStorage.setItem('ht2_active_year', year);
+  // 새 연도 빈 데이터 저장
+  localStorage.setItem('ht2_classes_' + year, JSON.stringify({}));
+  localStorage.setItem('ht2_class_master_' + year, JSON.stringify([]));
+  localStorage.setItem('ht2_school_timetable_' + year, JSON.stringify({}));
+  localStorage.setItem('ht2_tt_sync_state_' + year, JSON.stringify({}));
+  localStorage.setItem('ht2_adhoc_slots_' + year, JSON.stringify([]));
+  _addYearToList(year);
+  showToast(year + '학년도를 시작해요!');
+  setTimeout(function(){ location.reload(); }, 1200);
+}
+
+function resetAllData(){
+  if(!confirm('모든 학년도의 데이터가 완전히 삭제됩니다.\n이 작업은 되돌릴 수 없어요.\n계속하시겠어요?')) return;
+  if(!confirm('정말로 삭제할까요?\n백업을 먼저 해두시길 권장해요.')) return;
+  var keys = [];
+  for(var i = 0; i < localStorage.length; i++){
+    var k = localStorage.key(i);
+    if(k && k.startsWith('ht2_')) keys.push(k);
+  }
+  keys.forEach(function(k){ localStorage.removeItem(k); });
+  showToast('전체 데이터가 초기화됐어요');
+  setTimeout(function(){ location.reload(); }, 1200);
+}
+
+function renderYearManagerUI(){
+  var el = document.getElementById('year-manager-ui');
+  if(!el) return;
+  var active = getActiveYear();
+  var years = getAvailableYears();
+  if(years.indexOf(active) === -1) years.push(active);
+  years.sort().reverse();
+  var html = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
+  years.forEach(function(y){
+    var isActive = y === active;
+    html += '<button onclick="switchYear(\'' + y + '\')" style="padding:5px 14px;border-radius:20px;border:1.5px solid;font-size:12px;cursor:pointer;transition:all 0.15s;' +
+      (isActive ? 'background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;'
+                : 'background:var(--bg-surface);border-color:var(--border);color:var(--text-secondary);') +
+      '">' + y + '학년도' + (isActive ? ' ✓' : '') + '</button>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+  updateBackupLastTimeUI();
+  // 자동 백업 라디오 초기화
+  var cycle = localStorage.getItem('ht2_auto_backup') || 'manual';
+  document.querySelectorAll('input[name="auto-backup-cycle"]').forEach(function(r){ r.checked = r.value === cycle; });
+}
+
+/* ═══════════════════════════════════════════
    localStorage 영속화
 ═══════════════════════════════════════════ */
 function saveAll(){
   try{
-    // 활성 반의 students/records가 변경됐을 수 있으므로 다시 동기화
     var c = getActiveClass();
-    if(c){
-      c.students = students;
-      c.records = records;
-    }
-    localStorage.setItem('ht2_classes', JSON.stringify(classes));
-    localStorage.setItem('ht2_class_master', JSON.stringify(classMaster));
-    localStorage.setItem('ht2_school_timetable', JSON.stringify(schoolTimetable));
-    localStorage.setItem('ht2_tt_sync_state', JSON.stringify(ttSyncState));
-    localStorage.setItem('ht2_adhoc_slots', JSON.stringify(adhocSlots));
+    if(c){ c.students = students; c.records = records; }
+    var yr = getActiveYear();
+    localStorage.setItem('ht2_classes_' + yr, JSON.stringify(classes));
+    localStorage.setItem('ht2_class_master_' + yr, JSON.stringify(classMaster));
+    localStorage.setItem('ht2_school_timetable_' + yr, JSON.stringify(schoolTimetable));
+    localStorage.setItem('ht2_tt_sync_state_' + yr, JSON.stringify(ttSyncState));
+    localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
+    _addYearToList(yr);
   }catch(e){ console.warn('저장 실패', e); }
 }
 
-var BACKUP_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_settings','ht2_alert_settings','ht2_theme'];
+var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool'];
+var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme'];
 
 function backupData(){
-  saveAll();
-  var data = { _version: 1, _exportedAt: new Date().toISOString() };
-  BACKUP_KEYS.forEach(function(k){
+  saveAll(); saveTagPool();
+  var yr = getActiveYear();
+  var data = { _version: 2, _exportedAt: new Date().toISOString(), _year: yr };
+  BACKUP_YEAR_KEYS.forEach(function(k){
+    var v = localStorage.getItem(k + '_' + yr) || localStorage.getItem(k);
+    if(v !== null) try{ data[k] = JSON.parse(v); }catch(e){ data[k] = v; }
+  });
+  BACKUP_GLOBAL_KEYS.forEach(function(k){
     var v = localStorage.getItem(k);
     if(v !== null) try{ data[k] = JSON.parse(v); }catch(e){ data[k] = v; }
   });
@@ -4866,25 +4976,31 @@ function backupData(){
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   var date = new Date().toISOString().slice(0,10);
-  a.href = url; a.download = 'IAMSAM_백업_' + date + '.json';
+  a.href = url; a.download = 'IAMSAM_백업_' + yr + '학년도_' + date + '.json';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
-  var now = new Date().toISOString();
-  localStorage.setItem('ht2_last_backup', now);
+  localStorage.setItem('ht2_last_backup', new Date().toISOString());
   updateBackupLastTimeUI();
-  showToast('백업 파일이 저장됐어요');
+  showToast(yr + '학년도 백업 파일이 저장됐어요');
 }
 
 function restoreBackup(file){
-  if(!confirm('지금 저장된 모든 데이터가 백업 파일 내용으로 바뀝니다.\n계속하시겠어요?')) return;
+  if(!confirm('현재 학년도 데이터가 백업 파일 내용으로 바뀝니다.\n계속하시겠어요?')) return;
   var reader = new FileReader();
   reader.onload = function(e){
     try{
       var data = JSON.parse(e.target.result);
       if(!data._version) throw new Error('invalid');
-      BACKUP_KEYS.forEach(function(k){
+      var yr = data._year || getActiveYear();
+      localStorage.setItem('ht2_active_year', yr);
+      BACKUP_YEAR_KEYS.forEach(function(k){
+        if(k in data) localStorage.setItem(k + '_' + yr, JSON.stringify(data[k]));
+      });
+      BACKUP_GLOBAL_KEYS.forEach(function(k){
         if(k in data) localStorage.setItem(k, JSON.stringify(data[k]));
       });
+      var list = getAvailableYears();
+      if(list.indexOf(yr) === -1){ list.push(yr); list.sort(); _saveYearsList(list); }
       showToast('복원 완료! 잠시 후 새로고침해요');
       setTimeout(function(){ location.reload(); }, 1200);
     } catch(err){
@@ -4938,7 +5054,7 @@ function checkAutoBackup(){
 
 function loadAll(){
   try{
-    var cls = localStorage.getItem('ht2_classes');
+    var cls = _getYearLS('ht2_classes');
     if(cls){
       classes = JSON.parse(cls);
     } else {
@@ -4958,7 +5074,7 @@ function loadAll(){
         };
       }
     }
-    var cm = localStorage.getItem('ht2_class_master');
+    var cm = _getYearLS('ht2_class_master');
     if(cm){
       classMaster = JSON.parse(cm);
       // 마이그레이션: 기존 (day, period, classroom) 단일 슬롯 → 다중 슬롯 구조
@@ -5002,11 +5118,11 @@ function loadAll(){
         localStorage.removeItem('ht2_class_memos');
       }catch(e){}
     }
-    var st = localStorage.getItem('ht2_school_timetable');
+    var st = _getYearLS('ht2_school_timetable');
     if(st) schoolTimetable = JSON.parse(st);
-    var tts = localStorage.getItem('ht2_tt_sync_state');
+    var tts = _getYearLS('ht2_tt_sync_state');
     if(tts) ttSyncState = JSON.parse(tts);
-    var as = localStorage.getItem('ht2_adhoc_slots');
+    var as = _getYearLS('ht2_adhoc_slots');
     if(as) adhocSlots = JSON.parse(as);
 
     // 마이그레이션: 잘못 들어간 학생 데이터(NaN/합계행) 제거
@@ -12426,7 +12542,6 @@ function saveClassMemo(){
 
 function openClassSettings(){
   document.getElementById('class-settings-modal').classList.add('show');
-  initAutoBackupCycleUI();
 }
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
@@ -12512,6 +12627,7 @@ function init(){
   loadTagPool();
   loadAll();
   checkAutoBackup();
+  renderYearManagerUI();
 
   // 온보딩 체크
   var onboarded = false;
