@@ -3343,6 +3343,151 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   display:flex;justify-content:flex-end;gap:8px;
   background:var(--bg-elevated);flex-shrink:0;
 }
+
+/* ─── 생기부 — 학교급 / 과목 셀렉터 ─── */
+.sg-meta-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.sg-meta-field { flex:1; min-width:140px; }
+.sg-meta-label {
+  font-size:11px; font-weight:600; color:var(--text-tertiary,#9B9890);
+  letter-spacing:0.06em; text-transform:uppercase;
+  margin-bottom:5px; display:flex; align-items:center; gap:5px;
+}
+.sg-meta-label-required { color:var(--danger,#C03A2B); font-weight:700; letter-spacing:0; text-transform:none; }
+.sg-meta-select {
+  width:100%; padding:8px 12px; font-size:13px; font-family:inherit;
+  border:1px solid var(--border,#E5E3DB); border-radius:8px;
+  background:var(--bg-elevated,#F7F6F1); color:var(--text,#1A1916);
+  outline:none; cursor:pointer; transition:border-color 0.15s;
+}
+.sg-meta-select:focus { border-color:var(--border-accent,#B3C9F8); box-shadow:0 0 0 3px rgba(47,111,235,0.08); }
+.sg-meta-select:hover { border-color:var(--border-strong,#CCCAB8); }
+.sg-subject-field { display:none; }
+.sg-subject-field.show { display:block; animation:sgFieldFadeIn 0.2s ease; }
+@keyframes sgFieldFadeIn { from{opacity:0;transform:translateY(-4px);} to{opacity:1;transform:translateY(0);} }
+.sg-meta-hint { font-size:10px; color:var(--text-tertiary,#9B9890); margin-top:4px; line-height:1.5; }
+.sg-meta-hint.warn { color:var(--danger,#C03A2B); }
+
+/* ─── 생기부 — 금지어 경고 스타일 ─── */
+.sg-rec-card-warn {
+  border-color: var(--danger-border, #F5B9B3) !important;
+  background: var(--danger-dim, #FDECEA);
+  position: relative;
+}
+[data-theme="dark"] .sg-rec-card-warn {
+  background: #2A1412;
+  border-color: #6B2820 !important;
+}
+.sg-rec-warn-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 7px 10px;
+  background: var(--danger-dim, #FDECEA);
+  border: 1px solid var(--danger-border, #F5B9B3);
+  border-radius: 7px;
+  font-size: 11px;
+  color: var(--danger, #C03A2B);
+  line-height: 1.55;
+}
+[data-theme="dark"] .sg-rec-warn-banner {
+  background: #2A1412;
+  border-color: #6B2820;
+  color: #E05B4A;
+}
+.sg-rec-warn-icon { flex-shrink: 0; margin-top: 1px; }
+.sg-rec-warn-keyword {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(192, 58, 43, 0.15);
+  font-weight: 600;
+  margin: 0 2px;
+}
+.sg-rec-card-sensitive {
+  border-left: 3px solid var(--warn, #92550A) !important;
+  opacity: 0.7;
+}
+.sg-rec-sensitive-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 5px 9px;
+  background: var(--warn-dim, #FEF3E2);
+  border: 1px solid var(--warn-border, #F8D49A);
+  border-radius: 6px;
+  font-size: 10px;
+  color: var(--warn, #92550A);
+}
+[data-theme="dark"] .sg-rec-sensitive-banner {
+  background: #2A1E0A;
+  border-color: #5C3D0A;
+  color: #E8A953;
+}
+.sg-confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 25, 22, 0.5);
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.sg-confirm-overlay.show { display: flex; }
+.sg-confirm-dialog {
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border, #E5E3DB);
+  border-radius: 14px;
+  padding: 22px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  animation: sgConfirmPop 0.18s ease;
+}
+@keyframes sgConfirmPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.sg-confirm-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--warn-dim, #FEF3E2);
+  border: 1px solid var(--warn-border, #F8D49A);
+  color: var(--warn, #92550A);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.sg-confirm-title { font-size: 15px; font-weight: 700; color: var(--text, #1A1916); margin-bottom: 8px; }
+.sg-confirm-desc  { font-size: 13px; color: var(--text-secondary, #6B6860); line-height: 1.65; margin-bottom: 14px; }
+.sg-confirm-list {
+  background: var(--bg-elevated, #F7F6F1);
+  border: 1px solid var(--border, #E5E3DB);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-secondary, #6B6860);
+  line-height: 1.7;
+  margin-bottom: 16px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.sg-confirm-list b { color: var(--danger, #C03A2B); font-weight: 600; }
+.sg-confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sg-confirm-btn-cancel,
+.sg-confirm-btn-proceed {
+  padding: 10px; border-radius: 9px;
+  font-size: 13px; font-weight: 500; font-family: inherit;
+  cursor: pointer; transition: background 0.15s;
+}
+.sg-confirm-btn-cancel {
+  background: var(--bg-elevated, #F7F6F1);
+  border: 1px solid var(--border, #E5E3DB);
+  color: var(--text-secondary, #6B6860);
+}
+.sg-confirm-btn-cancel:hover { background: var(--bg-overlay, #EFEDE6); }
+.sg-confirm-btn-proceed { background: var(--warn, #92550A); border: none; color: #fff; }
+.sg-confirm-btn-proceed:hover { background: #6B3F08; }
 </style>
 </head>
 <body>
@@ -4451,6 +4596,41 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </button>
     </div>
     <div class="saengibu-body">
+      <!-- 학교급 / 과목 셀렉터 -->
+      <div class="sg-meta-row">
+        <div class="sg-meta-field">
+          <div class="sg-meta-label">학교급</div>
+          <select class="sg-meta-select" id="sg-school-level" onchange="onSgSchoolLevelChange()">
+            <option value="초">초등학교</option>
+            <option value="중" selected>중학교</option>
+            <option value="고">고등학교</option>
+          </select>
+          <div class="sg-meta-hint">학교급에 따라 글자수·기재 규칙이 달라져요</div>
+        </div>
+        <div class="sg-meta-field sg-subject-field" id="sg-subject-field">
+          <div class="sg-meta-label">과목 <span class="sg-meta-label-required">*</span></div>
+          <select class="sg-meta-select" id="sg-subject" onchange="onSgSubjectChange()">
+            <option value="">과목을 선택하세요</option>
+            <option value="국어">국어</option>
+            <option value="영어">영어</option>
+            <option value="수학">수학</option>
+            <option value="사회">사회</option>
+            <option value="역사">역사</option>
+            <option value="도덕">도덕</option>
+            <option value="과학">과학</option>
+            <option value="기술·가정">기술·가정</option>
+            <option value="정보">정보</option>
+            <option value="체육">체육</option>
+            <option value="음악">음악</option>
+            <option value="미술">미술</option>
+            <option value="제2외국어">제2외국어</option>
+            <option value="한문">한문</option>
+            <option value="기타">기타</option>
+          </select>
+          <div class="sg-meta-hint" id="sg-subject-hint">세특은 과목별로 작성해요</div>
+        </div>
+      </div>
+
       <div class="sg-section-label">작성할 영역 선택</div>
       <div class="sg-area-chips" id="sg-area-chips">
         <button class="sg-area-chip selected" data-area="행동특성" data-types="observation,consultation,parent" data-maxlen="중1,000자/고500자" onclick="selectSgArea(this)">행동특성 및 종합의견</button>
@@ -4475,7 +4655,8 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="sg-section-label">선생님 한마디 <span style="font-weight:400;text-transform:none;letter-spacing:0;">(선택)</span></div>
       <textarea id="sg-teacher-comment" rows="3" placeholder="강조하고 싶은 학생의 모습이나 작성 방향을 알려주세요"
-        class="textarea-large" style="margin-bottom:16px;"></textarea>
+        class="textarea-large" style="margin-bottom:4px;" oninput="document.getElementById('sg-comment-count').textContent=this.value.length"></textarea>
+      <div style="text-align:right;font-size:11px;color:var(--text-tertiary);margin-bottom:14px;"><span id="sg-comment-count">0</span>자</div>
 
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="sg-selected-count" style="flex:1;font-size:12px;color:var(--text-tertiary);">기록을 선택하세요</div>
@@ -4494,7 +4675,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <div class="anon-banner-text">학생 이름·번호·반·교사 이름이 모두 익명 토큰으로 치환됐어요. 외부 AI는 누구인지 알 수 없습니다.</div>
         </div>
         <div class="result-label">
-          <span>익명화된 프롬프트</span>
+          <span>익명화된 프롬프트 <span id="sg-prompt-length" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-tertiary);"></span></span>
           <button class="anon-toggle" onclick="toggleSgAnon()">원본 보기</button>
         </div>
         <div class="result-box prompt-box" id="sg-prompt-anon"></div>
@@ -4510,6 +4691,25 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   </div>
 </div>
 
+<!-- 생기부 프롬프트 생성 — 금지어 확인 모달 -->
+<div class="sg-confirm-overlay" id="sg-forbidden-modal" onclick="if(event.target===this)closeSgForbiddenModal()">
+  <div class="sg-confirm-dialog">
+    <div class="sg-confirm-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <div class="sg-confirm-title">기재 불가 내용이 포함됐어요</div>
+    <div class="sg-confirm-desc">선택한 기록에 학교생활기록부 기재 요령상 금지된 내용이 있어요. 그대로 진행하면 AI가 해당 내용을 초안에 포함할 수 있습니다.</div>
+    <div class="sg-confirm-list" id="sg-forbidden-list"></div>
+    <div class="sg-confirm-btns">
+      <button class="sg-confirm-btn-cancel" onclick="closeSgForbiddenModal()">기록 다시 선택</button>
+      <button class="sg-confirm-btn-proceed" onclick="proceedDespiteForbidden()">위험 감수하고 진행</button>
+    </div>
+  </div>
+</div>
+
 <button class="theme-toggle" onclick="toggleTheme()" title="다크모드 전환">
   <svg id="theme-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 </button>
@@ -4520,6 +4720,252 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 /* ═══════════════════════════════════════════
    v2.0-α 데이터 모델
 ═══════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════
+   생기부 기재요령 규칙 상수 (2026 교육부 기준)
+   - 영역별 작성 규칙, 금지 내용, 글자수 제한
+   - 학교급별(초·중·고) 분기 데이터
+═══════════════════════════════════════════ */
+
+// 학교급 상수 — 추후 학교급 셀렉터 추가 시 사용
+var SCHOOL_LEVELS = {
+  ELEM: '초',
+  MID:  '중',
+  HIGH: '고'
+};
+
+// 현재 학교급 — 임시 고정값, 추후 사용자 설정으로 분리
+var CURRENT_SCHOOL_LEVEL = SCHOOL_LEVELS.MID;
+
+/* ──────────────────────────────────────────
+   영역별 메타데이터
+   각 영역의 글자수·작성자·필수내용·금지내용·문체 등을 정의
+────────────────────────────────────────── */
+var AREA_META = {
+  '행동특성': {
+    fullName: '행동특성 및 종합의견',
+    purpose: '학년 동안의 지속적 관찰을 바탕으로 학생을 총체적으로 이해할 수 있는 종합 의견 작성',
+    writer: '담임교사',
+    maxLen: { '초': 500, '중': 500, '고': 500 },
+    required: [
+      '학년 동안 지속적으로 관찰된 행동 특성',
+      '학습 태도·자기주도성',
+      '인성·또래관계 (협력·배려·갈등 해결)',
+      '변화·성장 과정',
+      '학생의 강점·잠재력'
+    ],
+    forbidden: [
+      '공인어학시험 성적·명칭',
+      '교외 대회 수상·교외상',
+      '부모의 직업·직장·사회경제적 지위 암시',
+      '특정 학원명·강사명·대학명',
+      '방과후학교 활동',
+      '논문·도서 출간·특허',
+      '해외 활동(어학연수·해외봉사 등)',
+      '자격증 취득 사실',
+      '영재교육기관(영재학교·영재학급·영재교육원) 수료',
+      '장학생·장학금'
+    ],
+    style: 'NEIS 격식 문체 — 객관적·구체적·긍정적이되 과장 금지. 한 문단의 자연스러운 서술문.',
+    specialNote: '학생을 총체적으로 이해할 수 있는 종합 의견. 한두 가지 일화에 매몰되지 말고 학년 전반의 일관된 특성을 포착할 것.'
+  },
+
+  '창체자율': {
+    fullName: '창의적 체험활동 — 자율·자치활동',
+    purpose: '학급·학교 자치 활동에서 학생이 보여준 개별적 특성 기록',
+    writer: '담임교사',
+    maxLen: { '초': 500, '중': 500, '고': 500 },
+    required: [
+      '학급·학교 행사 참여',
+      '임원 활동(있는 경우): "전교/학년/학급" 구분 + 재임기간 명시',
+      '주제 탐구·공동체 활동에서의 실제적 역할',
+      '활동 과정에서 드러난 학생만의 특성'
+    ],
+    forbidden: [
+      '활동 사실의 단순 나열',
+      '학교교육계획에 없는 외부 활동',
+      '청소년단체 활동의 특기사항 (단체명은 가능, 고등학교는 단체명도 불가)'
+    ],
+    style: '활동결과 평가가 아닌 활동 과정에서 드러나는 행동 특성·참여도·협력도·활동실적을 실제적 역할 위주로 서술',
+    formatHint: '임원 표기 예시: "전교 학생자치회 부회장(2026.03.01.-2026.08.18.)"',
+    hasIsuTime: true,
+    isuTimeRequired: { '초': false, '중': false, '고': true }
+  },
+
+  '창체진로': {
+    fullName: '창의적 체험활동 — 진로활동',
+    purpose: '학생의 진로 탐색 과정과 진로 특성 기록',
+    writer: '담임교사',
+    maxLen: { '초': 500, '중': 500, '고': 700 },
+    required: [
+      '진로희망분야 (특기사항 시작 부분에 명시)',
+      '진로 관련 검사·상담 결과',
+      '관심분야와 관련된 구체적 활동',
+      '진로 탐색 과정에서의 변화·성장'
+    ],
+    forbidden: [
+      '진로 미정 시 빈칸 처리 (반드시 "진로탐색 중임." 등으로 명시)',
+      '외부 진로체험 기관·강사명'
+    ],
+    style: '진로 결정의 동기·근거가 활동과 연결되도록 서술. 학생의 흥미·적성과 활동이 일관되게 보이도록.',
+    formatHint: '진로희망분야 표기 — "희망분야: [분야명]" 또는 "희망분야: 진로탐색 중임."',
+    elemException: '초등학교는 진로희망분야 입력 생략 가능',
+    hasIsuTime: true,
+    isuTimeRequired: { '초': false, '중': false, '고': true }
+  },
+
+  '동아리': {
+    fullName: '창의적 체험활동 — 동아리활동',
+    purpose: '정규교육과정 내 동아리 활동에서의 실제적 역할과 활동 기록',
+    writer: '담임교사',
+    maxLen: { '초': 500, '중': 500, '고': 500 },
+    required: [
+      '동아리명 (괄호 안에 명시)',
+      '이수시간 (고등학교 필수)',
+      '참여도·협력도·열성도',
+      '실제 수행한 활동과 역할',
+      '동아리 내 특별한 활동 실적'
+    ],
+    forbidden: [
+      '평가성 등급 표현("최우수", "1등")',
+      '외부 동아리·교외 단체 활동',
+      '학기 중 구성된 자율동아리(학기 초만 허용)'
+    ],
+    style: '평가가 아닌 실제적 활동과 역할 위주로 서술',
+    formatHint: '시작 부분 표기 예시: "(영어회화반)(34시간) ~". 자율동아리는 "(동아리명: 자율동아리)" + 30자 이내 소개',
+    hasIsuTime: true,
+    isuTimeRequired: { '초': false, '중': false, '고': true }
+  },
+
+  '세특': {
+    fullName: '교과학습발달상황 — 세부능력 및 특기사항',
+    purpose: '해당 과목에서 학생이 보여준 성취 수준의 특성과 학습 활동 참여도 서술',
+    writer: '교과담당교사',
+    maxLen: { '초': 500, '중': 500, '고': 500 },
+    required: [
+      '해당 과목의 성취기준에 따른 성취수준의 특성',
+      '수업 중 실제 관찰된 구체적 장면(발표·질문·실험·과제)',
+      '학생만의 차별적 학습 특성(사고 방식·접근법·관심 분야)',
+      '학습 활동 참여 태도(적극성·협력·끈기)',
+      '가능한 경우 학기 초·말 변화 또는 성장 과정'
+    ],
+    forbidden: [
+      '학년 학생 전체에 동일하게 적용되는 일반론',
+      '단정적 평가("이해함", "잘함")만으로 채우는 서술',
+      '교외 수상·논문·도서 출간',
+      '특정 학원·강사·대학명',
+      '부모 정보',
+      '공인어학시험'
+    ],
+    style: '다른 학생과 구별되는 이 학생만의 특성이 드러나야 함. 실제 수업에서 한 행동·발화·결과물 중심.',
+    specialNote: '진학 사정에서 가장 중요하게 보는 항목. 고등학교는 모든 학생에 대해 전원 필수 작성.',
+    requiresSubject: true
+  }
+};
+
+/* ──────────────────────────────────────────
+   기재 금지어 사전 — 모든 영역 공통
+   프롬프트 생성 시 AI 지시문에 자동 포함
+   추후 단계에서 입력 단계 실시간 감지에도 사용
+────────────────────────────────────────── */
+var FORBIDDEN_PATTERNS = {
+  language_test: {
+    label: '공인어학시험',
+    keywords: ['TOEIC', 'TOEFL', 'TEPS', 'HSK', 'JPT', 'JLPT', 'DELF', 'DELE', 'OPIc', '토익', '토플', '텝스'],
+    message: '공인어학시험 관련 내용은 생기부 어떤 항목에도 기재할 수 없습니다.'
+  },
+  external_award: {
+    label: '교외 수상',
+    keywords: ['교외 대회', '교외대회', '표창장', '감사장', '공로상'],
+    message: '교외 수상 및 교외상은 기재 불가입니다.'
+  },
+  parent_info: {
+    label: '부모 정보',
+    keywords: ['아버지가', '어머니가', '부모님이', '아빠가', '엄마가', '집안이'],
+    message: '부모의 직업·직장·사회적 지위를 암시하는 내용은 기재할 수 없습니다.'
+  },
+  private_education: {
+    label: '학원·강사',
+    keywords: ['학원', '과외', '강사'],
+    message: '특정 학원명·강사명은 기재 불가입니다.'
+  },
+  after_school: {
+    label: '방과후학교',
+    keywords: ['방과후', '방과 후'],
+    message: '방과후학교 활동 내용은 기재할 수 없습니다.'
+  },
+  publication: {
+    label: '논문·도서·특허',
+    keywords: ['논문', '학회', '특허', '실용신안', '도서 출간', '도서출간', '저서'],
+    message: '논문·도서 출간·특허 등 지식재산권 관련 내용은 기재 불가입니다.'
+  },
+  overseas: {
+    label: '해외활동',
+    keywords: ['어학연수', '해외 봉사', '해외봉사', '해외 캠프', '교환학생', '해외 연수'],
+    message: '해외 활동 실적은 기재 불가입니다.'
+  },
+  certificate: {
+    label: '자격증',
+    keywords: ['자격증', '자격 취득', '인증서'],
+    message: '자격증 취득 사실은 기재 불가입니다.'
+  },
+  gifted_program: {
+    label: '영재교육',
+    keywords: ['영재학교', '영재학급', '영재교육원', '영재 프로그램'],
+    message: '영재교육기관 수료 내용은 행동특성·종합의견에 기재 불가입니다(세특에는 가능).'
+  },
+  scholarship: {
+    label: '장학금',
+    keywords: ['장학생', '장학금'],
+    message: '장학생·장학금 관련 내용은 기재 불가입니다.'
+  }
+};
+
+/* ──────────────────────────────────────────
+   영역별 권장 태그 매핑
+   기록에 어떤 태그가 붙어 있으면 해당 영역에 적합한지 정의
+   추후 기록 필터링에 사용
+────────────────────────────────────────── */
+var AREA_TAG_MAP = {
+  '행동특성': ['행동특성', '인성', '리더십', '협업', '성장', '학습태도', '또래관계'],
+  '창체자율': ['창체-자율', '자율활동', '학급활동', '학교행사', '임원', '봉사'],
+  '창체진로': ['창체-진로', '진로', '진로상담', '진로검사', '직업체험'],
+  '동아리':   ['창체-동아리', '동아리', '동아리활동'],
+  '세특':     ['세특', '교과', '수업태도', '수행평가', '발표', '과제']
+};
+
+/* ──────────────────────────────────────────
+   유틸: 영역의 글자수 제한 가져오기
+────────────────────────────────────────── */
+function getAreaMaxLen(area, level) {
+  var meta = AREA_META[area];
+  if(!meta) return 500;
+  var lv = level || CURRENT_SCHOOL_LEVEL;
+  return meta.maxLen[lv] || 500;
+}
+
+/* ──────────────────────────────────────────
+   유틸: 텍스트에서 금지 패턴 감지
+   - 반환: 매칭된 패턴 배열 [{category, keyword, message}, ...]
+────────────────────────────────────────── */
+function detectForbidden(text) {
+  if(!text) return [];
+  var matches = [];
+  Object.keys(FORBIDDEN_PATTERNS).forEach(function(key){
+    var pat = FORBIDDEN_PATTERNS[key];
+    pat.keywords.forEach(function(kw){
+      if(text.indexOf(kw) >= 0) {
+        matches.push({
+          category: key,
+          label: pat.label,
+          keyword: kw,
+          message: pat.message
+        });
+      }
+    });
+  });
+  return matches;
+}
 
 // 샘플 학생 명단 (v2.0-γ에서 NEIS 업로드로 대체)
 var SAMPLE_STUDENTS = [
@@ -8139,7 +8585,10 @@ var sgState = {
   selectedRecIds: [],
   comment: '',
   promptAnon: '',
-  promptReal: ''
+  promptReal: '',
+  schoolLevel: '중',
+  subject: '',
+  bypassForbidden: false
 };
 
 function openSaengibu(){
@@ -8163,6 +8612,13 @@ function openSaengibu(){
   document.getElementById('sg-result').style.display = 'none';
   document.getElementById('sg-teacher-comment').value = '';
 
+  var lvSel = document.getElementById('sg-school-level');
+  if(lvSel) lvSel.value = sgState.schoolLevel || '중';
+  var subjSel = document.getElementById('sg-subject');
+  if(subjSel) subjSel.value = sgState.subject || '';
+  onSgAreaChangeForSubject(sgState.area);
+  refreshSgGenerateBtn();
+
   renderSgRecords();
   document.getElementById('saengibu-overlay').classList.add('show');
 }
@@ -8179,6 +8635,161 @@ function selectSgArea(btn){
   sgState.areaMaxLen = btn.dataset.maxlen;
   sgState.selectedRecIds = [];
   renderSgRecords();
+  onSgAreaChangeForSubject(sgState.area);
+}
+
+/* ──────────────────────────────────────────
+   학교급 셀렉터 변경 핸들러
+────────────────────────────────────────── */
+function onSgSchoolLevelChange() {
+  var sel = document.getElementById('sg-school-level');
+  if(!sel) return;
+  var lv = sel.value;
+  sgState.schoolLevel = lv;
+  CURRENT_SCHOOL_LEVEL = lv;
+  refreshSgAreaMaxLenHint();
+  refreshSgAreaChipLabels();
+}
+
+function refreshSgAreaChipLabels() {
+  var chips = document.querySelectorAll('.sg-area-chip');
+  chips.forEach(function(chip){
+    var area = chip.getAttribute('data-area');
+    if(!area || !AREA_META[area]) return;
+    var maxLen = getAreaMaxLen(area, sgState.schoolLevel);
+    chip.setAttribute('data-maxlen', maxLen + '자');
+  });
+  // 현재 선택된 영역의 areaMaxLen도 동기화
+  refreshSgAreaMaxLenHint();
+}
+
+function onSgAreaChangeForSubject(area) {
+  var subjField = document.getElementById('sg-subject-field');
+  if(!subjField) return;
+  if(area === '세특') {
+    subjField.classList.add('show');
+  } else {
+    subjField.classList.remove('show');
+    sgState.subject = '';
+    var subjSel = document.getElementById('sg-subject');
+    if(subjSel) subjSel.value = '';
+  }
+  refreshSgGenerateBtn();
+}
+
+function onSgSubjectChange() {
+  var sel = document.getElementById('sg-subject');
+  if(!sel) return;
+  sgState.subject = sel.value;
+  var hint = document.getElementById('sg-subject-hint');
+  if(hint) {
+    if(!sel.value) {
+      hint.textContent = '세특은 과목별로 작성해요';
+      hint.classList.remove('warn');
+    } else {
+      hint.textContent = '['+sel.value+'] 과목의 세부능력 및 특기사항으로 작성됩니다';
+      hint.classList.remove('warn');
+    }
+  }
+  refreshSgGenerateBtn();
+}
+
+function refreshSgAreaMaxLenHint() {
+  if(sgState.area && AREA_META[sgState.area]) {
+    sgState.areaMaxLen = getAreaMaxLen(sgState.area, sgState.schoolLevel) + '자';
+  }
+}
+
+function refreshSgGenerateBtn() {
+  var btn = document.getElementById('sg-generate-btn');
+  if(!btn) return;
+  var hasRecord = sgState.selectedRecIds && sgState.selectedRecIds.length > 0;
+  var needsSubject = sgState.area === '세특';
+  var hasSubject = !needsSubject || (sgState.subject && sgState.subject.length > 0);
+  btn.disabled = !(hasRecord && hasSubject);
+  var label = document.getElementById('sg-selected-count');
+  if(label) {
+    if(!hasRecord) {
+      label.textContent = '기록을 선택하세요';
+    } else if(needsSubject && !hasSubject) {
+      label.textContent = '과목을 선택하세요';
+    } else {
+      label.textContent = sgState.selectedRecIds.length+'건 선택됨';
+    }
+  }
+}
+
+/* ──────────────────────────────────────────
+   기록 단위 금지어 / 민감도 검사
+────────────────────────────────────────── */
+function checkRecordForForbidden(rec) {
+  var text = (rec.content || '') + ' ' + ((rec.tags || []).join(' '));
+  var matches = detectForbidden(text);
+  var isSensitive = rec.type === 'consultation' &&
+    (rec.tags || []).some(function(t){
+      return t === '정서·행동' || t === '정서행동' || t === 'sensitive';
+    });
+  return { hasForbidden: matches.length > 0, matches: matches, isSensitive: isSensitive };
+}
+
+function buildForbiddenWarnHtml(matches) {
+  if(!matches || matches.length === 0) return '';
+  var seen = {};
+  var unique = matches.filter(function(m){
+    if(seen[m.category]) return false;
+    seen[m.category] = true;
+    return true;
+  });
+  var labels = unique.map(function(m){
+    return '<span class="sg-rec-warn-keyword">'+escapeHtml(m.label)+'</span>';
+  }).join(' ');
+  return '<div class="sg-rec-warn-banner">'+
+    '<svg class="sg-rec-warn-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
+    '<div>이 기록에 기재 불가 내용이 있어요: '+labels+'</div>'+
+    '</div>';
+}
+
+function buildSensitiveBannerHtml() {
+  return '<div class="sg-rec-sensitive-banner">'+
+    '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'+
+    '<div>민감 기록 — 생기부에 직접 기재되지 않아요</div>'+
+    '</div>';
+}
+
+/* ──────────────────────────────────────────
+   금지어 확인 모달 제어
+────────────────────────────────────────── */
+function showSgForbiddenModal(forbiddenList) {
+  var listEl = document.getElementById('sg-forbidden-list');
+  if(!listEl) return;
+  var grouped = {};
+  forbiddenList.forEach(function(f){
+    if(!grouped[f.category]) grouped[f.category] = { label: f.label, keywords: [], records: [] };
+    if(grouped[f.category].keywords.indexOf(f.keyword) < 0) grouped[f.category].keywords.push(f.keyword);
+    grouped[f.category].records.push(f.recDate);
+  });
+  var html = '';
+  Object.keys(grouped).forEach(function(cat){
+    var g = grouped[cat];
+    html += '<div style="margin-bottom:8px;">';
+    html += '<b>'+escapeHtml(g.label)+'</b>: ';
+    html += g.keywords.map(function(k){ return '"'+escapeHtml(k)+'"'; }).join(', ');
+    html += '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">'+g.records.length+'개 기록에서 발견</div>';
+    html += '</div>';
+  });
+  listEl.innerHTML = html;
+  document.getElementById('sg-forbidden-modal').classList.add('show');
+}
+
+function closeSgForbiddenModal() {
+  document.getElementById('sg-forbidden-modal').classList.remove('show');
+  sgState.bypassForbidden = false;
+}
+
+function proceedDespiteForbidden() {
+  document.getElementById('sg-forbidden-modal').classList.remove('show');
+  sgState.bypassForbidden = true;
+  generateSaengibuPrompt();
 }
 
 function renderSgRecords(){
@@ -8196,11 +8807,19 @@ function renderSgRecords(){
   list.innerHTML = recs.map(function(r){
     var checked = sgState.selectedRecIds.indexOf(r.id) >= 0;
     var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
-    return '<div class="sg-rec-item context-item'+(checked?' checked':'')+'" data-id="'+r.id+'">'+
+    var check = checkRecordForForbidden(r);
+    var extraClass = '';
+    if(check.hasForbidden) extraClass += ' sg-rec-card-warn';
+    if(check.isSensitive)  extraClass += ' sg-rec-card-sensitive';
+    var warnHtml = '';
+    if(check.hasForbidden) warnHtml += buildForbiddenWarnHtml(check.matches);
+    if(check.isSensitive)  warnHtml += buildSensitiveBannerHtml();
+    return '<div class="sg-rec-item context-item'+extraClass+(checked?' checked':'')+'" data-id="'+r.id+'">'+
       '<div class="context-checkbox"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
       '<div class="context-meta">'+
         '<div class="context-head"><span class="context-type-badge '+r.type+'">'+typeKor+'</span><span class="context-date">'+r.date+'</span>'+(r.tags && r.tags.length?' <span style="font-size:10px;color:var(--text-tertiary);">· '+r.tags.join(', ')+'</span>':'')+'</div>'+
         '<div class="context-content">'+escapeHtml(r.content.length > 90 ? r.content.substring(0,90)+'…' : r.content)+'</div>'+
+        warnHtml+
       '</div>'+
     '</div>';
   }).join('');
@@ -8239,8 +8858,240 @@ function toggleAllSgRecs(select){
   renderSgRecords();
 }
 
+/* ═══════════════════════════════════════════
+   생기부 프롬프트 빌더 — 공통 헬퍼
+═══════════════════════════════════════════ */
+
+function buildPromptHeader(ctx) {
+  var meta = ctx.areaMeta;
+  var maxLen = getAreaMaxLen(ctx.area, ctx.level);
+  var schoolName = ctx.level === '초' ? '초등학교' : (ctx.level === '중' ? '중학교' : '고등학교');
+  var lines = [];
+  lines.push('너는 대한민국 ' + schoolName + ' 담임교사의 생활기록부 작성을 돕는 전문가야.');
+  lines.push('2026학년도 교육부 학교생활기록부 기재요령을 철저히 준수해.');
+  lines.push('');
+  lines.push('[작성 영역]: ' + meta.fullName);
+  lines.push('[작성 목적]: ' + meta.purpose);
+  lines.push('[작성자]: ' + meta.writer);
+  lines.push('[학생]: [학생] ([학년][반] · ' + parseInt(ctx.student.num) + '번 · ' + ctx.student.gender + ')');
+  lines.push('[교사]: [교사]');
+  lines.push('[글자수 제한]: ' + maxLen + '자 (한글 기준) — 절대 초과하지 마세요');
+  lines.push('');
+  return lines;
+}
+
+function buildPromptFooter(ctx) {
+  var meta = ctx.areaMeta;
+  var lines = [];
+  lines.push('');
+  lines.push('[절대 포함 금지 — 학생부 기재요령 위반]');
+  meta.forbidden.forEach(function(item, i){
+    lines.push((i+1) + '. ' + item);
+  });
+  lines.push('');
+  lines.push('[출력 형식]');
+  lines.push('· 한 문단의 자연스러운 서술문으로 출력 (목록·번호·줄바꿈 없이)');
+  lines.push('· 학생을 "학생", "본 학생", 또는 [학생] 토큰으로 지칭 (이름 반복 금지)');
+  lines.push('· NEIS 문체 — 객관적·구체적·긍정적이되 과장 금지');
+  lines.push('· 출력 마지막에 [현재 글자수: N자] 표기');
+  lines.push('');
+  lines.push('[AI 면책]');
+  lines.push('출력 직후 다음 문구를 반드시 추가하세요:');
+  lines.push('"⚠ AI 초안입니다. 학생의 실제 수행과 대조 후 수정하여 NEIS에 입력하세요."');
+  return lines;
+}
+
+function formatRecordsForPrompt(contextRecords) {
+  var typeMap = { observation:'관찰', consultation:'상담', life:'생활', parent:'학부모' };
+  var lines = [];
+  lines.push('[학생 기록 — ' + contextRecords.length + '건]');
+  contextRecords.forEach(function(r){
+    var typeKor = typeMap[r.type] || '';
+    var tagStr = (r.tags && r.tags.length) ? ' #' + r.tags.join(' #') : '';
+    lines.push('· ' + r.date + ' ' + typeKor + tagStr + ': ' + r.content);
+  });
+  return lines;
+}
+
+/* ═══════════════════════════════════════════
+   영역별 프롬프트 빌더 — 5개 영역
+═══════════════════════════════════════════ */
+
+function buildBehaviorPrompt(ctx) {
+  var lines = buildPromptHeader(ctx);
+  lines.push('[영역 특성]');
+  lines.push('"행동특성 및 종합의견"은 학년 동안의 지속적 관찰을 바탕으로');
+  lines.push('다음 학년 담임교사 또는 진학사정관이 이 학생을 한눈에 이해할 수 있도록');
+  lines.push('총체적 종합 의견을 작성하는 항목이야.');
+  lines.push('');
+  lines.push('[작성 구성 — 권장]');
+  lines.push('다음 3가지 축이 모두 드러나도록 한 문단으로 작성하세요:');
+  lines.push('1. 학습 태도·자기주도성 (수업·과제 참여 패턴)');
+  lines.push('2. 인성·또래관계 (협력·배려·갈등 해결)');
+  lines.push('3. 성장·변화 (학기 초·말 비교, 어려움 극복 과정)');
+  lines.push('');
+  lines.push('[작성 원칙]');
+  lines.push('· 한두 가지 인상적 일화에 매몰되지 말고 학년 전반의 일관된 특성을 포착할 것');
+  lines.push('· 단정적 평가("우수함") 대신 관찰된 행동을 근거로 제시할 것');
+  lines.push('· 추상적 칭찬("성실함")보다 구체적 장면("매일 아침 학급 일지를 자발적으로 정리")');
+  lines.push('· 부정적 관찰이 있는 경우 변화 가능성과 함께 서술');
+  lines.push('· 학생을 인격적 주체로 존중하는 어조 유지');
+  lines.push('');
+  lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
+  lines.push.apply(lines, buildPromptFooter(ctx));
+  return lines.join('\n');
+}
+
+function buildJayulPrompt(ctx) {
+  var lines = buildPromptHeader(ctx);
+  var meta = ctx.areaMeta;
+  lines.push('[영역 특성]');
+  lines.push('"창체 — 자율·자치활동"은 학급·학교 자치 활동에서 학생이 보여준');
+  lines.push('개별적 특성을 기록하는 영역이야.');
+  lines.push('');
+  lines.push('[반드시 포함할 내용]');
+  meta.required.forEach(function(item, i){ lines.push((i+1) + '. ' + item); });
+  lines.push('');
+  lines.push('[표기 형식]');
+  lines.push('· ' + meta.formatHint);
+  lines.push('· 임원 활동이 있다면 학생 기록에서 직위·기간을 찾아 정확히 반영');
+  lines.push('');
+  lines.push('[작성 원칙]');
+  lines.push('· ' + meta.style);
+  lines.push('· 활동 사실의 단순 나열 금지 — 학생만의 역할·기여·변화 중심');
+  lines.push('');
+  lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
+  lines.push.apply(lines, buildPromptFooter(ctx));
+  return lines.join('\n');
+}
+
+function buildJinroPrompt(ctx) {
+  var lines = buildPromptHeader(ctx);
+  var meta = ctx.areaMeta;
+  lines.push('[영역 특성]');
+  lines.push('"창체 — 진로활동"은 학생의 진로 탐색 과정과 진로 특성을 기록하는 영역이야.');
+  lines.push('');
+  lines.push('[반드시 포함할 내용]');
+  meta.required.forEach(function(item, i){ lines.push((i+1) + '. ' + item); });
+  lines.push('');
+  lines.push('[진로희망분야 표기 — 필수]');
+  lines.push('· ' + meta.formatHint);
+  lines.push('· 학생 기록에서 진로 관련 내용을 찾아 희망분야를 도출');
+  lines.push('· 명확한 진로희망이 기록에 없으면 "희망분야: 진로탐색 중임." 으로 명시');
+  lines.push('· 빈칸 또는 누락 절대 금지');
+  if(ctx.level === '초'){ lines.push('· (초등학교는 진로희망분야 입력 생략 가능)'); }
+  lines.push('');
+  lines.push('[작성 원칙]');
+  lines.push('· ' + meta.style);
+  lines.push('· 학생의 흥미·적성과 활동이 일관되게 보이도록 구성');
+  lines.push('');
+  lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
+  lines.push.apply(lines, buildPromptFooter(ctx));
+  return lines.join('\n');
+}
+
+function buildDongariPrompt(ctx) {
+  var lines = buildPromptHeader(ctx);
+  var meta = ctx.areaMeta;
+  lines.push('[영역 특성]');
+  lines.push('"창체 — 동아리활동"은 정규교육과정 내 동아리 활동에서의');
+  lines.push('학생의 실제적 역할과 활동을 기록하는 영역이야.');
+  lines.push('');
+  lines.push('[반드시 포함할 내용]');
+  meta.required.forEach(function(item, i){ lines.push((i+1) + '. ' + item); });
+  lines.push('');
+  lines.push('[표기 형식]');
+  lines.push('· ' + meta.formatHint);
+  if(ctx.level === '고'){ lines.push('· 고등학교는 동아리명 뒤에 이수시간 필수 표기'); }
+  lines.push('');
+  lines.push('[작성 원칙]');
+  lines.push('· ' + meta.style);
+  lines.push('· "최우수" 같은 등급 표현 대신 구체적 활동·역할로 서술');
+  lines.push('');
+  lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
+  lines.push.apply(lines, buildPromptFooter(ctx));
+  return lines.join('\n');
+}
+
+function buildSetukPrompt(ctx) {
+  var lines = buildPromptHeader(ctx);
+  var meta = ctx.areaMeta;
+  var subject = ctx.subject || '(과목명 미지정 — 학생 기록에서 추론)';
+  lines.push('[영역 특성]');
+  lines.push('"교과 [' + subject + '] 세부능력 및 특기사항"은 해당 과목에서 학생이 보여준');
+  lines.push('성취 수준의 특성과 학습 활동 참여도를 서술하는 영역이야.');
+  lines.push('진학 사정에서 가장 중요하게 보는 항목이야.');
+  lines.push('');
+  lines.push('[과목 정보]');
+  lines.push('· 과목명: ' + subject);
+  lines.push('');
+  lines.push('[반드시 포함할 내용]');
+  meta.required.forEach(function(item, i){ lines.push((i+1) + '. ' + item); });
+  lines.push('');
+  lines.push('[작성 원칙]');
+  lines.push('· ' + meta.style);
+  lines.push('· 다른 학생과 구별되는 이 학생만의 특성이 드러나야 함');
+  lines.push('· 학년 학생 전체에 동일하게 쓸 수 있는 일반론 금지');
+  lines.push('· "이해함", "잘함" 같은 단정 대신 관찰된 근거 제시');
+  lines.push('');
+  lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
+  lines.push.apply(lines, buildPromptFooter(ctx));
+  return lines.join('\n');
+}
+
+/* ──────────────────────────────────────────
+   영역 → 빌더 함수 매핑
+────────────────────────────────────────── */
+var AREA_BUILDER_MAP = {
+  '행동특성': buildBehaviorPrompt,
+  '창체자율': buildJayulPrompt,
+  '창체진로': buildJinroPrompt,
+  '동아리':   buildDongariPrompt,
+  '세특':     buildSetukPrompt
+};
+
+/* ═══════════════════════════════════════════
+   generateSaengibuPrompt — 영역별 빌더 라우팅
+═══════════════════════════════════════════ */
 function generateSaengibuPrompt(){
   if(sgState.selectedRecIds.length === 0) return;
+
+  // ─── 세특 과목 필수 검증 ───
+  if(sgState.area === '세특' && !sgState.subject) {
+    var hint = document.getElementById('sg-subject-hint');
+    if(hint){ hint.textContent = '⚠ 과목을 먼저 선택하세요'; hint.classList.add('warn'); }
+    return;
+  }
+
+  // ─── 금지어 검증 게이트 ───
+  var selectedRecs = (records[sgState.studentNum] || [])
+    .filter(function(r){ return sgState.selectedRecIds.indexOf(r.id) >= 0; });
+  var allForbidden = [];
+  selectedRecs.forEach(function(r){
+    var check = checkRecordForForbidden(r);
+    if(check.hasForbidden){
+      check.matches.forEach(function(m){
+        allForbidden.push({
+          recId: r.id, recDate: r.date,
+          recContent: (r.content || '').slice(0,40)+'…',
+          category: m.category, label: m.label,
+          keyword: m.keyword, message: m.message
+        });
+      });
+    }
+  });
+  if(allForbidden.length > 0 && !sgState.bypassForbidden){
+    showSgForbiddenModal(allForbidden);
+    return;
+  }
+  sgState.bypassForbidden = false;
+  // ─── 게이트 끝 ───
+
   var s = students.find(function(x){return x.num === sgState.studentNum;});
   if(!s) return;
   sgState.comment = document.getElementById('sg-teacher-comment').value.trim();
@@ -8250,38 +9101,24 @@ function generateSaengibuPrompt(){
 
   anonMap = buildAnonMap(sgState.studentNum, contextRecords);
 
-  var lines = [];
-  lines.push('너는 한국 중학교 담임교사가 생활기록부 작성을 돕는 어시스턴트야. 아래 학생 기록을 바탕으로 '+sgState.area+' 영역의 초안을 작성해줘.');
-  lines.push('');
-  lines.push('[교사]: '+TEACHER_NAME+' ('+SCHOOL_GRADE+'학년 '+SCHOOL_CLASS+'반 담임)');
-  lines.push('[학생]: '+s.name+' ('+parseInt(s.num)+'번)');
-  lines.push('[작성 영역]: '+sgState.area);
-  lines.push('[글자 수 제한]: '+sgState.areaMaxLen);
-  lines.push('');
-  lines.push('[학생 기록 — '+contextRecords.length+'건]');
-  contextRecords.forEach(function(r){
-    var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
-    var tagStr = (r.tags && r.tags.length) ? ' #'+r.tags.join(' #') : '';
-    lines.push('· '+r.date+' '+typeKor+tagStr+': '+r.content);
-  });
-
-  if(sgState.comment){
-    lines.push('');
-    lines.push('[선생님 한마디]');
-    lines.push(sgState.comment);
+  var builder = AREA_BUILDER_MAP[sgState.area];
+  if(!builder){
+    console.error('No builder for area:', sgState.area);
+    return;
   }
 
-  lines.push('');
-  lines.push('[작성 지침]');
-  lines.push('· NEIS 생활기록부 문체 (객관적·구체적·긍정적)');
-  lines.push('· 글자 수 제한을 지킬 것');
-  lines.push('· 추상적 표현 지양, 관찰된 행동·결과 위주');
-  lines.push('');
-  lines.push('[학생 호칭 사용 규칙]');
-  lines.push('· 생활기록부는 격식 문서이므로 [학생] 토큰(풀네임)을 권장해. 다만 NEIS 문체상 학생 이름을 반복하지 않는 게 자연스러우니 첫 등장 후엔 생략하거나 "본 학생" 같은 표현도 사용 가능.');
-  lines.push('· 교사·반은 토큰([교사], [학년][반]) 형식을 그대로 유지해줘. 자동으로 실제 정보로 복원됩니다.');
+  var areaMeta = AREA_META[sgState.area];
+  var ctx = {
+    area: sgState.area,
+    areaMeta: areaMeta,
+    student: s,
+    contextRecords: contextRecords,
+    level: sgState.schoolLevel || CURRENT_SCHOOL_LEVEL,
+    comment: sgState.comment,
+    subject: sgState.subject || null
+  };
 
-  var realPrompt = lines.join('\n');
+  var realPrompt = builder(ctx);
   var anonPrompt = applyAnonymization(realPrompt, anonMap);
 
   sgState.promptReal = realPrompt;
@@ -8301,7 +9138,9 @@ function generateSaengibuPrompt(){
   document.getElementById('sg-prompt-real').style.display = 'none';
   document.getElementById('sg-result').style.display = 'block';
 
-  // 스크롤
+  var lenEl = document.getElementById('sg-prompt-length');
+  if(lenEl) lenEl.textContent = '· ' + realPrompt.length.toLocaleString() + '자';
+
   setTimeout(function(){
     document.getElementById('sg-result').scrollIntoView({behavior:'smooth', block:'nearest'});
   }, 50);
