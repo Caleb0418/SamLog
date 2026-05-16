@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Rename-Item \"C:\\\\Users\\\\seung\\\\Desktop\\\\유승종\\\\10_IAMSAM\\\\IAMSAM_v1.0.html\" \"index.html\")"
+    ]
+  }
+}
