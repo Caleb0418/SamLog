@@ -3441,6 +3441,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <button class="nav-tab active" data-tab="students" onclick="switchTab('students')">학생 관리</button>
       <button class="nav-tab" data-tab="class" onclick="switchTab('class')">수업 관리</button>
       <button class="nav-tab" data-tab="reply" onclick="switchTab('reply')">학부모 대응</button>
+      <button class="nav-tab" onclick="openSettings()" style="display:flex;align-items:center;gap:4px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        설정
+      </button>
     </div>
   </div>
 
@@ -3486,71 +3490,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- 알림·공지 영역 -->
     <div class="home-alerts" id="home-alerts" style="display:none;"></div>
 
-    <!-- 알람 설정 버튼 -->
-    <div style="display:flex;justify-content:flex-end;margin-top:12px;margin-bottom:8px;">
-      <button class="btn-small secondary" onclick="openAlertSettings()" style="font-size:11px;gap:4px;display:flex;align-items:center;">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        알람 설정
-      </button>
-    </div>
-
-    <!-- 학년도·백업·초기화 카드 -->
-    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-top:8px;margin-bottom:16px;display:flex;flex-direction:column;gap:16px;">
-
-      <!-- ① 학년도 관리 -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-          <div style="font-size:13px;font-weight:700;color:var(--text-primary);">학년도 관리</div>
-          <button class="btn-small secondary" onclick="startNewYear()" style="display:flex;align-items:center;gap:5px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            새 학년도 시작
-          </button>
-        </div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">학년도를 눌러 전환해요. 최근 3개 학년도 데이터가 보관돼요.</div>
-        <div id="year-manager-ui"></div>
-      </div>
-
-      <div style="height:1px;background:var(--border);"></div>
-
-      <!-- ② 데이터 백업 -->
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">데이터 백업</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">현재 학년도 데이터를 내 컴퓨터에 저장해두세요.</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;justify-content:space-between;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn-small primary" onclick="backupData()" style="display:flex;align-items:center;gap:5px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              백업하기
-            </button>
-            <button class="btn-small secondary" onclick="document.getElementById('restore-backup-input').click()" style="display:flex;align-items:center;gap:5px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              백업 불러오기
-            </button>
-            <input type="file" id="restore-backup-input" accept=".json" style="display:none;" onchange="if(this.files.length)restoreBackup(this.files[0]);this.value='';">
-          </div>
-          <div id="backup-last-time" style="font-size:11px;color:var(--text-tertiary);"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-          <span style="font-size:11px;color:var(--text-tertiary);">자동 백업:</span>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="manual" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">수동</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="daily" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">매일</label>
-          <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="weekly" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">매주</label>
-        </div>
-      </div>
-
-      <div style="height:1px;background:var(--border);"></div>
-
-      <!-- ③ 전체 초기화 -->
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">전체 초기화</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">모든 학년도의 데이터를 완전히 지우고 처음 상태로 되돌려요. 되돌릴 수 없으니 백업 먼저 해두세요.</div>
-        <button onclick="resetAllData()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;border:1.5px solid #e53e3e;background:transparent;color:#e53e3e;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          전체 데이터 초기화
-        </button>
-      </div>
-
-    </div>
 
   </div>
 
@@ -3562,7 +3501,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <div class="page-header">
       <div>
         <div class="page-title">수업 관리</div>
-        <div style="font-size:12px;color:var(--text-tertiary);margin-top:3px;">시간표·담당 수업 변경은 <button onclick="openClassSettings()" style="font-size:12px;color:var(--accent);background:none;border:none;padding:0;cursor:pointer;font-family:inherit;font-weight:500;">⚙ 설정</button>에서</div>
+        <div style="font-size:12px;color:var(--text-tertiary);margin-top:3px;">시간표·담당 수업 변경은 <button onclick="openClassSettings()" style="font-size:12px;color:var(--accent);background:none;border:none;padding:0;cursor:pointer;font-family:inherit;font-weight:500;">⚙ 시간표·수업 설정</button>에서</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div class="class-view-toggle">
@@ -3599,7 +3538,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <div class="modal class-settings-modal-inner">
       <div class="memo-modal-head">
         <div class="memo-modal-head-text">
-          <div class="memo-modal-eyebrow">설정</div>
+          <div class="memo-modal-eyebrow">수업 관리</div>
           <div class="memo-modal-title">시간표·담당 수업</div>
         </div>
         <button class="memo-modal-close" onclick="closeClassSettings()">×</button>
@@ -3681,50 +3620,92 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   <!-- ═══════════════════════════════════════════
        알람 설정 모달
   ═══════════════════════════════════════════ -->
-  <div class="modal-overlay" id="alert-settings-modal" onclick="if(event.target===this)closeAlertSettings()">
-    <div class="modal" style="max-width:420px;">
+  <!-- ═══════════════════════════════════════════
+       통합 설정 모달
+  ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+    <div class="modal class-settings-modal-inner" style="max-width:480px;">
       <div class="memo-modal-head">
         <div class="memo-modal-head-text">
-          <div class="memo-modal-eyebrow">알림 설정</div>
-          <div class="memo-modal-title">홈 화면 알람</div>
+          <div class="memo-modal-eyebrow">앱 설정</div>
+          <div class="memo-modal-title">설정</div>
         </div>
-        <button class="memo-modal-close" onclick="closeAlertSettings()">×</button>
+        <button class="memo-modal-close" onclick="closeSettings()">×</button>
       </div>
-      <div class="memo-modal-body" style="display:flex;flex-direction:column;gap:20px;">
+      <div class="memo-modal-body" style="display:flex;flex-direction:column;gap:0;">
 
-        <!-- 수업 N분 전 알람 -->
-        <div>
-          <div class="class-master-title" style="margin-bottom:8px;">수업 시작 전 알람</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-              <input type="radio" name="preClass" value="1" id="pre1" onchange="onPreClassChange(this)"> 1분 전
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-              <input type="radio" name="preClass" value="3" id="pre3" onchange="onPreClassChange(this)"> 3분 전
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-              <input type="radio" name="preClass" value="5" id="pre5" onchange="onPreClassChange(this)"> 5분 전
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-              <input type="radio" name="preClass" value="0" id="pre0" onchange="onPreClassChange(this)"> 끄기
-            </label>
+        <!-- ① 알람 설정 -->
+        <div style="padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border);">
+          <div class="class-master-title" style="margin-bottom:14px;">알람 설정</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">수업 시작 전 알람</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="preClass" value="1" id="pre1" onchange="onPreClassChange(this)"> 1분 전</label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="preClass" value="3" id="pre3" onchange="onPreClassChange(this)"> 3분 전</label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="preClass" value="5" id="pre5" onchange="onPreClassChange(this)"> 5분 전</label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="preClass" value="0" id="pre0" onchange="onPreClassChange(this)"> 끄기</label>
+              </div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">수업 시작 X분 전에 홈 화면에 알람이 표시돼요. 지난 교시 미기록 수업도 함께 보여줘요.</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">생기부 마감일</div>
+              <input type="date" id="sg-deadline-input" class="form-input-text" style="width:180px;" oninput="onSgDeadlineChange(this)">
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">D-30부터 알람이 표시되고, D-7부터 강조, D-0(당일)에 최고 강조돼요.</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">브라우저 알림 <span id="notify-permission-badge" style="font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:6px;"></span></div>
+              <button class="btn-small secondary" id="notify-request-btn" onclick="requestBrowserNotify()">알림 권한 허용하기</button>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">허용하면 탭이 백그라운드 상태일 때도 수업 시작 전 알람이 와요.</div>
+            </div>
           </div>
-          <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">수업 시작 X분 전에 홈 화면에 알람이 표시돼요. 지난 교시 미기록 수업도 함께 보여줘요.</div>
         </div>
 
-        <!-- 생기부 마감일 -->
-        <div>
-          <div class="class-master-title" style="margin-bottom:8px;">생기부 마감일</div>
-          <input type="date" id="sg-deadline-input" class="form-input-text" style="width:180px;"
-            oninput="onSgDeadlineChange(this)">
-          <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">D-30부터 알람이 표시되고, D-7부터 강조, D-0(당일)에 최고 강조돼요.</div>
+        <!-- ② 학년도 관리 -->
+        <div style="padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border);">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <div class="class-master-title">학년도 관리</div>
+            <button class="btn-small secondary" onclick="startNewYear()" style="display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              새 학년도 시작
+            </button>
+          </div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">학년도를 눌러 전환해요. 최근 3개 학년도 데이터가 보관돼요.</div>
+          <div id="year-manager-ui"></div>
         </div>
 
-        <!-- 브라우저 푸시 알림 -->
+        <!-- ③ 데이터 백업 -->
+        <div style="padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border);">
+          <div class="class-master-title" style="margin-bottom:4px;">데이터 백업</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">현재 학년도 데이터를 내 컴퓨터에 저장해두세요. 브라우저를 초기화하거나 다른 기기로 옮길 때 복원할 수 있어요.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="btn-small primary" onclick="backupData()" style="display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              백업하기
+            </button>
+            <button class="btn-small secondary" onclick="document.getElementById('restore-backup-input').click()" style="display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              백업 불러오기
+            </button>
+            <input type="file" id="restore-backup-input" accept=".json" style="display:none;" onchange="if(this.files.length)restoreBackup(this.files[0]);this.value='';">
+          </div>
+          <div id="backup-last-time" style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px;"></div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:var(--text-tertiary);">자동 백업:</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="manual" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">수동</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="daily" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">매일</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;"><input type="radio" name="auto-backup-cycle" value="weekly" onchange="saveAutoBackupCycle(this.value)" style="accent-color:var(--accent);">매주</label>
+          </div>
+        </div>
+
+        <!-- ④ 전체 초기화 -->
         <div>
-          <div class="class-master-title" style="margin-bottom:8px;">브라우저 알림 <span id="notify-permission-badge" style="font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:6px;"></span></div>
-          <button class="btn-small secondary" id="notify-request-btn" onclick="requestBrowserNotify()">알림 권한 허용하기</button>
-          <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">허용하면 탭이 백그라운드 상태일 때도 수업 시작 전 알람이 와요.</div>
+          <div class="class-master-title" style="margin-bottom:4px;">전체 초기화</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">모든 학년도의 데이터를 완전히 지우고 처음 상태로 되돌려요. 되돌릴 수 없으니 백업 먼저 해두세요.</div>
+          <button onclick="resetAllData()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;border:1.5px solid #e53e3e;background:transparent;color:#e53e3e;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            전체 데이터 초기화
+          </button>
         </div>
 
       </div>
@@ -12550,26 +12531,28 @@ function closeClassSettings(){
 /* ═══════════════════════════════════════════
    알람 설정 모달
 ═══════════════════════════════════════════ */
-function openAlertSettings(){
+function openSettings(){
   loadAlertSettings();
-  // 라디오 버튼 동기화
   var preVal = String(ALERT_SETTINGS.preClassMinutes);
   ['pre1','pre3','pre5','pre0'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.checked = (el.value === preVal);
   });
-  // 날짜 동기화
   var dlEl = document.getElementById('sg-deadline-input');
   if(dlEl) dlEl.value = ALERT_SETTINGS.sgDeadline || '';
-  // 상담 체크박스
   var ckEl = document.getElementById('consult-alarm-chk');
   if(ckEl) ckEl.checked = !!ALERT_SETTINGS.consultAlarm;
   renderAlertSettingsUI();
-  document.getElementById('alert-settings-modal').classList.add('show');
+  renderYearManagerUI();
+  updateBackupLastTimeUI();
+  initAutoBackupCycleUI();
+  document.getElementById('settings-modal').classList.add('show');
 }
-function closeAlertSettings(){
-  document.getElementById('alert-settings-modal').classList.remove('show');
+function closeSettings(){
+  document.getElementById('settings-modal').classList.remove('show');
 }
+function openAlertSettings(){ openSettings(); }
+function closeAlertSettings(){ closeSettings(); }
 function onPreClassChange(el){
   ALERT_SETTINGS.preClassMinutes = parseInt(el.value);
   saveAlertSettings();
