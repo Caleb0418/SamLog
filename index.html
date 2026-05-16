@@ -6878,15 +6878,19 @@ var replyState = {
   promptAnon: '',
   promptReal: '',
   aiResponse: '',
-  restored: ''
+  restored: '',
+  // v2 추가 — 다축 상태
+  angerMode: false,        // 분노·인신공격 상황 여부 (자동 감지 + 수동 수정 가능)
+  legalFlags: [],          // 감지된 법적 플래그 배열 ['privacy','evaluation' 등]
+  riskScore: 0             // 자동 계산된 위험도 점수 (1~5)
 };
 
 var REPLY_TYPES = [
   {id:'general',    label:'일반 문의',   desc:'학교생활·진도·행사', risk:'normal'},
   {id:'concern',    label:'우려·호소',   desc:'적응·친구 관계 걱정', risk:'normal'},
   {id:'complaint',  label:'민원·항의',   desc:'지도 방식·성적 이의', risk:'caution'},
-  {id:'bullying',   label:'학교폭력',    desc:'신고·조사 문의',     risk:'high'},
-  {id:'authority',  label:'교권 침해',   desc:'폭언·부적절 요구',   risk:'high'},
+  {id:'bullying',   label:'학교폭력',    desc:'신고·조사 문의',     risk:'caution'},
+  {id:'authority',  label:'교권 침해',   desc:'폭언·부적절 요구',   risk:'caution'},
   {id:'etc',        label:'기타',        desc:'직접 입력',          risk:'normal'}
 ];
 
@@ -7027,6 +7031,128 @@ var DEESCALATION_SEQUENCE = [
   '5. 정중 종결 — "오늘은 여기서 마무리하고, 공식 채널로 접수해 주시면 절차에 따라 안내드리겠습니다"'
 ];
 
+/* ═══════════════════════════════════════════
+   법적 플래그 자동 감지 (v2)
+   정규식 패턴으로 의도가 명확한 조합만 매칭 → 오탐 방지
+═══════════════════════════════════════════ */
+function detectLegalFlags(text){
+  if(!text) return [];
+  var flags = [];
+  var rules = [
+    {
+      key: 'privacy',
+      patterns: [
+        /(다른|상대|그) ?(아이|학생|애).{0,15}(연락처|번호|이름|어느 반|누구)/,
+        /(가해자|그 집|상대편).{0,10}(누구|연락|만나)/,
+        /(다른|그) ?(학부모|어머니|아버지).{0,15}(연락|만나|전화)/
+      ]
+    },
+    {
+      key: 'evaluation',
+      patterns: [
+        /수행평가.{0,20}(다시|재|올려|바꿔|이의|항의|불만|재고|조정)/,
+        /(점수|등급|성적).{0,15}(올려|바꿔|재|이의|항의|불만|재고|조정|다시)/,
+        /(평가|채점).{0,15}(다시|이의|항의|불만|불공정|편파)/
+      ]
+    },
+    {
+      key: 'channel',
+      patterns: [
+        /(개인|선생님).{0,5}(번호|연락처|전화|카톡|핸드폰)/,
+        /(주말|밤|새벽|퇴근|저녁|일찍).{0,10}(연락|전화|문자|답장)/,
+        /(언제든|아무때나|바로).{0,10}(연락|답)/
+      ]
+    },
+    {
+      key: 'bullying',
+      patterns: [
+        /(학교폭력|학폭)/,
+        /(맞았|때렸|괴롭|왕따|따돌|폭행|폭언)/,
+        /(신고|접수).{0,10}(학폭|폭력|괴롭)/
+      ]
+    },
+    {
+      key: 'authority',
+      patterns: [
+        /(교육청|장학사).{0,10}(민원|신고|전화|연락)/,
+        /(소송|고소|고발|법적|변호사)/,
+        /(언론|기자|신문|방송|SNS|인터넷).{0,15}(올리|퍼뜨|알리|제보)/,
+        /(가만|두고 ?보지|책임 ?지)/
+      ]
+    }
+  ];
+  rules.forEach(function(rule){
+    for(var i=0; i<rule.patterns.length; i++){
+      if(rule.patterns[i].test(text)){
+        flags.push(rule.key);
+        break;
+      }
+    }
+  });
+  return flags;
+}
+
+/* ═══════════════════════════════════════════
+   분노·공격성 자동 감지 (v2)
+   메시지에서 흥분·공격 신호를 감지해 angerMode 기본값 설정
+═══════════════════════════════════════════ */
+function detectAngerSignals(text){
+  if(!text) return false;
+  if(/[!?]{3,}/.test(text)) return true;
+  var angerWords = [
+    '당장','즉시','어이없','미친','황당','말도 안',
+    '도대체','대체 왜','왜 이래','이게 뭐',
+    '용납','참을 수 없','용서','어떻게 이런',
+    '실망','한심','부끄러','수치','창피'
+  ];
+  for(var i=0; i<angerWords.length; i++){
+    if(text.indexOf(angerWords[i]) >= 0) return true;
+  }
+  var threatPatterns = [
+    /가만.{0,5}(안|두지|않)/,
+    /두고 ?보(지|자)/,
+    /책임.{0,10}(져|지세요|물)/,
+    /(소송|고소|고발|법적|변호사)/,
+    /(교육청|언론|기자).{0,15}(민원|신고|올리|제보)/
+  ];
+  for(var j=0; j<threatPatterns.length; j++){
+    if(threatPatterns[j].test(text)) return true;
+  }
+  if(/(ㅅㅂ|ㅆㅂ|ㅂㅅ|시발|씨발|병신|미친놈|개ㅅㄲ)/.test(text)) return true;
+  return false;
+}
+
+/* ═══════════════════════════════════════════
+   위험도 자동 scoring (v2 가중치 차등화)
+   base(유형) + 상황 modifier → riskScore 1~5
+═══════════════════════════════════════════ */
+function calcRiskScore(type, angerMode, legalFlags, message){
+  var knowledge = CONSULT_KNOWLEDGE[type] || CONSULT_KNOWLEDGE.general;
+  var score = knowledge.riskLevel || 2;
+  if(angerMode) score += 1;
+  var flagWeights = {
+    bullying:   1.0,
+    authority:  1.0,
+    privacy:    0.7,
+    evaluation: 0.3,
+    channel:    0.3
+  };
+  if(legalFlags && legalFlags.length > 0){
+    var addedScore = 0;
+    legalFlags.forEach(function(flag){
+      addedScore += (flagWeights[flag] || 0.3);
+    });
+    score += Math.min(addedScore, 2);
+  }
+  var crisisKeywords = ['자해','자살','죽고 싶','사라지고 싶','스스로 목숨'];
+  if(message){
+    for(var i=0; i<crisisKeywords.length; i++){
+      if(message.indexOf(crisisKeywords[i]) >= 0) return 5;
+    }
+  }
+  return Math.min(5, Math.max(1, Math.round(score)));
+}
+
 // 교사 이름 / 학교 정보 (온보딩에서 입력, localStorage 영속)
 var TEACHER_NAME = '';
 var SCHOOL_GRADE = '';
@@ -7056,7 +7182,8 @@ function loadSettings(){
 function resetReplyFlow(){
   replyState = {
     step: 1, message:'', studentNum:null, type:null, typeRisk:'normal',
-    etcDetail:'', highConfirmed:false, contextIds:[], teacherNotes:'', promptAnon:'', promptReal:'', aiResponse:'', restored:''
+    etcDetail:'', highConfirmed:false, contextIds:[], teacherNotes:'', promptAnon:'', promptReal:'', aiResponse:'', restored:'',
+    angerMode: false, legalFlags: [], riskScore: 0   // v2 추가
   };
 }
 
@@ -7078,7 +7205,11 @@ var prepState = {
   promptReal: '',
   aiResponse: '',
   restored: '',
-  callNotes: ''            // 통화 중·후 메모
+  callNotes: '',           // 통화 중·후 메모
+  // v2 추가 — 다축 상태
+  angerMode: false,
+  legalFlags: [],
+  riskScore: 0
 };
 
 var PREP_TYPES = [
@@ -7086,8 +7217,8 @@ var PREP_TYPES = [
   {id:'academic',    label:'학습·진로',     desc:'성적·진로·학습 태도',    risk:'normal'},
   {id:'concern',     label:'생활 우려',     desc:'친구 관계·정서적 어려움', risk:'normal'},
   {id:'complaint',   label:'민원·항의 응대', desc:'학부모 항의에 대한 응대', risk:'caution'},
-  {id:'bullying',    label:'학교폭력 관련',  desc:'사안 안내·조사 협조 요청', risk:'high'},
-  {id:'authority',   label:'교권 침해 우려', desc:'녹음 고지·교권보호 안내', risk:'high'},
+  {id:'bullying',    label:'학교폭력 관련',  desc:'사안 안내·조사 협조 요청', risk:'caution'},
+  {id:'authority',   label:'교권 침해 우려', desc:'녹음 고지·교권보호 안내', risk:'caution'},
   {id:'etc',         label:'기타',          desc:'직접 입력',              risk:'normal'}
 ];
 
@@ -7095,7 +7226,8 @@ function resetPrepFlow(){
   prepState = {
     step: 1, direction: null, studentNum: null, purpose: '', type: null, typeRisk: 'normal',
     etcDetail:'', highConfirmed:false, contextIds:[], teacherNotes:'', promptAnon:'', promptReal:'',
-    aiResponse:'', restored:'', callNotes:''
+    aiResponse:'', restored:'', callNotes:'',
+    angerMode: false, legalFlags: [], riskScore: 0   // v2 추가
   };
 }
 
@@ -7197,6 +7329,8 @@ function buildStep1Active(){
     };
     btn.onclick = function(){
       replyState.message = ta.value.trim();
+      /* v2: 메시지 입력 직후 분노 신호 자동 감지 */
+      replyState.angerMode = detectAngerSignals(replyState.message);
       replyState.step = 2;
       renderReplyFlow();
     };
@@ -7316,6 +7450,7 @@ function buildStep3Active(){
         '<div class="step-sub">선택한 유형에 따라 학생 정보 노출 범위가 달라져요</div>'+
       '</div></div>'+
       '<div class="type-grid" id="type-grid">'+gridHtml+'</div>'+
+      '<div id="reply-anger-slot"></div>'+
       '<div id="reply-etc-slot"></div>'+
       '<div id="reply-warning-slot"></div>'+
       '<div class="step-actions">'+
@@ -7331,24 +7466,25 @@ function buildStep3Active(){
         replyState.type = typeId;
         replyState.typeRisk = risk;
         replyState.highConfirmed = false;
+        /* v2: 플래그 및 점수 갱신 */
+        replyState.legalFlags = detectLegalFlags(replyState.message);
+        replyState.riskScore = calcRiskScore(typeId, replyState.angerMode, replyState.legalFlags, replyState.message);
         card.querySelectorAll('.type-btn').forEach(function(x){
           x.classList.remove('selected','risk-caution','risk-high');
         });
         b.classList.add('selected');
         if(risk !== 'normal') b.classList.add('risk-'+risk);
+        renderReplyAngerToggle();
         renderReplyWarning();
         renderReplyEtcInput();
         updateStep3NextBtn();
       };
     });
+    renderReplyAngerToggle();
     renderReplyWarning();
     renderReplyEtcInput();
     updateStep3NextBtn();
     document.getElementById('reply-next-3').onclick = function(){
-      if(replyState.typeRisk === 'high' && !replyState.highConfirmed){
-        showToast('내용을 확인했어요 체크가 필요해요');
-        return;
-      }
       if(replyState.type === 'etc' && !replyState.etcDetail.trim()){
         showToast('어떤 상황인지 직접 입력해주세요');
         var inp = document.getElementById('reply-etc-input');
@@ -7389,32 +7525,54 @@ function updateStep3NextBtn(){
   btn.disabled = false;
 }
 
+function renderReplyAngerToggle(){
+  var slot = document.getElementById('reply-anger-slot');
+  if(!slot) return;
+  var autoDetected = detectAngerSignals(replyState.message);
+  var detectedHint = autoDetected
+    ? '<span style="font-size:11px;color:var(--warning,#d46b08);font-weight:600;margin-left:6px;">⚡ 메시지에서 자동 감지됨</span>'
+    : '';
+  slot.innerHTML =
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;'+
+    'padding:10px 12px;background:var(--warning-dim,#fffbe6);border:1px solid var(--warning-border,#ffe58f);'+
+    'border-radius:var(--radius-md);margin-bottom:8px;">'+
+      '<input type="checkbox" id="reply-anger-check" '+
+        (replyState.angerMode ? 'checked' : '')+
+        ' style="width:14px;height:14px;accent-color:var(--warning,#d46b08);flex-shrink:0;">'+
+      '<span style="font-size:12px;line-height:1.5;">'+
+        '<strong style="color:var(--warning,#d46b08);">학부모가 현재 흥분·공격적인 상황이에요</strong>'+
+        detectedHint+'<br>'+
+        '<span style="color:var(--text-secondary);">체크하면 분노 완화 대응 전략이 프롬프트에 추가돼요. 자동 감지 결과는 수정 가능해요.</span>'+
+      '</span>'+
+    '</label>';
+  var chk = document.getElementById('reply-anger-check');
+  if(chk){
+    chk.onchange = function(){
+      replyState.angerMode = chk.checked;
+      replyState.riskScore = calcRiskScore(
+        replyState.type, replyState.angerMode, replyState.legalFlags, replyState.message
+      );
+    };
+  }
+}
+
 function renderReplyWarning(){
   var slot = document.getElementById('reply-warning-slot');
   if(!slot) return;
-  if(replyState.typeRisk !== 'high'){ slot.innerHTML = ''; return; }
+  var isSensitive = replyState.type === 'bullying' || replyState.type === 'authority';
+  if(!isSensitive){ slot.innerHTML = ''; return; }
   slot.innerHTML =
     '<div class="inline-warning">'+
       '<div class="warning-head">'+
         '<div class="warning-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'+
-        '<span class="warning-title">법적 보호가 필요한 상황이에요</span>'+
+        '<span class="warning-title">법적 절차가 필요한 사안이에요</span>'+
       '</div>'+
-      '<div class="warning-body">학교폭력·교권 침해는 특별 절차가 있어요. 생성되는 프롬프트에는 학생 기록이 빠지고, 답장은 반드시 교사가 직접 검토 후 사용해야 해요.</div>'+
+      '<div class="warning-body">학교폭력·교권 침해는 특별 대응 절차가 있어요. AI 답장은 반드시 교사가 직접 검토 후 사용해야 해요.</div>'+
       '<div class="warning-resources">'+
         '<a href="tel:117" class="warning-link">학폭신고 117</a>'+
         '<a href="tel:15887017" class="warning-link">교원상담 1588-7017</a>'+
       '</div>'+
-      '<label style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-top:12px;">'+
-        '<input type="checkbox" id="high-confirm" '+(replyState.highConfirmed?'checked':'')+' style="width:14px;height:14px;accent-color:var(--danger);">'+
-        '<span style="font-size:12px;color:var(--danger);font-weight:600;">내용을 확인했어요. 제한 모드로 진행할게요.</span>'+
-      '</label>'+
     '</div>';
-  var chk = document.getElementById('high-confirm');
-  if(chk){
-    chk.onchange = function(){
-      replyState.highConfirmed = chk.checked;
-    };
-  }
 }
 
 function buildStep3Summary(){
@@ -7439,24 +7597,7 @@ function buildStep4Active(){
   var card = document.createElement('div');
   card.className = 'step-card active';
 
-  // 고위험이면 컨텍스트 자동 비움 + 안내
-  if(replyState.typeRisk === 'high'){
-    card.innerHTML =
-      '<div class="step-active-body">'+
-        '<div class="step-head"><div class="step-num">4</div><div>'+
-          '<div class="step-title">제한 모드: 학생 기록 미포함</div>'+
-          '<div class="step-sub">학교폭력·교권 침해 유형은 학생 기록을 프롬프트에 포함하지 않아요</div>'+
-        '</div></div>'+
-        '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;padding:6px 0;">메시지와 상황 유형만으로 답장 가이드를 생성합니다. 학생 정보는 익명 토큰으로도 노출되지 않습니다.</div>'+
-        '<div class="step-actions">'+
-          '<span class="field-hint">기록 없이 진행됩니다</span>'+
-          '<button class="btn-primary" onclick="replyState.contextIds=[]; replyState.step=5; renderReplyFlow();">다음 →</button>'+
-        '</div>'+
-      '</div>';
-    return card;
-  }
-
-  // 일반 흐름: 최근 30일 기록 체크박스
+  // 최근 30일 기록 체크박스
   var recs = (records[replyState.studentNum] || [])
     .filter(function(r){return r.type !== 'unsorted';})
     .filter(function(r){return daysFromNow(r.date) <= 30;})
@@ -7517,12 +7658,7 @@ function buildStep4Active(){
 function buildStep4Summary(){
   var card = document.createElement('div');
   card.className = 'step-card';
-  var label;
-  if(replyState.typeRisk === 'high'){
-    label = '제한 모드 · 기록 미포함';
-  } else {
-    label = '기록 '+replyState.contextIds.length+'건 포함';
-  }
+  var label = '기록 '+replyState.contextIds.length+'건 포함';
   card.innerHTML = summaryHTML('컨텍스트', label);
   setTimeout(function(){
     card.querySelector('.step-summary').onclick = function(){
@@ -7539,9 +7675,6 @@ function buildStep5Active(){
   card.className = 'step-card active';
 
   var riskBadge = '';
-  if(replyState.typeRisk === 'high'){
-    riskBadge = '<span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--risk-high-bg,#fff1f0);color:var(--risk-high,#d4380d);">고위험 — 의견은 프롬프트에만 참고, 익명화 처리됨</span>';
-  }
 
   card.innerHTML =
     '<div class="step-active-body">'+
@@ -7782,11 +7915,8 @@ function generateReplyPrompt(){
   }
 
   // 컨텍스트 기록 모으기
-  var contextRecords = [];
-  if(replyState.typeRisk !== 'high'){
-    contextRecords = (records[replyState.studentNum] || [])
-      .filter(function(r){return replyState.contextIds.indexOf(r.id) >= 0;});
-  }
+  var contextRecords = (records[replyState.studentNum] || [])
+    .filter(function(r){return replyState.contextIds.indexOf(r.id) >= 0;});
 
   anonMap = buildAnonMap(replyState.studentNum, contextRecords);
 
@@ -7881,6 +8011,33 @@ function generateReplyPrompt(){
     });
   }
 
+  /* v2: [현재 상황 상태] 섹션 — 분노 모드·법적 플래그·위험도 점수 반영 */
+  var replyRiskScore = calcRiskScore(replyState.type, replyState.angerMode, replyState.legalFlags, replyState.message);
+  replyState.riskScore = replyRiskScore;
+
+  if(replyState.angerMode || (replyState.legalFlags && replyState.legalFlags.length > 0) || replyRiskScore >= 3){
+    lines.push('');
+    lines.push('[현재 상황 상태]');
+    lines.push('· 종합 위험도: ' + replyRiskScore + '/5' +
+      (replyRiskScore >= 4 ? ' ⚠ 매우 높음' : replyRiskScore >= 3 ? ' 주의 필요' : ''));
+    if(replyState.angerMode){
+      lines.push('· 학부모 감정 상태: 흥분·공격적 — 드-에스컬레이션 우선 적용');
+      lines.push('  → 아래 단계 순서를 스크립트에 반영해줘:');
+      DEESCALATION_SEQUENCE.forEach(function(step){ lines.push('     ' + step); });
+    }
+    if(replyState.legalFlags && replyState.legalFlags.length > 0){
+      var flagLabels = {
+        privacy:'개인정보(타 학생 정보 요구)',
+        evaluation:'성적·평가 변경 압박',
+        channel:'개인 연락처 요구',
+        bullying:'학교폭력 관련',
+        authority:'교육청 민원·교권 침해'
+      };
+      lines.push('· 법적 주의 플래그: ' + replyState.legalFlags.map(function(f){ return flagLabels[f]||f; }).join(', '));
+      lines.push('  → 답장에서 위 항목에 대한 직접적 답변·약속 절대 금지. 법적 절차 안내로 대응.');
+    }
+  }
+
   lines.push('');
   lines.push('[학생 호칭 사용 규칙 — 매우 중요]');
   lines.push('학생을 지칭할 때 아래 토큰을 사용해줘. 한국어 조사 규칙에 맞게 골라 쓰면 자연스러운 답장이 돼.');
@@ -7892,6 +8049,17 @@ function generateReplyPrompt(){
   lines.push('학부모에게 보내는 답장은 보통 친근한 호칭이 더 자연스러워. 격식이 필요한 첫 문장 정도에만 풀네임을 써.');
   lines.push('');
   lines.push('· 교사·반·다른 학생 이름도 토큰([교사], [학년][반], [학생2] 등) 형식을 그대로 유지해줘. 자동으로 실제 정보로 복원됩니다.');
+
+  /* v2: internalNote — 내부 판단 메모 (프롬프트에 포함되지 않음) */
+  var internalNote = {
+    generatedAt: new Date().toISOString(),
+    type: replyState.type,
+    riskScore: replyRiskScore,
+    angerMode: replyState.angerMode,
+    legalFlags: replyState.legalFlags ? replyState.legalFlags.slice() : [],
+    autoDetectedAnger: detectAngerSignals(replyState.message)
+  };
+  replyState._internalNote = internalNote; // 절대 lines.push 금지
 
   var realPrompt = lines.join('\n');
   var anonPrompt = applyAnonymization(realPrompt, anonMap);
@@ -8093,6 +8261,8 @@ function buildPrepStep1Active(){
     };
     document.getElementById('prep-next-1').onclick = function(){
       prepState.purpose = ta.value.trim();
+      /* v2: 목적 입력 직후 분노 신호 자동 감지 */
+      prepState.angerMode = detectAngerSignals(prepState.purpose);
       prepState.step = 2;
       renderPrepFlow();
     };
@@ -8217,6 +8387,7 @@ function buildPrepStep3Active(){
         '<div class="step-sub">유형에 따라 통화 스크립트의 톤과 안내 사항이 달라져요</div>'+
       '</div></div>'+
       '<div class="type-grid">'+gridHtml+'</div>'+
+      '<div id="prep-anger-slot"></div>'+
       '<div id="prep-etc-slot"></div>'+
       '<div id="prep-warning-slot"></div>'+
       '<div class="step-actions">'+
@@ -8231,25 +8402,26 @@ function buildPrepStep3Active(){
         prepState.type = b.dataset.type;
         prepState.typeRisk = b.dataset.risk;
         prepState.highConfirmed = false;
+        /* v2: 플래그 및 점수 갱신 */
+        prepState.legalFlags = detectLegalFlags(prepState.purpose);
+        prepState.riskScore = calcRiskScore(b.dataset.type, prepState.angerMode, prepState.legalFlags, prepState.purpose);
         card.querySelectorAll('.type-btn').forEach(function(x){
           x.classList.remove('selected','risk-caution','risk-high');
         });
         b.classList.add('selected');
         if(prepState.typeRisk !== 'normal') b.classList.add('risk-'+prepState.typeRisk);
+        renderPrepAngerToggle();
         renderPrepWarning();
         renderPrepEtcInput();
         updatePrepStep3NextBtn();
       };
     });
+    renderPrepAngerToggle();
     renderPrepWarning();
     renderPrepEtcInput();
     updatePrepStep3NextBtn();
     document.getElementById('prep-back-3').onclick = function(){ prepState.step = 2; renderPrepFlow(); };
     document.getElementById('prep-next-3').onclick = function(){
-      if(prepState.typeRisk === 'high' && !prepState.highConfirmed){
-        showToast('내용을 확인했어요 체크가 필요해요');
-        return;
-      }
       if(prepState.type === 'etc' && !(prepState.etcDetail||'').trim()){
         showToast('어떤 상황인지 직접 입력해주세요');
         var inp = document.getElementById('prep-etc-input');
@@ -8282,27 +8454,49 @@ function renderPrepEtcInput(){
   inp.focus();
 }
 
+function renderPrepAngerToggle(){
+  var slot = document.getElementById('prep-anger-slot');
+  if(!slot) return;
+  var autoDetected = detectAngerSignals(prepState.purpose);
+  var detectedHint = autoDetected
+    ? '<span style="font-size:11px;color:var(--warning,#d46b08);font-weight:600;margin-left:6px;">⚡ 목적 입력에서 자동 감지됨</span>'
+    : '';
+  slot.innerHTML =
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;'+
+    'padding:10px 12px;background:var(--warning-dim,#fffbe6);border:1px solid var(--warning-border,#ffe58f);'+
+    'border-radius:var(--radius-md);margin-bottom:8px;">'+
+      '<input type="checkbox" id="prep-anger-check" '+
+        (prepState.angerMode ? 'checked' : '')+
+        ' style="width:14px;height:14px;accent-color:var(--warning,#d46b08);flex-shrink:0;">'+
+      '<span style="font-size:12px;line-height:1.5;">'+
+        '<strong style="color:var(--warning,#d46b08);">학부모가 현재 흥분·공격적인 상황이에요</strong>'+
+        detectedHint+'<br>'+
+        '<span style="color:var(--text-secondary);">체크하면 분노 완화 대응 전략이 스크립트에 추가돼요. 자동 감지 결과는 수정 가능해요.</span>'+
+      '</span>'+
+    '</label>';
+  var chk = document.getElementById('prep-anger-check');
+  if(chk){
+    chk.onchange = function(){
+      prepState.angerMode = chk.checked;
+      prepState.riskScore = calcRiskScore(
+        prepState.type, prepState.angerMode, prepState.legalFlags, prepState.purpose
+      );
+    };
+  }
+}
+
 function renderPrepWarning(){
   var slot = document.getElementById('prep-warning-slot');
   if(!slot) return;
-  if(prepState.typeRisk !== 'high'){ slot.innerHTML = ''; return; }
+  var isSensitive = prepState.type === 'bullying' || prepState.type === 'authority';
+  if(!isSensitive){ slot.innerHTML = ''; return; }
   slot.innerHTML =
     '<div class="reply-high-warning">'+
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+
-      '<div>이 유형은 통화 중 <strong>녹음 가능성·교권 보호 절차</strong>를 안내받게 돼요. 학생 기록은 프롬프트에 포함되지 않습니다.'+
-        '<label style="display:block;margin-top:8px;font-size:12px;font-weight:500;cursor:pointer;">'+
-          '<input type="checkbox" id="prep-high-confirm" '+(prepState.highConfirmed?'checked':'')+' style="margin-right:6px;">'+
-          '이해했고 진행할게요'+
-        '</label>'+
+      '<div>법적 절차가 필요한 사안이에요. 통화 중 <strong>녹음 고지·교권 보호 절차</strong>를 안내할 수 있어요.'+
+        '<div style="margin-top:6px;font-size:11px;color:var(--text-tertiary);">학생 기록을 포함해 스크립트를 생성하므로, 스크립트는 교사가 직접 검토 후 사용해주세요.</div>'+
       '</div>'+
     '</div>';
-  var conf = document.getElementById('prep-high-confirm');
-  if(conf){
-    conf.onchange = function(){
-      prepState.highConfirmed = conf.checked;
-      updatePrepStep3NextBtn();
-    };
-  }
 }
 
 function updatePrepStep3NextBtn(){
@@ -8314,7 +8508,6 @@ function updatePrepStep3NextBtn(){
 function canPrepProceed3(){
   if(!prepState.type) return false;
   if(prepState.type === 'etc' && !(prepState.etcDetail||'').trim()) return false;
-  if(prepState.typeRisk === 'high' && !prepState.highConfirmed) return false;
   return true;
 }
 
@@ -8335,26 +8528,6 @@ function buildPrepStep3Summary(){
 function buildPrepStep4Active(){
   var card = document.createElement('div');
   card.className = 'step-card active';
-
-  if(prepState.typeRisk === 'high'){
-    card.innerHTML =
-      '<div class="step-active-body">'+
-        '<div class="step-head"><div class="step-num">4</div><div>'+
-          '<div class="step-title">제한 모드: 학생 기록 미포함</div>'+
-          '<div class="step-sub">학교폭력·교권 침해 유형은 학생 기록을 스크립트에 포함하지 않아요</div>'+
-        '</div></div>'+
-        '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;padding:6px 0 14px;">상황 유형과 목적만으로 통화 스크립트를 생성합니다. 학생 정보는 익명 토큰으로도 노출되지 않습니다.</div>'+
-        '<div class="step-actions">'+
-          '<button class="btn-secondary" id="prep-back-4">← 이전</button>'+
-          '<button class="btn-primary" id="prep-next-4">다음 →</button>'+
-        '</div>'+
-      '</div>';
-    setTimeout(function(){
-      document.getElementById('prep-back-4').onclick = function(){ prepState.step = 3; renderPrepFlow(); };
-      document.getElementById('prep-next-4').onclick = function(){ prepState.contextIds=[]; prepState.step=5; renderPrepFlow(); };
-    },0);
-    return card;
-  }
 
   var recs = (records[prepState.studentNum] || [])
     .filter(function(r){return r.type !== 'unsorted';})
@@ -8427,7 +8600,7 @@ function attachTeacherNotesHandler(){
 function buildPrepStep4Summary(){
   var card = document.createElement('div');
   card.className = 'step-card';
-  var label = prepState.typeRisk === 'high' ? '제한 모드 · 기록 미포함' : ('기록 '+prepState.contextIds.length+'건 포함');
+  var label = '기록 '+prepState.contextIds.length+'건 포함';
   if(prepState.teacherNotes && prepState.teacherNotes.trim()){
     label += ' · 선생님 의견 첨부됨';
   }
@@ -8444,9 +8617,6 @@ function buildPrepStep5Active(){
   card.className = 'step-card active';
 
   var riskBadge = '';
-  if(prepState.typeRisk === 'high'){
-    riskBadge = '<span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--risk-high-bg,#fff1f0);color:var(--risk-high,#d4380d);">고위험 — 의견은 스크립트에만 참고, 익명화 처리됨</span>';
-  }
 
   card.innerHTML =
     '<div class="step-active-body">'+
@@ -8710,10 +8880,6 @@ function buildPrepBriefingHTML(s){
     '<div class="prep-brief-row"><span class="prep-brief-key">목적</span><span class="prep-brief-val">'+escapeHtml(purpose)+'</span></div>'+
   '</div>';
 
-  if(prepState.typeRisk === 'high'){
-    return html;  // high 위험은 기록 미표시
-  }
-
   // 학부모 통화·면담 이력 별도 섹션 (가장 중요)
   var parentRecs = (records[s.num] || [])
     .filter(function(r){return r.type === 'parent';})
@@ -8786,11 +8952,8 @@ function generatePrepPrompt(){
   var typeLabel = t ? t.label : '';
   if(prepState.type === 'etc' && prepState.etcDetail) typeLabel = '기타 (' + prepState.etcDetail + ')';
 
-  var contextRecords = [];
-  if(prepState.typeRisk !== 'high'){
-    contextRecords = (records[prepState.studentNum] || [])
-      .filter(function(r){return prepState.contextIds.indexOf(r.id) >= 0;});
-  }
+  var contextRecords = (records[prepState.studentNum] || [])
+    .filter(function(r){return prepState.contextIds.indexOf(r.id) >= 0;});
 
   anonMap = buildAnonMap(prepState.studentNum, contextRecords);
 
@@ -8909,6 +9072,33 @@ function generatePrepPrompt(){
     });
   }
 
+  /* v2: [현재 상황 상태] 섹션 — 분노 모드·법적 플래그·위험도 점수 반영 */
+  var prepRiskScore = calcRiskScore(prepState.type, prepState.angerMode, prepState.legalFlags, prepState.purpose);
+  prepState.riskScore = prepRiskScore;
+
+  if(prepState.angerMode || (prepState.legalFlags && prepState.legalFlags.length > 0) || prepRiskScore >= 3){
+    lines.push('');
+    lines.push('[현재 상황 상태]');
+    lines.push('· 종합 위험도: ' + prepRiskScore + '/5' +
+      (prepRiskScore >= 4 ? ' ⚠ 매우 높음' : prepRiskScore >= 3 ? ' 주의 필요' : ''));
+    if(prepState.angerMode){
+      lines.push('· 학부모 감정 상태: 흥분·공격적 — 드-에스컬레이션 우선 적용');
+      lines.push('  → 통화 중 아래 단계 순서를 스크립트 섹션 3에 반영해줘:');
+      DEESCALATION_SEQUENCE.forEach(function(step){ lines.push('     ' + step); });
+    }
+    if(prepState.legalFlags && prepState.legalFlags.length > 0){
+      var prepFlagLabels = {
+        privacy:'개인정보(타 학생 정보 요구)',
+        evaluation:'성적·평가 변경 압박',
+        channel:'개인 연락처 요구',
+        bullying:'학교폭력 관련',
+        authority:'교육청 민원·교권 침해'
+      };
+      lines.push('· 법적 주의 플래그: ' + prepState.legalFlags.map(function(f){ return prepFlagLabels[f]||f; }).join(', '));
+      lines.push('  → 통화 중 위 항목에 대한 직접적 답변·약속 절대 금지. 법적 절차 안내로 대응.');
+    }
+  }
+
   lines.push('');
   lines.push('[톤·형식]');
   lines.push('· 정중하고 따뜻하게, 그러나 명확하게');
@@ -8925,6 +9115,17 @@ function generatePrepPrompt(){
   lines.push('통화에서는 본론부터는 친근한 호칭이 더 자연스러워. 시작 멘트 첫 문장에만 풀네임을 써.');
   lines.push('');
   lines.push('· 교사·반·다른 학생 이름도 토큰([교사], [학년][반], [학생2] 등) 형식을 그대로 유지해줘.');
+
+  /* v2: internalNote — 내부 판단 메모 (프롬프트에 포함되지 않음) */
+  var prepInternalNote = {
+    generatedAt: new Date().toISOString(),
+    type: prepState.type,
+    riskScore: prepRiskScore,
+    angerMode: prepState.angerMode,
+    legalFlags: prepState.legalFlags ? prepState.legalFlags.slice() : [],
+    autoDetectedAnger: detectAngerSignals(prepState.purpose)
+  };
+  prepState._internalNote = prepInternalNote; // 절대 lines.push 금지
 
   var realPrompt = lines.join('\n');
   var anonPrompt = applyAnonymization(realPrompt, anonMap);
@@ -10799,20 +11000,6 @@ function saveAddClass(){
   closeAddClass();
   switchClassKey(key);
   showToast(g+'학년 '+c+'반이 추가됐어요');
-}
-
-/* ═══════════════════════════════════════════
-   설정 (모달)
-═══════════════════════════════════════════ */
-function openSettings(){
-  // 간단한 prompt 방식으로 처리 (모달 만들면 길어짐 - 추후 개선)
-  var newName = prompt('선생님 성함', TEACHER_NAME);
-  if(newName === null) return;
-  if(newName.trim().length < 2){ showToast('이름은 2자 이상이어야 해요'); return; }
-  TEACHER_NAME = newName.trim();
-  saveSettings();
-  showToast('설정이 저장됐어요');
-  if(document.getElementById('tab-home').style.display === 'block') renderHome();
 }
 
 /* ═══════════════════════════════════════════
