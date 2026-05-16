@@ -713,6 +713,34 @@ body{
 .tag-mgr-icon-btn.danger:hover{
   background:var(--danger-dim);color:var(--danger);
 }
+.tag-mgr-edit-wrap{
+  display:flex;align-items:center;gap:4px;flex:1;min-width:0;
+}
+.tag-mgr-edit-input{
+  flex:1;min-width:0;font-size:13px;font-weight:500;
+  font-family:inherit;color:var(--text);
+  border:1.5px solid var(--accent);border-radius:6px;
+  padding:4px 8px;background:var(--bg-surface);
+  outline:none;
+}
+.tag-mgr-edit-btn{
+  width:26px;height:26px;border-radius:5px;
+  border:none;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.12s;
+}
+.tag-mgr-edit-btn.confirm{
+  background:var(--accent);color:#fff;
+}
+.tag-mgr-edit-btn.confirm:hover{
+  filter:brightness(1.1);
+}
+.tag-mgr-edit-btn.cancel{
+  background:var(--bg-elevated);color:var(--text-tertiary);
+}
+.tag-mgr-edit-btn.cancel:hover{
+  background:var(--danger-dim);color:var(--danger);
+}
 .tag-mgr-footer{
   margin-top:14px;padding-top:14px;
   border-top:1px solid var(--border);
@@ -4642,25 +4670,66 @@ function addTagFromInput(){
 }
 
 function startEditTag(idx){
+  var list = document.getElementById('tag-mgr-list');
+  if(!list) return;
+  var row = list.querySelector('.tag-mgr-row[data-idx="'+idx+'"]');
+  if(!row) return;
+  // 이미 수정 중이면 무시
+  if(row.querySelector('.tag-mgr-edit-input')) return;
   var pool = TAG_POOL[tagMgrCurrentType];
-  if(!pool || !pool[idx]) return;
+  if(!pool || pool[idx] === undefined) return;
   var current = pool[idx];
-  var newName = prompt('태그 이름을 수정하세요 (14자 이내)', current);
-  if(newName === null) return;
-  newName = newName.trim();
-  if(!newName){ showToast('태그 이름은 비울 수 없어요'); return; }
-  if(newName.length > 14){ showToast('태그는 14자 이내로 입력하세요'); return; }
-  if(newName === current) return;
-  if(pool.indexOf(newName) >= 0){
-    showToast('"'+newName+'" 태그는 이미 있어요');
-    return;
+  var nameSpan = row.querySelector('.tag-mgr-name');
+  var actionsDiv = row.querySelector('.tag-mgr-row-actions');
+  // 이름 span → input 교체
+  nameSpan.style.display = 'none';
+  actionsDiv.style.display = 'none';
+  var editWrap = document.createElement('div');
+  editWrap.className = 'tag-mgr-edit-wrap';
+  editWrap.innerHTML =
+    '<input class="tag-mgr-edit-input" type="text" maxlength="14" value="'+escapeAttr(current)+'">'+
+    '<button class="tag-mgr-edit-btn confirm" onclick="confirmEditTag('+idx+')" title="확인">'+
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+    '</button>'+
+    '<button class="tag-mgr-edit-btn cancel" onclick="cancelEditTag('+idx+')" title="취소">'+
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'+
+    '</button>';
+  row.appendChild(editWrap);
+  var inp = editWrap.querySelector('.tag-mgr-edit-input');
+  inp.focus();
+  inp.select();
+  inp.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); confirmEditTag(idx); }
+    if(e.key === 'Escape'){ cancelEditTag(idx); }
+  });
+}
+
+function confirmEditTag(idx){
+  var list = document.getElementById('tag-mgr-list');
+  if(!list) return;
+  var row = list.querySelector('.tag-mgr-row[data-idx="'+idx+'"]');
+  if(!row) return;
+  var inp = row.querySelector('.tag-mgr-edit-input');
+  if(!inp) return;
+  var pool = TAG_POOL[tagMgrCurrentType];
+  var current = pool[idx];
+  var newName = inp.value.trim();
+  if(!newName){ showToast('태그 이름은 비울 수 없어요'); inp.focus(); return; }
+  if(newName.length > 14){ showToast('태그는 14자 이내로 입력하세요'); inp.focus(); return; }
+  if(newName !== current && pool.indexOf(newName) >= 0){
+    showToast('"'+newName+'" 태그는 이미 있어요'); inp.focus(); return;
   }
-  pool[idx] = newName;
-  saveTagPool();
-  // 기존 records에서 이 태그를 쓰던 항목 자동 갱신
-  migrateTagName(tagMgrCurrentType, current, newName);
+  if(newName !== current){
+    pool[idx] = newName;
+    saveTagPool();
+    migrateTagName(tagMgrCurrentType, current, newName);
+    showToast('태그 이름이 수정됐어요 (기존 기록도 함께 갱신)');
+  }
   renderTagMgrList();
-  showToast('태그 이름이 수정됐어요 (기존 기록도 함께 갱신)');
+}
+
+function cancelEditTag(idx){
+  renderTagMgrList();
 }
 
 function deleteTag(idx){
