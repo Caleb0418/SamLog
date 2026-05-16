@@ -3366,11 +3366,11 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="onboarding-form-row">
           <div class="onboarding-field">
             <label class="form-label" style="display:block;">학년</label>
-            <input type="number" id="ob-grade" placeholder="2" class="form-input-text" min="1" max="6">
+            <input type="number" id="ob-grade" placeholder="예) 2" class="form-input-text" min="1" max="6">
           </div>
           <div class="onboarding-field">
             <label class="form-label" style="display:block;">반</label>
-            <input type="number" id="ob-class" placeholder="3" class="form-input-text" min="1" max="20">
+            <input type="number" id="ob-class" placeholder="예) 3" class="form-input-text" min="1" max="20">
           </div>
         </div>
       </div>
@@ -3641,11 +3641,11 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
               <div class="class-form-row">
                 <div class="class-form-field" style="width:74px;">
                   <label class="form-label" style="display:block;">학년</label>
-                  <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="2">
+                  <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2">
                 </div>
                 <div class="class-form-field" style="width:74px;">
                   <label class="form-label" style="display:block;">반</label>
-                  <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="3">
+                  <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3">
                 </div>
                 <div class="class-form-field" style="flex:1;min-width:120px;">
                   <label class="form-label" style="display:block;">과목</label>
@@ -5389,49 +5389,6 @@ function loadAll(){
   saveAll();
 }
 
-/* ═══════════════════════════════════════════
-   초기 데모 데이터 시드 (처음 한 번만)
-═══════════════════════════════════════════ */
-function seedDemoData(){
-  if(localStorage.getItem('ht2_seeded') === '1') return;
-  if(students.length === 0) return;
-
-  var today = new Date();
-  var todayStr = formatDateForInput(today);
-  var d5 = new Date(today); d5.setDate(d5.getDate()-5);
-  var d12 = new Date(today); d12.setDate(d12.getDate()-12);
-  var d3 = new Date(today); d3.setDate(d3.getDate()-3);
-  var d9 = new Date(today); d9.setDate(d9.getDate()-9);
-
-  // 학생 번호 안전하게 — 명단에서 직접 찾아서 사용
-  var s08 = students.find(function(s){return s.num === '08';});
-  var s05 = students.find(function(s){return s.num === '05';});
-  var s11 = students.find(function(s){return s.num === '11';});
-
-  if(s08){
-    records[s08.num] = [
-      {id:'r1',type:'unsorted',date:todayStr,time:'10:42',content:'쉬는 시간에 친구랑 다투고 자리에서 한참 안 일어남. 점심시간 끝나고 확인 필요.',tags:[],createdAt:Date.now()-3600000*2},
-      {id:'r2',type:'unsorted',date:todayStr,time:'08:15',content:'아침에 약간 멍한 표정. 어제 못 잔 것 같아 보임.',tags:[],createdAt:Date.now()-3600000*5},
-      {id:'r3',type:'observation',date:formatDateForInput(d5),time:'14:20',content:'수학 시간에 친구가 모르는 문제를 끝까지 설명해 줬다. 자기 풀이를 천천히 단계별로 나눠서 알려주는 게 인상적.',tags:['세특','협업'],createdAt:Date.now()-86400000*5},
-      {id:'r4',type:'consultation',date:formatDateForInput(d5),time:'16:30',content:'진로 상담. 미디어 학과에 관심이 있다고 말함. 영상 편집을 1년째 독학 중. 부모님은 안정적인 진로를 권한다고 함.',tags:['진로'],createdAt:Date.now()-86400000*5+1000},
-      {id:'r5',type:'parent',date:formatDateForInput(d12),time:'19:15',content:'어머니와 통화. 최근 학원 일정이 늘어 피곤해 보인다고 함. 학교에서 졸린 모습 보이면 알려달라고 요청.',tags:[],createdAt:Date.now()-86400000*12},
-    ];
-  }
-  if(s05){
-    records[s05.num] = [
-      {id:'r6',type:'unsorted',date:todayStr,time:'11:20',content:'체육 시간 중간에 어지럽다고 보건실 다녀옴. 컨디션 체크 필요.',tags:[],createdAt:Date.now()-3600000*1},
-      {id:'r7',type:'observation',date:formatDateForInput(d3),time:'10:00',content:'국어 발표 시간에 자기 의견을 논리적으로 정리해서 발표함. 친구들 질문도 차분히 받아쳤다.',tags:['발표','세특'],createdAt:Date.now()-86400000*3},
-    ];
-  }
-  if(s11){
-    records[s11.num] = [
-      {id:'r8',type:'observation',date:formatDateForInput(d9),time:'13:10',content:'점심 후 운동장에서 친구들과 어울려 노는 모습. 활기차 보임.',tags:['행동특성'],createdAt:Date.now()-86400000*9}
-    ];
-  }
-
-  saveAll();
-  try{ localStorage.setItem('ht2_seeded','1'); }catch(e){}
-}
 
 /* ═══════════════════════════════════════════
    유틸
@@ -6395,9 +6352,9 @@ var REPLY_TYPES = [
 ];
 
 // 교사 이름 / 학교 정보 (온보딩에서 입력, localStorage 영속)
-var TEACHER_NAME = '담임 ○○○';
-var SCHOOL_GRADE = 2;
-var SCHOOL_CLASS = 3;
+var TEACHER_NAME = '';
+var SCHOOL_GRADE = '';
+var SCHOOL_CLASS = '';
 
 function saveSettings(){
   try{
@@ -12899,12 +12856,6 @@ function init(){
     saveSettings();
   }
   syncActiveClass();
-
-  // 데모 데이터 시드 (현재 반에 학생은 있고 기록은 0이면 한 번만)
-  if(Object.keys(records).length === 0 && students.length >= 5){
-    seedDemoData();
-    syncActiveClass();
-  }
 
   updateHeaderClass();
   switchTab('home');
