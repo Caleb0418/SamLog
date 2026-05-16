@@ -3615,6 +3615,21 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             <div id="class-master-list"></div>
           </div>
         </div>
+
+        <!-- ③ 데이터 백업 -->
+        <div class="class-master-title" style="margin-bottom:8px;margin-top:20px;">데이터 백업</div>
+        <div class="class-master-sub" style="margin-bottom:10px;">모든 학생 기록·수업·시간표 데이터를 JSON 파일로 내보내거나, 이전에 내보낸 파일로 복원할 수 있어요.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-small primary" onclick="exportDataAsJSON()" style="display:flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            JSON으로 내보내기
+          </button>
+          <button class="btn-small secondary" onclick="document.getElementById('import-json-input').click()" style="display:flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            JSON에서 복원
+          </button>
+          <input type="file" id="import-json-input" accept=".json" style="display:none;" onchange="if(this.files.length)importDataFromJSON(this.files[0]);this.value='';">
+        </div>
       </div>
     </div>
   </div>
@@ -4799,6 +4814,44 @@ function saveAll(){
     localStorage.setItem('ht2_adhoc_slots', JSON.stringify(adhocSlots));
   }catch(e){ console.warn('저장 실패', e); }
 }
+
+function exportDataAsJSON(){
+  saveAll();
+  var KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_settings','ht2_alert_settings','ht2_theme'];
+  var data = { _version: 1, _exportedAt: new Date().toISOString() };
+  KEYS.forEach(function(k){
+    var v = localStorage.getItem(k);
+    if(v !== null) try{ data[k] = JSON.parse(v); }catch(e){ data[k] = v; }
+  });
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var date = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = 'iamsam_backup_' + date + '.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('데이터를 JSON 파일로 내보냈어요');
+}
+
+function importDataFromJSON(file){
+  if(!confirm('현재 모든 데이터가 파일 내용으로 교체됩니다.\n계속하시겠어요?')) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      var KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_settings','ht2_alert_settings','ht2_theme'];
+      KEYS.forEach(function(k){
+        if(k in data) localStorage.setItem(k, JSON.stringify(data[k]));
+      });
+      showToast('복원 완료! 페이지를 새로고침해요');
+      setTimeout(function(){ location.reload(); }, 1200);
+    } catch(err){
+      alert('파일을 읽는 중 오류가 발생했어요.\n올바른 IAMSAM 백업 파일인지 확인해주세요.');
+    }
+  };
+  reader.readAsText(file);
+}
+
 function loadAll(){
   try{
     var cls = localStorage.getItem('ht2_classes');
