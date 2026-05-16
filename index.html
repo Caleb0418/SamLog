@@ -4151,7 +4151,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="progress-connector"></div>
         <div class="progress-step" data-step="4"><div class="progress-num">4</div><div class="progress-label">컨텍스트</div></div>
         <div class="progress-connector"></div>
-        <div class="progress-step" data-step="5"><div class="progress-num">5</div><div class="progress-label">프롬프트</div></div>
+        <div class="progress-step" data-step="5"><div class="progress-num">5</div><div class="progress-label">교사 의견</div></div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="6"><div class="progress-num">6</div><div class="progress-label">프롬프트</div></div>
       </div>
       <div id="reply-steps-container"></div>
     </div>
@@ -4168,7 +4170,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="progress-connector"></div>
         <div class="progress-step" data-step="4"><div class="progress-num">4</div><div class="progress-label">컨텍스트</div></div>
         <div class="progress-connector"></div>
-        <div class="progress-step" data-step="5"><div class="progress-num">5</div><div class="progress-label">스크립트</div></div>
+        <div class="progress-step" data-step="5"><div class="progress-num">5</div><div class="progress-label">교사 의견</div></div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="6"><div class="progress-num">6</div><div class="progress-label">스크립트</div></div>
       </div>
       <div id="prep-steps-container"></div>
     </div>
@@ -6870,6 +6874,7 @@ var replyState = {
   etcDetail: '',           // 기타 유형 선택 시 직접 입력
   highConfirmed: false,
   contextIds: [],          // 선택된 기록 id 목록
+  teacherNotes: '',        // 교사 의견 (선택 입력)
   promptAnon: '',
   promptReal: '',
   aiResponse: '',
@@ -6883,6 +6888,143 @@ var REPLY_TYPES = [
   {id:'bullying',   label:'학교폭력',    desc:'신고·조사 문의',     risk:'high'},
   {id:'authority',  label:'교권 침해',   desc:'폭언·부적절 요구',   risk:'high'},
   {id:'etc',        label:'기타',        desc:'직접 입력',          risk:'normal'}
+];
+
+// ── 학부모 대응 지식베이스 ──────────────────────────────────────────
+var CONSULT_KNOWLEDGE = {
+  general: {
+    riskLevel: 1,
+    keyPrinciple: '강점 먼저 언급, 객관 사실 중심, 후속 약속 명확화',
+    forbidden: ['단정적 진단', '과장된 칭찬', '개인정보 과도 공유'],
+    legalRules: [],
+    expressions: {
+      opening: '연락 주셔서 감사합니다. {학생호칭}에 대해 말씀드릴게요.',
+      empathy: '어머님(아버님)께서 걱정하시는 마음 충분히 이해합니다.',
+      closing: '앞으로도 함께 잘 살펴보겠습니다. 궁금하신 점은 언제든 연락 주세요.'
+    }
+  },
+  attendance: {
+    riskLevel: 1,
+    keyPrinciple: '결석·지각 사실 확인 후 가정 상황 청취, 지원 방향 공유',
+    forbidden: ['일방적 독촉', '처벌 강조'],
+    legalRules: [],
+    expressions: {
+      empathy: '가정에서도 어려운 점이 있으셨군요. 학교에서도 함께 방법을 찾아보겠습니다.',
+      closing: '출결 상황 변동이 있으면 학교로 연락 주시면 바로 협조하겠습니다.'
+    }
+  },
+  academic: {
+    riskLevel: 1,
+    keyPrinciple: '성취 사실 객관 전달, 개선 방향 구체화, 가정 협력 요청',
+    forbidden: ['타학생 비교', '성적 보장 약속', '과목교사 비방'],
+    legalRules: [],
+    expressions: {
+      factFirst: '현재 {과목} 과목 학습 상황을 말씀드리면…',
+      closing: '가정에서도 이 부분을 함께 살펴봐 주시면 더 효과가 클 것 같습니다.'
+    }
+  },
+  concern: {
+    riskLevel: 2,
+    keyPrinciple: '공감 우선 → 사실 확인 → 학교 관찰 내용 공유 → 협력 방안 제시',
+    forbidden: ['즉각 진단', '진료 강요', '경솔한 원인 단정'],
+    legalRules: ['아동학대_신고_의무_유의'],
+    expressions: {
+      empathy: '어머님(아버님)께서 많이 걱정되실 것 같아요. 저도 꼼꼼히 살펴보겠습니다.',
+      boundary: '학교에서 관찰한 내용을 공유해드릴게요. 전문적인 판단은 전문가와 연계해 드릴 수 있습니다.',
+      closing: '1주일 뒤에 다시 한 번 말씀 나누면 어떨까요?'
+    }
+  },
+  complaint: {
+    riskLevel: 3,
+    keyPrinciple: '감정 수용 → 사실 확인 → 학교 입장 명확화 → 공식 채널 안내',
+    forbidden: ['즉각 사과', '평가 변경 약속', '동료교사 비방', '감정적 맞대응'],
+    legalRules: ['평가_변경_불가', '민원_채널', '교육활동_침해'],
+    expressions: {
+      empathy: '말씀하신 부분에서 불편함을 느끼셨군요. 일단 말씀을 잘 들었습니다.',
+      boundary: '해당 사안은 학교 공식 절차를 통해 검토해드릴 수 있습니다.',
+      closing: '학교 민원 담당자를 통해 공식으로 접수하시면 절차에 따라 답변드리겠습니다.'
+    }
+  },
+  bullying: {
+    riskLevel: 5,
+    keyPrinciple: '경청 → 사실 기록 → 절차 안내 → 단정·약속 금지 → 면담 권고',
+    forbidden: ['화해 강요', '가해자·피해자 단정', '합의 권유', '개인정보 공유'],
+    legalRules: ['학폭_화해_압박_금지', '개인정보', '교육활동_침해'],
+    expressions: {
+      empathy: '말씀해 주셔서 감사합니다. 학교에서도 엄중하게 대응하겠습니다.',
+      procedure: '학교폭력 사안은 학교폭력대책심의위원회 절차를 거쳐야 하며, 담임이 임의로 결론을 내릴 수 없습니다.',
+      closing: '빠른 시일 내에 면담을 진행하고, 학교 절차에 따라 안내드리겠습니다.'
+    }
+  },
+  authority: {
+    riskLevel: 5,
+    keyPrinciple: '경계 명확화 → 녹음 고지 → 관리자 위임 → 필요 시 종결',
+    forbidden: ['감정 반응', '사적 약속', '위협 수용', '단독 처리'],
+    legalRules: ['교육활동_침해', '녹음_규칙', '악성_민원_종결'],
+    expressions: {
+      empathy: '말씀해 주셔서 감사합니다. 어머님(아버님)께서 우려하시는 마음을 충분히 이해합니다.',
+      boundary: '교육활동과 관련된 정당한 요청에는 성실히 응답하겠습니다. 다만 업무 범위를 벗어난 요구는 응할 수 없습니다.',
+      escalate: '이 사안은 교감(교장) 선생님과 함께 말씀 나누시는 것이 더 적절할 것 같습니다.',
+      closing: '더 이상 이 방식으로는 대화를 지속하기 어렵습니다. 공식 민원 채널을 이용해 주시기 바랍니다.'
+    }
+  },
+  etc: {
+    riskLevel: 2,
+    keyPrinciple: '사안 내용 파악 → 적절한 담당자 연계 → 후속 안내',
+    forbidden: ['무책임한 떠넘기기', '즉각 해결 약속'],
+    legalRules: [],
+    expressions: {
+      empathy: '말씀 감사합니다. 내용을 잘 파악해서 안내해 드리겠습니다.',
+      closing: '확인 후 다시 연락드리겠습니다.'
+    }
+  }
+};
+
+var LEGAL_RULES = {
+  '개인정보': {
+    rule: '「개인정보 보호법」제18조 — 학부모 동의 없이 다른 학생·가정 정보 공유 금지',
+    guidance: '다른 학생 이름·가정환경 등 개인정보는 절대 언급하지 않기'
+  },
+  '학폭_화해_압박_금지': {
+    rule: '「학교폭력예방법」제16조 — 담임이 임의로 화해를 종용하거나 합의를 권유하면 안 됨',
+    guidance: '화해·합의 언급 금지, 반드시 학폭위 절차 안내'
+  },
+  '평가_변경_불가': {
+    rule: '「초·중등교육법 시행령」제79조 — 성적은 학업성적관리위원회 의결 없이 변경 불가',
+    guidance: '성적 정정 약속 절대 금지, 이의신청 공식 절차 안내'
+  },
+  '민원_채널': {
+    rule: '「민원 처리에 관한 법률」제8조 — 공식 민원은 지정 채널로 접수',
+    guidance: '구두 약속 남기지 않기, 공식 민원 채널(교육청·학교 민원함) 안내'
+  },
+  '교육활동_침해': {
+    rule: '「교원의 지위 향상 및 교육활동 보호를 위한 특별법」제15조 — 교육활동 침해 시 즉각 보고 의무',
+    guidance: '폭언·위협 시 즉시 관리자에게 보고, 상황 기록 남기기'
+  },
+  '아동학대_신고_의무_유의': {
+    rule: '「아동복지법」제26조 — 교사는 아동학대 의심 시 신고 의무',
+    guidance: '학대 의심 징후 발견 시 섣불리 판단하지 말고 담당기관 안내 또는 관리자 협의'
+  },
+  '녹음_규칙': {
+    rule: '「통신비밀보호법」제3조 — 상대방 동의 없는 녹음은 원칙적으로 위법(단, 당사자간 통화는 허용)',
+    guidance: '교사 본인 보호를 위해 녹음 사전 고지 가능. 상대 녹음 여부 확인 필요 시 고지'
+  },
+  '악성_민원_종결': {
+    rule: '「민원 처리에 관한 법률」제23조 — 반복·악성 민원은 종결 처리 가능',
+    guidance: '동일 내용 3회 이상 반복 시 관리자 위임 후 공문으로 종결 처리 안내'
+  },
+  '진료_강요_금지': {
+    rule: '교사는 특정 의료기관 진료를 강제하거나 진단명을 단정할 수 없음',
+    guidance: '전문가 연계는 권유 수준으로. "이런 기관이 있습니다" 안내 방식'
+  }
+};
+
+var DEESCALATION_SEQUENCE = [
+  '1. 감정 수용 — "많이 걱정되셨겠어요 / 속상하셨겠어요" (판단 없이 감정만 반영)',
+  '2. 속도 조절 — 말을 끊지 않고 끝까지 들은 뒤, 천천히 낮은 톤으로 응답',
+  '3. 경계 설정 — "제가 도울 수 있는 부분과 그렇지 않은 부분을 말씀드릴게요"',
+  '4. 위임·보류 — "이 부분은 교감(교장) 선생님께 함께 말씀 나누시는 게 좋겠습니다"',
+  '5. 정중 종결 — "오늘은 여기서 마무리하고, 공식 채널로 접수해 주시면 절차에 따라 안내드리겠습니다"'
 ];
 
 // 교사 이름 / 학교 정보 (온보딩에서 입력, localStorage 영속)
@@ -6914,7 +7056,7 @@ function loadSettings(){
 function resetReplyFlow(){
   replyState = {
     step: 1, message:'', studentNum:null, type:null, typeRisk:'normal',
-    etcDetail:'', highConfirmed:false, contextIds:[], promptAnon:'', promptReal:'', aiResponse:'', restored:''
+    etcDetail:'', highConfirmed:false, contextIds:[], teacherNotes:'', promptAnon:'', promptReal:'', aiResponse:'', restored:''
   };
 }
 
@@ -6996,11 +7138,20 @@ function renderReplyFlow(){
     container.appendChild(buildStep4Summary());
   }
 
-  // STEP 5 (프롬프트)
+  // STEP 5 (교사 의견)
   if(replyState.step < 5){
-    container.appendChild(buildStepLocked(5, '프롬프트 & 답장'));
-  } else {
+    container.appendChild(buildStepLocked(5, '교사 의견'));
+  } else if(replyState.step === 5){
     container.appendChild(buildStep5Active());
+  } else {
+    container.appendChild(buildStep5Summary());
+  }
+
+  // STEP 6 (프롬프트)
+  if(replyState.step < 6){
+    container.appendChild(buildStepLocked(6, '프롬프트 & 답장'));
+  } else {
+    container.appendChild(buildStep6Active());
   }
 }
 
@@ -7299,7 +7450,7 @@ function buildStep4Active(){
         '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;padding:6px 0;">메시지와 상황 유형만으로 답장 가이드를 생성합니다. 학생 정보는 익명 토큰으로도 노출되지 않습니다.</div>'+
         '<div class="step-actions">'+
           '<span class="field-hint">기록 없이 진행됩니다</span>'+
-          '<button class="btn-primary" onclick="replyState.contextIds=[]; replyState.step=5; renderReplyFlow();">프롬프트 만들기 →</button>'+
+          '<button class="btn-primary" onclick="replyState.contextIds=[]; replyState.step=5; renderReplyFlow();">다음 →</button>'+
         '</div>'+
       '</div>';
     return card;
@@ -7339,7 +7490,7 @@ function buildStep4Active(){
       '<div class="context-list">'+listHtml+'</div>'+
       '<div class="step-actions">'+
         '<span class="field-hint" id="context-count-hint">선택: '+replyState.contextIds.length+' / '+recs.length+'</span>'+
-        '<button class="btn-primary" onclick="replyState.step=5; renderReplyFlow();">프롬프트 만들기 →</button>'+
+        '<button class="btn-primary" onclick="replyState.step=5; renderReplyFlow();">다음 →</button>'+
       '</div>'+
     '</div>';
 
@@ -7382,8 +7533,64 @@ function buildStep4Summary(){
   return card;
 }
 
-/* STEP 5 — 익명화 프롬프트 생성 */
+/* STEP 5 — 교사 의견 */
 function buildStep5Active(){
+  var card = document.createElement('div');
+  card.className = 'step-card active';
+
+  var riskBadge = '';
+  if(replyState.typeRisk === 'high'){
+    riskBadge = '<span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--risk-high-bg,#fff1f0);color:var(--risk-high,#d4380d);">고위험 — 의견은 프롬프트에만 참고, 익명화 처리됨</span>';
+  }
+
+  card.innerHTML =
+    '<div class="step-active-body">'+
+      '<div class="step-head"><div class="step-num">5</div><div>'+
+        '<div class="step-title">이 상황에 대한 교사 의견'+riskBadge+'</div>'+
+        '<div class="step-sub">학부모 메시지를 보고 든 교사의 생각, 배경 정보, 주의사항 등 — AI에게 더 넓은 맥락을 전달해요</div>'+
+      '</div></div>'+
+      '<textarea id="reply-teacher-notes" class="textarea-large" '+
+        'placeholder="예) 이 학생은 평소 교우관계가 원만한 편입니다. 학부모가 성적에 민감하게 반응하시는 편이라 차분하고 사실 중심의 톤이 중요합니다. 수행평가 점수는 기준표에 따라 정당하게 부여됐습니다.">'+escapeHtml(replyState.teacherNotes||'')+'</textarea>'+
+      '<div class="field-meta-row">'+
+        '<span class="field-hint">선택 입력 · 비워두면 교사 의견 없이 진행됩니다</span>'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button class="btn-secondary" onclick="replyState.teacherNotes=\'\'; replyState.step=6; renderReplyFlow();">건너뛰기</button>'+
+          '<button class="btn-primary" id="reply-notes-next">프롬프트 만들기 →</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  setTimeout(function(){
+    var ta = card.querySelector('#reply-teacher-notes');
+    var btn = card.querySelector('#reply-notes-next');
+    btn.onclick = function(){
+      replyState.teacherNotes = ta.value.trim();
+      replyState.step = 6;
+      renderReplyFlow();
+    };
+  }, 0);
+
+  return card;
+}
+
+function buildStep5Summary(){
+  var card = document.createElement('div');
+  card.className = 'step-card';
+  var label = replyState.teacherNotes
+    ? (replyState.teacherNotes.length > 30 ? replyState.teacherNotes.substring(0,30)+'…' : replyState.teacherNotes)
+    : '(의견 없음)';
+  card.innerHTML = summaryHTML('교사 의견', label);
+  setTimeout(function(){
+    card.querySelector('.step-summary').onclick = function(){
+      replyState.step = 5;
+      renderReplyFlow();
+    };
+  }, 0);
+  return card;
+}
+
+/* STEP 6 — 익명화 프롬프트 생성 */
+function buildStep6Active(){
   // 프롬프트 생성
   generateReplyPrompt();
 
@@ -7391,7 +7598,7 @@ function buildStep5Active(){
   card.className = 'step-card active';
   card.innerHTML =
     '<div class="step-active-body">'+
-      '<div class="step-head"><div class="step-num">5</div><div>'+
+      '<div class="step-head"><div class="step-num">6</div><div>'+
         '<div class="step-title">프롬프트를 복사해 AI에 붙여넣으세요</div>'+
         '<div class="step-sub">학생 정보가 익명 토큰으로 치환됐어요 · ChatGPT·Claude·Gemini 어디든 사용 가능</div>'+
       '</div></div>'+
@@ -7603,17 +7810,77 @@ function generateReplyPrompt(){
     });
   }
 
+  // 교사 의견
+  if(replyState.teacherNotes && replyState.teacherNotes.trim()){
+    lines.push('');
+    lines.push('[담임교사 의견 — 이 상황에 대한 교사의 해석·맥락·주의사항]');
+    lines.push(replyState.teacherNotes.trim());
+    lines.push('※ 위 교사 의견을 바탕으로 답장의 톤과 내용을 조정해줘. 의견 자체를 학부모에게 그대로 전달하지는 말 것.');
+  }
+
+  // 지식베이스 기반 작성 지침 주입
+  var typeId = replyState.type || 'general';
+  var kb = CONSULT_KNOWLEDGE[typeId] || CONSULT_KNOWLEDGE['general'];
+
+  lines.push('');
+  lines.push('[사안 유형 분석]');
+  lines.push('· 유형: ' + (replyState.type ? ({general:'일반 문의',concern:'우려·호소',complaint:'민원·항의',bullying:'학교폭력',authority:'교권 침해',etc:'기타'})[replyState.type] || replyState.type : '일반 문의'));
+  lines.push('· 위험도: ' + kb.riskLevel + '/5');
+  lines.push('· 핵심 원칙: ' + kb.keyPrinciple);
+
   lines.push('');
   lines.push('[작성 지침]');
-  lines.push('· 정중하고 따뜻한 톤');
-  if(replyState.typeRisk === 'high'){
-    lines.push('· 학교폭력·교권 침해 사안: 구체적 조치 약속 금지');
-    lines.push('· 절차 안내와 직접 면담 제안 위주');
-  } else {
-    lines.push('· 학생의 긍정적 모습을 구체적 사실로 언급');
-    lines.push('· 학부모의 우려에 공감하되 단정하지 않기');
-    lines.push('· 필요 시 추가 상담·통화 제안');
+  lines.push('· 정중하고 따뜻한 톤, 한국 교사가 실제 쓰는 자연스러운 문체');
+  lines.push('· 답장 서두: 공감 표현으로 시작 — "' + kb.expressions.empathy + '"');
+  if(kb.expressions.opening){
+    lines.push('· 도입 예시: ' + kb.expressions.opening);
   }
+
+  if(kb.riskLevel >= 4){
+    lines.push('· ⚠ 고위험 사안 — 아래 절대 금지 사항 엄수');
+    lines.push('  - 구체적 조치 약속·결론 단정 절대 금지');
+    lines.push('  - 절차 안내와 면담 제안 위주로 작성');
+    if(typeId === 'bullying' && kb.expressions.procedure){
+      lines.push('  - 절차 안내 예시: "' + kb.expressions.procedure + '"');
+    }
+    if(typeId === 'authority' && kb.expressions.escalate){
+      lines.push('  - 관리자 위임 예시: "' + kb.expressions.escalate + '"');
+    }
+  } else if(kb.riskLevel >= 2){
+    lines.push('· 중위험 사안 — 공감 우선, 사실 기반 전달');
+    lines.push('  - 학생의 긍정적 모습을 구체적 사실로 먼저 언급');
+    lines.push('  - 학부모의 우려에 공감하되 단정하지 않기');
+    if(kb.expressions.boundary){
+      lines.push('  - 경계 설정: "' + kb.expressions.boundary + '"');
+    }
+    lines.push('  - 필요 시 추가 상담·통화 제안');
+  } else {
+    lines.push('· 일반 사안 — 강점 언급 → 사실 전달 → 후속 약속');
+    lines.push('  - 학생의 긍정적 모습을 구체적 사실로 먼저 언급');
+    lines.push('  - 학부모의 우려에 공감하되 단정하지 않기');
+    lines.push('  - 필요 시 추가 상담·통화 제안');
+  }
+
+  if(kb.expressions.closing){
+    lines.push('· 마무리 예시: "' + kb.expressions.closing + '"');
+  }
+
+  lines.push('');
+  lines.push('[절대 금지 표현]');
+  kb.forbidden.forEach(function(f){ lines.push('· ' + f); });
+
+  if(kb.legalRules.length > 0){
+    lines.push('');
+    lines.push('[관련 법률 유의사항]');
+    kb.legalRules.forEach(function(ruleKey){
+      var rule = LEGAL_RULES[ruleKey];
+      if(rule){
+        lines.push('· ' + rule.rule);
+        lines.push('  → ' + rule.guidance);
+      }
+    });
+  }
+
   lines.push('');
   lines.push('[학생 호칭 사용 규칙 — 매우 중요]');
   lines.push('학생을 지칭할 때 아래 토큰을 사용해줘. 한국어 조사 규칙에 맞게 골라 쓰면 자연스러운 답장이 돼.');
@@ -7756,9 +8023,16 @@ function renderPrepFlow(){
   }
 
   if(prepState.step >= 5){
-    container.appendChild(buildPrepStep5Active());
+    if(prepState.step === 5) container.appendChild(buildPrepStep5Active());
+    else container.appendChild(buildPrepStep5Summary());
   } else if(prepState.step < 5){
-    container.appendChild(buildStepLocked(5, '스크립트 + 통화 메모'));
+    container.appendChild(buildStepLocked(5, '교사 의견'));
+  }
+
+  if(prepState.step >= 6){
+    container.appendChild(buildPrepStep6Active());
+  } else if(prepState.step < 6){
+    container.appendChild(buildStepLocked(6, '스크립트 + 통화 메모'));
   }
 }
 
@@ -8070,14 +8344,12 @@ function buildPrepStep4Active(){
           '<div class="step-sub">학교폭력·교권 침해 유형은 학생 기록을 스크립트에 포함하지 않아요</div>'+
         '</div></div>'+
         '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;padding:6px 0 14px;">상황 유형과 목적만으로 통화 스크립트를 생성합니다. 학생 정보는 익명 토큰으로도 노출되지 않습니다.</div>'+
-        buildTeacherNotesHTML()+
         '<div class="step-actions">'+
           '<button class="btn-secondary" id="prep-back-4">← 이전</button>'+
-          '<button class="btn-primary" id="prep-next-4">스크립트 만들기 →</button>'+
+          '<button class="btn-primary" id="prep-next-4">다음 →</button>'+
         '</div>'+
       '</div>';
     setTimeout(function(){
-      attachTeacherNotesHandler();
       document.getElementById('prep-back-4').onclick = function(){ prepState.step = 3; renderPrepFlow(); };
       document.getElementById('prep-next-4').onclick = function(){ prepState.contextIds=[]; prepState.step=5; renderPrepFlow(); };
     },0);
@@ -8114,11 +8386,10 @@ function buildPrepStep4Active(){
         '<div class="step-sub">최근 60일 기록 · 익명화돼서 AI에 전달돼요</div>'+
       '</div></div>'+
       '<div class="context-list">'+listHtml+'</div>'+
-      buildTeacherNotesHTML()+
       '<div class="step-actions">'+
         '<button class="btn-secondary" id="prep-back-4">← 이전</button>'+
         '<span class="field-hint" id="prep-context-count">선택: '+prepState.contextIds.length+' / '+recs.length+'</span>'+
-        '<button class="btn-primary" id="prep-next-4">스크립트 만들기 →</button>'+
+        '<button class="btn-primary" id="prep-next-4">다음 →</button>'+
       '</div>'+
     '</div>';
   setTimeout(function(){
@@ -8133,7 +8404,6 @@ function buildPrepStep4Active(){
     });
     document.getElementById('prep-back-4').onclick = function(){ prepState.step = 3; renderPrepFlow(); };
     document.getElementById('prep-next-4').onclick = function(){ prepState.step = 5; renderPrepFlow(); };
-    attachTeacherNotesHandler();
   },0);
   return card;
 }
@@ -8168,8 +8438,66 @@ function buildPrepStep4Summary(){
   return card;
 }
 
-/* STEP 5 — 통화 스크립트 생성 + 통화 메모 + 저장 */
+/* STEP 5 — 교사 의견 */
 function buildPrepStep5Active(){
+  var card = document.createElement('div');
+  card.className = 'step-card active';
+
+  var riskBadge = '';
+  if(prepState.typeRisk === 'high'){
+    riskBadge = '<span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--risk-high-bg,#fff1f0);color:var(--risk-high,#d4380d);">고위험 — 의견은 스크립트에만 참고, 익명화 처리됨</span>';
+  }
+
+  card.innerHTML =
+    '<div class="step-active-body">'+
+      '<div class="step-head"><div class="step-num">5</div><div>'+
+        '<div class="step-title">이 상황에 대한 교사 의견'+riskBadge+'</div>'+
+        '<div class="step-sub">통화 전 교사가 파악하고 있는 맥락, 주의사항, 전달하고 싶은 내용 — AI가 스크립트 톤과 내용을 조정해요</div>'+
+      '</div></div>'+
+      '<textarea id="prep-teacher-notes" class="textarea-large" '+
+        'placeholder="예) 어머님이 학원 일정을 너무 많이 잡으셔서 학생이 지쳐 보임. 가정에서의 휴식 시간 확보를 부탁드리고 싶음. 학부모와 통화가 잘 안 되는 편이라 메시지 위주로 소통해 왔음.">'+escapeHtml(prepState.teacherNotes||'')+'</textarea>'+
+      '<div class="field-meta-row">'+
+        '<span class="field-hint">선택 입력 · 비워두면 교사 의견 없이 진행됩니다</span>'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button class="btn-secondary" id="prep-notes-skip">건너뛰기</button>'+
+          '<button class="btn-primary" id="prep-notes-next">스크립트 만들기 →</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  setTimeout(function(){
+    var ta = document.getElementById('prep-teacher-notes');
+    ta.oninput = function(){ prepState.teacherNotes = ta.value; };
+    document.getElementById('prep-notes-skip').onclick = function(){
+      prepState.teacherNotes = '';
+      prepState.step = 6;
+      renderPrepFlow();
+    };
+    document.getElementById('prep-notes-next').onclick = function(){
+      prepState.teacherNotes = ta.value.trim();
+      prepState.step = 6;
+      renderPrepFlow();
+    };
+  }, 0);
+
+  return card;
+}
+
+function buildPrepStep5Summary(){
+  var card = document.createElement('div');
+  card.className = 'step-card';
+  var label = prepState.teacherNotes
+    ? (prepState.teacherNotes.length > 30 ? prepState.teacherNotes.substring(0,30)+'…' : prepState.teacherNotes)
+    : '(의견 없음)';
+  card.innerHTML = summaryHTML('교사 의견', label);
+  setTimeout(function(){
+    card.querySelector('.step-summary').onclick = function(){ prepState.step = 5; renderPrepFlow(); };
+  }, 0);
+  return card;
+}
+
+/* STEP 6 — 통화 스크립트 생성 + 통화 메모 + 저장 */
+function buildPrepStep6Active(){
   generatePrepPrompt();
 
   var s = students.find(function(x){return x.num === prepState.studentNum;});
@@ -8500,32 +8828,53 @@ function generatePrepPrompt(){
     lines.push(prepState.teacherNotes.trim());
   }
 
+  // 지식베이스 기반 통화 준비 지침 주입
+  var prepTypeId = prepState.type || 'general';
+  var prepKb = CONSULT_KNOWLEDGE[prepTypeId] || CONSULT_KNOWLEDGE['general'];
+  var parentHon = '어머님(아버님)';
+  if(s.parentRelation){
+    parentHon = ({모:'어머님', 부:'아버님', 조모:'할머님', 조부:'할아버님', 보호자:'보호자님'})[s.parentRelation] || '보호자님';
+  }
+
+  lines.push('');
+  lines.push('[사안 유형 분석]');
+  var prepTypeLabel = ({general:'일반 문의',concern:'우려·호소',complaint:'민원·항의',bullying:'학교폭력',authority:'교권 침해',attendance:'출결 관련',academic:'학습 관련',etc:'기타'})[prepTypeId] || prepTypeId;
+  lines.push('· 유형: ' + prepTypeLabel);
+  lines.push('· 위험도: ' + prepKb.riskLevel + '/5');
+  lines.push('· 핵심 원칙: ' + prepKb.keyPrinciple);
+
   lines.push('');
   lines.push('[작성 지침]');
   lines.push('아래 4개 섹션으로 구성해서 작성해줘.');
   lines.push('');
   lines.push('1. 시작 멘트 (1~2문장)');
   lines.push('   - 교사 신원·학생 신원 확인·통화 가능 여부 확인');
-  if(s.parentRelation){
-    var hon2 = ({모:'어머님', 부:'아버님', 조모:'할머님', 조부:'할아버님', 보호자:'보호자님'})[s.parentRelation] || '보호자님';
-    lines.push('   - 학부모는 "'+hon2+'" 호칭을 사용 (위 [학부모 호칭] 참고)');
-  } else {
-    lines.push('   - 학부모 호칭은 "어머님" 또는 "아버님" (관계 정보 없음 — 통화 중 확인)');
-  }
+  lines.push('   - 학부모 호칭: "' + parentHon + '"' + (s.parentRelation ? ' (위 [학부모 호칭] 참고)' : ' (관계 정보 없음 — 통화 중 확인)'));
   if(prepState.direction === 'outbound'){
     lines.push('   - "갑작스레 연락드려 죄송하지만…" 같은 정중한 도입');
   } else {
     lines.push('   - "연락 주셔서 감사합니다. 시간을 내주셔서…" 같은 환영 도입');
   }
+  lines.push('   - 공감 도입 예시: "' + prepKb.expressions.empathy + '"');
   lines.push('');
   lines.push('2. 본론 — 짚을 핵심 포인트 (3~5개)');
-  if(prepState.typeRisk === 'high'){
-    lines.push('   - 학교폭력·교권 침해 관련: 구체적 단정·약속 금지');
+  if(prepKb.riskLevel >= 4){
+    lines.push('   ⚠ 고위험 사안 — 아래 지침 엄수:');
+    lines.push('   - 구체적 단정·약속 절대 금지');
     lines.push('   - 학교 절차·신고 의무·조사 일정 안내 위주');
+    if(prepKb.expressions.procedure){
+      lines.push('   - 절차 안내 예시: "' + prepKb.expressions.procedure + '"');
+    }
     lines.push('   - 직접 면담 일정 잡기 제안');
-  } else if(prepState.typeRisk === 'caution'){
-    lines.push('   - 학부모 항의·우려에 먼저 공감하고 차분히 청취');
+    if(prepKb.expressions.escalate){
+      lines.push('   - 관리자 위임 예시: "' + prepKb.expressions.escalate + '"');
+    }
+  } else if(prepKb.riskLevel >= 2){
+    lines.push('   - 학부모 ' + (prepKb.riskLevel >= 3 ? '항의·우려' : '우려') + '에 먼저 공감하고 차분히 청취');
     lines.push('   - 학교 입장과 사실관계는 명확히 전달하되 비방·단정 금지');
+    if(prepKb.expressions.boundary){
+      lines.push('   - 경계 설정 예시: "' + prepKb.expressions.boundary + '"');
+    }
     lines.push('   - 학부모의 구체적 요구 사항을 한 번 더 정리해서 확인');
   } else {
     lines.push('   - 학생의 강점·긍정적 모습을 구체적 사실로 먼저 언급');
@@ -8533,12 +8882,33 @@ function generatePrepPrompt(){
     lines.push('   - 가정의 의견·정보 청취 (학생이 집에서는 어떤지)');
   }
   lines.push('');
-  lines.push('3. 학부모 반응별 분기 멘트');
-  lines.push('   - 수용적 반응일 때 / 방어적 반응일 때 / 격앙된 반응일 때 각각 한두 문장씩');
+  lines.push('3. 학부모 반응별 분기 멘트 — 드-에스컬레이션 순서 참고:');
+  DEESCALATION_SEQUENCE.forEach(function(step){ lines.push('   ' + step); });
+  lines.push('   ※ 위 단계를 상황에 맞게 선택해서 한두 문장씩 스크립트로 만들어줘.');
   lines.push('');
   lines.push('4. 마무리 멘트 (1~2문장)');
+  if(prepKb.expressions.closing){
+    lines.push('   - 마무리 예시: "' + prepKb.expressions.closing + '"');
+  }
   lines.push('   - 합의된 다음 액션 재확인 (예: 1주 뒤 follow-up)');
   lines.push('   - 감사 표현·학교-가정 협력 강조');
+
+  lines.push('');
+  lines.push('[절대 금지 표현]');
+  prepKb.forbidden.forEach(function(f){ lines.push('· ' + f); });
+
+  if(prepKb.legalRules.length > 0){
+    lines.push('');
+    lines.push('[관련 법률 유의사항]');
+    prepKb.legalRules.forEach(function(ruleKey){
+      var rule = LEGAL_RULES[ruleKey];
+      if(rule){
+        lines.push('· ' + rule.rule);
+        lines.push('  → ' + rule.guidance);
+      }
+    });
+  }
+
   lines.push('');
   lines.push('[톤·형식]');
   lines.push('· 정중하고 따뜻하게, 그러나 명확하게');
