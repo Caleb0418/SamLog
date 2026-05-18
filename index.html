@@ -3939,6 +3939,20 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
 
       <div class="memo-modal-body">
+        <!-- 샘플 데이터 체험 배너 (처음 사용자용) -->
+        <div id="sample-data-banner" style="margin-bottom:18px;padding:12px 14px;background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0;flex:1;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--bg-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">처음이세요? 샘플로 체험해보세요</div>
+              <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;">담임반(3학년 2반) 1주일 시간표 + 담당 수업 5건이 자동 등록돼요</div>
+            </div>
+          </div>
+          <button class="btn-small primary" onclick="loadSampleClassData()" style="flex-shrink:0;">샘플 적용</button>
+        </div>
+
         <!-- ① NEIS 시간표 업로드 -->
         <div class="class-master-title" style="margin-bottom:8px;">시간표 연동</div>
         <div class="class-master-sub" style="margin-bottom:10px;">NEIS 포털 → 학교생활 → 시간표 → 엑셀 다운로드 후 업로드하면 담당 수업 요일·교시가 자동으로 채워져요</div>
@@ -13904,6 +13918,90 @@ function addClassMaster(){
   if(document.getElementById('tab-home').style.display === 'block') renderHome();
 }
 
+/* ═══════════════════════════════════════════
+   샘플 데이터 일괄 적용 (체험용)
+   - 담임반(없으면 3학년 2반 자동 생성)에 1주일치 시간표 채움
+   - 담당 수업 5건(국어/수학/영어/과학/사회) 자동 등록
+═══════════════════════════════════════════ */
+function loadSampleClassData(){
+  if(!confirm('샘플 시간표와 담당 수업 5건을 추가할까요?\n\n• 담임반 1주일 시간표 (월~금, 1~6교시)\n• 담당 수업: 국어 / 수학 / 영어 / 과학 / 사회\n\n나중에 각각 삭제할 수 있어요.')) return;
+
+  // 1. 담임반 찾기, 없으면 3학년 2반을 자동 생성
+  var primaryKey = Object.keys(classes).find(function(k){return classes[k].isPrimary;});
+  if(!primaryKey){
+    primaryKey = getClassKey(3, 2);
+    if(classes[primaryKey]){
+      // 이미 3-2가 있지만 담임반이 아니면 담임으로 승격
+      classes[primaryKey].isPrimary = true;
+    } else {
+      classes[primaryKey] = {
+        grade: 3, classNum: 2, isPrimary: true,
+        students: [], records: {}
+      };
+    }
+    currentClassKey = primaryKey;
+    syncActiveClass();
+  }
+  var primary = classes[primaryKey];
+  var g = primary.grade;
+  var c = primary.classNum;
+
+  // 2. 시간표 채우기 (요일: 1=월~5=금, 교시 1~6)
+  var schedule = [
+    // 1교시   2교시   3교시   4교시   5교시   6교시
+    ['국어','수학','영어','과학','사회','창체'],  // 월
+    ['수학','국어','과학','영어','음악','체육'],  // 화
+    ['영어','과학','국어','수학','체육','미술'],  // 수
+    ['과학','영어','사회','국어','미술','음악'],  // 목
+    ['사회','음악','체육','미술','창체','국어']   // 금
+  ];
+  for(var d=1; d<=5; d++){
+    for(var p=1; p<=6; p++){
+      schoolTimetable[g+'-'+c+'-'+d+'-'+p] = schedule[d-1][p-1];
+    }
+  }
+  if(!ttSyncState) ttSyncState = {};
+  ttSyncState.synced = true;
+  ttSyncState.lastSync = new Date().toISOString();
+  ttSyncState.totalRows = (ttSyncState.totalRows || 0) + 30;
+
+  // 3. 담당 수업 등록 (주요 5과목)
+  var subjects = ['국어','수학','영어','과학','사회'];
+  var added = 0;
+  subjects.forEach(function(subject){
+    var dup = classMaster.find(function(cm){
+      return String(cm.grade)===String(g) && String(cm.cls)===String(c) && cm.subject===subject;
+    });
+    if(dup) return;
+    var slots = findSlotsFromTimetable(String(g), String(c), subject);
+    classMaster.push({
+      id: 'cm'+Date.now()+'_'+subject+'_'+Math.random().toString(36).slice(2,6),
+      grade: String(g), cls: String(c), subject: subject,
+      slots: slots, memos: []
+    });
+    added++;
+  });
+
+  saveAll();
+
+  // UI 갱신
+  if(typeof renderClassMasterList === 'function') renderClassMasterList();
+  if(typeof updateTimetableBanner === 'function') updateTimetableBanner();
+  if(typeof renderClassTab === 'function') renderClassTab();
+  if(document.getElementById('tab-home') && document.getElementById('tab-home').style.display === 'block'){
+    renderHome();
+  }
+  // 사이드바 갱신 (담임반이 새로 생긴 경우)
+  if(typeof renderClassDropdown === 'function') renderClassDropdown();
+  if(typeof updateHeaderClass === 'function') updateHeaderClass();
+
+  // 배너 숨김
+  var banner = document.getElementById('sample-data-banner');
+  if(banner) banner.style.display = 'none';
+
+  showToast('샘플 데이터 적용됨! 모달을 닫고 \'오늘 수업\'에서 확인해보세요.');
+}
+
 function deleteClassMaster(id){
   var entry = classMaster.find(function(c){return c.id === id;});
   if(!entry) return;
@@ -14623,6 +14721,13 @@ function saveClassMemo(){
 
 function openClassSettings(){
   document.getElementById('class-settings-modal').classList.add('show');
+  // 샘플 배너: 시간표 또는 담당 수업 데이터가 이미 있으면 숨김
+  var banner = document.getElementById('sample-data-banner');
+  if(banner){
+    var hasTimetable = ttSyncState && ttSyncState.synced;
+    var hasClassMaster = classMaster && classMaster.length > 0;
+    banner.style.display = (hasTimetable || hasClassMaster) ? 'none' : 'flex';
+  }
 }
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
