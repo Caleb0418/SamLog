@@ -2903,11 +2903,13 @@ body{
   border-color:var(--border-strong);
 }
 .week-nav-label{
-  display:inline-flex;align-items:center;gap:4px;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-width:138px;
   padding:6px 12px;font-size:13px;font-weight:600;color:var(--text);
   background:var(--bg-surface);border:1px solid var(--border);
   border-radius:7px;cursor:pointer;font-family:inherit;
   transition:all 0.12s;
+  font-variant-numeric:tabular-nums;
 }
 .week-nav-label:hover{
   background:var(--bg-elevated);border-color:var(--border-strong);
