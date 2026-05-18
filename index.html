@@ -993,6 +993,55 @@ body{
 .rec-followup-flag.done svg{fill:var(--success);}
 .rec-followup-flag.done:hover{background:var(--success-dim);opacity:1;}
 
+/* 처리 메모 — 깃발이 on 또는 done일 때만 카드 하단에 노출 */
+.rec-followup-note-wrap{margin-top:8px;}
+.rec-followup-note-add{
+  background:transparent;border:none;cursor:pointer;
+  font-size:11px;color:var(--text-tertiary);
+  padding:4px 0;
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:inherit;
+}
+.rec-followup-note-add:hover{color:var(--text-secondary);}
+.rec-followup-note{
+  padding:7px 10px 7px 12px;
+  background:var(--bg-surface);
+  border-left:2px solid var(--accent);
+  border-radius:0 4px 4px 0;
+  font-size:12px;color:var(--text-secondary);line-height:1.55;
+  cursor:pointer;
+  display:flex;align-items:flex-start;gap:6px;
+  white-space:pre-wrap;word-break:break-word;
+}
+.rec-followup-note:hover{background:var(--bg-elevated);}
+.rec-followup-note::before{
+  content:"↳";color:var(--accent);font-weight:600;flex-shrink:0;
+}
+.rec-followup-note-editor{
+  margin-top:8px;display:flex;gap:6px;align-items:stretch;
+}
+.rec-followup-note-input{
+  flex:1;padding:7px 10px;font-size:12px;
+  background:var(--bg-surface);
+  border:1px solid var(--border-accent, var(--border));
+  border-radius:6px;color:var(--text);font-family:inherit;
+  resize:vertical;min-height:32px;max-height:120px;line-height:1.5;
+}
+.rec-followup-note-input:focus{outline:none;border-color:var(--accent);}
+.rec-followup-note-save{
+  padding:0 12px;font-size:11px;font-weight:600;
+  background:var(--accent);color:#fff;
+  border:none;border-radius:6px;cursor:pointer;font-family:inherit;
+}
+.rec-followup-note-save:hover{background:var(--accent-hover,var(--accent));}
+.rec-followup-note-cancel{
+  padding:0 10px;font-size:11px;
+  background:transparent;color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:6px;
+  cursor:pointer;font-family:inherit;
+}
+.rec-followup-note-cancel:hover{background:var(--bg-elevated);}
+
 /* 인라인 편집 폼 */
 .rec-edit-form{
   margin-top:8px;padding:12px;
@@ -6673,6 +6722,20 @@ function renderTimeline(){
         r.tags.forEach(function(t){ html += '<span class="rec-tag">'+escapeHtml(t)+'</span>'; });
         html += '</div>';
       }
+
+      // 처리 메모 — 깃발이 on 또는 done 상태일 때만 노출
+      if(r.needsFollowUp){
+        html += '<div class="rec-followup-note-wrap" id="followup-wrap-'+r.id+'">';
+        if(r.followUpNote && r.followUpNote.trim()){
+          html += '<div class="rec-followup-note" onclick="editFollowUpNote(\''+r.id+'\')" title="클릭해서 수정">'+
+                  escapeHtml(r.followUpNote)+'</div>';
+        } else {
+          html += '<button class="rec-followup-note-add" onclick="editFollowUpNote(\''+r.id+'\')">'+
+                  '+ 어떻게 처리했는지 간단히 (선택)</button>';
+        }
+        html += '</div>';
+      }
+
       if(r.type === 'unsorted'){
         html += '<div class="rec-classify-row">';
         html += '<span class="rec-classify-label">분류하기:</span>';
@@ -7087,6 +7150,65 @@ function toggleFollowUp(recordId){
   // 홈 화면 알람도 갱신
   if(document.getElementById('tab-home').style.display === 'block') renderHome();
 }
+/* 처리 메모 편집 모드 열기 — 인라인 편집기 렌더링 */
+function editFollowUpNote(recordId){
+  if(!currentStudent) return;
+  var recs = records[currentStudent] || [];
+  var r = recs.find(function(x){return x.id === recordId;});
+  if(!r) return;
+  var wrap = document.getElementById('followup-wrap-'+recordId);
+  if(!wrap) return;
+  var current = r.followUpNote || '';
+  wrap.innerHTML =
+    '<div class="rec-followup-note-editor">'+
+      '<textarea class="rec-followup-note-input" id="followup-input-'+recordId+'" '+
+        'placeholder="예: 학부모께 전화드림, 다음 주 화 다시 확인" rows="1">'+escapeHtml(current)+'</textarea>'+
+      '<button class="rec-followup-note-save" onclick="saveFollowUpNote(\''+recordId+'\')">저장</button>'+
+      '<button class="rec-followup-note-cancel" onclick="cancelFollowUpNote(\''+recordId+'\')">취소</button>'+
+    '</div>';
+  var input = document.getElementById('followup-input-'+recordId);
+  if(!input) return;
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  var autoResize = function(){
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  };
+  input.addEventListener('input', autoResize);
+  autoResize();
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      saveFollowUpNote(recordId);
+    } else if(e.key === 'Escape'){
+      e.preventDefault();
+      cancelFollowUpNote(recordId);
+    }
+  });
+}
+
+/* 처리 메모 저장 */
+function saveFollowUpNote(recordId){
+  if(!currentStudent) return;
+  var recs = records[currentStudent] || [];
+  var r = recs.find(function(x){return x.id === recordId;});
+  if(!r) return;
+  var input = document.getElementById('followup-input-'+recordId);
+  if(!input) return;
+  var text = input.value.trim();
+  r.followUpNote = text;
+  r.followUpNoteUpdatedAt = text ? (new Date().toISOString()) : null;
+  saveAll();
+  selectStudent(currentStudent);
+  showToast(text ? '처리 메모 저장됨' : '처리 메모 비움');
+}
+
+/* 처리 메모 편집 취소 */
+function cancelFollowUpNote(recordId){
+  if(!currentStudent) return;
+  selectStudent(currentStudent);
+}
+
 function undoDelete(){
   if(!lastDeleted) return;
   var recs = records[lastDeleted.studentNum];
@@ -8265,7 +8387,11 @@ function generateReplyPrompt(){
     lines.push('[최근 학생 기록]');
     contextRecords.forEach(function(r){
       var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
-      lines.push('· '+r.date+' '+typeKor+': '+r.content);
+      var line = '· '+r.date+' '+typeKor+': '+r.content;
+      if(r.followUpNote && r.followUpNote.trim()){
+        line += ' [처리: '+r.followUpNote.replace(/\s+/g,' ').trim()+']';
+      }
+      lines.push(line);
     });
   }
 
@@ -9309,7 +9435,11 @@ function generatePrepPrompt(){
     lines.push('[최근 학생 기록]');
     contextRecords.forEach(function(r){
       var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
-      lines.push('· '+r.date+' '+typeKor+': '+r.content);
+      var line = '· '+r.date+' '+typeKor+': '+r.content;
+      if(r.followUpNote && r.followUpNote.trim()){
+        line += ' [처리: '+r.followUpNote.replace(/\s+/g,' ').trim()+']';
+      }
+      lines.push(line);
     });
   }
 
