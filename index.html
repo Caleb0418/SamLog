@@ -52,6 +52,27 @@
   --life-dim: #E5EEFA;
   --life-border: #B0C8E5;
 
+  /* 메모 유형 전용 색상 — 5개가 색상환에서 충분히 떨어지도록 분리 */
+  --memo-observation: #3B82F6;        /* 관찰 — 파랑 */
+  --memo-observation-dim: #E8F1FE;
+  --memo-observation-border: #B8D4F8;
+
+  --memo-consultation: #1B7F4F;       /* 상담 — 녹색 (success와 동일) */
+  --memo-consultation-dim: #E8F5EE;
+  --memo-consultation-border: #A7D9BE;
+
+  --memo-life: #D97706;               /* 생활 — 호박색 */
+  --memo-life-dim: #FEF3E2;
+  --memo-life-border: #F8D49A;
+
+  --memo-parent: #7A4FB8;             /* 학부모 — 보라 */
+  --memo-parent-dim: #F2EDFA;
+  --memo-parent-border: #D4C2EB;
+
+  --memo-unsorted: #C03A2B;           /* 미분류 — 빨강 (danger와 동일) */
+  --memo-unsorted-dim: #FDECEA;
+  --memo-unsorted-border: #F5B9B3;
+
   /* 모서리 */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -90,6 +111,27 @@
   --life: #6BA0F0;
   --life-dim: #0E1A2A;
   --life-border: #2A4A75;
+
+  /* 메모 유형 전용 색상 — 다크 모드 */
+  --memo-observation: #60A5FA;
+  --memo-observation-dim: #0F1F33;
+  --memo-observation-border: #1E3A5C;
+
+  --memo-consultation: #2AAD6A;
+  --memo-consultation-dim: #0F2A1E;
+  --memo-consultation-border: #1B5C3A;
+
+  --memo-life: #F59E0B;
+  --memo-life-dim: #2A1E0A;
+  --memo-life-border: #5C3D0A;
+
+  --memo-parent: #A985E0;
+  --memo-parent-dim: #1F1530;
+  --memo-parent-border: #3D2A5C;
+
+  --memo-unsorted: #E05B4A;
+  --memo-unsorted-dim: #2A1412;
+  --memo-unsorted-border: #6B2820;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -858,7 +900,7 @@ body{
   margin-bottom: 8px;
 }
 /* 유형별 색상은 카드 내부 도트로만 표현 */
-.rec-card.unsorted{background:var(--danger-dim);border-color:var(--danger-border);}
+.rec-card.unsorted{background:var(--memo-unsorted-dim);border-color:var(--memo-unsorted-border);}
 
 /* 확인 필요 깃발 강조 — 옅은 빨간 배경 유지 */
 .rec-card.has-followup{
@@ -877,12 +919,12 @@ body{
 }
 /* 카드 내부 도트 + 유형명 */
 .rec-type{display:flex;align-items:center;gap:7px;}
-.rec-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
-.dot-observation{background:var(--accent);}
-.dot-consultation{background:var(--success);}
-.dot-life{background:var(--life);}
-.dot-parent{background:var(--warning);}
-.dot-unsorted{background:var(--danger);}
+.rec-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.dot-observation{background:var(--memo-observation);}
+.dot-consultation{background:var(--memo-consultation);}
+.dot-life{background:var(--memo-life);}
+.dot-parent{background:var(--memo-parent);}
+.dot-unsorted{background:var(--memo-unsorted);}
 .rec-type-name{font-size:12px;font-weight:500;color:var(--text);}
 .rec-time{font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;}
 .rec-content{font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;word-break:break-word;}
@@ -1037,11 +1079,11 @@ body{
   cursor:pointer;font-family:inherit;transition:all 0.12s;
 }
 .rec-classify-btn:hover{border-color:var(--accent);color:var(--accent);}
-.rec-classify-btn .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
-.rec-classify-btn .dot.obs{background:var(--accent);}
-.rec-classify-btn .dot.cons{background:var(--success);}
-.rec-classify-btn .dot.life{background:var(--life);}
-.rec-classify-btn .dot.par{background:var(--warning);}
+.rec-classify-btn .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.rec-classify-btn .dot.obs{background:var(--memo-observation);}
+.rec-classify-btn .dot.cons{background:var(--memo-consultation);}
+.rec-classify-btn .dot.life{background:var(--memo-life);}
+.rec-classify-btn .dot.par{background:var(--memo-parent);}
 
 /* 토스트 */
 .toast{
@@ -2395,9 +2437,11 @@ body{
   font-size:10px;font-weight:600;letter-spacing:0.04em;
   padding:1px 6px;border-radius:6px;
 }
-.context-type-badge.observation{color:var(--accent);background:var(--accent-dim);}
-.context-type-badge.consultation{color:var(--success);background:var(--success-dim);}
-.context-type-badge.parent{color:var(--warning);background:var(--warning-dim);}
+.context-type-badge.observation{color:var(--memo-observation);background:var(--memo-observation-dim);}
+.context-type-badge.consultation{color:var(--memo-consultation);background:var(--memo-consultation-dim);}
+.context-type-badge.life{color:var(--memo-life);background:var(--memo-life-dim);}
+.context-type-badge.parent{color:var(--memo-parent);background:var(--memo-parent-dim);}
+.context-type-badge.unsorted{color:var(--memo-unsorted);background:var(--memo-unsorted-dim);}
 .context-date{font-size:11px;color:var(--text-tertiary);}
 .context-content{font-size:12px;color:var(--text-secondary);line-height:1.55;}
 
