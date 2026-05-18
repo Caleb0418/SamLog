@@ -4372,6 +4372,12 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </label>
       </div>
 
+      <!-- 중복 반 경고 (실시간) -->
+      <div id="ac-duplicate-warning" style="display:none;margin:8px 0 12px;padding:9px 12px;background:var(--danger-dim);border:1px solid var(--danger-border);border-radius:8px;font-size:12.5px;color:var(--danger);display:none;align-items:center;gap:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="ac-duplicate-warning-text">이미 등록된 반입니다</span>
+      </div>
+
       <!-- 학생 명단 -->
       <div class="ac-section">
         <label class="form-label" style="display:block;margin-bottom:6px;">학생 명단 (선택)</label>
@@ -10838,6 +10844,9 @@ function openAddClass(){
   // dedupe 슬롯 초기화
   var ds = document.getElementById('ac-dedupe-slot');
   if(ds){ ds.style.display = 'none'; ds.innerHTML = ''; }
+  // 중복 반 경고 초기화
+  var dw = document.getElementById('ac-duplicate-warning');
+  if(dw) dw.style.display = 'none';
 
   setTimeout(function(){ document.getElementById('ac-grade').focus(); }, 50);
 }
@@ -10847,7 +10856,28 @@ function closeAddClass(){
 function updateAddClassBtn(){
   var g = document.getElementById('ac-grade').value;
   var c = document.getElementById('ac-class').value;
-  document.getElementById('ac-save-btn').disabled = !(g && c);
+  var warn = document.getElementById('ac-duplicate-warning');
+  var warnText = document.getElementById('ac-duplicate-warning-text');
+
+  // 학년·반 모두 입력됐을 때 중복 검사
+  var isDuplicate = false;
+  if(g && c){
+    var key = getClassKey(parseInt(g), parseInt(c));
+    if(classes[key]){
+      isDuplicate = true;
+      var existing = classes[key];
+      var role = existing.isPrimary ? '담임반' : '교과 담당반';
+      if(warnText) warnText.textContent = g+'학년 '+c+'반은 이미 '+role+'으로 등록돼 있어요';
+    }
+  }
+
+  // 경고 표시 토글
+  if(warn){
+    warn.style.display = isDuplicate ? 'flex' : 'none';
+  }
+
+  // 저장 버튼: 학년·반 둘 다 있고, 중복 아닐 때만 활성화
+  document.getElementById('ac-save-btn').disabled = !(g && c) || isDuplicate;
 }
 function handleAddClassFile(file){
   if(typeof XLSX === 'undefined'){
