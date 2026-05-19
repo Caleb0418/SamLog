@@ -73,6 +73,8 @@
   --memo-unsorted-dim: #FDECEA;
   --memo-unsorted-border: #F5B9B3;
 
+  --memo-attendance: #f59e0b;         /* 출결 — 호박색 */
+
   /* 모서리 */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -132,6 +134,8 @@
   --memo-unsorted: #E05B4A;
   --memo-unsorted-dim: #2A1412;
   --memo-unsorted-border: #6B2820;
+
+  --memo-attendance: #fbbf24;         /* 출결 — 호박색 다크 */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -664,6 +668,35 @@ body{
 }
 .unsorted-banner-text{flex:1;font-size:13px;color:var(--text);}
 .unsorted-banner-text strong{color:var(--danger);font-weight:700;}
+.att-student-summary{
+  margin:0 0 10px 0;
+  padding:12px 14px;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.att-summary-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.att-summary-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;
+  background:var(--bg-secondary);color:var(--text-secondary);
+}
+.att-summary-chip.absent{background:rgba(239,68,68,.12);color:#ef4444;}
+.att-summary-chip.late{background:rgba(245,158,11,.12);color:#f59e0b;}
+.att-summary-chip.early-leave{background:rgba(168,85,247,.12);color:#a855f7;}
+.att-summary-chip.partial{background:rgba(59,130,246,.12);color:#3b82f6;}
+.att-summary-chip.makeup{background:rgba(34,197,94,.12);color:#22c55e;}
+.att-summary-goto{
+  font-size:11px;color:var(--accent);cursor:pointer;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;text-decoration:none;
+}
+.att-summary-goto:hover{text-decoration:underline;}
+.att-summary-label{font-size:11px;color:var(--text-tertiary);margin-right:2px;}
 
 /* 기록 영역 */
 .records-panel{
@@ -925,6 +958,7 @@ body{
 .dot-life{background:var(--memo-life);}
 .dot-parent{background:var(--memo-parent);}
 .dot-unsorted{background:var(--memo-unsorted);}
+.dot-attendance{background:var(--memo-attendance,#f59e0b);}
 .rec-type-name{font-size:12px;font-weight:500;color:var(--text);}
 .rec-time{font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;}
 .rec-content{font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;word-break:break-word;}
@@ -2151,6 +2185,33 @@ body{
 .att-modal-footer .btn-save{background:var(--accent);color:#fff;border:none;font-weight:500;}
 .att-modal-footer .btn-save:hover{background:var(--accent-hover,var(--accent));}
 .att-modal-footer .btn-save:disabled{opacity:0.4;cursor:not-allowed;}
+.att-notify-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1100;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.att-notify-modal{
+  background:var(--card-bg);border-radius:14px;padding:24px;
+  width:100%;max-width:480px;display:flex;flex-direction:column;gap:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.2);
+  max-height:90vh;overflow-y:auto;
+}
+.att-notify-header{display:flex;align-items:center;justify-content:space-between;}
+.att-notify-title{font-size:15px;font-weight:700;color:var(--text);}
+.att-notify-meta{font-size:12px;color:var(--text-tertiary);line-height:1.5;}
+.att-notify-textarea{
+  width:100%;border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;font-size:13px;line-height:1.7;color:var(--text);
+  background:var(--bg-secondary);resize:vertical;min-height:160px;
+  font-family:inherit;box-sizing:border-box;
+}
+.att-notify-footer{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+.att-notify-btn{
+  padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;display:flex;align-items:center;gap:6px;
+}
+.att-notify-btn.secondary{background:var(--bg-secondary);color:var(--text-secondary);}
+.att-notify-btn.primary{background:var(--accent);color:#fff;}
+.att-notify-btn:hover{opacity:.85;}
 
 .cr-memo-edit{
   margin-left:auto;
@@ -4641,6 +4702,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </div>
 
+        <!-- 출결 요약 카드 -->
+        <div class="att-student-summary" id="att-student-summary" style="display:none;"></div>
+
         <!-- 기록 영역 -->
         <div class="records-panel">
           <div class="record-bar">
@@ -4953,6 +5017,26 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
   </div>
 </div>
+
+      <!-- 출결 학부모 통지 모달 -->
+      <div class="att-notify-overlay" id="att-notify-overlay" style="display:none;">
+        <div class="att-notify-modal">
+          <div class="att-notify-header">
+            <span class="att-notify-title">학부모 통지 문구</span>
+            <button class="modal-close-btn" onclick="closeAttendanceNotify()">×</button>
+          </div>
+          <div class="att-notify-meta" id="att-notify-meta"></div>
+          <textarea class="att-notify-textarea" id="att-notify-textarea" rows="10" placeholder="통지 문구가 여기에 생성됩니다..."></textarea>
+          <div class="att-notify-footer">
+            <button class="att-notify-btn secondary" onclick="closeAttendanceNotify()">닫기</button>
+            <button class="att-notify-btn primary" onclick="copyNotifyToClipboard()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              복사
+            </button>
+            <button class="att-notify-btn primary" id="att-notify-mark-btn" onclick="markAttNotified()">통지 완료 표시</button>
+          </div>
+        </div>
+      </div>
 
 <!-- 분류 모달 -->
 <div class="modal-overlay" id="classify-modal" onclick="if(event.target===this)closeClassifyModal()">
@@ -6252,6 +6336,7 @@ var adhocSlots = [];
 //   reason: 'illness'|'unjustified'|'other'|'approved'
 //   periods: { '조회':true, '1':true, ... }  결시 교시만 true
 var attendanceRecords = {};
+var attendanceFilterStudent = '';
 
 // 출결 설정
 var attendanceSettings = {
@@ -7093,6 +7178,7 @@ function selectStudent(num){
 
   closeRecordForm();
   renderTimeline();
+  renderStudentAttendanceSummary(num);
   renderSidebar(document.getElementById('search-input').value);
 }
 
@@ -7191,8 +7277,8 @@ function renderTimeline(){
     html += '<div class="day-label">'+dayLabel(date)+'</div>';
     var dayRecs = groups[date];
     dayRecs.forEach(function(r, i){
-      var typeKor = ({unsorted:'미분류',observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || r.type;
-      var timeLabel = r.type === 'unsorted' ? '퀵메모 · '+(r.time||'') : (r.time||'');
+      var typeKor = ({unsorted:'미분류',observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || r.type;
+      var timeLabel = r.type === 'unsorted' ? '퀵메모 · '+(r.time||'') : r.type === 'attendance' ? (r.attSummary||'') : (r.time||'');
       var followClass = '';
       if(r.needsFollowUp && !r.followedUp) followClass = ' has-followup';
       else if(r.needsFollowUp && r.followedUp) followClass = ' followup-done';
@@ -8186,6 +8272,88 @@ function getAttendanceRecords(date, studentNum){
   if(!attendanceRecords[date][studentNum]) return [];
   return attendanceRecords[date][studentNum];
 }
+
+/* ─── 출결↔타임라인 연동 ─── */
+function formatAttendanceForTimeline(date, studentNum, rec){
+  var statusLabel = ({absent:'결석',late:'지각',early_leave:'조퇴',partial:'결과',makeup:'공결'})[rec.status] || rec.status;
+  var reasonLabel = getReasonLabel(rec.reason);
+  var summary = reasonLabel+'·'+statusLabel;
+  if(rec.status !== 'absent'){
+    var missed = getPeriodSlots().filter(function(s){ return rec.periods && rec.periods[s]; });
+    if(missed.length > 0) summary += ' ('+missed.join('·')+')';
+  }
+  return {
+    id: 'rec_att_'+rec.id,
+    type: 'attendance',
+    date: date,
+    time: '',
+    attSummary: summary,
+    attStatus: rec.status,
+    attReason: rec.reason,
+    attRecordId: rec.id,
+    content: '[출결] '+summary+(rec.memo ? ' — '+rec.memo : ''),
+    needsFollowUp: false,
+    followedUp: false,
+    createdAt: rec.createdAt
+  };
+}
+function syncAttendanceToTimeline(date, studentNum, rec){
+  if(!rec) return;
+  if(!records[studentNum]) records[studentNum] = [];
+  var recs = records[studentNum];
+  var timelineId = 'rec_att_'+rec.id;
+  var existing = recs.findIndex(function(r){ return r.id === timelineId; });
+  var entry = formatAttendanceForTimeline(date, studentNum, rec);
+  if(existing >= 0) recs[existing] = entry;
+  else recs.push(entry);
+}
+function removeAttendanceFromTimeline(studentNum, recordId){
+  if(!records[studentNum]) return;
+  var timelineId = 'rec_att_'+recordId;
+  var idx = records[studentNum].findIndex(function(r){ return r.id === timelineId; });
+  if(idx >= 0) records[studentNum].splice(idx, 1);
+}
+function renderStudentAttendanceSummary(num){
+  var el = document.getElementById('att-student-summary');
+  if(!el) return;
+  // 전체 출결 기록에서 이 학생의 것 집계
+  var counts = {absent:0, late:0, early_leave:0, partial:0, makeup:0};
+  Object.keys(attendanceRecords).forEach(function(date){
+    var dayRecs = attendanceRecords[date][num] || [];
+    dayRecs.forEach(function(r){
+      if(counts[r.status] !== undefined) counts[r.status]++;
+    });
+  });
+  var total = counts.absent + counts.late + counts.early_leave + counts.partial + counts.makeup;
+  if(total === 0){ el.style.display='none'; return; }
+  var labels = {absent:'결석',late:'지각',early_leave:'조퇴',partial:'결과',makeup:'공결'};
+  var chipClass = {absent:'absent',late:'late',early_leave:'early-leave',partial:'partial',makeup:'makeup'};
+  var chips = '';
+  ['absent','late','early_leave','partial','makeup'].forEach(function(s){
+    if(counts[s] > 0){
+      chips += '<span class="att-summary-chip '+chipClass[s]+'">'+labels[s]+' '+counts[s]+'</span>';
+    }
+  });
+  el.innerHTML =
+    '<div class="att-summary-chips"><span class="att-summary-label">출결</span>'+chips+'</div>'+
+    '<span class="att-summary-goto" onclick="goToAttendanceForStudent(\''+num+'\')">'+
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'+
+      '출결 보기'+
+    '</span>';
+  el.style.display = 'flex';
+}
+function goToAttendanceForStudent(num){
+  attendanceFilterStudent = String(num);
+  switchTab('attendance');
+  setTimeout(function(){
+    var inp = document.getElementById('att-search-input');
+    if(inp){
+      var s = students.find(function(st){ return st.num === num; });
+      inp.value = s ? s.name : String(num);
+      renderAttendanceIssueList();
+    }
+  }, 80);
+}
 function getTodayDate(){
   var d = new Date();
   var m = String(d.getMonth()+1).padStart(2,'0');
@@ -8632,7 +8800,7 @@ function buildStep4Active(){
     ? '<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-tertiary);">최근 30일 내 기록이 없어요. 기록 없이 진행됩니다.</div>'
     : recs.map(function(r){
         var checked = replyState.contextIds.indexOf(r.id) >= 0;
-        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
+        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
         return '<div class="context-item'+(checked?' checked':'')+'" data-id="'+r.id+'">'+
           '<div class="context-checkbox"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
           '<div class="context-meta">'+
@@ -8955,7 +9123,7 @@ function generateReplyPrompt(){
     lines.push('');
     lines.push('[최근 학생 기록]');
     contextRecords.forEach(function(r){
-      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
+      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
       var line = '· '+r.date+' '+typeKor+': '+r.content;
       if(r.followUpNote && r.followUpNote.trim()){
         line += ' [처리: '+r.followUpNote.replace(/\s+/g,' ').trim()+']';
@@ -9566,7 +9734,7 @@ function buildPrepStep4Active(){
     ? '<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-tertiary);">최근 60일 내 기록이 없어요. 기록 없이 진행됩니다.</div>'
     : recs.map(function(r){
         var checked = prepState.contextIds.indexOf(r.id) >= 0;
-        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
+        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
         return '<div class="context-item'+(checked?' checked':'')+'" data-id="'+r.id+'">'+
           '<div class="context-checkbox"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
           '<div class="context-meta">'+
@@ -10003,7 +10171,7 @@ function generatePrepPrompt(){
     lines.push('');
     lines.push('[최근 학생 기록]');
     contextRecords.forEach(function(r){
-      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
+      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
       var line = '· '+r.date+' '+typeKor+': '+r.content;
       if(r.followUpNote && r.followUpNote.trim()){
         line += ' [처리: '+r.followUpNote.replace(/\s+/g,' ').trim()+']';
@@ -10623,7 +10791,7 @@ function renderSgRecords(){
 
   list.innerHTML = recs.map(function(r){
     var checked = sgState.selectedRecIds.indexOf(r.id) >= 0;
-    var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'})[r.type] || '';
+    var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
     var check = checkRecordForForbidden(r);
     var extraClass = '';
     if(check.hasForbidden) extraClass += ' sg-rec-card-warn';
@@ -14090,6 +14258,11 @@ function saveAttendanceRecord(){
     attendanceRecords[date][num].push(newRec);
     showToast('저장됨');
   }
+  if(attModalState.mode === 'edit'){
+    syncAttendanceToTimeline(date, num, attendanceRecords[date][num].find(function(r){ return r.id === attModalState.recordId; }));
+  } else {
+    syncAttendanceToTimeline(date, num, attendanceRecords[date][num][attendanceRecords[date][num].length-1]);
+  }
   saveAll();
   closeAttendanceModal();
   renderAttendanceTab();
@@ -14106,6 +14279,7 @@ function deleteAttendanceRecord(studentNum, recordId){
   var recs = dayRecs[studentNum] || [];
   var idx = recs.findIndex(function(r){ return r.id === recordId; });
   if(idx < 0) return;
+  removeAttendanceFromTimeline(studentNum, recordId);
   recs.splice(idx, 1);
   if(recs.length === 0){
     delete dayRecs[studentNum];
@@ -14115,8 +14289,83 @@ function deleteAttendanceRecord(studentNum, recordId){
   renderAttendanceTab();
   showToast('삭제됨');
 }
+var notifyState = { studentNum: null, date: null, records: [] };
 function openAttendanceNotify(studentNum){
-  showToast('학부모 통지문구는 다음 단계(3/3)에서 구현됩니다');
+  var date = attendanceCurrentDate;
+  var dayRecs = (attendanceRecords[date] || {})[studentNum] || [];
+  if(dayRecs.length === 0){ showToast('이 날 출결 기록이 없어요'); return; }
+  notifyState.studentNum = studentNum;
+  notifyState.date = date;
+  notifyState.records = dayRecs;
+  var s = students.find(function(st){ return st.num === studentNum; }) || {};
+  var sName = s.name || String(studentNum);
+  var parentName = s.parentName ? (s.parentRelation||'보호자')+' '+s.parentName+'님' : '학부모님';
+  var meta = document.getElementById('att-notify-meta');
+  if(meta) meta.textContent = sName+' · '+formatAttendanceDate(date);
+  var text = buildNotifyText(s, date, dayRecs);
+  var ta = document.getElementById('att-notify-textarea');
+  if(ta) ta.value = text;
+  // 이미 모두 통지완료면 버튼 텍스트 변경
+  var allNotified = dayRecs.every(function(r){ return r.notifiedParent; });
+  var markBtn = document.getElementById('att-notify-mark-btn');
+  if(markBtn) markBtn.textContent = allNotified ? '통지 완료됨 ✓' : '통지 완료 표시';
+  document.getElementById('att-notify-overlay').style.display = 'flex';
+}
+function buildNotifyText(s, date, recs){
+  var sName = s.name || '학생';
+  var parentHon = '학부모님';
+  if(s.parentRelation){
+    parentHon = ({모:'어머님', 부:'아버님', 조모:'할머님', 조부:'할아버님', 보호자:'보호자님'})[s.parentRelation] || '보호자님';
+  }
+  var teacherName = (typeof TEACHER_NAME !== 'undefined' && TEACHER_NAME) ? TEACHER_NAME : '담임';
+  var grade = (typeof SCHOOL_GRADE !== 'undefined') ? SCHOOL_GRADE : '';
+  var cls   = (typeof SCHOOL_CLASS !== 'undefined') ? SCHOOL_CLASS : '';
+  var dateStr = formatAttendanceDate(date);
+  var lines = [];
+  lines.push(parentHon+', 안녕하세요. '+grade+'학년 '+cls+'반 '+teacherName+' 입니다.');
+  lines.push('');
+  lines.push(dateStr+' '+sName+' 학생의 출결 사항을 안내드립니다.');
+  lines.push('');
+  recs.forEach(function(r, i){
+    var statusLabel = ({absent:'결석',late:'지각',early_leave:'조퇴',partial:'결과',makeup:'공결'})[r.status] || r.status;
+    var reasonLabel = getReasonLabel(r.reason);
+    var line = '▪ '+reasonLabel+' '+statusLabel;
+    if(r.status !== 'absent'){
+      var missed = getPeriodSlots().filter(function(s){ return r.periods && r.periods[s]; });
+      if(missed.length > 0) line += ' ('+missed.join('·')+' 교시)';
+    }
+    if(r.memo) line += '\n  메모: '+r.memo;
+    lines.push(line);
+  });
+  lines.push('');
+  lines.push('궁금하신 점은 언제든지 연락 주세요. 감사합니다.');
+  return lines.join('\n');
+}
+function closeAttendanceNotify(){
+  document.getElementById('att-notify-overlay').style.display = 'none';
+}
+function copyNotifyToClipboard(){
+  var ta = document.getElementById('att-notify-textarea');
+  if(!ta) return;
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showToast('클립보드에 복사됐어요');
+  } catch(e){
+    navigator.clipboard.writeText(ta.value).then(function(){ showToast('클립보드에 복사됐어요'); });
+  }
+}
+function markAttNotified(){
+  var date = notifyState.date;
+  var num = notifyState.studentNum;
+  if(!date || !num) return;
+  var dayRecs = (attendanceRecords[date] || {})[num] || [];
+  dayRecs.forEach(function(r){ r.notifiedParent = true; });
+  saveAll();
+  showToast('통지 완료로 표시됐어요');
+  var markBtn = document.getElementById('att-notify-mark-btn');
+  if(markBtn) markBtn.textContent = '통지 완료됨 ✓';
+  setTimeout(function(){ closeAttendanceNotify(); renderAttendanceTab(); }, 600);
 }
 function openAttendanceDatePicker(){
   var d = prompt('날짜를 입력하세요 (YYYY-MM-DD)', attendanceCurrentDate);
@@ -16110,6 +16359,7 @@ function init(){
   loadAlertSettings();
   loadTagPool();
   loadAll();
+  maybeRunAttendanceMigration();
   checkAutoBackup();
   renderYearManagerUI();
 
@@ -16141,6 +16391,29 @@ function init(){
     var homeTab = document.getElementById('tab-home');
     if(homeTab && homeTab.style.display !== 'none') renderHomeAlerts();
   }, 60000);
+}
+
+/* ─── 출결 → 타임라인 마이그레이션 ─── */
+function migrateAttendanceToTimeline(){
+  Object.keys(attendanceRecords).forEach(function(date){
+    var dayMap = attendanceRecords[date];
+    Object.keys(dayMap).forEach(function(num){
+      (dayMap[num] || []).forEach(function(rec){
+        var timelineId = 'rec_att_'+rec.id;
+        var recs = records[num] || [];
+        var exists = recs.some(function(r){ return r.id === timelineId; });
+        if(!exists) syncAttendanceToTimeline(date, num, rec);
+      });
+    });
+  });
+}
+function maybeRunAttendanceMigration(){
+  try{
+    if(localStorage.getItem('ht2_attendance_migrated_v1') === '1') return;
+    migrateAttendanceToTimeline();
+    saveAll();
+    localStorage.setItem('ht2_attendance_migrated_v1','1');
+  }catch(e){}
 }
 
 window.addEventListener('DOMContentLoaded', init);
