@@ -2553,13 +2553,27 @@ body{
 .att-period-section:last-child{margin-bottom:0;}
 .att-period-section-head{
   display:flex;justify-content:space-between;align-items:flex-start;
-  gap:8px;margin-bottom:8px;flex-wrap:wrap;
+  gap:10px;margin-bottom:8px;
 }
+.att-period-section-head-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
 .att-period-section-title{font-size:12px;font-weight:600;color:var(--text);}
 .att-period-section-head.late .att-period-section-title{color:#A16207;}
 [data-theme="dark"] .att-period-section-head.late .att-period-section-title{color:#FAC775;}
 .att-period-section-hint{font-size:10px;color:var(--text-tertiary);}
 .att-period-section-hint strong{color:var(--text-secondary);font-weight:600;}
+.att-period-clear-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 9px;
+  background:transparent;border:1px solid var(--border);border-radius:5px;
+  font-size:11px;font-weight:500;font-family:inherit;
+  color:var(--text-secondary);cursor:pointer;flex-shrink:0;
+  transition:all .12s;
+}
+.att-period-clear-btn:hover:not(:disabled){
+  background:var(--danger-dim);border-color:var(--danger);color:var(--danger);
+}
+.att-period-clear-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.att-period-clear-btn svg{flex-shrink:0;}
 .att-period-section-summary{
   margin-top:8px;padding:5px 9px;
   background:var(--bg-overlay);border-radius:5px;
@@ -17483,10 +17497,16 @@ function renderPeriodSection(status){
     early_leave: { title:'조퇴 — 몇 교시부터 빠지는지', hint:'클릭한 교시 <strong>이후까지 모두</strong> 결시', colorCls:'early' },
     partial:     { title:'결과 — 결시 교시 개별 선택',  hint:'결시한 교시를 <strong>하나씩 클릭</strong>해서 선택', colorCls:'partial' }
   }[status];
+  var hasAny = Object.keys(sel.periods).some(function(k){ return sel.periods[k] === true; });
   var html = '<div class="att-period-section" data-status="'+status+'">';
   html += '<div class="att-period-section-head '+meta.colorCls+'">';
+  html += '<div class="att-period-section-head-left">';
   html += '<span class="att-period-section-title">'+escapeHtml(meta.title)+'</span>';
   html += '<span class="att-period-section-hint">'+meta.hint+'</span>';
+  html += '</div>';
+  html += '<button class="att-period-clear-btn" onclick="clearPeriodSection(\''+status+'\')"'+(hasAny?'':' disabled')+'>';
+  html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  html += '깨끗이</button>';
   html += '</div>';
   html += '<div class="att-period-grid">';
   slots.forEach(function(s){
@@ -17501,6 +17521,14 @@ function renderPeriodSection(status){
   }
   html += '</div>';
   return html;
+}
+
+function clearPeriodSection(status){
+  var sel = attModalState.selections[status];
+  if(!sel) return;
+  sel.periods = {};
+  refreshPeriodSections();
+  updateAttSaveButton();
 }
 
 function onAttPeriodClick(status, slot){
