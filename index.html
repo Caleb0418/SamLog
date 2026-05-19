@@ -1974,8 +1974,11 @@ body{
 .att-table-wrap{
   border:1px solid var(--border);border-radius:10px;overflow:hidden;
   background:var(--card-bg);margin-top:4px;
+  max-height:calc(100vh - 260px);overflow-y:auto;
 }
 .att-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+/* 헤더 고정 */
+.att-table thead th{position:sticky;top:0;z-index:2;}
 .att-th{
   padding:9px 12px;font-size:11px;font-weight:600;
   color:var(--text-tertiary);text-align:left;
