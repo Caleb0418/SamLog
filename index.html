@@ -4419,16 +4419,74 @@ details > summary::-webkit-details-marker { display:none; }
 }
 .week-grid-corner{}
 .week-grid-dayhead{
-  text-align:center;padding:6px 0;
+  text-align:center;padding:6px 4px;
   border-radius:6px;background:var(--bg-surface);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  min-height:42px;cursor:default;transition:background .12s;
 }
+.week-grid-dayhead:has(.week-day-events){cursor:pointer;}
+.week-grid-dayhead:has(.week-day-events):hover{background:var(--bg-overlay);}
 .week-grid-dayhead.is-today{
   background:var(--accent-dim);border:1px solid var(--border-accent);
 }
+.week-grid-dayhead.is-holiday{
+  background:color-mix(in srgb,var(--danger,#ef4444) 10%,transparent);
+  border:1px solid color-mix(in srgb,var(--danger,#ef4444) 30%,transparent);
+}
+.week-grid-dayhead.is-holiday .week-grid-dayname,
+.week-grid-dayhead.is-holiday .week-grid-daydate{color:var(--danger,#ef4444);}
 .week-grid-dayname{font-size:12px;font-weight:700;color:var(--text-secondary);}
 .week-grid-dayhead.is-today .week-grid-dayname{color:var(--accent);}
 .week-grid-daydate{font-size:10px;color:var(--text-tertiary);margin-top:1px;font-variant-numeric:tabular-nums;}
 .week-grid-dayhead.is-today .week-grid-daydate{color:var(--accent);font-weight:600;}
+/* 학사일정 띠 */
+.week-day-events{
+  display:flex;flex-direction:column;gap:2px;
+  width:100%;margin-top:3px;
+}
+.week-day-event{
+  display:block;
+  font-size:9px;font-weight:500;
+  padding:1px 5px;border-radius:3px;
+  background:var(--bg-elevated,var(--bg-surface));
+  color:var(--text-secondary);
+  border:0.5px solid var(--border);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  cursor:help;
+}
+.week-day-event.is-my-grade{
+  background:var(--accent-dim);
+  color:var(--accent);
+  border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  font-weight:600;
+}
+.week-day-event.is-holiday{
+  background:var(--danger,#ef4444);
+  color:#fff;
+  border-color:var(--danger,#ef4444);
+  font-weight:600;
+}
+.week-day-event-more{
+  display:block;
+  font-size:9px;color:var(--text-tertiary);
+  text-align:right;padding:0 3px;
+  cursor:help;
+}
+/* 휴업일 시간표 셀 */
+.class-week-cell-holiday{
+  background:color-mix(in srgb,var(--danger,#ef4444) 8%,transparent);
+  border:1px dashed color-mix(in srgb,var(--danger,#ef4444) 50%,transparent);
+  border-radius:6px;min-height:48px;
+  display:flex;align-items:center;justify-content:center;
+  padding:6px;cursor:not-allowed;opacity:0.75;
+}
+.class-week-cell-holiday .holiday-label{
+  font-size:10px;font-weight:600;
+  color:var(--danger,#ef4444);
+  text-align:center;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  max-width:100%;
+}
 .week-grid-periodlabel{
   text-align:center;font-size:11px;font-weight:600;
   color:var(--text-tertiary);padding:10px 0;
@@ -10208,6 +10266,55 @@ function getWeeklyTimetable(grade, cls, mondayDateStr){
   return result;
 }
 
+/* ─── 학사일정 헬퍼 ─── */
+// 특정 날짜의 학사일정 조회 (학년 필터)
+function getScheduleForDate(dateStr, grade){
+  var events = schoolSchedule[dateStr] || [];
+  if(!grade) return events;
+  var gradeKey = 'g' + grade;
+  return events.filter(function(ev){
+    if(!ev.gradeScope) return true;
+    var anyTrue = Object.keys(ev.gradeScope).some(function(k){ return ev.gradeScope[k]; });
+    if(!anyTrue) return true; // 학년 무관 전체 대상
+    return ev.gradeScope[gradeKey] === true;
+  });
+}
+
+// 특정 날짜가 휴업일인지 판별
+var NON_SCHOOL_KEYWORDS = /방학|휴업|휴일|공휴일|개교기념|재량휴|대체휴/;
+function isNonSchoolDay(dateStr, grade){
+  var events = getScheduleForDate(dateStr, grade);
+  if(events.length === 0) return false;
+  if(events.some(function(ev){ return ev.dayType === '휴업일'; })) return true;
+  // fallback: dayType 없는 구 데이터 — 키워드 기반
+  return events.some(function(ev){
+    if(ev.dayType) return false;
+    return NON_SCHOOL_KEYWORDS.test(ev.event);
+  });
+}
+
+// 주간 시간표에서 사용할 종합 일정 정보
+function getWeekDayScheduleInfo(dateStr, grade){
+  var events = getScheduleForDate(dateStr, grade);
+  var isHoliday = isNonSchoolDay(dateStr, grade);
+  var sorted = events.slice().sort(function(a, b){
+    var aH = a.dayType === '휴업일' ? 1 : 0;
+    var bH = b.dayType === '휴업일' ? 1 : 0;
+    if(aH !== bH) return bH - aH;
+    if(grade){
+      var aM = a.gradeScope && a.gradeScope['g'+grade] ? 1 : 0;
+      var bM = b.gradeScope && b.gradeScope['g'+grade] ? 1 : 0;
+      if(aM !== bM) return bM - aM;
+    }
+    return 0;
+  });
+  return {
+    events: sorted,
+    isHoliday: isHoliday,
+    primaryEvent: sorted.length > 0 ? sorted[0].event : ''
+  };
+}
+
 /* ─── NEIS 시간표 변경 감지 ─── */
 function detectNeisTimetableChanges(rows){
   var changes = [];
@@ -10295,6 +10402,7 @@ function mergeNeisSchedule(rows){
         g3: r.THREE_GRADE_EVENT_YN==='Y', g4: r.FR_GRADE_EVENT_YN==='Y',
         g5: r.FIV_GRADE_EVENT_YN==='Y', g6: r.SIX_GRADE_EVENT_YN==='Y'
       },
+      dayType: r.SBTR_DD_SC_NM || '',
       source: 'neis'
     });
     added++;
@@ -18777,19 +18885,51 @@ function renderClassWeek(){
     adhocGrid[key].push(a);
   });
 
+  // 담당 학년 (현재 활성 반 기준, 없으면 null → 전체 일정 표시)
+  var activeClassObj = getActiveClass ? getActiveClass() : null;
+  var teacherGrade = activeClassObj ? activeClassObj.grade : null;
+
+  // 날짜별 학사일정 사전 계산 (5일치)
+  var dayInfo = [];
+  for(var dd=0; dd<5; dd++){
+    var ds = formatDateForInput(weekDates[dd]);
+    dayInfo.push({ dateStr: ds, schedInfo: getWeekDayScheduleInfo(ds, teacherGrade) });
+  }
+
   // 그리드 HTML
   var html = headerHtml;
   html += '<div class="week-grid">';
   html += '<div class="week-grid-corner"></div>';
 
-  // 요일 헤더 (요일명 + 날짜)
+  // 요일 헤더 (요일명 + 날짜 + 학사일정 띠)
   for(var d=1; d<=5; d++){
     var dt = weekDates[d-1];
     var isToday = isSameDay(dt, today);
-    html += '<div class="week-grid-dayhead'+(isToday?' is-today':'')+'">'+
-      '<div class="week-grid-dayname">'+WEEKDAYS[d]+'</div>'+
-      '<div class="week-grid-daydate">'+(dt.getMonth()+1)+'/'+dt.getDate()+'</div>'+
-    '</div>';
+    var di = dayInfo[d-1];
+    var headCls = 'week-grid-dayhead';
+    if(isToday) headCls += ' is-today';
+    if(di.schedInfo.isHoliday) headCls += ' is-holiday';
+
+    html += '<div class="'+headCls+'" onclick="openWeekDayEvents(\''+di.dateStr+'\')" title="'+(di.schedInfo.events.length>0?'학사일정 보기':'')+'">';
+    html += '<div class="week-grid-dayname">'+WEEKDAYS[d]+'</div>';
+    html += '<div class="week-grid-daydate">'+(dt.getMonth()+1)+'/'+dt.getDate()+'</div>';
+    if(di.schedInfo.events.length > 0){
+      html += '<div class="week-day-events">';
+      var visEvts = di.schedInfo.events.slice(0, 2);
+      visEvts.forEach(function(ev){
+        var evCls = 'week-day-event';
+        if(ev.dayType === '휴업일') evCls += ' is-holiday';
+        else if(teacherGrade && ev.gradeScope && ev.gradeScope['g'+teacherGrade]) evCls += ' is-my-grade';
+        var tip = ev.event + (ev.detail ? '\n' + ev.detail : '');
+        html += '<span class="'+evCls+'" title="'+escapeHtml(tip)+'">'+escapeHtml(ev.event)+'</span>';
+      });
+      if(di.schedInfo.events.length > 2){
+        var rest = di.schedInfo.events.slice(2).map(function(e){ return e.event; }).join(', ');
+        html += '<span class="week-day-event-more" title="'+escapeHtml(rest)+'">+'+(di.schedInfo.events.length-2)+'</span>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
   }
 
   // 교시별 행
@@ -18799,8 +18939,15 @@ function renderClassWeek(){
       var key2 = d2+'-'+p;
       var cells = grid[key2] || [];
       var adhocCells = adhocGrid[key2] || [];
+      var dayD2 = dayInfo[d2-1];
+      var isHolidayCell = dayD2.schedInfo.isHoliday;
 
-      if(cells.length > 0){
+      if(isHolidayCell){
+        var primary = dayD2.schedInfo.primaryEvent || '휴업';
+        html += '<div class="class-week-cell-holiday" title="휴업일 — '+escapeHtml(primary)+'">';
+        html += '<span class="holiday-label">'+escapeHtml(primary)+'</span>';
+        html += '</div>';
+      } else if(cells.length > 0){
         var c0 = cells[0];
         var cellDate = formatDateForInput(weekDates[d2-1]);
         var hasMemoOnDate = (c0.memos||[]).some(function(m){return m.date===cellDate;});
@@ -18829,6 +18976,19 @@ function renderClassWeek(){
   }
   html += '</div>';
   container.innerHTML = html;
+}
+
+function openWeekDayEvents(dateStr){
+  var events = schoolSchedule[dateStr] || [];
+  if(events.length === 0) return;
+  var lines = events.map(function(ev){
+    var label = ev.event;
+    if(ev.dayType === '휴업일') label += ' (휴업일)';
+    else if(ev.dayType === '수업일') label += ' (수업일)';
+    if(ev.detail) label += '\n  ' + ev.detail;
+    return label;
+  });
+  alert(dateStr+'\n\n'+lines.join('\n'));
 }
 
 /* ④ 기록 뷰 — 반·과목별로 메모 모음, 진도/내용 분리, 차시 번호 */
