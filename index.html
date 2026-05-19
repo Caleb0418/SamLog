@@ -16906,7 +16906,16 @@ function renderClassMonthlyView(){
           else if(topStatus==='partial') rowCounts.partial++;
         }
       }
-      var onclick=isWeekend?'':' onclick="onCmmCellClick(\''+date+'\')"';
+      var onclick='';
+      if(!isWeekend){
+        if(cellText){
+          // 특이사항 있는 셀 → 해당 학생 월간으로
+          onclick=' onclick="onCmmCellStudentClick(\''+stu.num+'\')" style="cursor:pointer;"';
+        } else {
+          // 빈 셀 → 일간 보기
+          onclick=' onclick="onCmmCellClick(\''+date+'\')"';
+        }
+      }
       html+='<td class="'+cellCls.join(' ')+'"'+onclick+'>'+cellText+'</td>';
     }
     html+='<td class="cmm-col-sum">'+rowCounts.absent+'</td>';
@@ -16930,6 +16939,13 @@ function onCmmNameClick(studentNum){
   smvState.studentNum=studentNum;
   smvState.year=cmmState.year;
   smvState.month=cmmState.month;
+  switchAttView('student-monthly');
+}
+
+function onCmmCellStudentClick(studentNum){
+  smvState.studentNum = studentNum;
+  smvState.year = cmmState.year;
+  smvState.month = cmmState.month;
   switchAttView('student-monthly');
 }
 
