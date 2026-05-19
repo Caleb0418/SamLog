@@ -20138,10 +20138,14 @@ function goToStudentsAndAddClass(grade, cls){
   closeClassSettings();
   switchTab('students');
   setTimeout(function(){
-    var gInput = document.getElementById('add-class-grade');
-    var cInput = document.getElementById('add-class-num');
-    if(gInput) gInput.value = grade;
-    if(cInput) cInput.value = cls;
+    openAddClass();
+    setTimeout(function(){
+      var gInput = document.getElementById('ac-grade');
+      var cInput = document.getElementById('ac-class');
+      if(gInput){ gInput.value = grade; }
+      if(cInput){ cInput.value = cls; }
+      updateAddClassBtn();
+    }, 80);
     showToast(grade+'학년 '+cls+'반을 추가한 뒤, 다시 수업 관리에서 수업을 등록하세요');
   }, 150);
 }
@@ -20834,6 +20838,16 @@ function saveClassMemo(){
   showToast(c.grade+'학년 '+c.cls+'반 '+c.subject+' 메모 저장 완료'+mentionMsg);
 }
 
+function maybeAutoSyncOnClassSettingsOpen(){
+  if(!neisSettings.apiKey || !neisSettings.atptCode || !neisSettings.schulCode) return;
+  if(!classes || Object.keys(classes).length === 0) return;
+  var TWELVE_HOURS = 12 * 60 * 60 * 1000;
+  var lastSync = neisSettings.lastSyncedAt ? new Date(neisSettings.lastSyncedAt).getTime() : 0;
+  if(Date.now() - lastSync < TWELVE_HOURS) return;
+  var btn = document.getElementById('neis-sync-btn');
+  if(btn && !btn.disabled){ onNeisSyncClick(); }
+}
+
 function openClassSettings(){
   document.getElementById('class-settings-modal').classList.add('show');
 
@@ -20867,6 +20881,8 @@ function openClassSettings(){
       altLabel.textContent = '다른 방법으로 시간표 가져오기';
     }
   }
+
+  maybeAutoSyncOnClassSettingsOpen();
 }
 
 /* details 토글 시 화살표 회전 (한 번만 등록) */
