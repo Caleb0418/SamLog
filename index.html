@@ -2652,23 +2652,47 @@ body{
   font-size:11px;color:var(--text-tertiary);
   font-weight:400;margin-left:4px;
 }
-.smv-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.smv-unauth-badges{
-  display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;cursor:help;
+/* 미인정 출결 영역 — 5칸 통계 아래 별도 줄 */
+.smv-unauth{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:8px 12px;margin-bottom:12px;
+  background:var(--danger-dim);
+  border:1px solid var(--danger);
+  border-radius:6px;
 }
-.smv-unauth-badge{
+.smv-unauth.empty{
+  background:var(--bg-surface);
+  border-color:var(--border);
+}
+.smv-unauth-icon{color:var(--danger);flex-shrink:0;}
+.smv-unauth.empty .smv-unauth-icon{color:var(--text-tertiary);}
+.smv-unauth-label{
+  font-size:11px;font-weight:600;color:var(--danger);flex-shrink:0;
+}
+.smv-unauth.empty .smv-unauth-label{color:var(--text-tertiary);}
+.smv-unauth-items{
+  display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;
+}
+.smv-unauth-item{font-size:11px;color:var(--danger);font-variant-numeric:tabular-nums;}
+.smv-unauth-item strong{font-weight:700;font-size:13px;}
+.smv-unauth-item.key strong{font-size:15px;}
+.smv-unauth-converted{
   display:inline-flex;align-items:center;gap:3px;
-  font-size:10px;font-weight:500;
-  padding:2px 7px;border-radius:4px;
-  background:var(--danger-dim);color:var(--danger);
-  border:0.5px solid var(--danger);white-space:nowrap;
+  font-size:11px;color:var(--danger);
+  padding:2px 8px;
+  background:rgba(255,255,255,0.5);
+  border:1px dashed var(--danger);border-radius:4px;cursor:help;
 }
-.smv-unauth-badge strong{font-weight:700;font-variant-numeric:tabular-nums;}
-.smv-unauth-badge.absent{background:var(--danger);color:#fff;border-color:var(--danger);}
-.smv-unauth-badge.converted{
-  background:transparent;color:var(--danger);
-  border:1px dashed var(--danger);font-weight:600;
+[data-theme="dark"] .smv-unauth-converted{background:rgba(0,0,0,0.2);}
+.smv-unauth-converted strong{font-weight:700;}
+.smv-unauth-empty{font-size:11px;color:var(--text-tertiary);flex:1;}
+.smv-unauth-hint{
+  width:16px;height:16px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--danger);color:#fff;
+  font-size:10px;font-weight:700;cursor:help;flex-shrink:0;
 }
+.smv-unauth.empty .smv-unauth-hint{background:var(--text-tertiary);}
 .smv-name-class{font-size:11px;color:var(--text-secondary);margin-top:1px;}
 .smv-student-select{
   padding:5px 8px;font-size:12px;
@@ -16713,19 +16737,7 @@ function renderStudentMonthlyView(){
   html += '<div class="smv-head">';
   html += '<div class="smv-avatar">'+escapeHtml(stu.name.substring(0,2))+'</div>';
   html += '<div class="smv-info">';
-  html += '<div class="smv-name-row">';
   html += '<div class="smv-name">'+escapeHtml(stu.name)+'<span class="smv-name-num">'+parseInt(stu.num)+'번</span></div>';
-  var u = stats.unauth;
-  if(u.absent > 0 || u.partialSum > 0){
-    html += '<div class="smv-unauth-badges" title="미인정(무단) 출결 — 지각/조퇴/결과 3회=결석 1일 환산">';
-    if(u.absent > 0) html += '<span class="smv-unauth-badge absent">미인정 결석 <strong>'+u.absent+'</strong></span>';
-    if(u.late > 0) html += '<span class="smv-unauth-badge">지각 <strong>'+u.late+'</strong></span>';
-    if(u.early_leave > 0) html += '<span class="smv-unauth-badge">조퇴 <strong>'+u.early_leave+'</strong></span>';
-    if(u.partial > 0) html += '<span class="smv-unauth-badge">결과 <strong>'+u.partial+'</strong></span>';
-    if(u.convertedAbsent > 0) html += '<span class="smv-unauth-badge converted" title="미인정 지각/조퇴/결과 '+u.partialSum+'회 = 결석 '+u.convertedAbsent+'일 환산">→ 결석 '+u.convertedAbsent+'일 환산</span>';
-    html += '</div>';
-  }
-  html += '</div>';
   html += '<div class="smv-name-class">'+c.grade+'학년 '+c.classNum+'반</div>';
   html += '</div>';
   html += '<select class="smv-student-select" onchange="onSmvStudentChange(this.value)">';
@@ -16746,6 +16758,27 @@ function renderStudentMonthlyView(){
   html += '<div class="smv-stat late"><div class="smv-stat-val">'+stats.late+'</div><div class="smv-stat-lbl">지각</div></div>';
   html += '<div class="smv-stat"><div class="smv-stat-val">'+stats.early_leave+'</div><div class="smv-stat-lbl">조퇴</div></div>';
   html += '<div class="smv-stat"><div class="smv-stat-val">'+stats.partial+'</div><div class="smv-stat-lbl">결과</div></div>';
+  html += '</div>';
+  // 미인정 출결 영역
+  var u = stats.unauth;
+  var hasUnauth = (u.absent + u.late + u.early_leave + u.partial) > 0;
+  html += '<div class="smv-unauth'+(hasUnauth?'':' empty')+'">';
+  html += '<svg class="smv-unauth-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  html += '<span class="smv-unauth-label">미인정</span>';
+  if(hasUnauth){
+    html += '<span class="smv-unauth-items">';
+    if(u.absent > 0)      html += '<span class="smv-unauth-item key"><strong>'+u.absent+'</strong> 결석</span>';
+    if(u.late > 0)        html += '<span class="smv-unauth-item"><strong>'+u.late+'</strong> 지각</span>';
+    if(u.early_leave > 0) html += '<span class="smv-unauth-item"><strong>'+u.early_leave+'</strong> 조퇴</span>';
+    if(u.partial > 0)     html += '<span class="smv-unauth-item"><strong>'+u.partial+'</strong> 결과</span>';
+    if(u.convertedAbsent > 0){
+      html += '<span class="smv-unauth-converted" title="미인정 지각/조퇴/결과 '+u.partialSum+'회 = 결석 '+u.convertedAbsent+'일 환산">→ 결석 <strong>'+u.convertedAbsent+'일</strong> 환산</span>';
+    }
+    html += '</span>';
+  } else {
+    html += '<span class="smv-unauth-empty">없음</span>';
+  }
+  html += '<span class="smv-unauth-hint" title="미인정 지각/조퇴/결과 3회는 결석 1일로 환산됩니다">?</span>';
   html += '</div>';
   html += '<div class="smv-cal">';
   ['일','월','화','수','목','금','토'].forEach(function(d, i){
