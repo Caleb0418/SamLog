@@ -2652,6 +2652,23 @@ body{
   font-size:11px;color:var(--text-tertiary);
   font-weight:400;margin-left:4px;
 }
+.smv-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.smv-unauth-badges{
+  display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;cursor:help;
+}
+.smv-unauth-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;font-weight:500;
+  padding:2px 7px;border-radius:4px;
+  background:var(--danger-dim);color:var(--danger);
+  border:0.5px solid var(--danger);white-space:nowrap;
+}
+.smv-unauth-badge strong{font-weight:700;font-variant-numeric:tabular-nums;}
+.smv-unauth-badge.absent{background:var(--danger);color:#fff;border-color:var(--danger);}
+.smv-unauth-badge.converted{
+  background:transparent;color:var(--danger);
+  border:1px dashed var(--danger);font-weight:600;
+}
 .smv-name-class{font-size:11px;color:var(--text-secondary);margin-top:1px;}
 .smv-student-select{
   padding:5px 8px;font-size:12px;
@@ -16690,10 +16707,25 @@ function renderStudentMonthlyView(){
   var stu = c.students.find(function(s){ return s.num === smvState.studentNum; });
   var html = '';
   html += '<div class="smv-wrap">';
+  // stats 사전 계산 (학생 이름 영역 배지에서 사용)
+  var monthRecs = getMonthRecordsForStudent(smvState.studentNum, smvState.year, smvState.month);
+  var stats = aggregateMonthlyStats(monthRecs);
   html += '<div class="smv-head">';
   html += '<div class="smv-avatar">'+escapeHtml(stu.name.substring(0,2))+'</div>';
   html += '<div class="smv-info">';
+  html += '<div class="smv-name-row">';
   html += '<div class="smv-name">'+escapeHtml(stu.name)+'<span class="smv-name-num">'+parseInt(stu.num)+'번</span></div>';
+  var u = stats.unauth;
+  if(u.absent > 0 || u.partialSum > 0){
+    html += '<div class="smv-unauth-badges" title="미인정(무단) 출결 — 지각/조퇴/결과 3회=결석 1일 환산">';
+    if(u.absent > 0) html += '<span class="smv-unauth-badge absent">미인정 결석 <strong>'+u.absent+'</strong></span>';
+    if(u.late > 0) html += '<span class="smv-unauth-badge">지각 <strong>'+u.late+'</strong></span>';
+    if(u.early_leave > 0) html += '<span class="smv-unauth-badge">조퇴 <strong>'+u.early_leave+'</strong></span>';
+    if(u.partial > 0) html += '<span class="smv-unauth-badge">결과 <strong>'+u.partial+'</strong></span>';
+    if(u.convertedAbsent > 0) html += '<span class="smv-unauth-badge converted" title="미인정 지각/조퇴/결과 '+u.partialSum+'회 = 결석 '+u.convertedAbsent+'일 환산">→ 결석 '+u.convertedAbsent+'일 환산</span>';
+    html += '</div>';
+  }
+  html += '</div>';
   html += '<div class="smv-name-class">'+c.grade+'학년 '+c.classNum+'반</div>';
   html += '</div>';
   html += '<select class="smv-student-select" onchange="onSmvStudentChange(this.value)">';
@@ -16708,8 +16740,6 @@ function renderStudentMonthlyView(){
   html += '<button class="smv-nav-btn" onclick="smvShiftMonth(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>';
   html += '</div>';
   html += '</div>';
-  var monthRecs = getMonthRecordsForStudent(smvState.studentNum, smvState.year, smvState.month);
-  var stats = aggregateMonthlyStats(monthRecs);
   html += '<div class="smv-stats">';
   html += '<div class="smv-stat attend"><div class="smv-stat-val">'+stats.attendDays+'</div><div class="smv-stat-lbl">출석일</div></div>';
   html += '<div class="smv-stat absent"><div class="smv-stat-val">'+stats.absent+'</div><div class="smv-stat-lbl">결석</div></div>';
@@ -16791,6 +16821,7 @@ function aggregateMonthlyStats(monthRecs){
     dateStatus[item.date].push(item.rec);
   });
   var counts = { absent:0, late:0, early_leave:0, partial:0 };
+  var unauth = { absent:0, late:0, early_leave:0, partial:0 };
   var issueDates = 0;
   Object.keys(dateStatus).forEach(function(date){
     var recs = dateStatus[date];
@@ -16800,7 +16831,15 @@ function aggregateMonthlyStats(monthRecs){
     var topStatus = priorityList.find(function(p){
       return recs.some(function(r){ return r.status===p && r.reason!=='approved'; });
     });
-    if(topStatus){ counts[topStatus]++; issueDates++; }
+    if(topStatus){
+      counts[topStatus]++;
+      issueDates++;
+      // 미인정(unjustified) 사유로 발생한 경우만 별도 집계
+      var isUnauth = recs.some(function(r){
+        return r.status===topStatus && r.reason==='unjustified';
+      });
+      if(isUnauth) unauth[topStatus]++;
+    }
   });
   var year=parseInt(smvState.year), month=parseInt(smvState.month);
   var lastDate=new Date(year,month,0).getDate();
@@ -16812,7 +16851,18 @@ function aggregateMonthlyStats(monthRecs){
     var dow=date.getDay();
     if(dow!==0&&dow!==6) weekdayCount++;
   }
-  return { attendDays:Math.max(0,weekdayCount-issueDates), absent:counts.absent, late:counts.late, early_leave:counts.early_leave, partial:counts.partial };
+  var partialSum = unauth.late + unauth.early_leave + unauth.partial;
+  var convertedAbsent = Math.floor(partialSum / 3);
+  return {
+    attendDays:Math.max(0,weekdayCount-issueDates),
+    absent:counts.absent, late:counts.late, early_leave:counts.early_leave, partial:counts.partial,
+    unauth:{
+      absent:unauth.absent, late:unauth.late, early_leave:unauth.early_leave, partial:unauth.partial,
+      partialSum:partialSum,
+      convertedAbsent:convertedAbsent,
+      totalEquivalentAbsent:unauth.absent+convertedAbsent
+    }
+  };
 }
 
 function onSmvStudentChange(num){
