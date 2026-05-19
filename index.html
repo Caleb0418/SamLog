@@ -1109,6 +1109,10 @@ body{
   cursor:pointer;font-family:inherit;
 }
 .rec-followup-note-cancel:hover{background:var(--bg-elevated);}
+.rec-followup-note-ts{
+  display:block;font-size:10px;color:var(--text-tertiary);
+  margin-top:3px;white-space:nowrap;
+}
 
 /* 인라인 편집 폼 */
 .rec-edit-form{
@@ -7358,6 +7362,13 @@ function formatDateForInput(d){
 function formatTimeHHMM(d){
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 }
+function formatFollowUpTs(iso){
+  if(!iso) return '';
+  var d = new Date(iso);
+  var M=String(d.getMonth()+1).padStart(2,'0'), D=String(d.getDate()).padStart(2,'0');
+  var h=String(d.getHours()).padStart(2,'0'), m=String(d.getMinutes()).padStart(2,'0');
+  return M+'/'+D+' '+h+':'+m;
+}
 function daysFromNow(dateStr){
   if(!dateStr) return null;
   var t = new Date(dateStr+'T00:00:00').getTime();
@@ -7775,8 +7786,9 @@ function renderTimeline(){
       if(r.needsFollowUp){
         html += '<div class="rec-followup-note-wrap" id="followup-wrap-'+r.id+'">';
         if(r.followUpNote && r.followUpNote.trim()){
+          var fnTs = r.followUpNoteUpdatedAt ? '<span class="rec-followup-note-ts">'+formatFollowUpTs(r.followUpNoteUpdatedAt)+'</span>' : '';
           html += '<div class="rec-followup-note" onclick="editFollowUpNote(\''+r.id+'\')" title="클릭해서 수정">'+
-                  escapeHtml(r.followUpNote)+'</div>';
+                  escapeHtml(r.followUpNote)+fnTs+'</div>';
         } else {
           html += '<button class="rec-followup-note-add" onclick="editFollowUpNote(\''+r.id+'\')">'+
                   '+ 어떻게 처리했는지 간단히 (선택)</button>';
