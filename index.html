@@ -1919,134 +1919,104 @@ body{
 .att-stat-card.success .att-stat-value{color:var(--success);}
 .att-stat-card.danger .att-stat-value{color:var(--danger);}
 .att-stat-card.warning .att-stat-value{color:var(--warning);}
-/* 검색 */
-.att-search-wrap{position:relative;margin-bottom:16px;}
-.att-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);pointer-events:none;}
-.att-search-input{
-  width:100%;padding:10px 14px 10px 38px;font-size:13px;
+/* ═══ 출결 테이블 UI ═══ */
+.att-tbl-controls{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.att-tbl-search-wrap{position:relative;flex:1;max-width:320px;}
+.att-tbl-search-icon{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--text-tertiary);pointer-events:none;
+}
+.att-tbl-search-input{
+  width:100%;padding:7px 12px 7px 32px;font-size:12px;
   background:var(--bg-surface);border:1px solid var(--border);
-  border-radius:8px;color:var(--text);font-family:inherit;box-sizing:border-box;
+  border-radius:6px;color:var(--text);font-family:inherit;box-sizing:border-box;
 }
-.att-search-input:focus{outline:none;border-color:var(--accent);}
-.att-search-dropdown{
-  position:absolute;top:calc(100% + 4px);left:0;right:0;
-  background:var(--bg-overlay);border:1px solid var(--border);border-radius:8px;
-  max-height:240px;overflow-y:auto;z-index:50;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+.att-tbl-search-input:focus{outline:none;border-color:var(--accent);}
+.att-tbl-toggles{display:flex;gap:6px;margin-left:auto;}
+.att-tbl-toggle{
+  padding:7px 12px;font-size:12px;background:var(--bg-surface);
+  color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;
 }
-.att-search-item{
-  padding:10px 14px;font-size:13px;cursor:pointer;
-  display:flex;align-items:center;gap:10px;
-  border-bottom:1px solid var(--border);
+.att-tbl-toggle:hover{background:var(--bg-elevated);}
+.att-tbl-toggle.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);font-weight:600;}
+.att-tbl-wrap{
+  background:var(--bg-overlay);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  max-height:calc(100vh - 280px);overflow-y:auto;
 }
-.att-search-item:last-child{border-bottom:none;}
-.att-search-item:hover{background:var(--bg-elevated);}
-.att-search-item-num{font-size:11px;color:var(--text-tertiary);min-width:28px;}
-.att-search-item-name{font-weight:500;}
-.att-search-empty{padding:14px;font-size:12px;color:var(--text-tertiary);text-align:center;}
-/* 이슈 학생 헤더 */
-.att-issue-header{
-  font-size:12px;color:var(--text-secondary);
-  margin-bottom:10px;display:flex;align-items:center;gap:6px;
-}
-.att-issue-header strong{font-weight:600;color:var(--text);}
-.att-issue-header .att-issue-sep{color:var(--text-tertiary);}
-.att-issue-header .att-issue-hint{color:var(--text-tertiary);}
-/* 이슈 학생 카드 */
-.att-issue-list{display:flex;flex-direction:column;gap:8px;}
-.att-issue-card{background:var(--bg-overlay);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.att-issue-card-head{
-  padding:10px 14px;display:flex;align-items:center;gap:12px;
-  background:var(--bg-surface);border-bottom:1px solid var(--border);
-}
-.att-issue-avatar{
-  width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:600;font-size:12px;
-  background:var(--bg-elevated);color:var(--text);flex-shrink:0;
-}
-.att-issue-info{flex:1;min-width:0;}
-.att-issue-name{font-size:14px;font-weight:600;color:var(--text);}
-.att-issue-num{font-size:11px;color:var(--text-tertiary);font-weight:400;margin-left:4px;}
-.att-issue-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;}
-.att-issue-actions{display:flex;gap:6px;}
-/* 전체 학생 출결 테이블 */
-.att-table-wrap{
-  border:1px solid var(--border);border-radius:10px;
-  background:var(--card-bg);margin-top:4px;
-  max-height:calc(100vh - 260px);overflow-y:auto;
-}
-.att-table{width:100%;border-collapse:collapse;table-layout:fixed;}
-/* 헤더 고정 — overflow:hidden 제거해야 sticky 동작 */
-.att-table thead th{
+.att-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.att-tbl thead th{
   position:sticky;top:0;z-index:2;
-  background:var(--bg-secondary);
+  background:var(--bg-surface);font-size:11px;font-weight:500;
+  color:var(--text-tertiary);text-align:left;padding:9px 14px;
+  border-bottom:1px solid var(--border);letter-spacing:0.3px;
 }
-/* 첫/마지막 th에 border-radius */
-.att-table thead th:first-child{border-radius:10px 0 0 0;}
-.att-table thead th:last-child{border-radius:0 10px 0 0;}
-.att-th{
-  padding:9px 12px;font-size:11px;font-weight:600;
-  color:var(--text-tertiary);text-align:left;
-  background:var(--bg-secondary);border-bottom:1px solid var(--border);
+.att-tbl thead th:first-child{border-radius:8px 0 0 0;}
+.att-tbl thead th:last-child{border-radius:0 8px 0 0;}
+.att-tbl tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;}
+.att-tbl tbody tr:last-child{border-bottom:none;}
+.att-tbl tbody tr:hover{background:var(--bg-surface);}
+.att-tbl tbody tr.has-issue{background:rgba(245,158,11,.06);}
+.att-tbl tbody tr.has-issue:hover{background:rgba(245,158,11,.1);}
+[data-theme="dark"] .att-tbl tbody tr.has-issue{background:rgba(245,158,11,.08);}
+[data-theme="dark"] .att-tbl tbody tr.has-issue:hover{background:rgba(245,158,11,.14);}
+.att-tbl td{padding:11px 14px;vertical-align:middle;}
+.att-col-num{width:48px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;font-size:12px;}
+.att-col-name{width:100px;font-weight:500;color:var(--text);cursor:pointer;}
+.att-col-status{width:130px;}
+.att-col-detail{color:var(--text-secondary);font-size:12px;line-height:1.5;cursor:pointer;}
+.att-col-actions{width:80px;text-align:right;padding-right:10px;}
+.att-status-default{font-size:11px;color:var(--text-tertiary);}
+.att-status-pill{
+  display:inline-block;font-size:11px;font-weight:500;
+  padding:2px 8px;border-radius:10px;white-space:nowrap;cursor:pointer;
 }
-.att-th-num{width:44px;}
-.att-th-name{width:72px;}
-.att-th-status{width:80px;}
-.att-th-detail{width:auto;}
-.att-th-action{width:80px;text-align:right;}
-.att-tr{border-bottom:1px solid var(--border);}
-.att-tr:last-child{border-bottom:none;}
-.att-tr.att-tr-issue{background:var(--bg-overlay);}
-.att-tr:hover{background:var(--bg-elevated);}
-.att-td{
-  padding:9px 12px;font-size:13px;color:var(--text);
-  vertical-align:middle;overflow:hidden;
+.att-status-pill.late{background:#FAEEDA;color:#633806;}
+.att-status-pill.absent{background:#FCEBEB;color:#791F1F;}
+.att-status-pill.early_leave,.att-status-pill.partial{background:#F1EFE8;color:#2C2C2A;}
+.att-status-pill.makeup{background:#E8F5E9;color:#1B5E20;}
+[data-theme="dark"] .att-status-pill.late{background:#2A1E0A;color:#FAC775;}
+[data-theme="dark"] .att-status-pill.absent{background:#2A1412;color:#F09595;}
+[data-theme="dark"] .att-status-pill.early_leave,[data-theme="dark"] .att-status-pill.partial{background:#2C2C2A;color:#D3D1C7;}
+[data-theme="dark"] .att-status-pill.makeup{background:#1A2A1A;color:#81C784;}
+.att-status-pill+.att-status-pill{margin-left:3px;}
+.att-detail-multi{display:flex;flex-direction:column;gap:3px;}
+.att-detail-line{font-size:12px;color:var(--text-secondary);line-height:1.5;}
+.att-row-actions{
+  display:flex;gap:2px;align-items:center;justify-content:flex-end;
+  opacity:0;transition:opacity 0.12s;
 }
-.att-td-num{color:var(--text-tertiary);font-size:12px;font-variant-numeric:tabular-nums;}
-.att-td-name{font-weight:600;}
-.att-status-chip{
-  display:inline-flex;align-items:center;padding:2px 8px;
-  border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;
+.att-tbl tbody tr:hover .att-row-actions{opacity:1;}
+.att-tbl tbody tr.has-issue .att-row-actions{opacity:0.4;}
+.att-tbl tbody tr.has-issue:hover .att-row-actions{opacity:1;}
+.att-row-btn{
+  width:28px;height:28px;padding:0;background:transparent;border:none;
+  cursor:pointer;color:var(--text-tertiary);
+  display:flex;align-items:center;justify-content:center;border-radius:5px;
 }
-.att-status-chip.present{background:rgba(34,197,94,.1);color:#16a34a;}
-.att-status-chip.absent{background:rgba(239,68,68,.1);color:#ef4444;}
-.att-status-chip.late{background:rgba(245,158,11,.1);color:#d97706;}
-.att-status-chip.early-leave{background:rgba(168,85,247,.1);color:#9333ea;}
-.att-status-chip.partial{background:rgba(59,130,246,.1);color:#2563eb;}
-.att-status-chip.makeup{background:rgba(34,197,94,.1);color:#16a34a;}
-.att-detail-item{
-  font-size:12px;color:var(--text-secondary);
-  display:flex;align-items:center;gap:6px;
-  padding:1px 0;flex-wrap:wrap;
+.att-row-btn:hover{background:var(--bg-elevated);color:var(--text);}
+.att-row-btn.primary{color:var(--accent);}
+.att-row-btn.primary:hover{background:var(--accent-dim);}
+.att-row-menu{
+  position:fixed;z-index:500;background:var(--bg-overlay);
+  border:1px solid var(--border);border-radius:8px;padding:4px;
+  min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.12);
 }
-.att-detail-item+.att-detail-item{margin-top:4px;padding-top:4px;border-top:1px dashed var(--border);}
-.att-detail-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.att-row-icons{display:flex;gap:2px;flex-shrink:0;}
-.att-icon-btn{
-  width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
-  border:none;border-radius:5px;cursor:pointer;background:transparent;color:var(--text-tertiary);
-  transition:background .13s;padding:0;
+.att-row-menu-item{
+  width:100%;padding:8px 10px;background:transparent;border:none;cursor:pointer;
+  font-size:12px;color:var(--text);font-family:inherit;
+  display:flex;align-items:center;gap:8px;border-radius:5px;text-align:left;
 }
-.att-icon-btn:hover{background:var(--bg-elevated);color:var(--text);}
-.att-icon-btn.danger:hover{background:rgba(239,68,68,.1);color:#ef4444;}
-.att-icon-btn.notify:hover{background:rgba(99,102,241,.1);color:#6366f1;}
-.att-td-actions{text-align:right;white-space:nowrap;}
-.att-add-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:26px;height:26px;border-radius:6px;
-  border:1.5px dashed var(--border-strong,var(--border));
-  background:transparent;color:var(--text-tertiary);cursor:pointer;
-  font-size:15px;font-weight:300;transition:all .13s;
-}
-.att-add-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
-.att-notify-btn{
-  padding:5px 10px;font-size:11px;
-  background:var(--bg-overlay);color:var(--text-secondary);
-  border:1px solid var(--border);border-radius:5px;cursor:pointer;
-  display:inline-flex;align-items:center;gap:4px;font-family:inherit;
-}
-.att-notify-btn:hover{background:var(--bg-elevated);border-color:var(--border-strong,var(--border));}
+.att-row-menu-item:hover{background:var(--bg-elevated);}
+.att-row-menu-item.danger{color:var(--danger);}
+.att-row-menu-item.danger:hover{background:var(--danger-dim,rgba(239,68,68,.08));}
+.att-row-menu-item svg{color:var(--text-tertiary);flex-shrink:0;}
+.att-row-menu-item.danger svg{color:var(--danger);}
+.att-row-menu-sep{height:1px;background:var(--border);margin:4px 6px;}
+.att-tbl-empty{padding:40px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;}
 /* 개별 레코드 행 */
 .att-record-row{
   padding:10px 14px;display:flex;align-items:center;gap:10px;
@@ -4933,14 +4903,53 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
   <div class="att-stats" id="att-stats"></div>
 
-  <!-- 학생 검색/필터 -->
-  <div class="att-search-wrap">
-    <svg class="att-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="att-filter" class="att-search-input" placeholder="이름 또는 번호로 검색" autocomplete="off" oninput="onAttFilterInput(this.value)">
+  <!-- 테이블 상단 컨트롤 -->
+  <div class="att-tbl-controls">
+    <div class="att-tbl-search-wrap">
+      <svg class="att-tbl-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="att-tbl-search" class="att-tbl-search-input" placeholder="이름·번호로 거르기" autocomplete="off" oninput="onAttTableSearch(this.value)" />
+    </div>
+    <div class="att-tbl-toggles">
+      <button class="att-tbl-toggle" id="att-tbl-issue-only" onclick="toggleAttIssueOnly()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        이슈만 보기
+      </button>
+    </div>
   </div>
 
-  <!-- 전체 학생 출결 테이블 -->
-  <div class="att-table-wrap" id="att-table-wrap"></div>
+  <!-- 학생 명단 테이블 -->
+  <div class="att-tbl-wrap">
+    <table class="att-tbl">
+      <thead>
+        <tr>
+          <th class="att-col-num">번호</th>
+          <th class="att-col-name">이름</th>
+          <th class="att-col-status">출결</th>
+          <th class="att-col-detail">상세</th>
+          <th class="att-col-actions"></th>
+        </tr>
+      </thead>
+      <tbody id="att-tbl-body"></tbody>
+    </table>
+    <div class="att-tbl-empty" id="att-tbl-empty" style="display:none;"></div>
+  </div>
+
+  <!-- 행 액션 메뉴 -->
+  <div class="att-row-menu" id="att-row-menu" style="display:none;">
+    <button class="att-row-menu-item" onclick="onRowMenuEdit()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      수정
+    </button>
+    <button class="att-row-menu-item" onclick="onRowMenuAddAnother()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      사례 추가
+    </button>
+    <div class="att-row-menu-sep"></div>
+    <button class="att-row-menu-item danger" onclick="onRowMenuDelete()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+      삭제
+    </button>
+  </div>
 
 </div><!-- /tab-attendance -->
 
@@ -8421,9 +8430,9 @@ function goToAttendanceForStudent(num){
   setTimeout(function(){
     var s = students.find(function(st){ return st.num === num; });
     var q = s ? s.name : String(parseInt(num));
-    var inp = document.getElementById('att-filter');
+    var inp = document.getElementById('att-tbl-search');
     if(inp){ inp.value = q; }
-    attTableFilter = q;
+    attTableState.searchQuery = q;
     renderAttendanceTable();
   }, 80);
 }
@@ -13986,11 +13995,8 @@ function updateTimetableBanner(){
 ═══════════════════════════════════════════ */
 var attendanceCurrentDate = null;
 
-var attTableFilter = '';
-function onAttFilterInput(q){
-  attTableFilter = q.trim();
-  renderAttendanceTable();
-}
+/* ═══ 출결 테이블 UI ═══ */
+var attTableState = { searchQuery: '', issueOnly: false };
 
 function renderAttendanceTab(){
   var c = getActiveClass();
@@ -14036,96 +14042,169 @@ function renderAttendanceStats(){
 function renderAttendanceTable(){
   var c = getActiveClass();
   if(!c) return;
-  var wrap = document.getElementById('att-table-wrap');
-  if(!wrap) return;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
-  var q = attTableFilter.toLowerCase();
+  var allStudents = (c.students || []).slice();
 
-  var statusLabel = {absent:'결석', late:'지각', early_leave:'조퇴', partial:'결과', makeup:'공결'};
-  var statusCls   = {absent:'absent', late:'late', early_leave:'early-leave', partial:'partial', makeup:'makeup'};
-
-  var list = (c.students || []).slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); });
+  // 검색 필터
+  var q = attTableState.searchQuery.trim();
   if(q){
-    list = list.filter(function(s){
-      return s.name.indexOf(q) >= 0 || String(parseInt(s.num)).indexOf(q) >= 0;
+    allStudents = allStudents.filter(function(s){
+      return s.name.indexOf(q) >= 0 || s.num.indexOf(q) >= 0 || parseInt(s.num) === parseInt(q);
     });
   }
-
-  /* SVG 아이콘 공통 */
-  var svgEdit   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
-  var svgDelete = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
-  var svgNotify = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-
-  var rows = '';
-  list.forEach(function(s){
-    var recs = dateRecs[s.num] || [];
-    var isIssue = recs.length > 0;
-    var trClass = 'att-tr' + (isIssue ? ' att-tr-issue' : '');
-
-    /* 상태 셀 */
-    var statusCell = '';
-    if(recs.length === 0){
-      statusCell = '<span class="att-status-chip present">출석</span>';
-    } else {
-      statusCell = recs.map(function(r){
-        var sc = statusCls[r.status] || 'present';
-        var sl = statusLabel[r.status] || r.status;
-        return '<span class="att-status-chip '+sc+'" style="margin-bottom:2px;">'+sl+'</span>';
-      }).join('<br>');
-    }
-
-    /* 상세 셀 (이슈 있을 때만) */
-    var detailCell = '';
-    if(recs.length > 0){
-      detailCell = recs.map(function(r){
-        var rl = getReasonLabel(r.reason);
-        var ps = summarizePeriods(r.periods);
-        var memo = r.memo ? ' · '+escapeHtml(r.memo) : '';
-        var detail = escapeHtml(rl) + (ps ? ' · '+escapeHtml(ps) : '') + memo;
-        var icons =
-          '<span class="att-row-icons">'+
-            '<button class="att-icon-btn" onclick="openAttendanceEdit(\''+s.num+'\',\''+r.id+'\')" title="수정">'+svgEdit+'</button>'+
-            '<button class="att-icon-btn danger" onclick="deleteAttendanceRecord(\''+s.num+'\',\''+r.id+'\')" title="삭제">'+svgDelete+'</button>'+
-          '</span>';
-        return '<div class="att-detail-item"><span class="att-detail-text">'+detail+'</span>'+icons+'</div>';
-      }).join('');
-    }
-
-    /* 액션 셀 */
-    var notifyBtn = isIssue
-      ? '<button class="att-icon-btn notify" onclick="openAttendanceNotify(\''+s.num+'\')" title="학부모 통지">'+svgNotify+'</button>'
-      : '';
-    var addBtn = '<button class="att-add-btn" onclick="openAttendanceAdd(\''+s.num+'\')" title="출결 추가">+</button>';
-
-    rows +=
-      '<tr class="'+trClass+'">'+
-        '<td class="att-td att-td-num">'+parseInt(s.num)+'</td>'+
-        '<td class="att-td att-td-name">'+escapeHtml(s.name)+'</td>'+
-        '<td class="att-td att-td-status">'+statusCell+'</td>'+
-        '<td class="att-td att-td-detail">'+detailCell+'</td>'+
-        '<td class="att-td att-td-actions">'+notifyBtn+' '+addBtn+'</td>'+
-      '</tr>';
+  // 이슈만 보기
+  if(attTableState.issueOnly){
+    allStudents = allStudents.filter(function(s){ return (dateRecs[s.num]||[]).length > 0; });
+  }
+  // 정렬: 이슈 우선, 각각 번호 순
+  allStudents.sort(function(a,b){
+    var aHas = (dateRecs[a.num]||[]).length > 0;
+    var bHas = (dateRecs[b.num]||[]).length > 0;
+    if(aHas && !bHas) return -1;
+    if(!aHas && bHas) return 1;
+    return parseInt(a.num) - parseInt(b.num);
   });
 
-  if(list.length === 0){
-    wrap.innerHTML = '<div style="padding:32px;text-align:center;font-size:13px;color:var(--text-tertiary);">검색 결과가 없어요</div>';
+  var tbody = document.getElementById('att-tbl-body');
+  var emptyEl = document.getElementById('att-tbl-empty');
+  if(!tbody) return;
+
+  if(allStudents.length === 0){
+    tbody.innerHTML = '';
+    emptyEl.style.display = 'block';
+    emptyEl.textContent = q ? '"'+q+'"에 해당하는 학생이 없어요'
+      : attTableState.issueOnly ? '오늘은 이슈 학생이 없어요 — 전원 출석입니다'
+      : '학생이 없어요';
     return;
   }
+  emptyEl.style.display = 'none';
 
-  wrap.innerHTML =
-    '<table class="att-table">'+
-      '<thead><tr>'+
-        '<th class="att-th att-th-num">번호</th>'+
-        '<th class="att-th att-th-name">이름</th>'+
-        '<th class="att-th att-th-status">출결</th>'+
-        '<th class="att-th att-th-detail">상세</th>'+
-        '<th class="att-th att-th-action"></th>'+
-      '</tr></thead>'+
-      '<tbody>'+rows+'</tbody>'+
-    '</table>';
+  var html = '';
+  allStudents.forEach(function(s){
+    var recs = dateRecs[s.num] || [];
+    var hasIssue = recs.length > 0;
+    var rowCls = hasIssue ? ' class="has-issue"' : '';
+    html += '<tr'+rowCls+' data-num="'+escapeHtml(s.num)+'">';
+
+    // 번호
+    html += '<td class="att-col-num">'+parseInt(s.num)+'</td>';
+
+    // 이름
+    html += '<td class="att-col-name" onclick="onAttRowClick(\''+s.num+'\')">'+escapeHtml(s.name)+'</td>';
+
+    // 출결 상태
+    html += '<td class="att-col-status" onclick="onAttRowClick(\''+s.num+'\')">';
+    if(!hasIssue){
+      html += '<span class="att-status-default">출석</span>';
+    } else {
+      var seenStatuses = [];
+      recs.forEach(function(r){ if(seenStatuses.indexOf(r.status)<0) seenStatuses.push(r.status); });
+      seenStatuses.forEach(function(st){
+        html += '<span class="att-status-pill '+st+'">'+getStatusLabel(st)+'</span>';
+      });
+    }
+    html += '</td>';
+
+    // 상세
+    html += '<td class="att-col-detail" onclick="onAttRowClick(\''+s.num+'\')">';
+    if(hasIssue){
+      if(recs.length === 1){
+        var r = recs[0];
+        var ps = summarizePeriods(r.periods);
+        html += escapeHtml(getReasonLabel(r.reason)+(ps?' · '+ps:''));
+        if(r.memo) html += ' · '+escapeHtml(r.memo);
+      } else {
+        html += '<div class="att-detail-multi">';
+        recs.forEach(function(r){
+          var ps = summarizePeriods(r.periods);
+          html += '<div class="att-detail-line">'+escapeHtml(getReasonLabel(r.reason)+(ps?' · '+ps:''));
+          if(r.memo) html += ' · '+escapeHtml(r.memo);
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+    }
+    html += '</td>';
+
+    // 액션
+    html += '<td class="att-col-actions"><div class="att-row-actions">';
+    if(!hasIssue){
+      html += '<button class="att-row-btn" onclick="event.stopPropagation();openAttendanceAdd(\''+s.num+'\')" title="출결 추가">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>';
+    } else {
+      html += '<button class="att-row-btn primary" onclick="event.stopPropagation();openAttendanceNotify(\''+s.num+'\')" title="학부모 통지">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>';
+      html += '<button class="att-row-btn" onclick="event.stopPropagation();openRowMenu(event,\''+s.num+'\')" title="더 보기">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>';
+    }
+    html += '</div></td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
 }
 
-/* 구 검색 드롭다운 제거 — 테이블 필터로 대체 */
+function onAttRowClick(studentNum){
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var recs = dateRecs[studentNum] || [];
+  if(recs.length === 0) openAttendanceAdd(studentNum);
+  else openAttendanceEdit(studentNum, recs[0].id);
+}
+
+function onAttTableSearch(query){
+  attTableState.searchQuery = query;
+  renderAttendanceTable();
+}
+
+function toggleAttIssueOnly(){
+  attTableState.issueOnly = !attTableState.issueOnly;
+  var btn = document.getElementById('att-tbl-issue-only');
+  if(btn) btn.classList.toggle('active', attTableState.issueOnly);
+  renderAttendanceTable();
+}
+
+/* 행 메뉴 */
+var rowMenuState = { studentNum: null };
+
+function openRowMenu(e, studentNum){
+  rowMenuState.studentNum = studentNum;
+  var menu = document.getElementById('att-row-menu');
+  var rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top  = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.max(4, rect.right - 144) + 'px';
+  menu.style.display = 'block';
+  setTimeout(function(){
+    document.addEventListener('click', closeRowMenuOnOutside, { once: true });
+  }, 0);
+}
+function closeRowMenuOnOutside(e){
+  var menu = document.getElementById('att-row-menu');
+  if(menu && !menu.contains(e.target)){
+    menu.style.display = 'none';
+  } else {
+    document.addEventListener('click', closeRowMenuOnOutside, { once: true });
+  }
+}
+function closeRowMenu(){ document.getElementById('att-row-menu').style.display = 'none'; }
+function onRowMenuEdit(){
+  var num = rowMenuState.studentNum; closeRowMenu();
+  var recs = ((attendanceRecords[attendanceCurrentDate]||{})[num])||[];
+  if(recs.length) openAttendanceEdit(num, recs[0].id);
+}
+function onRowMenuAddAnother(){
+  var num = rowMenuState.studentNum; closeRowMenu();
+  if(num) openAttendanceAdd(num);
+}
+function onRowMenuDelete(){
+  var num = rowMenuState.studentNum; closeRowMenu();
+  var recs = ((attendanceRecords[attendanceCurrentDate]||{})[num])||[];
+  if(!recs.length) return;
+  if(recs.length === 1){
+    deleteAttendanceRecord(num, recs[0].id);
+  } else {
+    if(!confirm('이 학생의 출결 사례 '+recs.length+'건을 모두 삭제할까요?')) return;
+    recs.slice().forEach(function(r){ deleteAttendanceRecord(num, r.id); });
+  }
+}
 
 /* ═══════════════════════════════════════════
    출결 사례 추가/수정 모달
@@ -14601,15 +14680,6 @@ function saveAttSettingsFromModal(){
   renderAttendanceTab();
   showToast('출결 설정 저장됨');
 }
-
-/* 검색 외부 클릭 시 드롭다운 닫기 */
-document.addEventListener('click', function(e){
-  var wrap = document.querySelector('.att-search-wrap');
-  if(wrap && !wrap.contains(e.target)){
-    var dd = document.getElementById('att-search-dropdown');
-    if(dd) dd.style.display = 'none';
-  }
-});
 
 function renderClassTab(){
   if(currentClassView === 'today') renderClassToday();
