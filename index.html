@@ -2506,6 +2506,21 @@ body{
 }
 .att-modal-close:hover{background:var(--bg-elevated);}
 .att-modal-body{padding:18px 20px;}
+.att-multi-hint{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 12px;margin-bottom:14px;
+  background:var(--accent-dim);border:1px solid var(--border-accent);
+  border-radius:7px;font-size:11.5px;color:var(--accent);font-weight:500;
+}
+.att-multi-hint svg{flex-shrink:0;}
+.att-multi-hint span{flex:1;}
+.att-multi-hint-dismiss{
+  width:18px;height:18px;border-radius:4px;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--accent);opacity:0.6;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.att-multi-hint-dismiss:hover{opacity:1;background:rgba(127,119,221,0.15);}
 /* 단계 헤더 */
 .att-step{margin-bottom:18px;}
 .att-step:last-child{margin-bottom:0;}
@@ -2743,6 +2758,14 @@ body{
 }
 [data-theme="dark"] .smv-unauth-converted{background:rgba(0,0,0,0.2);}
 .smv-unauth-converted strong{font-weight:700;}
+.smv-unauth-hint{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:50%;
+  font-size:9px;font-weight:700;
+  background:var(--border);color:var(--text-tertiary);
+  cursor:help;flex-shrink:0;
+}
+.smv-unauth.empty .smv-unauth-hint{opacity:0.5;}
 .smv-unauth-empty{font-size:11px;color:var(--text-tertiary);flex:1;}
 .smv-name-class{font-size:11px;color:var(--text-secondary);margin-top:1px;}
 .smv-student-select{
@@ -4381,33 +4404,51 @@ details > summary::-webkit-details-marker { display:none; }
   background:rgba(31,158,117,0.25);
 }
 .class-week-cell.state-today-progress{ border-width:1.5px; }
-/* 수업했어야 함 + 진도 미입력 — 노랑 */
+/* 메모 없음 — 회색 (덜 압박) */
 .class-week-cell.state-past-empty{
-  background:var(--warning-dim,rgba(186,117,23,0.1));
-  border-color:var(--warning-border,#d97706);
+  background:var(--bg-elevated,var(--bg-surface));
+  border:1px dashed var(--border);
 }
 .class-week-cell.state-past-empty:hover{
-  background:#fff;border-color:var(--warning,#d97706);
+  background:#fff;border-color:var(--accent);border-style:solid;
 }
 [data-theme="dark"] .class-week-cell.state-past-empty{
-  background:rgba(186,117,23,0.15);
+  background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.12);
 }
-/* 오늘 + 진도 미입력 — 진한 노랑 */
 .class-week-cell.state-today-empty{
-  background:var(--warning-dim,rgba(186,117,23,0.1));
-  border:1.5px solid var(--warning,#d97706);
+  background:var(--bg-elevated,var(--bg-surface));
+  border:1.5px dashed var(--accent);
 }
-.class-week-cell.state-today-empty:hover{ background:#fff; }
-/* 미래 수업 — accent 기본 (이미 .class-week-cell에서 처리) */
+.class-week-cell.state-today-empty:hover{background:#fff;border-style:solid;}
+/* 메모만 있음 — 살구색 (중간 톤) */
+.class-week-cell.state-past-memo{
+  background:#FAEEDA;border-color:#EF9F27;
+}
+.class-week-cell.state-past-memo:hover{background:#fff;border-color:#BA7517;}
+[data-theme="dark"] .class-week-cell.state-past-memo{
+  background:rgba(186,117,23,0.18);border-color:rgba(186,117,23,0.5);
+}
+.class-week-cell.state-today-memo{
+  background:#FAEEDA;border:1.5px solid #BA7517;
+}
+.class-week-cell.state-today-memo:hover{background:#fff;}
+[data-theme="dark"] .class-week-cell.state-today-memo{
+  background:rgba(186,117,23,0.25);border-color:#EF9F27;
+}
+/* 미래 수업 — accent 기본 유지 */
 .class-week-cell.state-future{ /* 기본 스타일 유지 */ }
 /* 차시 배지 — 상태별 */
 .week-cell-session.state-past-progress,
 .week-cell-session.state-today-progress{
   background:var(--success,#1f9e75);color:#fff;border-color:var(--success,#1f9e75);
 }
+.week-cell-session.state-past-memo,
+.week-cell-session.state-today-memo{
+  background:#BA7517;color:#fff;border-color:#BA7517;
+}
 .week-cell-session.state-past-empty,
 .week-cell-session.state-today-empty{
-  background:var(--warning,#d97706);color:#fff;border-color:var(--warning,#d97706);
+  background:var(--bg-surface);color:var(--text-tertiary);border:1px solid var(--border);
 }
 .week-cell-session.state-future{
   background:var(--bg-surface);color:var(--text-secondary);
@@ -4426,7 +4467,10 @@ details > summary::-webkit-details-marker { display:none; }
   width:10px;height:10px;border-radius:3px;flex-shrink:0;
 }
 .week-legend-dot.state-past-progress{ background:var(--success,#1f9e75); }
-.week-legend-dot.state-past-empty{ background:var(--warning,#d97706); }
+.week-legend-dot.state-past-memo{ background:#BA7517; }
+.week-legend-dot.state-past-empty{
+  background:var(--bg-elevated,var(--bg-surface));border:1px dashed var(--border);
+}
 .week-legend-dot.state-future{
   background:var(--accent-dim);border:1px dashed var(--border);
 }
@@ -6657,6 +6701,14 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </div>
 
     <div class="att-modal-body">
+
+      <div class="att-multi-hint" id="att-multi-hint" style="display:none;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>여러 상태(지각·조퇴 등)를 동시 선택할 수 있어요</span>
+        <button class="att-multi-hint-dismiss" onclick="dismissAttMultiHint()" title="다시 안내 안 받기">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
 
       <!-- 1단계: 사유 -->
       <div class="att-step" id="att-step-reason">
@@ -17431,6 +17483,7 @@ function renderStudentMonthlyView(){
   html += '<div class="smv-unauth'+(hasUnauth?'':' empty')+'">';
   html += '<svg class="smv-unauth-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   html += '<span class="smv-unauth-label">미인정</span>';
+  html += '<span class="smv-unauth-hint" title="일반 규칙: 미인정 지각/조퇴/결과 3회 = 결석 1일 환산.&#10;&#10;학교마다 규정이 다를 수 있으니 본인 학교 출결 규정 확인을 권장합니다." tabindex="0">?</span>';
   if(hasUnauth){
     html += '<span class="smv-unauth-items">';
     if(u.absent > 0)      html += '<span class="smv-unauth-item key"><strong>'+u.absent+'</strong> 결석</span>';
@@ -17438,7 +17491,7 @@ function renderStudentMonthlyView(){
     if(u.early_leave > 0) html += '<span class="smv-unauth-item"><strong>'+u.early_leave+'</strong> 조퇴</span>';
     if(u.partial > 0)     html += '<span class="smv-unauth-item"><strong>'+u.partial+'</strong> 결과</span>';
     if(u.convertedAbsent > 0){
-      html += '<span class="smv-unauth-converted" title="미인정 지각/조퇴/결과 '+u.partialSum+'회 = 결석 '+u.convertedAbsent+'일 환산">→ 결석 <strong>'+u.convertedAbsent+'일</strong> 환산</span>';
+      html += '<span class="smv-unauth-converted" title="일반 환산 규칙 기준: 미인정 지각/조퇴/결과 '+u.partialSum+'회 = 결석 '+u.convertedAbsent+'일.&#10;본인 학교 규정과 다를 수 있으니 확인해주세요.">→ 결석 <strong>'+u.convertedAbsent+'일</strong> 환산</span>';
     }
     html += '</span>';
   } else {
@@ -17971,6 +18024,7 @@ function openAttendanceAdd(studentNum){
     selections:{ absent:{active:false,periods:{}}, late:{active:false,periods:{}}, early_leave:{active:false,periods:{}}, partial:{active:false,periods:{}} },
     memo:'' };
   setupAttModalForStudent(stu);
+  _showAttMultiHint();
   document.getElementById('att-modal-overlay').style.display = 'flex';
 }
 
@@ -17996,7 +18050,27 @@ function openAttendanceEdit(studentNum, recordId){
   document.getElementById('att-step-status').classList.remove('att-step-disabled');
   document.getElementById('att-step-memo').classList.remove('att-step-disabled');
   updateAttSaveButton();
+  _showAttMultiHint();
   document.getElementById('att-modal-overlay').style.display = 'flex';
+}
+
+function _showAttMultiHint(){
+  var hintEl = document.getElementById('att-multi-hint');
+  if(!hintEl) return;
+  var dismissed = localStorage.getItem('ht2_att_multi_hint_dismissed') === '1';
+  var count = parseInt(localStorage.getItem('ht2_att_multi_hint_count') || '0');
+  if(dismissed || count >= 5){
+    hintEl.style.display = 'none';
+  } else {
+    hintEl.style.display = 'flex';
+    localStorage.setItem('ht2_att_multi_hint_count', String(count + 1));
+  }
+}
+
+function dismissAttMultiHint(){
+  localStorage.setItem('ht2_att_multi_hint_dismissed', '1');
+  var el = document.getElementById('att-multi-hint');
+  if(el) el.style.display = 'none';
 }
 
 function setupAttModalForStudent(stu){
@@ -18645,18 +18719,22 @@ function getAutoSessionNumber(entry, dateStr){
     cursor.setDate(cursor.getDate()+1);
   }
 
-  var hasProgress = false;
+  var hasProgress = false, hasAnyMemo = false;
   if(entry.memos){
     var memo = null;
     for(var mi=0; mi<entry.memos.length; mi++){
       if(entry.memos[mi].date === dateStr){ memo = entry.memos[mi]; break; }
     }
-    if(memo && memo.progress && memo.progress.trim()) hasProgress = true;
+    if(memo){
+      hasAnyMemo = true;
+      if(memo.progress && memo.progress.trim()) hasProgress = true;
+    }
   }
 
   var result = {
     sessionNum: isTargetHoliday ? 0 : sessionCount,
     hasProgress: hasProgress,
+    hasAnyMemo: hasAnyMemo,
     isHoliday: isTargetHoliday
   };
   _sessionCache[cacheKey] = result;
@@ -18671,8 +18749,13 @@ function getCellState(sessionInfo, dateStr){
   if(sessionInfo.isHoliday) return 'holiday';
   var todayStr = formatDateForInput(new Date());
   if(dateStr > todayStr) return 'future';
-  if(dateStr === todayStr) return sessionInfo.hasProgress ? 'today-progress' : 'today-empty';
-  return sessionInfo.hasProgress ? 'past-progress' : 'past-empty';
+  var isToday = (dateStr === todayStr);
+  // 진도 입력됨 — 녹색 (가장 강조)
+  if(sessionInfo.hasProgress) return isToday ? 'today-progress' : 'past-progress';
+  // 메모는 있지만 진도 없음 — 살구색 (중간)
+  if(sessionInfo.hasAnyMemo) return isToday ? 'today-memo' : 'past-memo';
+  // 메모 자체 없음 — 회색 (덜 압박)
+  return isToday ? 'today-empty' : 'past-empty';
 }
 
 // 오늘 해당 수업에 이미 메모가 있는지
@@ -19090,7 +19173,8 @@ function renderClassWeek(){
   // 범례
   var legendHtml = '<div class="week-legend">'+
     '<span class="week-legend-item"><span class="week-legend-dot state-past-progress"></span>진도 입력</span>'+
-    '<span class="week-legend-item"><span class="week-legend-dot state-past-empty"></span>미입력</span>'+
+    '<span class="week-legend-item"><span class="week-legend-dot state-past-memo"></span>메모만</span>'+
+    '<span class="week-legend-item"><span class="week-legend-dot state-past-empty"></span>미작성</span>'+
     '<span class="week-legend-item"><span class="week-legend-dot state-future"></span>예정</span>'+
     '<span class="week-legend-item"><span class="week-legend-dot state-holiday"></span>휴업일</span>'+
     '</div>';
@@ -19157,7 +19241,12 @@ function renderClassWeek(){
 
         var sessionPill = '';
         if(sessionInfo.sessionNum > 0){
-          sessionPill = '<div class="week-cell-session state-'+cellState+'">'+sessionInfo.sessionNum+'차시</div>';
+          var semStart = getSemesterStartDate(cellDate);
+          var _tip = '학기 시작 '+semStart.replace(/-/g,'.')+' 기준 '+sessionInfo.sessionNum+'차시';
+          if(sessionInfo.hasProgress) _tip += '\n진도: 입력됨';
+          else if(sessionInfo.hasAnyMemo) _tip += '\n메모는 있지만 진도 미입력';
+          else _tip += '\n메모 미작성';
+          sessionPill = '<div class="week-cell-session state-'+cellState+'" title="'+_tip+'">'+sessionInfo.sessionNum+'차시</div>';
         } else if(cellState === 'future'){
           // 미래 수업은 예측 차시 없이 빈 배지 표시 안 함
         }
