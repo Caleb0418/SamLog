@@ -2273,6 +2273,74 @@ body{
 .att-notify-btn.secondary{background:var(--bg-secondary);color:var(--text-secondary);}
 .att-notify-btn.primary{background:var(--accent);color:#fff;}
 .att-notify-btn:hover{opacity:.85;}
+/* 출결 달력 피커 */
+.att-cal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1200;
+  display:flex;align-items:center;justify-content:center;
+}
+.att-cal-modal{
+  background:var(--card-bg);border-radius:16px;padding:20px;
+  width:296px;box-shadow:0 20px 60px rgba(0,0,0,.22);
+  display:flex;flex-direction:column;gap:0;
+}
+.att-cal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.att-cal-title{font-size:15px;font-weight:700;color:var(--text);}
+.att-cal-nav{
+  width:30px;height:30px;border:none;border-radius:7px;
+  background:var(--bg-secondary);color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .13s;
+}
+.att-cal-nav:hover{background:var(--bg-elevated);}
+.att-cal-dow-row{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  text-align:center;margin-bottom:4px;
+}
+.att-cal-dow-row span{
+  font-size:10px;font-weight:600;color:var(--text-tertiary);padding:3px 0;
+}
+.att-cal-dow-row span:first-child{color:#ef4444;}
+.att-cal-dow-row span:last-child{color:#3b82f6;}
+.att-cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:2px;
+}
+.att-cal-day{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  aspect-ratio:1;border:none;background:transparent;border-radius:8px;
+  cursor:pointer;font-size:13px;color:var(--text);position:relative;
+  transition:background .12s;gap:3px;padding:0;
+}
+.att-cal-day:hover{background:var(--bg-elevated);}
+.att-cal-day.other-month{color:var(--text-tertiary);opacity:.4;}
+.att-cal-day.today{font-weight:700;color:var(--accent);}
+.att-cal-day.selected{background:var(--accent)!important;color:#fff!important;font-weight:600;}
+.att-cal-day.sun{color:#ef4444;}
+.att-cal-day.sat{color:#3b82f6;}
+.att-cal-day.selected.sun,.att-cal-day.selected.sat,.att-cal-day.selected.today{color:#fff!important;}
+.att-cal-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--accent);flex-shrink:0;
+}
+.att-cal-day.selected .att-cal-dot{background:rgba(255,255,255,.7);}
+.att-cal-footer{
+  display:flex;gap:8px;justify-content:flex-end;
+  margin-top:14px;padding-top:12px;border-top:1px solid var(--border);
+}
+.att-cal-today-btn{
+  padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;background:var(--accent);color:#fff;
+  transition:opacity .13s;
+}
+.att-cal-today-btn:hover{opacity:.85;}
+.att-cal-cancel-btn{
+  padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;background:var(--bg-secondary);color:var(--text-secondary);
+  transition:background .13s;
+}
+.att-cal-cancel-btn:hover{background:var(--bg-elevated);}
 
 .cr-memo-edit{
   margin-left:auto;
@@ -5096,6 +5164,29 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </div>
       </div>
+
+<!-- 출결 날짜 달력 피커 -->
+<div class="att-cal-overlay" id="att-cal-overlay" style="display:none;" onclick="if(event.target===this)closeAttCal()">
+  <div class="att-cal-modal">
+    <div class="att-cal-header">
+      <button class="att-cal-nav" onclick="attCalPrevMonth()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="att-cal-title" id="att-cal-title">2026년 5월</span>
+      <button class="att-cal-nav" onclick="attCalNextMonth()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="att-cal-dow-row">
+      <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+    </div>
+    <div class="att-cal-grid" id="att-cal-grid"></div>
+    <div class="att-cal-footer">
+      <button class="att-cal-today-btn" onclick="attCalSelectToday()">오늘로</button>
+      <button class="att-cal-cancel-btn" onclick="closeAttCal()">닫기</button>
+    </div>
+  </div>
+</div>
 
 <!-- 분류 모달 -->
 <div class="modal-overlay" id="classify-modal" onclick="if(event.target===this)closeClassifyModal()">
@@ -14434,12 +14525,76 @@ function markAttNotified(){
   if(markBtn) markBtn.textContent = '통지 완료됨 ✓';
   setTimeout(function(){ closeAttendanceNotify(); renderAttendanceTab(); }, 600);
 }
+var attCalState = { year: 0, month: 0 };
+
 function openAttendanceDatePicker(){
-  var d = prompt('날짜를 입력하세요 (YYYY-MM-DD)', attendanceCurrentDate);
-  if(!d) return;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ showToast('형식이 올바르지 않아요 (예: 2026-05-19)'); return; }
-  attendanceCurrentDate = d;
+  var parts = (attendanceCurrentDate || getTodayDate()).split('-');
+  attCalState.year  = parseInt(parts[0]);
+  attCalState.month = parseInt(parts[1]) - 1;
+  renderAttCal();
+  document.getElementById('att-cal-overlay').style.display = 'flex';
+}
+function closeAttCal(){
+  document.getElementById('att-cal-overlay').style.display = 'none';
+}
+function attCalPrevMonth(){
+  attCalState.month--;
+  if(attCalState.month < 0){ attCalState.month = 11; attCalState.year--; }
+  renderAttCal();
+}
+function attCalNextMonth(){
+  attCalState.month++;
+  if(attCalState.month > 11){ attCalState.month = 0; attCalState.year++; }
+  renderAttCal();
+}
+function renderAttCal(){
+  var y = attCalState.year, m = attCalState.month;
+  var KO_MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('att-cal-title').textContent = y + '년 ' + KO_MONTHS[m];
+
+  var today    = getTodayDate();
+  var selected = attendanceCurrentDate || today;
+
+  /* 출결 기록 있는 날짜 모음 */
+  var hasDot = {};
+  Object.keys(attendanceRecords).forEach(function(d){
+    var dm = attendanceRecords[d];
+    if(Object.keys(dm).some(function(n){ return (dm[n]||[]).length > 0; })) hasDot[d] = true;
+  });
+
+  var firstDow  = new Date(y, m, 1).getDay();      /* 0=일 */
+  var daysInMon = new Date(y, m + 1, 0).getDate();
+  var totalCells = Math.ceil((firstDow + daysInMon) / 7) * 7;
+
+  var html = '';
+  for(var i = 0; i < totalCells; i++){
+    var offset = i - firstDow;
+    var d = new Date(y, m, 1 + offset);
+    var ds = d.getFullYear() + '-' +
+             String(d.getMonth()+1).padStart(2,'0') + '-' +
+             String(d.getDate()).padStart(2,'0');
+    var inMonth = d.getMonth() === m;
+    var dow = d.getDay();
+
+    var cls = 'att-cal-day';
+    if(!inMonth)   cls += ' other-month';
+    if(ds === today && inMonth) cls += ' today';
+    if(ds === selected) cls += ' selected';
+    if(dow === 0)  cls += ' sun';
+    if(dow === 6)  cls += ' sat';
+
+    var dot = (hasDot[ds] && inMonth) ? '<span class="att-cal-dot"></span>' : '';
+    html += '<button class="'+cls+'" onclick="attCalSelectDate(\''+ds+'\')" '+(inMonth?'':'tabindex="-1"')+'>'+d.getDate()+dot+'</button>';
+  }
+  document.getElementById('att-cal-grid').innerHTML = html;
+}
+function attCalSelectDate(ds){
+  attendanceCurrentDate = ds;
+  closeAttCal();
   renderAttendanceTab();
+}
+function attCalSelectToday(){
+  attCalSelectDate(getTodayDate());
 }
 
 /* 출결 설정 모달 */
