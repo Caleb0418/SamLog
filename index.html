@@ -4616,6 +4616,16 @@ details > summary::-webkit-details-marker { display:none; }
 .week-grid-dayhead.is-today .week-grid-dayname{color:var(--accent);}
 .week-grid-daydate{font-size:10px;color:var(--text-tertiary);margin-top:1px;font-variant-numeric:tabular-nums;}
 .week-grid-dayhead.is-today .week-grid-daydate{color:var(--accent);font-weight:600;}
+/* 요일 헤더 카테고리 배경 (gradient) */
+.week-grid-dayhead.has-sched-exam{
+  background:linear-gradient(to bottom,rgba(251,146,60,0.1) 0%,transparent 100%);
+}
+.week-grid-dayhead.has-sched-listening{
+  background:linear-gradient(to bottom,rgba(99,102,241,0.1) 0%,transparent 100%);
+}
+.week-grid-dayhead.has-sched-activity{
+  background:linear-gradient(to bottom,rgba(34,197,94,0.08) 0%,transparent 100%);
+}
 /* 학사일정 띠 */
 .week-day-events{
   display:flex;flex-direction:column;gap:2px;
@@ -4643,6 +4653,26 @@ details > summary::-webkit-details-marker { display:none; }
   border-color:var(--danger,#ef4444);
   font-weight:600;
 }
+/* 카테고리별 이벤트 배지 색상 */
+.week-day-event.cat-holiday{
+  background:rgba(239,68,68,0.15);color:var(--danger,#ef4444);
+  border-color:rgba(239,68,68,0.3);font-weight:600;
+}
+.week-day-event.cat-exam{
+  background:rgba(251,146,60,0.15);color:#c2410c;
+  border-color:rgba(251,146,60,0.35);font-weight:600;
+}
+.week-day-event.cat-listening{
+  background:rgba(99,102,241,0.15);color:#4338ca;
+  border-color:rgba(99,102,241,0.3);font-weight:600;
+}
+.week-day-event.cat-activity{
+  background:rgba(34,197,94,0.15);color:#15803d;
+  border-color:rgba(34,197,94,0.3);
+}
+[data-theme="dark"] .week-day-event.cat-exam{ color:#fb923c; }
+[data-theme="dark"] .week-day-event.cat-listening{ color:#818cf8; }
+[data-theme="dark"] .week-day-event.cat-activity{ color:#4ade80; }
 .week-day-event-more{
   display:block;
   font-size:9px;color:var(--text-tertiary);
@@ -8740,6 +8770,23 @@ function loadAll(){
       if(cvsRaw) classViewSettings = JSON.parse(cvsRaw);
     }catch(e){ classViewSettings = { showSessionBadge: true }; }
 
+    // 기존 schoolSchedule 데이터에 category 필드 없으면 자동 보완
+    (function migrateScheduleCategories(){
+      var changed = false;
+      Object.keys(schoolSchedule).forEach(function(date){
+        (schoolSchedule[date] || []).forEach(function(ev){
+          if(!ev.category){
+            ev.category = categorizeScheduleEvent(ev.event);
+            changed = true;
+          }
+        });
+      });
+      if(changed){
+        var yr2 = getActiveYear ? getActiveYear() : String(new Date().getFullYear());
+        try{ localStorage.setItem('ht2_school_schedule_' + yr2, JSON.stringify(schoolSchedule)); }catch(e){}
+      }
+    })();
+
     // 마이그레이션: 잘못 들어간 학생 데이터(NaN/합계행) 제거
     var cleaned = 0;
     Object.keys(classes).forEach(function(key){
@@ -10473,6 +10520,23 @@ function getScheduleForDate(dateStr, grade){
   });
 }
 
+// 학사일정 카테고리 분류 키워드
+var SCHEDULE_CATEGORY = {
+  HOLIDAY:  /방학|휴업|휴일|공휴일|토요휴업|재량휴업|대체공휴|개교기념|삼일절|광복절|개천절|한글날|어린이날|현충일|성탄절|노동절|부처님|석가|설날|추석|신정/,
+  EXAM:     /고사|시험|평가회|학력평가|전국연합/,
+  LISTENING:/영어듣기/,
+  ACTIVITY: /체험학습|수련|수학여행|현장학습|소풍|캠프|체육대회|운동회|축제|학예|발표회|체력평가|PAPS|건강체력/
+};
+
+function categorizeScheduleEvent(eventName){
+  if(!eventName) return 'general';
+  if(SCHEDULE_CATEGORY.HOLIDAY.test(eventName))   return 'holiday';
+  if(SCHEDULE_CATEGORY.EXAM.test(eventName))      return 'exam';
+  if(SCHEDULE_CATEGORY.LISTENING.test(eventName)) return 'listening';
+  if(SCHEDULE_CATEGORY.ACTIVITY.test(eventName))  return 'activity';
+  return 'general';
+}
+
 // 특정 날짜가 휴업일인지 판별
 var NON_SCHOOL_KEYWORDS = /방학|휴업|휴일|공휴일|개교기념|재량휴|대체휴/;
 function isNonSchoolDay(dateStr, grade){
@@ -10487,24 +10551,38 @@ function isNonSchoolDay(dateStr, grade){
 }
 
 // 주간 시간표에서 사용할 종합 일정 정보
+var _SCAT_ORDER = { holiday:0, exam:1, listening:2, activity:3, general:4 };
 function getWeekDayScheduleInfo(dateStr, grade){
   var events = getScheduleForDate(dateStr, grade);
   var isHoliday = isNonSchoolDay(dateStr, grade);
+
   var sorted = events.slice().sort(function(a, b){
-    var aH = a.dayType === '휴업일' ? 1 : 0;
-    var bH = b.dayType === '휴업일' ? 1 : 0;
-    if(aH !== bH) return bH - aH;
+    // 1) 휴업일 dayType 우선
+    var aH = a.dayType === '휴업일' ? -1 : 0;
+    var bH = b.dayType === '휴업일' ? -1 : 0;
+    if(aH !== bH) return aH - bH;
+    // 2) 카테고리 순서
+    var aCat = _SCAT_ORDER[a.category||'general'];
+    var bCat = _SCAT_ORDER[b.category||'general'];
+    if(aCat !== bCat) return aCat - bCat;
+    // 3) 담당 학년 해당 이벤트 우선
     if(grade){
-      var aM = a.gradeScope && a.gradeScope['g'+grade] ? 1 : 0;
-      var bM = b.gradeScope && b.gradeScope['g'+grade] ? 1 : 0;
-      if(aM !== bM) return bM - aM;
+      var aM = a.gradeScope && a.gradeScope['g'+grade] ? -1 : 0;
+      var bM = b.gradeScope && b.gradeScope['g'+grade] ? -1 : 0;
+      if(aM !== bM) return aM - bM;
     }
     return 0;
   });
+
+  // 대표 카테고리 결정
+  var primaryCategory = sorted.length > 0 ? (sorted[0].category || 'general') : 'none';
+  if(sorted.some(function(ev){ return ev.dayType === '휴업일'; })) primaryCategory = 'holiday';
+
   return {
     events: sorted,
     isHoliday: isHoliday,
-    primaryEvent: sorted.length > 0 ? sorted[0].event : ''
+    primaryEvent: sorted.length > 0 ? sorted[0].event : '',
+    primaryCategory: primaryCategory
   };
 }
 
@@ -10635,6 +10713,7 @@ function mergeNeisSchedule(rows){
         g5: r.FIV_GRADE_EVENT_YN==='Y', g6: r.SIX_GRADE_EVENT_YN==='Y'
       },
       dayType: r.SBTR_DD_SC_NM || '',
+      category: categorizeScheduleEvent(r.EVENT_NM),
       source: 'neis'
     });
     added++;
@@ -19305,6 +19384,9 @@ function renderClassWeek(){
     var headCls = 'week-grid-dayhead';
     if(isToday) headCls += ' is-today';
     if(di.schedInfo.isHoliday) headCls += ' is-holiday';
+    if(di.schedInfo.primaryCategory && di.schedInfo.primaryCategory !== 'none' && !di.schedInfo.isHoliday){
+      headCls += ' has-sched-'+di.schedInfo.primaryCategory;
+    }
 
     html += '<div class="'+headCls+'" onclick="openWeekDayEvents(\''+di.dateStr+'\')" title="'+(di.schedInfo.events.length>0?'학사일정 보기':'')+'">';
     html += '<div class="week-grid-dayname">'+WEEKDAYS[d]+'</div>';
@@ -19314,7 +19396,11 @@ function renderClassWeek(){
       var visEvts = di.schedInfo.events.slice(0, 2);
       visEvts.forEach(function(ev){
         var evCls = 'week-day-event';
-        if(ev.dayType === '휴업일') evCls += ' is-holiday';
+        var evCat = ev.category || 'general';
+        if(ev.dayType === '휴업일' || evCat === 'holiday') evCls += ' cat-holiday';
+        else if(evCat === 'exam')      evCls += ' cat-exam';
+        else if(evCat === 'listening') evCls += ' cat-listening';
+        else if(evCat === 'activity')  evCls += ' cat-activity';
         else if(teacherGrade && ev.gradeScope && ev.gradeScope['g'+teacherGrade]) evCls += ' is-my-grade';
         var tip = ev.event + (ev.detail ? '\n' + ev.detail : '');
         html += '<span class="'+evCls+'" title="'+escapeHtml(tip)+'">'+escapeHtml(ev.event)+'</span>';
