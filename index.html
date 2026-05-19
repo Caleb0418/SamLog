@@ -1970,6 +1970,67 @@ body{
 .att-issue-num{font-size:11px;color:var(--text-tertiary);font-weight:400;margin-left:4px;}
 .att-issue-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;}
 .att-issue-actions{display:flex;gap:6px;}
+/* 전체 학생 출결 테이블 */
+.att-table-wrap{
+  border:1px solid var(--border);border-radius:10px;overflow:hidden;
+  background:var(--card-bg);margin-top:4px;
+}
+.att-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.att-th{
+  padding:9px 12px;font-size:11px;font-weight:600;
+  color:var(--text-tertiary);text-align:left;
+  background:var(--bg-secondary);border-bottom:1px solid var(--border);
+}
+.att-th-num{width:44px;}
+.att-th-name{width:72px;}
+.att-th-status{width:80px;}
+.att-th-detail{width:auto;}
+.att-th-action{width:80px;text-align:right;}
+.att-tr{border-bottom:1px solid var(--border);}
+.att-tr:last-child{border-bottom:none;}
+.att-tr.att-tr-issue{background:var(--bg-overlay);}
+.att-tr:hover{background:var(--bg-elevated);}
+.att-td{
+  padding:9px 12px;font-size:13px;color:var(--text);
+  vertical-align:middle;overflow:hidden;
+}
+.att-td-num{color:var(--text-tertiary);font-size:12px;font-variant-numeric:tabular-nums;}
+.att-td-name{font-weight:600;}
+.att-status-chip{
+  display:inline-flex;align-items:center;padding:2px 8px;
+  border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;
+}
+.att-status-chip.present{background:rgba(34,197,94,.1);color:#16a34a;}
+.att-status-chip.absent{background:rgba(239,68,68,.1);color:#ef4444;}
+.att-status-chip.late{background:rgba(245,158,11,.1);color:#d97706;}
+.att-status-chip.early-leave{background:rgba(168,85,247,.1);color:#9333ea;}
+.att-status-chip.partial{background:rgba(59,130,246,.1);color:#2563eb;}
+.att-status-chip.makeup{background:rgba(34,197,94,.1);color:#16a34a;}
+.att-detail-item{
+  font-size:12px;color:var(--text-secondary);
+  display:flex;align-items:center;gap:6px;
+  padding:1px 0;flex-wrap:wrap;
+}
+.att-detail-item+.att-detail-item{margin-top:4px;padding-top:4px;border-top:1px dashed var(--border);}
+.att-detail-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.att-row-icons{display:flex;gap:2px;flex-shrink:0;}
+.att-icon-btn{
+  width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
+  border:none;border-radius:5px;cursor:pointer;background:transparent;color:var(--text-tertiary);
+  transition:background .13s;padding:0;
+}
+.att-icon-btn:hover{background:var(--bg-elevated);color:var(--text);}
+.att-icon-btn.danger:hover{background:rgba(239,68,68,.1);color:#ef4444;}
+.att-icon-btn.notify:hover{background:rgba(99,102,241,.1);color:#6366f1;}
+.att-td-actions{text-align:right;white-space:nowrap;}
+.att-add-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:6px;
+  border:1.5px dashed var(--border-strong,var(--border));
+  background:transparent;color:var(--text-tertiary);cursor:pointer;
+  font-size:15px;font-weight:300;transition:all .13s;
+}
+.att-add-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
 .att-notify-btn{
   padding:5px 10px;font-size:11px;
   background:var(--bg-overlay);color:var(--text-secondary);
@@ -4858,16 +4919,14 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   <!-- 통계 카드 -->
   <div class="att-stats" id="att-stats"></div>
 
-  <!-- 학생 추가 검색창 -->
+  <!-- 학생 검색/필터 -->
   <div class="att-search-wrap">
     <svg class="att-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="att-search" class="att-search-input" placeholder="학생 추가 — 이름 또는 번호 입력" autocomplete="off" oninput="onAttendanceSearchInput(this.value)" onfocus="onAttendanceSearchFocus()" />
-    <div class="att-search-dropdown" id="att-search-dropdown" style="display:none;"></div>
+    <input type="text" id="att-filter" class="att-search-input" placeholder="이름 또는 번호로 검색" autocomplete="off" oninput="onAttFilterInput(this.value)">
   </div>
 
-  <!-- 이슈 학생 카드 목록 -->
-  <div class="att-issue-header" id="att-issue-header"></div>
-  <div class="att-issue-list" id="att-issue-list"></div>
+  <!-- 전체 학생 출결 테이블 -->
+  <div class="att-table-wrap" id="att-table-wrap"></div>
 
 </div><!-- /tab-attendance -->
 
@@ -8343,15 +8402,14 @@ function renderStudentAttendanceSummary(num){
   el.style.display = 'flex';
 }
 function goToAttendanceForStudent(num){
-  attendanceFilterStudent = String(num);
   switchTab('attendance');
   setTimeout(function(){
-    var inp = document.getElementById('att-search-input');
-    if(inp){
-      var s = students.find(function(st){ return st.num === num; });
-      inp.value = s ? s.name : String(num);
-      renderAttendanceIssueList();
-    }
+    var s = students.find(function(st){ return st.num === num; });
+    var q = s ? s.name : String(parseInt(num));
+    var inp = document.getElementById('att-filter');
+    if(inp){ inp.value = q; }
+    attTableFilter = q;
+    renderAttendanceTable();
   }, 80);
 }
 function getTodayDate(){
@@ -13913,6 +13971,12 @@ function updateTimetableBanner(){
 ═══════════════════════════════════════════ */
 var attendanceCurrentDate = null;
 
+var attTableFilter = '';
+function onAttFilterInput(q){
+  attTableFilter = q.trim();
+  renderAttendanceTable();
+}
+
 function renderAttendanceTab(){
   var c = getActiveClass();
   if(!c || !c.students || c.students.length === 0){
@@ -13926,7 +13990,7 @@ function renderAttendanceTab(){
     attendanceCurrentDate === getTodayDate() ? '오늘 출결' :
     formatAttendanceDate(attendanceCurrentDate) + ' 출결';
   renderAttendanceStats();
-  renderAttendanceIssueList();
+  renderAttendanceTable();
 }
 
 function renderAttendanceStats(){
@@ -13954,96 +14018,99 @@ function renderAttendanceStats(){
   document.getElementById('att-stats').innerHTML = html;
 }
 
-function renderAttendanceIssueList(){
-  var c = getActiveClass();
-  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
-  var issueStudentNums = Object.keys(dateRecs).filter(function(num){
-    return (dateRecs[num] || []).length > 0;
-  });
-  var attendedCount = c.students.length - issueStudentNums.length;
-  var header = document.getElementById('att-issue-header');
-  if(issueStudentNums.length === 0){
-    header.innerHTML = '<span class="att-issue-hint">이슈 학생이 없어요. 위 검색창에서 학생을 찾아 출결을 등록하세요.</span>';
-    document.getElementById('att-issue-list').innerHTML = '';
-    return;
-  }
-  header.innerHTML =
-    '<strong>이슈 학생 '+issueStudentNums.length+'명</strong>'+
-    '<span class="att-issue-sep">·</span>'+
-    '<span class="att-issue-hint">나머지 '+attendedCount+'명은 자동 출석 처리됐어요</span>';
-  issueStudentNums.sort(function(a,b){ return parseInt(a)-parseInt(b); });
-  var html = '';
-  issueStudentNums.forEach(function(num){
-    var stu = c.students.find(function(s){ return s.num === num; });
-    if(!stu) return;
-    var recs = dateRecs[num];
-    var initial = stu.name.substring(0,2);
-    html += '<div class="att-issue-card">';
-    html += '<div class="att-issue-card-head">';
-    html += '<div class="att-issue-avatar">'+escapeHtml(initial)+'</div>';
-    html += '<div class="att-issue-info">';
-    html += '<div class="att-issue-name">'+escapeHtml(stu.name)+'<span class="att-issue-num">'+parseInt(num)+'번</span></div>';
-    html += '<div class="att-issue-sub">사례 '+recs.length+'건</div>';
-    html += '</div>';
-    html += '<div class="att-issue-actions">';
-    html += '<button class="att-notify-btn" onclick="openAttendanceNotify(\''+num+'\')">'+
-      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>통지문구</button>';
-    html += '</div></div>';
-    recs.forEach(function(r){
-      html += '<div class="att-record-row reason-'+r.reason+'">';
-      html += '<div class="att-record-tags">';
-      html += '<span class="att-record-tag '+r.reason+'">'+getReasonLabel(r.reason)+'</span>';
-      html += '<span class="att-record-tag '+r.reason+'">'+getStatusLabel(r.status)+'</span>';
-      html += '</div>';
-      html += '<div class="att-record-summary">'+escapeHtml(summarizePeriods(r.periods));
-      if(r.memo) html += ' · '+escapeHtml(r.memo);
-      html += '</div>';
-      html += '<div class="att-record-actions">';
-      html += '<button class="att-record-icon-btn" onclick="openAttendanceEdit(\''+num+'\',\''+r.id+'\')" title="수정">'+
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>';
-      html += '<button class="att-record-icon-btn" onclick="deleteAttendanceRecord(\''+num+'\',\''+r.id+'\')" title="삭제">'+
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>';
-      html += '</div></div>';
-    });
-    html += '<div class="att-record-add">'+
-      '<button class="att-record-add-btn" onclick="openAttendanceAdd(\''+num+'\')">'+
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>사례 추가</button></div>';
-    html += '</div>';
-  });
-  document.getElementById('att-issue-list').innerHTML = html;
-}
-
-function onAttendanceSearchInput(query){
-  var dropdown = document.getElementById('att-search-dropdown');
-  query = query.trim();
-  if(!query){ dropdown.style.display='none'; return; }
+function renderAttendanceTable(){
   var c = getActiveClass();
   if(!c) return;
-  var matches = (c.students||[]).filter(function(s){
-    return s.name.indexOf(query)>=0 || s.num.indexOf(query)>=0 || parseInt(s.num)===parseInt(query);
-  }).slice(0,8);
-  var html = '';
-  if(matches.length===0){
-    html='<div class="att-search-empty">일치하는 학생이 없어요</div>';
-  } else {
-    matches.forEach(function(s){
-      html+='<div class="att-search-item" onclick="onSelectStudentForAttendance(\''+s.num+'\')">'+
-        '<span class="att-search-item-num">'+parseInt(s.num)+'번</span>'+
-        '<span class="att-search-item-name">'+escapeHtml(s.name)+'</span></div>';
+  var wrap = document.getElementById('att-table-wrap');
+  if(!wrap) return;
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var q = attTableFilter.toLowerCase();
+
+  var statusLabel = {absent:'결석', late:'지각', early_leave:'조퇴', partial:'결과', makeup:'공결'};
+  var statusCls   = {absent:'absent', late:'late', early_leave:'early-leave', partial:'partial', makeup:'makeup'};
+
+  var list = (c.students || []).slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); });
+  if(q){
+    list = list.filter(function(s){
+      return s.name.indexOf(q) >= 0 || String(parseInt(s.num)).indexOf(q) >= 0;
     });
   }
-  dropdown.innerHTML=html;
-  dropdown.style.display='block';
+
+  /* SVG 아이콘 공통 */
+  var svgEdit   = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+  var svgDelete = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  var svgNotify = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+
+  var rows = '';
+  list.forEach(function(s){
+    var recs = dateRecs[s.num] || [];
+    var isIssue = recs.length > 0;
+    var trClass = 'att-tr' + (isIssue ? ' att-tr-issue' : '');
+
+    /* 상태 셀 */
+    var statusCell = '';
+    if(recs.length === 0){
+      statusCell = '<span class="att-status-chip present">출석</span>';
+    } else {
+      statusCell = recs.map(function(r){
+        var sc = statusCls[r.status] || 'present';
+        var sl = statusLabel[r.status] || r.status;
+        return '<span class="att-status-chip '+sc+'" style="margin-bottom:2px;">'+sl+'</span>';
+      }).join('<br>');
+    }
+
+    /* 상세 셀 (이슈 있을 때만) */
+    var detailCell = '';
+    if(recs.length > 0){
+      detailCell = recs.map(function(r){
+        var rl = getReasonLabel(r.reason);
+        var ps = summarizePeriods(r.periods);
+        var memo = r.memo ? ' · '+escapeHtml(r.memo) : '';
+        var detail = escapeHtml(rl) + (ps ? ' · '+escapeHtml(ps) : '') + memo;
+        var icons =
+          '<span class="att-row-icons">'+
+            '<button class="att-icon-btn" onclick="openAttendanceEdit(\''+s.num+'\',\''+r.id+'\')" title="수정">'+svgEdit+'</button>'+
+            '<button class="att-icon-btn danger" onclick="deleteAttendanceRecord(\''+s.num+'\',\''+r.id+'\')" title="삭제">'+svgDelete+'</button>'+
+          '</span>';
+        return '<div class="att-detail-item"><span class="att-detail-text">'+detail+'</span>'+icons+'</div>';
+      }).join('');
+    }
+
+    /* 액션 셀 */
+    var notifyBtn = isIssue
+      ? '<button class="att-icon-btn notify" onclick="openAttendanceNotify(\''+s.num+'\')" title="학부모 통지">'+svgNotify+'</button>'
+      : '';
+    var addBtn = '<button class="att-add-btn" onclick="openAttendanceAdd(\''+s.num+'\')" title="출결 추가">+</button>';
+
+    rows +=
+      '<tr class="'+trClass+'">'+
+        '<td class="att-td att-td-num">'+parseInt(s.num)+'</td>'+
+        '<td class="att-td att-td-name">'+escapeHtml(s.name)+'</td>'+
+        '<td class="att-td att-td-status">'+statusCell+'</td>'+
+        '<td class="att-td att-td-detail">'+detailCell+'</td>'+
+        '<td class="att-td att-td-actions">'+notifyBtn+' '+addBtn+'</td>'+
+      '</tr>';
+  });
+
+  if(list.length === 0){
+    wrap.innerHTML = '<div style="padding:32px;text-align:center;font-size:13px;color:var(--text-tertiary);">검색 결과가 없어요</div>';
+    return;
+  }
+
+  wrap.innerHTML =
+    '<table class="att-table">'+
+      '<thead><tr>'+
+        '<th class="att-th att-th-num">번호</th>'+
+        '<th class="att-th att-th-name">이름</th>'+
+        '<th class="att-th att-th-status">출결</th>'+
+        '<th class="att-th att-th-detail">상세</th>'+
+        '<th class="att-th att-th-action">액션</th>'+
+      '</tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>';
 }
-function onAttendanceSearchFocus(){
-  var v=document.getElementById('att-search').value.trim();
-  if(v) onAttendanceSearchInput(v);
-}
-function onSelectStudentForAttendance(num){
-  document.getElementById('att-search').value='';
-  document.getElementById('att-search-dropdown').style.display='none';
-  openAttendanceAdd(num);
-}
+
+/* 구 검색 드롭다운 제거 — 테이블 필터로 대체 */
 
 /* ═══════════════════════════════════════════
    출결 사례 추가/수정 모달
