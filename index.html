@@ -75,6 +75,10 @@
 
   --memo-attendance: #f59e0b;         /* 출결 — 호박색 */
 
+  --memo-bulk: #64748B;              /* 일괄 공지 — 회색 */
+  --memo-bulk-dim: #F1F5F9;
+  --memo-bulk-border: #CBD5E1;
+
   /* 모서리 */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -136,6 +140,10 @@
   --memo-unsorted-border: #6B2820;
 
   --memo-attendance: #fbbf24;         /* 출결 — 호박색 다크 */
+
+  --memo-bulk: #94A3B8;
+  --memo-bulk-dim: #1E293B;
+  --memo-bulk-border: #334155;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -934,6 +942,31 @@ body{
 }
 /* 유형별 색상은 카드 내부 도트로만 표현 */
 .rec-card.unsorted{background:var(--memo-unsorted-dim);border-color:var(--memo-unsorted-border);}
+.rec-card.bulk{background:var(--memo-bulk-dim);border-color:var(--memo-bulk-border);}
+[data-theme="dark"] .rec-card.bulk{background:var(--memo-bulk-dim);border-color:var(--memo-bulk-border);}
+.rec-bulk-label{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:500;
+  padding:2px 7px;border-radius:3px;
+  background:var(--memo-bulk-dim);
+  color:var(--memo-bulk);
+  margin-left:6px;
+}
+.rec-bulk-label svg{flex-shrink:0;}
+.rec-bulk-actions{
+  margin-top:10px;padding-top:8px;
+  border-top:1px solid var(--memo-bulk-border);
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--text-tertiary);
+}
+.rec-bulk-meta{flex:1;}
+.rec-bulk-convert-btn{
+  background:transparent;border:none;cursor:pointer;
+  font-size:11px;color:var(--text-secondary);
+  text-decoration:underline;text-underline-offset:2px;
+  font-family:inherit;padding:2px 6px;
+}
+.rec-bulk-convert-btn:hover{color:var(--text);}
 
 /* 확인 필요 깃발 강조 — 옅은 빨간 배경 유지 */
 .rec-card.has-followup{
@@ -959,6 +992,7 @@ body{
 .dot-parent{background:var(--memo-parent);}
 .dot-unsorted{background:var(--memo-unsorted);}
 .dot-attendance{background:var(--memo-attendance,#f59e0b);}
+.dot-bulk{background:var(--memo-bulk);}
 .rec-type-name{font-size:12px;font-weight:500;color:var(--text);}
 .rec-time{font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;}
 .rec-content{font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;word-break:break-word;}
@@ -7685,14 +7719,18 @@ function renderTimeline(){
     html += '<div class="day-label">'+dayLabel(date)+'</div>';
     var dayRecs = groups[date];
     dayRecs.forEach(function(r, i){
-      var typeKor = ({unsorted:'미분류',observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || r.type;
-      var timeLabel = r.type === 'unsorted' ? '퀵메모 · '+(r.time||'') : r.type === 'attendance' ? (r.attSummary||'') : (r.time||'');
+      var typeKor = ({unsorted:'미분류',observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'공지'})[r.type] || r.type;
+      var timeLabel = r.type === 'unsorted' ? '퀵메모 · '+(r.time||'') : r.type === 'attendance' ? (r.attSummary||'') : r.type === 'bulk' ? '공지 · '+(r.time||'') : (r.time||'');
       var followClass = '';
       if(r.needsFollowUp && !r.followedUp) followClass = ' has-followup';
       else if(r.needsFollowUp && r.followedUp) followClass = ' followup-done';
       html += '<div class="rec-card '+r.type+followClass+'" id="rec-card-'+r.id+'">';
       html += '<div class="rec-head">';
-      html += '<div class="rec-type"><span class="rec-dot dot-'+r.type+'"></span><span class="rec-type-name">'+typeKor+'</span></div>';
+      html += '<div class="rec-type"><span class="rec-dot dot-'+r.type+'"></span><span class="rec-type-name">'+typeKor+'</span>';
+      if(r.type === 'bulk' && r.bulkClassLabel){
+        html += '<span class="rec-bulk-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'+escapeHtml(r.bulkClassLabel)+' 전체</span>';
+      }
+      html += '</div>';
       // 확인 필요 깃발 — 켜져 있으면 빨강 또는 회색(완료), 꺼져 있으면 호버 시만 표시
       var flagState = r.needsFollowUp ? (r.followedUp ? 'done' : 'on') : 'off';
       var flagTitle = flagState === 'on' ? '확인 필요 (클릭해서 완료 처리)'
@@ -7745,6 +7783,13 @@ function renderTimeline(){
         html += '<button class="rec-classify-btn" onclick="openClassifyModal(\''+r.id+'\',\'consultation\')"><span class="dot cons"></span>상담</button>';
         html += '<button class="rec-classify-btn" onclick="openClassifyModal(\''+r.id+'\',\'life\')"><span class="dot life"></span>생활</button>';
         html += '<button class="rec-classify-btn" onclick="openClassifyModal(\''+r.id+'\',\'parent\')"><span class="dot par"></span>학부모</button>';
+        html += '</div>';
+      }
+      if(r.type === 'bulk'){
+        var bulkMeta = r.bulkRecipientCount ? r.bulkRecipientCount+'명에게 동일 발송됨' : '학급 전체 발송';
+        html += '<div class="rec-bulk-actions">';
+        html += '<span class="rec-bulk-meta">'+escapeHtml(bulkMeta)+'</span>';
+        html += '<button class="rec-bulk-convert-btn" onclick="openBulkConvertModal(\''+r.id+'\')">유형 변경</button>';
         html += '</div>';
       }
       html += '</div>';
@@ -7879,6 +7924,61 @@ function saveRecord(){
 /* ═══════════════════════════════════════════
    분류 모달 (미분류 → 관찰/상담/학부모)
 ═══════════════════════════════════════════ */
+function openBulkConvertModal(recordId){
+  if(!currentStudent) return;
+  var recs = records[currentStudent] || [];
+  var rec = recs.find(function(r){ return r.id === recordId; });
+  if(!rec || rec.type !== 'bulk') return;
+  var newType = prompt(
+    '이 공지 메모를 어떤 유형으로 변경할까요?\n\n'+
+    '1: 관찰\n2: 상담\n3: 생활\n4: 학부모\n\n'+
+    '숫자 입력 (취소는 빈칸):'
+  );
+  if(!newType || !newType.trim()) return;
+  var typeMap = {'1':'observation','2':'consultation','3':'life','4':'parent'};
+  var targetType = typeMap[newType.trim()];
+  if(!targetType){ showToast('1~4 중 하나를 입력해주세요'); return; }
+  var groupId = rec.bulkGroupId;
+  var groupSize = rec.bulkRecipientCount || 0;
+  var applyToGroup = false;
+  if(groupId && groupSize > 1){
+    applyToGroup = confirm(
+      '이 메모는 '+groupSize+'명에게 동일하게 보낸 공지 메모입니다.\n\n'+
+      '확인 — 그룹 전체 '+groupSize+'명 모두 변경\n'+
+      '취소 — 이 학생 1명만 변경'
+    );
+  }
+  var typeKorMap = {observation:'관찰',consultation:'상담',life:'생활',parent:'학부모'};
+  var changeCount = 0;
+  if(applyToGroup){
+    Object.keys(classes).forEach(function(ck){
+      var cls = classes[ck];
+      if(!cls.records) return;
+      Object.keys(cls.records).forEach(function(num){
+        (cls.records[num]||[]).forEach(function(r){
+          if(r.bulkGroupId === groupId){
+            r.type = targetType;
+            delete r.bulkGroupId; delete r.bulkClassKey;
+            delete r.bulkClassLabel; delete r.bulkRecipientCount;
+            r.updatedAt = new Date().toISOString();
+            changeCount++;
+          }
+        });
+      });
+    });
+  } else {
+    rec.type = targetType;
+    delete rec.bulkGroupId; delete rec.bulkClassKey;
+    delete rec.bulkClassLabel; delete rec.bulkRecipientCount;
+    rec.updatedAt = new Date().toISOString();
+    changeCount = 1;
+  }
+  saveAll();
+  syncActiveClass();
+  selectStudent(currentStudent);
+  showToast(changeCount+'건이 '+typeKorMap[targetType]+'로 변경됐어요');
+}
+
 function openClassifyModal(recordId, targetType){
   classifyingRecordId = recordId;
   classifyingType = targetType;
@@ -9230,7 +9330,7 @@ function buildStep4Active(){
     ? '<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-tertiary);">최근 30일 내 기록이 없어요. 기록 없이 진행됩니다.</div>'
     : recs.map(function(r){
         var checked = replyState.contextIds.indexOf(r.id) >= 0;
-        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
+        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'학급공지'})[r.type] || '';
         return '<div class="context-item'+(checked?' checked':'')+'" data-id="'+r.id+'">'+
           '<div class="context-checkbox"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
           '<div class="context-meta">'+
@@ -9553,7 +9653,7 @@ function generateReplyPrompt(){
     lines.push('');
     lines.push('[최근 학생 기록]');
     contextRecords.forEach(function(r){
-      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
+      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'학급공지'})[r.type] || '';
       var line = '· '+r.date+' '+typeKor+': '+r.content;
       if(r.followUpNote && r.followUpNote.trim()){
         line += ' [처리: '+r.followUpNote.replace(/\s+/g,' ').trim()+']';
@@ -10164,7 +10264,7 @@ function buildPrepStep4Active(){
     ? '<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-tertiary);">최근 60일 내 기록이 없어요. 기록 없이 진행됩니다.</div>'
     : recs.map(function(r){
         var checked = prepState.contextIds.indexOf(r.id) >= 0;
-        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
+        var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'학급공지'})[r.type] || '';
         return '<div class="context-item'+(checked?' checked':'')+'" data-id="'+r.id+'">'+
           '<div class="context-checkbox"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
           '<div class="context-meta">'+
@@ -10601,7 +10701,7 @@ function generatePrepPrompt(){
     lines.push('');
     lines.push('[최근 학생 기록]');
     contextRecords.forEach(function(r){
-      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
+      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'학급공지'})[r.type] || '';
       var line = '· '+r.date+' '+typeKor+': '+r.content;
       if(r.followUpNote && r.followUpNote.trim()){
         line += ' [처리: '+r.followUpNote.replace(/\s+/g,' ').trim()+']';
@@ -11221,7 +11321,7 @@ function renderSgRecords(){
 
   list.innerHTML = recs.map(function(r){
     var checked = sgState.selectedRecIds.indexOf(r.id) >= 0;
-    var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결'})[r.type] || '';
+    var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'학급공지'})[r.type] || '';
     var check = checkRecordForForbidden(r);
     var extraClass = '';
     if(check.hasForbidden) extraClass += ' sg-rec-card-warn';
@@ -13542,6 +13642,7 @@ function saveQuickMemo(){
 
   // @2-3전체 패턴 처리: 해당 반 전체 학생을 추가 매칭
   var allMentionStudents = [];
+  var mentionedClassKeys = [];  // bulk groupId 사전 생성용
   var allMentionRe3 = /@(\d+)-(\d+)전체(?![가-힣])/g;
   var am3;
   while((am3 = allMentionRe3.exec(text)) !== null){
@@ -13551,16 +13652,28 @@ function saveQuickMemo(){
       if(classes[k].grade == amGrade3 && classes[k].classNum == amCls3) amKey3 = k;
     });
     if(!amKey3) continue;
+    if(mentionedClassKeys.indexOf(amKey3) < 0) mentionedClassKeys.push(amKey3);
     var amClass3 = classes[amKey3];
+    var validCount3 = (amClass3.students||[]).filter(function(s){
+      return s && s.name && !/^[\s\d명/+\-]+$/.test(s.name) && !/총\s*\d+\s*명/.test(s.name);
+    }).length;
     (amClass3.students||[]).forEach(function(s){
       if(!s || !s.name || /^[\s\d명/+\-]+$/.test(s.name) || /총\s*\d+\s*명/.test(s.name)) return;
       var alreadyIn = matches.matched.some(function(m){ return m._classKey === amKey3 && m.num === s.num; });
       var alreadyAll = allMentionStudents.some(function(m){ return m._classKey === amKey3 && m.num === s.num; });
       if(!alreadyIn && !alreadyAll){
-        allMentionStudents.push(Object.assign({}, s, { _classKey: amKey3, _classLabel: amGrade3+'-'+amCls3 }));
+        allMentionStudents.push(Object.assign({}, s, {
+          _classKey: amKey3, _classLabel: amGrade3+'-'+amCls3,
+          _bulkGrade: amGrade3, _bulkCls: amCls3, _bulkCount: validCount3
+        }));
       }
     });
   }
+  // 반별 bulkGroupId 생성
+  var bulkGroupIdsByClass = {};
+  mentionedClassKeys.forEach(function(ck){
+    bulkGroupIdsByClass[ck] = 'bg_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'_'+ck;
+  });
 
   if(matches.matched.length === 0 && allMentionStudents.length === 0){
     if(matches.ambiguous.length > 0){
@@ -13623,7 +13736,11 @@ function saveQuickMemo(){
     if(!cls.records[s.num]) cls.records[s.num] = [];
     var rec = {
       id: genId(),
-      type: 'unsorted',
+      type: 'bulk',
+      bulkGroupId: bulkGroupIdsByClass[classKey] || ('bg_'+Date.now()+'_'+classKey),
+      bulkClassKey: classKey,
+      bulkClassLabel: s._bulkGrade+'학년 '+s._bulkCls+'반',
+      bulkRecipientCount: s._bulkCount || 0,
       date: formatDateForInput(now),
       time: formatTimeHHMM(now),
       content: memoContent,
