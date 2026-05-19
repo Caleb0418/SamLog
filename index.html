@@ -2788,6 +2788,76 @@ body{
 /* 모달 내부에서는 배너·등록섹션이 첫 마진을 갖지 않도록 */
 .class-settings-modal-inner .tt-upload-banner{margin-top:0;}
 
+/* ── NEIS 자동 연동 배너 ── */
+.neis-banner{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;margin-bottom:12px;
+}
+.neis-banner-row{display:flex;align-items:center;gap:10px;}
+.neis-banner-row > svg{flex-shrink:0;color:var(--accent);}
+.neis-banner-text{flex:1;min-width:0;}
+.neis-banner-title{font-size:13px;font-weight:600;color:var(--text);}
+.neis-banner-sub{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+.neis-sync-result{
+  margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--border);
+  font-size:11px;color:var(--text-secondary);line-height:1.6;
+}
+.neis-sync-result strong{color:var(--text);font-weight:600;}
+.neis-sync-result.success strong{color:var(--success);}
+
+/* ── NEIS 설정 모달 ── */
+.neis-step{margin-bottom:18px;}
+.neis-step-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.neis-step-num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.neis-step-label{font-size:13px;font-weight:600;color:var(--text);}
+.neis-step-hint{font-size:11px;color:var(--text-secondary);margin-top:6px;line-height:1.5;}
+.neis-step-hint a{color:var(--accent);text-decoration:none;}
+.neis-step-hint a:hover{text-decoration:underline;}
+.neis-remember-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;
+}
+.neis-remember-toggle input{margin:0;}
+.neis-school-results{
+  margin-top:10px;display:flex;flex-direction:column;gap:4px;
+  max-height:220px;overflow-y:auto;
+}
+.neis-school-results:empty{display:none;}
+.neis-school-result{
+  padding:9px 12px;background:var(--bg-surface);
+  border:1px solid var(--border);border-radius:6px;
+  cursor:pointer;font-size:12px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+}
+.neis-school-result:hover{background:var(--bg-elevated);}
+.neis-school-result.selected{background:var(--accent-dim);border-color:var(--accent);}
+.neis-school-result-name{font-weight:600;color:var(--text);}
+.neis-school-result-meta{font-size:10px;color:var(--text-tertiary);margin-top:2px;}
+.neis-school-result-code{font-size:10px;color:var(--text-tertiary);font-family:monospace;flex-shrink:0;}
+.neis-confirm-card{
+  background:var(--success-dim,#f0fdf4);border:1px solid var(--success,#22c55e);
+  border-radius:6px;padding:12px 14px;
+}
+.neis-confirm-card-name{font-size:13px;font-weight:600;color:var(--success,#22c55e);}
+.neis-confirm-card-meta{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+.neis-confirm-card-kind{
+  display:inline-block;font-size:10px;padding:2px 7px;
+  background:var(--success,#22c55e);color:#fff;border-radius:3px;margin-top:4px;
+}
+
+/* ── 학생 월간 달력 학사일정 ── */
+.smv-cal-event{
+  font-size:9px;color:var(--accent);
+  margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:500;
+}
+
 /* 통합 설정 모달 — 가로 탭 */
 .settings-tabs{
   display:flex;gap:2px;padding:0 22px;
@@ -4649,6 +4719,60 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 <body>
 
 <!-- ═══════════════════════════════════════════
+     NEIS 설정 모달
+═══════════════════════════════════════════ -->
+<div id="neis-setup-overlay" class="onboarding-overlay" style="display:none;" onclick="if(event.target===this)closeNeisSetupModal()">
+  <div class="onboarding-card" style="max-width:520px;">
+    <div class="onboarding-title" style="margin-bottom:4px;">NEIS 자동 연동</div>
+    <div class="onboarding-desc" style="margin-bottom:18px;">시간표·학사일정을 자동으로 가져오기 위해 인증키와 학교를 설정합니다.</div>
+
+    <!-- 1단계: 인증키 -->
+    <div class="neis-step">
+      <div class="neis-step-head">
+        <span class="neis-step-num">1</span>
+        <span class="neis-step-label">NEIS 인증키</span>
+      </div>
+      <input type="text" id="neis-key-input" placeholder="발급받은 인증키 (40자 내외)" class="form-input-text" autocomplete="off" />
+      <div class="neis-step-hint">
+        키가 없으면 <a href="https://open.neis.go.kr/portal/myPage/actKey/actKeyPage.do" target="_blank">NEIS 인증키 발급 페이지</a>에서 소셜 로그인 후 신청 (즉시 발급, 무료)
+      </div>
+      <label class="neis-remember-toggle">
+        <input type="checkbox" id="neis-remember-checkbox" />
+        <span>이 PC에 키 저장 (다음에 자동 로그인)</span>
+      </label>
+      <div class="neis-step-hint" style="margin-top:4px;font-size:10px;">체크 안 하면 새로고침 시 키가 사라집니다. 공용 PC에서는 체크하지 마세요.</div>
+    </div>
+
+    <!-- 2단계: 학교 검색 -->
+    <div class="neis-step">
+      <div class="neis-step-head">
+        <span class="neis-step-num">2</span>
+        <span class="neis-step-label">학교 검색</span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="neis-school-search" placeholder="학교명 (예: 서울중앙중학교)" class="form-input-text" style="flex:1;" />
+        <button class="btn-small primary" onclick="searchNeisSchool()" id="neis-search-btn">검색</button>
+      </div>
+      <div id="neis-school-results" class="neis-school-results"></div>
+    </div>
+
+    <!-- 3단계: 선택된 학교 확인 (자동 노출) -->
+    <div class="neis-step" id="neis-step-confirm" style="display:none;">
+      <div class="neis-step-head">
+        <span class="neis-step-num">3</span>
+        <span class="neis-step-label">선택한 학교 확인</span>
+      </div>
+      <div class="neis-confirm-card" id="neis-confirm-card"></div>
+    </div>
+
+    <div class="onboarding-actions">
+      <button class="btn-secondary" onclick="closeNeisSetupModal()">취소</button>
+      <button class="btn-primary" id="neis-save-btn" disabled onclick="saveNeisSetup()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
      온보딩 — 처음 진입 시
 ═══════════════════════════════════════════ -->
 <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
@@ -4993,7 +5117,42 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <button class="btn-small primary" onclick="loadSampleClassData()" style="flex-shrink:0;">샘플 적용</button>
         </div>
 
-        <!-- ① NEIS 시간표 업로드 -->
+        <!-- ① NEIS 자동 연동 배너 -->
+        <div class="class-master-title" style="margin-bottom:6px;">NEIS 자동 연동</div>
+        <div class="class-master-sub" style="margin-bottom:10px;">인증키 + 학교를 한 번 설정하면 시간표·학사일정을 자동으로 가져옵니다.</div>
+        <div class="neis-banner" id="neis-banner">
+          <!-- 미설정 상태 -->
+          <div class="neis-banner-setup" id="neis-banner-setup">
+            <div class="neis-banner-row">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div class="neis-banner-text">
+                <div class="neis-banner-title">NEIS 인증키 미설정</div>
+                <div class="neis-banner-sub">무료, 즉시 발급, 학교 공개 정보만 조회</div>
+              </div>
+              <button class="btn-small primary" onclick="openNeisSetupModal()">설정 시작</button>
+            </div>
+          </div>
+          <!-- 설정 완료 상태 -->
+          <div class="neis-banner-active" id="neis-banner-active" style="display:none;">
+            <div class="neis-banner-row">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success,#22c55e);"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="neis-banner-text">
+                <div class="neis-banner-title" id="neis-school-name-label">—</div>
+                <div class="neis-banner-sub" id="neis-last-synced-label">아직 동기화 안 됨</div>
+              </div>
+              <button class="btn-small primary" onclick="onNeisSyncClick()" id="neis-sync-btn">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                지금 동기화
+              </button>
+              <button class="btn-small secondary" onclick="openNeisSetupModal()" title="설정 수정" style="padding:0 8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </button>
+            </div>
+            <div class="neis-sync-result" id="neis-sync-result" style="display:none;"></div>
+          </div>
+        </div>
+
+        <!-- ② NEIS 시간표 업로드 (엑셀 fallback) -->
         <div class="class-master-title" style="margin-bottom:8px;">시간표 연동</div>
         <div class="class-master-sub" style="margin-bottom:10px;">NEIS 포털 → 학교생활 → 시간표 → 엑셀 다운로드 후 업로드하면 담당 수업 요일·교시가 자동으로 채워져요</div>
         <div class="tt-upload-banner" id="tt-upload-banner">
@@ -6940,6 +7099,20 @@ var classMaster = [];
 // NEIS 시간표 파일 업로드 후 누적됨
 var schoolTimetable = {};
 
+// NEIS API 설정
+var neisSettings = {
+  apiKey: '',
+  rememberKey: false,
+  atptCode: '',
+  schulCode: '',
+  schoolName: '',
+  schoolKind: '',      // 'els' | 'mis' | 'his'
+  lastSyncedAt: null
+};
+
+// 학사일정: { 'YYYY-MM-DD': [{event, detail, gradeScope, source}, ...] }
+var schoolSchedule = {};
+
 // 시간표 동기화 상태
 var ttSyncState = { synced: false, lastSync: null, totalRows: 0 };
 
@@ -7058,7 +7231,7 @@ function getActiveTab(){
    학년도 관리
 ═══════════════════════════════════════════ */
 var MAX_YEARS = 3;
-var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool'];
+var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_school_schedule'];
 
 function getActiveYear(){
   return localStorage.getItem('ht2_active_year') || String(new Date().getFullYear());
@@ -7169,12 +7342,13 @@ function saveAll(){
     localStorage.setItem('ht2_tt_sync_state_' + yr, JSON.stringify(ttSyncState));
     localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
     localStorage.setItem('ht2_attendance_' + yr, JSON.stringify(attendanceRecords));
+    localStorage.setItem('ht2_school_schedule_' + yr, JSON.stringify(schoolSchedule));
     _addYearToList(yr);
   }catch(e){ console.warn('저장 실패', e); }
 }
 
-var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_attendance'];
-var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings'];
+var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
+var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings','ht2_neis_key'];
 
 /* ─── 백업 폴더 핸들 (IndexedDB) ─── */
 function _openBackupDB(){
@@ -7487,6 +7661,10 @@ function loadAll(){
       var attRaw = localStorage.getItem('ht2_attendance_' + getActiveYear());
       if(attRaw) attendanceRecords = JSON.parse(attRaw);
     }catch(e){ attendanceRecords = {}; }
+    try{
+      var schedRaw = localStorage.getItem('ht2_school_schedule_' + getActiveYear());
+      if(schedRaw) schoolSchedule = JSON.parse(schedRaw);
+    }catch(e){ schoolSchedule = {}; }
 
     // 마이그레이션: 잘못 들어간 학생 데이터(NaN/합계행) 제거
     var cleaned = 0;
@@ -8953,8 +9131,20 @@ function saveSettings(){
     localStorage.setItem('ht2_settings', JSON.stringify({
       teacher: TEACHER_NAME, grade: SCHOOL_GRADE, classNum: SCHOOL_CLASS,
       schoolLevel: SCHOOL_LEVEL,
-      currentClassKey: currentClassKey
+      currentClassKey: currentClassKey,
+      neisAtptCode: neisSettings.atptCode,
+      neisSchulCode: neisSettings.schulCode,
+      neisSchoolName: neisSettings.schoolName,
+      neisSchoolKind: neisSettings.schoolKind,
+      neisLastSyncedAt: neisSettings.lastSyncedAt,
+      neisRememberKey: neisSettings.rememberKey
     }));
+    // API 키는 rememberKey가 true일 때만 별도 저장
+    if(neisSettings.rememberKey && neisSettings.apiKey){
+      localStorage.setItem('ht2_neis_key', neisSettings.apiKey);
+    } else {
+      localStorage.removeItem('ht2_neis_key');
+    }
   }catch(e){}
 }
 function loadSettings(){
@@ -8967,8 +9157,367 @@ function loadSettings(){
       SCHOOL_CLASS = d.classNum || SCHOOL_CLASS;
       SCHOOL_LEVEL = d.schoolLevel || 'middle';
       if(d.currentClassKey) currentClassKey = d.currentClassKey;
+      if(d.neisAtptCode) neisSettings.atptCode = d.neisAtptCode;
+      if(d.neisSchulCode) neisSettings.schulCode = d.neisSchulCode;
+      if(d.neisSchoolName) neisSettings.schoolName = d.neisSchoolName;
+      if(d.neisSchoolKind) neisSettings.schoolKind = d.neisSchoolKind;
+      if(d.neisLastSyncedAt) neisSettings.lastSyncedAt = d.neisLastSyncedAt;
+      neisSettings.rememberKey = d.neisRememberKey === true;
+      if(neisSettings.rememberKey){
+        neisSettings.apiKey = localStorage.getItem('ht2_neis_key') || '';
+      }
     }
   }catch(e){}
+}
+
+/* ═══════════════════════════════════════════
+   NEIS OpenAPI 클라이언트
+═══════════════════════════════════════════ */
+var NEIS_BASE = 'https://open.neis.go.kr/hub/';
+
+function neisCallApi(endpoint, params){
+  var url = NEIS_BASE + endpoint + '?';
+  var arr = [];
+  Object.keys(params).forEach(function(k){
+    if(params[k] !== undefined && params[k] !== null && params[k] !== ''){
+      arr.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+    }
+  });
+  url += arr.join('&');
+  return fetch(url, { method: 'GET' })
+    .then(function(res){
+      return res.text().then(function(text){ return { ok: res.ok, status: res.status, body: text }; });
+    })
+    .catch(function(err){
+      return { ok: false, networkError: true, error: err.message || String(err) };
+    });
+}
+
+function neisParseRows(responseBody, endpointKey){
+  var data;
+  try{ data = JSON.parse(responseBody); }catch(e){ return { error: 'parse', detail: e.message }; }
+  if(data.RESULT) return { error: data.RESULT.CODE, detail: data.RESULT.MESSAGE, rows: [] };
+  if(data[endpointKey]){
+    var arr = data[endpointKey];
+    if(arr.length >= 2 && arr[1].row) return { rows: arr[1].row };
+    if(arr[0] && arr[0].head){
+      var head = arr[0].head;
+      for(var i=0;i<head.length;i++){ if(head[i].RESULT) return { error: head[i].RESULT.CODE, detail: head[i].RESULT.MESSAGE, rows: [] }; }
+    }
+    return { rows: [] };
+  }
+  return { error: 'unknown', detail: 'Unknown response shape' };
+}
+
+function neisSearchSchool(apiKey, schoolName){
+  return neisCallApi('schoolInfo', { KEY: apiKey, Type: 'json', pIndex: 1, pSize: 30, SCHUL_NM: schoolName })
+    .then(function(res){
+      if(res.networkError) return { ok: false, error: 'network', detail: res.error };
+      var parsed = neisParseRows(res.body, 'schoolInfo');
+      if(parsed.error) return { ok: false, error: parsed.error, detail: parsed.detail };
+      return { ok: true, rows: parsed.rows || [] };
+    });
+}
+
+function getTimetableEndpoint(schoolKind){
+  if(schoolKind === 'els') return 'elsTimetable';
+  if(schoolKind === 'his') return 'hisTimetable';
+  return 'misTimetable';
+}
+function detectSchoolKind(schoolRow){
+  var name = schoolRow.SCHUL_KND_SC_NM || '';
+  if(name.indexOf('고등') >= 0) return 'his';
+  if(name.indexOf('초등') >= 0) return 'els';
+  return 'mis';
+}
+function getCurrentSemester(year, month){
+  return (month >= 3 && month <= 7) ? '1' : '2';
+}
+function ymdToDow(ymd){
+  var y=parseInt(ymd.substring(0,4)), m=parseInt(ymd.substring(4,6)), d=parseInt(ymd.substring(6,8));
+  var dow = new Date(y, m-1, d).getDay();
+  return dow === 0 ? 7 : dow;
+}
+function ymdToDate(ymd){
+  return ymd.substring(0,4)+'-'+ymd.substring(4,6)+'-'+ymd.substring(6,8);
+}
+
+function neisFetchTimetableForClass(apiKey, grade, classNum, opts){
+  opts = opts || {};
+  var endpoint = getTimetableEndpoint(neisSettings.schoolKind);
+  var now = new Date();
+  var year = opts.year || now.getFullYear();
+  var month = opts.month || (now.getMonth()+1);
+  var sem = opts.sem || getCurrentSemester(year, month);
+  var fromYmd, toYmd;
+  if(sem === '1'){ fromYmd = year+'0301'; toYmd = year+'0731'; }
+  else { fromYmd = year+'0801'; toYmd = (year+1)+'0228'; }
+  return neisCallApi(endpoint, {
+    KEY: apiKey, Type: 'json', pIndex: 1, pSize: 1000,
+    ATPT_OFCDC_SC_CODE: neisSettings.atptCode, SD_SCHUL_CODE: neisSettings.schulCode,
+    AY: String(year), SEM: sem, GRADE: String(grade), CLASS_NM: String(classNum),
+    TI_FROM_YMD: fromYmd, TI_TO_YMD: toYmd
+  }).then(function(res){
+    if(res.networkError) return { ok: false, error: 'network', detail: res.error };
+    var parsed = neisParseRows(res.body, endpoint);
+    if(parsed.error) return { ok: false, error: parsed.error, detail: parsed.detail };
+    return { ok: true, rows: parsed.rows || [] };
+  });
+}
+
+function neisFetchSchedule(apiKey, opts){
+  opts = opts || {};
+  var now = new Date();
+  var year = opts.year || now.getFullYear();
+  var month = opts.month || (now.getMonth()+1);
+  var sem = opts.sem || getCurrentSemester(year, month);
+  var fromYmd, toYmd;
+  if(sem === '1'){ fromYmd = year+'0301'; toYmd = year+'0731'; }
+  else { fromYmd = year+'0801'; toYmd = (year+1)+'0228'; }
+  return neisCallApi('SchoolSchedule', {
+    KEY: apiKey, Type: 'json', pIndex: 1, pSize: 500,
+    ATPT_OFCDC_SC_CODE: neisSettings.atptCode, SD_SCHUL_CODE: neisSettings.schulCode,
+    AA_FROM_YMD: fromYmd, AA_TO_YMD: toYmd
+  }).then(function(res){
+    if(res.networkError) return { ok: false, error: 'network', detail: res.error };
+    var parsed = neisParseRows(res.body, 'SchoolSchedule');
+    if(parsed.error) return { ok: false, error: parsed.error, detail: parsed.detail };
+    return { ok: true, rows: parsed.rows || [] };
+  });
+}
+
+function mergeNeisTimetable(rows){
+  var added = 0;
+  rows.forEach(function(r){
+    if(!r.GRADE || !r.CLASS_NM || !r.ALL_TI_YMD || !r.PERIO || !r.ITRT_CNTNT) return;
+    var dow = ymdToDow(r.ALL_TI_YMD);
+    if(dow > 5) return;
+    var key = parseInt(r.GRADE)+'-'+parseInt(r.CLASS_NM)+'-'+dow+'-'+parseInt(r.PERIO);
+    schoolTimetable[key] = r.ITRT_CNTNT.trim();
+    added++;
+  });
+  return added;
+}
+
+function mergeNeisSchedule(rows){
+  var added = 0;
+  rows.forEach(function(r){
+    if(!r.AA_YMD || !r.EVENT_NM) return;
+    var date = ymdToDate(r.AA_YMD);
+    if(!schoolSchedule[date]) schoolSchedule[date] = [];
+    var exists = schoolSchedule[date].some(function(ev){ return ev.event === r.EVENT_NM; });
+    if(exists) return;
+    schoolSchedule[date].push({
+      event: r.EVENT_NM,
+      detail: r.EVENT_CNTNT || '',
+      gradeScope: {
+        g1: r.ONE_GRADE_EVENT_YN==='Y', g2: r.TW_GRADE_EVENT_YN==='Y',
+        g3: r.THREE_GRADE_EVENT_YN==='Y', g4: r.FR_GRADE_EVENT_YN==='Y',
+        g5: r.FIV_GRADE_EVENT_YN==='Y', g6: r.SIX_GRADE_EVENT_YN==='Y'
+      },
+      source: 'neis'
+    });
+    added++;
+  });
+  return added;
+}
+
+function neisSyncAll(){
+  if(!neisSettings.apiKey || !neisSettings.atptCode || !neisSettings.schulCode){
+    showToast('NEIS 설정을 먼저 완료해주세요'); return Promise.resolve(null);
+  }
+  return neisFetchSchedule(neisSettings.apiKey).then(function(schedRes){
+    var scheduleAdded = 0, scheduleError = null;
+    if(schedRes.ok){ scheduleAdded = mergeNeisSchedule(schedRes.rows); }
+    else { scheduleError = schedRes; }
+
+    var classList = Object.keys(classes).map(function(k){ return { grade: classes[k].grade, classNum: classes[k].classNum }; });
+    if(classList.length === 0){
+      return { schedule: { added: scheduleAdded, error: scheduleError }, timetable: { added: 0, errors: [] } };
+    }
+    var timetableAdded = 0, timetableErrors = [];
+    var chain = Promise.resolve();
+    classList.forEach(function(c){
+      chain = chain.then(function(){
+        return neisFetchTimetableForClass(neisSettings.apiKey, c.grade, c.classNum)
+          .then(function(res){
+            if(res.ok){ timetableAdded += mergeNeisTimetable(res.rows); }
+            else { timetableErrors.push({ class: c.grade+'-'+c.classNum, error: res.error, detail: res.detail }); }
+          });
+      });
+    });
+    return chain.then(function(){
+      return { schedule: { added: scheduleAdded, error: scheduleError }, timetable: { added: timetableAdded, errors: timetableErrors } };
+    });
+  }).then(function(result){
+    if(!result) return result;
+    neisSettings.lastSyncedAt = new Date().toISOString();
+    saveAll(); saveSettings(); return result;
+  });
+}
+
+/* ═══════════════════════════════════════════
+   NEIS 설정 UI
+═══════════════════════════════════════════ */
+var neisSetupState = { selectedSchoolRow: null };
+
+function refreshNeisBanner(){
+  var setupEl = document.getElementById('neis-banner-setup');
+  var activeEl = document.getElementById('neis-banner-active');
+  if(!setupEl || !activeEl) return;
+  if(neisSettings.atptCode && neisSettings.schulCode){
+    setupEl.style.display = 'none'; activeEl.style.display = 'block';
+    document.getElementById('neis-school-name-label').textContent = neisSettings.schoolName || '학교 미지정';
+    var syncEl = document.getElementById('neis-last-synced-label');
+    if(neisSettings.lastSyncedAt){
+      var d = new Date(neisSettings.lastSyncedAt);
+      syncEl.textContent = '마지막 동기화: '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+
+        String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    } else { syncEl.textContent = '아직 동기화 안 됨'; }
+  } else {
+    setupEl.style.display = 'block'; activeEl.style.display = 'none';
+  }
+}
+
+function openNeisSetupModal(){
+  document.getElementById('neis-key-input').value = neisSettings.apiKey || '';
+  document.getElementById('neis-remember-checkbox').checked = neisSettings.rememberKey;
+  document.getElementById('neis-school-search').value = neisSettings.schoolName || '';
+  document.getElementById('neis-school-results').innerHTML = '';
+  document.getElementById('neis-step-confirm').style.display = 'none';
+  neisSetupState.selectedSchoolRow = null;
+  if(neisSettings.atptCode && neisSettings.schulCode){
+    neisSetupState.selectedSchoolRow = {
+      ATPT_OFCDC_SC_CODE: neisSettings.atptCode,
+      SD_SCHUL_CODE: neisSettings.schulCode,
+      SCHUL_NM: neisSettings.schoolName,
+      ATPT_OFCDC_SC_NM: '',
+      _detectedKind: neisSettings.schoolKind
+    };
+    renderNeisConfirmCard();
+  }
+  document.getElementById('neis-setup-overlay').style.display = 'flex';
+  updateNeisSaveButton();
+
+  // Enter 키 핸들러 (한 번만 등록)
+  var searchEl = document.getElementById('neis-school-search');
+  searchEl.onkeydown = function(e){ if(e.key==='Enter') searchNeisSchool(); };
+  document.getElementById('neis-key-input').oninput = updateNeisSaveButton;
+}
+
+function closeNeisSetupModal(){
+  document.getElementById('neis-setup-overlay').style.display = 'none';
+}
+
+function searchNeisSchool(){
+  var key = document.getElementById('neis-key-input').value.trim();
+  if(!key){ showToast('인증키를 먼저 입력해주세요'); return; }
+  var name = document.getElementById('neis-school-search').value.trim();
+  if(!name){ showToast('학교명을 입력해주세요'); return; }
+  var btn = document.getElementById('neis-search-btn');
+  btn.disabled = true; btn.textContent = '검색 중...';
+  neisSearchSchool(key, name).then(function(res){
+    btn.disabled = false; btn.textContent = '검색';
+    var resultsEl = document.getElementById('neis-school-results');
+    if(!res.ok){
+      var msg = res.error === 'network' ? 'CORS/네트워크 차단' : (res.detail || res.error);
+      resultsEl.innerHTML = '<div style="padding:8px 12px;color:var(--danger,#ef4444);font-size:12px;">검색 실패: '+escapeHtml(msg)+'</div>';
+      return;
+    }
+    if(res.rows.length === 0){
+      resultsEl.innerHTML = '<div style="padding:8px 12px;color:var(--text-tertiary);font-size:12px;">결과 없음</div>';
+      return;
+    }
+    var html = '';
+    res.rows.forEach(function(r, i){
+      r._detectedKind = detectSchoolKind(r);
+      var kindLabel = ({els:'초등', mis:'중학', his:'고등'})[r._detectedKind] || '';
+      html += '<div class="neis-school-result" data-idx="'+i+'">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div class="neis-school-result-name">'+escapeHtml(r.SCHUL_NM||'')+'</div>';
+      html += '<div class="neis-school-result-meta">'+escapeHtml(r.ATPT_OFCDC_SC_NM||'')+' · '+escapeHtml(kindLabel)+'</div>';
+      html += '</div>';
+      html += '<div class="neis-school-result-code">'+r.ATPT_OFCDC_SC_CODE+'/'+r.SD_SCHUL_CODE+'</div>';
+      html += '</div>';
+    });
+    resultsEl.innerHTML = html;
+    var _rows = res.rows;
+    Array.prototype.forEach.call(resultsEl.querySelectorAll('.neis-school-result'), function(el){
+      el.onclick = function(){
+        var idx = parseInt(el.dataset.idx);
+        neisSetupState.selectedSchoolRow = _rows[idx];
+        Array.prototype.forEach.call(resultsEl.querySelectorAll('.neis-school-result'), function(e2){
+          e2.classList.toggle('selected', e2 === el);
+        });
+        renderNeisConfirmCard();
+        updateNeisSaveButton();
+      };
+    });
+  });
+}
+
+function renderNeisConfirmCard(){
+  var row = neisSetupState.selectedSchoolRow;
+  if(!row) return;
+  var kindLabel = ({els:'초등학교', mis:'중학교', his:'고등학교'})[row._detectedKind] || '학교';
+  var html = '<div class="neis-confirm-card-name">'+escapeHtml(row.SCHUL_NM||'')+'</div>';
+  if(row.ATPT_OFCDC_SC_NM) html += '<div class="neis-confirm-card-meta">'+escapeHtml(row.ATPT_OFCDC_SC_NM)+'</div>';
+  html += '<span class="neis-confirm-card-kind">'+kindLabel+'</span>';
+  document.getElementById('neis-confirm-card').innerHTML = html;
+  document.getElementById('neis-step-confirm').style.display = 'block';
+}
+
+function updateNeisSaveButton(){
+  var key = (document.getElementById('neis-key-input') || {}).value || '';
+  document.getElementById('neis-save-btn').disabled = !(key.trim() && neisSetupState.selectedSchoolRow);
+}
+
+function saveNeisSetup(){
+  var key = document.getElementById('neis-key-input').value.trim();
+  var remember = document.getElementById('neis-remember-checkbox').checked;
+  var row = neisSetupState.selectedSchoolRow;
+  if(!key || !row) return;
+  neisSettings.apiKey = key;
+  neisSettings.rememberKey = remember;
+  neisSettings.atptCode = row.ATPT_OFCDC_SC_CODE;
+  neisSettings.schulCode = row.SD_SCHUL_CODE;
+  neisSettings.schoolName = row.SCHUL_NM;
+  neisSettings.schoolKind = row._detectedKind || 'mis';
+  saveSettings();
+  refreshNeisBanner();
+  closeNeisSetupModal();
+  showToast('NEIS 연동 완료');
+}
+
+function onNeisSyncClick(){
+  var btn = document.getElementById('neis-sync-btn');
+  btn.disabled = true; btn.textContent = '동기화 중...';
+  var resultEl = document.getElementById('neis-sync-result');
+  resultEl.style.display = 'none';
+  neisSyncAll().then(function(result){
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>지금 동기화';
+    if(!result){ return; }
+    var html = '', hasError = false;
+    if(result.schedule.error){
+      hasError = true;
+      var sd = result.schedule.error.error === 'network' ? 'CORS/네트워크 차단' : (result.schedule.error.detail || result.schedule.error.error);
+      html += '<div>학사일정: <strong style="color:var(--danger,#ef4444);">실패</strong> — '+escapeHtml(sd)+'</div>';
+    } else {
+      html += '<div>학사일정: <strong>'+result.schedule.added+'건</strong> 추가</div>';
+    }
+    if(result.timetable.errors.length > 0){
+      hasError = true;
+      html += '<div>시간표: <strong>'+result.timetable.added+'건</strong> 추가 · <strong style="color:var(--warning,#d46b08);">'+result.timetable.errors.length+'개 반 실패</strong></div>';
+      result.timetable.errors.forEach(function(e){ html += '<div style="margin-left:8px;color:var(--text-tertiary);">· '+e.class+': '+escapeHtml(e.detail||e.error)+'</div>'; });
+    } else {
+      html += '<div>시간표: <strong>'+result.timetable.added+'건</strong> 추가</div>';
+    }
+    resultEl.className = 'neis-sync-result'+(hasError ? '' : ' success');
+    resultEl.innerHTML = html;
+    resultEl.style.display = 'block';
+    refreshNeisBanner();
+  });
 }
 
 function saveAttendanceSettings(){
@@ -15165,6 +15714,10 @@ function renderStudentMonthlyView(){
       html += '<div class="smv-cal-pill '+topStatus+'">'+getStatusLabel(topStatus)+'</div>';
       if(recs.length>1) html += '<div class="smv-cal-multi">+'+(recs.length-1)+'</div>';
     }
+    var schedEvents = schoolSchedule[date]||[];
+    if(schedEvents.length>0){
+      html += '<div class="smv-cal-event" title="'+escapeHtml(schedEvents.map(function(e){return e.event;}).join(' / '))+'">'+escapeHtml(schedEvents[0].event)+'</div>';
+    }
     html += '</div>';
   }
   html += '</div>';
@@ -17917,6 +18470,7 @@ function openClassSettings(){
       }
     }
   }
+  refreshNeisBanner();
 }
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
