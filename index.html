@@ -9961,7 +9961,10 @@ function switchTab(tab){
 
   if(tab === 'home') renderHome();
   if(tab === 'students') renderSidebar('');
-  if(tab === 'class') renderClassTab();
+  if(tab === 'class'){
+    renderClassTab();
+    maybeAutoSyncNeis();
+  }
   if(tab === 'reply') renderReplyFlow();
   if(tab === 'attendance'){
     attCurrentView = 'daily';
@@ -20110,28 +20113,32 @@ function onClassGradeClassInput(){
   var grade = document.getElementById('class-form-grade').value.trim();
   var cls   = document.getElementById('class-form-class').value.trim();
   var warnEl = document.getElementById('class-form-class-warn');
-  if(!warnEl) return;
 
-  if(!grade || !cls){ warnEl.style.display = 'none'; onClassSubjectInput(); return; }
+  try {
+    if(!warnEl) return;
+    if(!grade || !cls){ warnEl.style.display = 'none'; return; }
+    var gNum = parseInt(grade), cNum = parseInt(cls);
+    if(isNaN(gNum) || isNaN(cNum)){ warnEl.style.display = 'none'; return; }
 
-  var gNum = parseInt(grade), cNum = parseInt(cls);
-  if(isNaN(gNum) || isNaN(cNum)){ warnEl.style.display = 'none'; return; }
+    var classKey = getClassKey(grade, cls);
+    if(classes[classKey]){
+      warnEl.style.display = 'none';
+      return;
+    }
 
-  var classKey = getClassKey(grade, cls);
-  if(classes[classKey]){
-    warnEl.style.display = 'none';
+    // 학생관리에 없는 반: 안내 박스 표시
+    warnEl.style.display = 'flex';
+    warnEl.innerHTML =
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
+      '<span>'+grade+'학년 '+cls+'반이 학생 관리에 없어요. '+
+      '<button class="warn-link-btn" onclick="goToStudentsAndAddClass(\''+grade+'\',\''+cls+'\')">학생 관리에서 추가</button>'+
+      '<span style="margin:0 4px;color:var(--text-tertiary);">·</span>'+
+      '<button class="warn-link-btn" onclick="document.getElementById(\'class-form-class-warn\').style.display=\'none\'">무시하고 진행</button>'+
+      '</span>';
+  } finally {
+    // 학년·반 변경 시 항상 추천 칩 갱신
     onClassSubjectInput();
-    return;
   }
-
-  warnEl.style.display = 'flex';
-  warnEl.innerHTML =
-    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
-    '<span>'+grade+'학년 '+cls+'반이 학생 관리에 없어요. '+
-    '<button class="warn-link-btn" onclick="goToStudentsAndAddClass(\''+grade+'\',\''+cls+'\')">학생 관리에서 추가</button>'+
-    '<span style="margin:0 4px;color:var(--text-tertiary);">·</span>'+
-    '<button class="warn-link-btn" onclick="document.getElementById(\'class-form-class-warn\').style.display=\'none\'">무시하고 진행</button>'+
-    '</span>';
 }
 
 function goToStudentsAndAddClass(grade, cls){
@@ -20155,41 +20162,62 @@ function onClassSubjectInput(){
   var grade   = document.getElementById('class-form-grade').value.trim();
   var cls     = document.getElementById('class-form-class').value.trim();
   var subject = document.getElementById('class-form-subject').value.trim();
-  if(!grade || !cls || !subject || Object.keys(schoolTimetable).length === 0){ hideSuggestChips(); return; }
-  var slots = findSlotsFromTimetable(grade, cls, subject);
   var wrap = document.getElementById('tt-suggest-chips');
-  if(slots.length === 0){
-    // 같은 (학년-반)에서 비슷한 과목 추천
-    var related = {};
-    var gN = grade.replace(/[^0-9]/g,''), cN = cls.replace(/[^0-9]/g,'');
-    Object.keys(schoolTimetable).forEach(function(k){
-      if(k.indexOf(gN+'-'+cN+'-') === 0){
-        var s = schoolTimetable[k];
-        if(s && s.indexOf('고사') === -1 && s.indexOf('시험') === -1){
-          related[s] = (related[s] || 0) + 1;
-        }
-      }
-    });
-    var top = Object.keys(related).sort(function(a,b){return related[b]-related[a];}).slice(0,6);
-    if(top.length === 0){ hideSuggestChips(); return; }
-    var html = '<div class="tt-suggest-label">'+
-      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'+
-      '이 반 시간표의 과목 (클릭해 입력)</div>';
-    html += top.map(function(s){
-      return '<button class="tt-suggest-chip" onclick="fillSubjectFromChip(\''+escapeHtml(s).replace(/'/g,"\\'")+'\')">'+escapeHtml(s)+'</button>';
-    }).join('');
-    wrap.innerHTML = html;
-    wrap.style.display = 'flex';
-  } else {
-    var html2 = '<div class="tt-suggest-label">'+
-      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
-      '시간표에서 '+slots.length+'개 슬롯을 찾았어요 — 추가하면 자동 적용됩니다</div>';
-    html2 += slots.map(function(s){
-      return '<span class="cmi-slot-chip">'+WEEKDAYS[s.day]+s.period+'교시</span>';
-    }).join('');
-    wrap.innerHTML = html2;
-    wrap.style.display = 'flex';
+
+  // 학년·반이 없으면 칩 숨김
+  if(!grade || !cls || Object.keys(schoolTimetable).length === 0){ hideSuggestChips(); return; }
+
+  // CASE 1: 과목까지 입력 → 시간표 슬롯 매칭 시도
+  if(subject){
+    var slots = findSlotsFromTimetable(grade, cls, subject);
+    if(slots.length > 0){
+      var html2 = '<div class="tt-suggest-label">'+
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+        '시간표에서 '+slots.length+'개 슬롯을 찾았어요 — 추가하면 자동 적용됩니다</div>';
+      html2 += slots.map(function(s){
+        return '<span class="cmi-slot-chip">'+WEEKDAYS[s.day]+s.period+'교시</span>';
+      }).join('');
+      wrap.innerHTML = html2;
+      wrap.style.display = 'flex';
+      return;
+    }
+    // 매칭 안 됨 → 같은 반 과목 후보 표시로 폴백
   }
+
+  // CASE 2: 과목 미입력 또는 매칭 실패 → 같은 (학년-반) 시간표 과목 후보
+  var related = {};
+  var gN = grade.replace(/[^0-9]/g,''), cN = cls.replace(/[^0-9]/g,'');
+  Object.keys(schoolTimetable).forEach(function(k){
+    if(k.indexOf(gN+'-'+cN+'-') === 0){
+      var s = schoolTimetable[k];
+      if(s && s.indexOf('고사') === -1 && s.indexOf('시험') === -1
+            && s.indexOf('휴업') === -1 && s.indexOf('공휴') === -1){
+        related[s] = (related[s] || 0) + 1;
+      }
+    }
+  });
+  var top = Object.keys(related).sort(function(a,b){return related[b]-related[a];}).slice(0,8);
+  if(top.length === 0){ hideSuggestChips(); return; }
+
+  // 입력 중인 subject로 필터링 (있을 경우)
+  if(subject){
+    var subjLower = subject.toLowerCase();
+    top = top.filter(function(s){ return s.toLowerCase().indexOf(subjLower) !== -1; });
+    if(top.length === 0){ hideSuggestChips(); return; }
+  }
+
+  var label = subject
+    ? gN+'학년 '+cN+'반 시간표에서 비슷한 과목 (클릭해 입력)'
+    : gN+'학년 '+cN+'반 시간표의 과목 (클릭해 입력)';
+
+  var html = '<div class="tt-suggest-label">'+
+    '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'+
+    label+'</div>';
+  html += top.map(function(s){
+    return '<button class="tt-suggest-chip" onclick="fillSubjectFromChip(\''+escapeHtml(s).replace(/'/g,"\\'")+'\')">'+escapeHtml(s)+'</button>';
+  }).join('');
+  wrap.innerHTML = html;
+  wrap.style.display = 'flex';
 }
 function hideSuggestChips(){
   var wrap = document.getElementById('tt-suggest-chips');
@@ -20838,7 +20866,7 @@ function saveClassMemo(){
   showToast(c.grade+'학년 '+c.cls+'반 '+c.subject+' 메모 저장 완료'+mentionMsg);
 }
 
-function maybeAutoSyncOnClassSettingsOpen(){
+function maybeAutoSyncNeis(){
   if(!neisSettings.apiKey || !neisSettings.atptCode || !neisSettings.schulCode) return;
   if(!classes || Object.keys(classes).length === 0) return;
   var TWELVE_HOURS = 12 * 60 * 60 * 1000;
@@ -20882,7 +20910,6 @@ function openClassSettings(){
     }
   }
 
-  maybeAutoSyncOnClassSettingsOpen();
 }
 
 /* details 토글 시 화살표 회전 (한 번만 등록) */
