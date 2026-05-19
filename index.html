@@ -1361,6 +1361,87 @@ body{
   background:var(--bg-elevated);border-radius:var(--radius-sm);
   padding:8px 12px;border:1px solid var(--border);line-height:1.6;
 }
+
+/* ── STEP 1 재설계: ob-field-group, 역할/학교급 버튼, 반 리스트 ── */
+.ob-field-group{margin-bottom:16px;}
+.ob-field-label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;font-weight:500;}
+.ob-field-hint{color:var(--text-tertiary);font-weight:400;margin-left:4px;}
+
+.ob-role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ob-role-btn{padding:12px 14px;background:var(--bg-overlay);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;text-align:left;font-family:inherit;display:flex;flex-direction:column;gap:3px;}
+.ob-role-btn:hover{background:var(--bg-elevated);}
+.ob-role-btn.active{background:var(--accent-dim);border-color:var(--accent);}
+.ob-role-title{font-size:13px;font-weight:600;color:var(--text);}
+.ob-role-btn.active .ob-role-title{color:var(--accent);}
+.ob-role-sub{font-size:11px;color:var(--text-tertiary);}
+.ob-role-btn.active .ob-role-sub{color:var(--accent);opacity:0.8;}
+
+.ob-level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.ob-level-btn{padding:10px;font-size:12px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--text-secondary);}
+.ob-level-btn:hover{background:var(--bg-elevated);}
+.ob-level-btn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);border-width:1.5px;font-weight:600;}
+
+.ob-class-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.ob-class-list:empty{display:none;}
+.ob-class-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-surface);border-radius:6px;font-size:13px;}
+.ob-class-item-num{font-size:11px;color:var(--text-tertiary);min-width:18px;}
+.ob-class-item-label{flex:1;color:var(--text);font-weight:500;}
+.ob-class-item-status{font-size:11px;color:var(--text-tertiary);display:inline-flex;align-items:center;gap:3px;}
+.ob-class-item-status.has-students{color:var(--success);}
+.ob-class-remove{width:26px;height:26px;background:transparent;border:none;cursor:pointer;color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;border-radius:4px;}
+.ob-class-remove:hover{background:var(--danger-dim,#fef2f2);color:var(--danger,#ef4444);}
+
+.ob-class-add-row{display:flex;gap:6px;align-items:center;}
+.ob-class-add-row .form-input-text{padding:8px 10px;font-size:12px;}
+.ob-add-class-btn{padding:8px 12px;font-size:12px;background:var(--bg-overlay);color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-family:inherit;font-weight:500;white-space:nowrap;}
+.ob-add-class-btn:hover{background:var(--bg-elevated);}
+
+.ob-hint{margin-top:10px;padding:9px 11px;background:var(--bg-surface);border-radius:6px;font-size:11px;color:var(--text-secondary);line-height:1.5;border-left:2px solid var(--accent);}
+.ob-hint strong{color:var(--text);font-weight:600;}
+
+/* ── STEP 2 교과 전담: 반별 임포트 리스트 ── */
+.ob-import-hint{
+  background:var(--bg-surface);border-radius:6px;
+  padding:10px 12px;font-size:12px;color:var(--text-secondary);
+  margin-bottom:14px;line-height:1.5;
+  border-left:2px solid var(--accent);
+}
+.ob-import-hint strong{color:var(--text);font-weight:600;}
+.ob-import-list{display:flex;flex-direction:column;gap:8px;}
+.ob-import-item{
+  background:var(--bg-overlay);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;
+}
+.ob-import-item.imported{
+  background:var(--success-dim);border-color:var(--success);
+}
+.ob-import-item-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.ob-import-item-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--bg-surface);color:var(--text-tertiary);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;flex-shrink:0;
+}
+.ob-import-item.imported .ob-import-item-num{
+  background:var(--success);color:#fff;
+}
+.ob-import-item-label{flex:1;font-size:13px;font-weight:600;color:var(--text);}
+.ob-import-item-status{font-size:11px;color:var(--text-tertiary);}
+.ob-import-item.imported .ob-import-item-status{color:var(--success);font-weight:500;}
+.ob-import-actions{display:flex;gap:6px;}
+.ob-import-action-btn{
+  padding:6px 11px;font-size:11px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:5px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;font-family:inherit;
+}
+.ob-import-action-btn:hover{background:var(--bg-elevated);}
+.ob-import-action-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.ob-import-action-btn.primary:hover{background:var(--accent-hover,var(--accent));filter:brightness(1.1);}
+.ob-import-action-btn.later{color:var(--text-tertiary);}
+
 .onboarding-actions{
   display:flex;align-items:center;gap:8px;
   padding-top:18px;border-top:1px solid var(--border);
@@ -4541,38 +4622,68 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- STEP 1: 환영 + 기본정보 -->
     <div id="onboarding-step-1" class="onboarding-step">
       <div class="onboarding-step-badge">1 / 3</div>
-      <div class="onboarding-title" id="ob-title">아이엠쌤에 오신 걸 환영합니다</div>
-      <div class="onboarding-desc" id="ob-desc">먼저 담당하시는 학급 정보를 알려주세요.<br>모든 데이터는 이 PC에만 저장됩니다.</div>
+      <div class="onboarding-title">아이엠쌤에 오신 걸 환영합니다</div>
+      <div class="onboarding-desc">담당 정보를 알려주세요. 모든 데이터는 이 PC에만 저장됩니다.</div>
 
-      <!-- 역할 선택 -->
-      <div style="margin-bottom:18px;">
-        <label class="form-label" style="display:block;margin-bottom:8px;">선생님 역할</label>
-        <div class="role-toggle-group">
-          <button class="role-toggle-btn active" id="ob-role-homeroom" onclick="selectOnboardingRole('homeroom')">🏠 담임</button>
-          <button class="role-toggle-btn" id="ob-role-subject" onclick="selectOnboardingRole('subject')">📚 교과 전담</button>
+      <!-- 담당 역할 -->
+      <div class="ob-field-group">
+        <label class="ob-field-label">담당 역할</label>
+        <div class="ob-role-grid">
+          <button type="button" class="ob-role-btn active" data-role="homeroom" onclick="selectOnboardingRole('homeroom')">
+            <span class="ob-role-title">담임</span>
+            <span class="ob-role-sub">담임반이 있어요</span>
+          </button>
+          <button type="button" class="ob-role-btn" data-role="subject" onclick="selectOnboardingRole('subject')">
+            <span class="ob-role-title">교과 전담</span>
+            <span class="ob-role-sub">담임 없이 수업만</span>
+          </button>
         </div>
-        <div class="ob-subject-hint" id="ob-subject-hint" style="display:none;">담임반 없이 교과 수업만 담당하는 경우예요. 학부모 대응·AI 프롬프트에서 "교과 담당 교사"로 안내됩니다.</div>
       </div>
 
-      <div class="onboarding-form">
-        <div class="onboarding-field">
-          <label class="form-label" style="display:block;">선생님 성함</label>
-          <input type="text" id="ob-teacher" placeholder="예) 김선생" class="form-input-text" autocomplete="off">
+      <!-- 학교급 -->
+      <div class="ob-field-group">
+        <label class="ob-field-label">학교급</label>
+        <div class="ob-level-grid">
+          <button type="button" class="ob-level-btn" data-level="elementary" onclick="selectOnboardingLevel('elementary')">초등학교</button>
+          <button type="button" class="ob-level-btn active" data-level="middle" onclick="selectOnboardingLevel('middle')">중학교</button>
+          <button type="button" class="ob-level-btn" data-level="high" onclick="selectOnboardingLevel('high')">고등학교</button>
         </div>
-        <div class="onboarding-form-row">
-          <div class="onboarding-field">
-            <label class="form-label" style="display:block;">학년</label>
-            <input type="number" id="ob-grade" placeholder="예) 2" class="form-input-text" min="1" max="6">
-          </div>
-          <div class="onboarding-field">
-            <label class="form-label" style="display:block;">반</label>
-            <input type="number" id="ob-class" placeholder="예) 3" class="form-input-text" min="1" max="20">
-          </div>
+      </div>
+
+      <!-- 성함 -->
+      <div class="ob-field-group">
+        <label class="ob-field-label">선생님 성함</label>
+        <input type="text" id="ob-teacher" placeholder="예) 김선생" class="form-input-text" maxlength="20" autocomplete="off" />
+      </div>
+
+      <!-- 담임반 (담임 역할 시) -->
+      <div class="ob-field-group" id="ob-homeroom-section">
+        <label class="ob-field-label">담임반</label>
+        <div style="display:flex;gap:8px;">
+          <input type="number" id="ob-grade" placeholder="학년" class="form-input-text" style="max-width:90px;" min="1" max="3" />
+          <input type="number" id="ob-class" placeholder="반" class="form-input-text" style="max-width:90px;" min="1" max="20" />
+        </div>
+      </div>
+
+      <!-- 수업하는 반 (교과 전담 시) -->
+      <div class="ob-field-group" id="ob-subject-section" style="display:none;">
+        <label class="ob-field-label">수업하는 반 <span class="ob-field-hint">여러 반 등록 가능</span></label>
+        <div id="ob-class-list" class="ob-class-list"></div>
+        <div class="ob-class-add-row">
+          <input type="number" id="ob-class-add-grade" placeholder="학년" class="form-input-text" style="max-width:80px;" min="1" max="3" />
+          <input type="number" id="ob-class-add-num" placeholder="반" class="form-input-text" style="max-width:80px;" min="1" max="20" />
+          <button type="button" class="ob-add-class-btn" onclick="addOnboardingClass()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            반 추가
+          </button>
+        </div>
+        <div class="ob-hint">
+          수업하는 반 학생을 지금 다 추가하셔도 좋고 <strong>나중에 추가도 가능</strong>합니다. 사이드바에서 언제든 반·학생을 추가할 수 있어요.
         </div>
       </div>
 
       <div class="onboarding-actions">
-        <span class="field-hint">필수 정보 3개</span>
+        <span class="field-hint" id="ob-step1-hint">성함·학년·반을 입력하세요</span>
         <button class="btn-primary" id="ob-next-1" disabled onclick="onboardingNext(2)">다음 →</button>
       </div>
     </div>
@@ -4581,26 +4692,36 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <div id="onboarding-step-2" class="onboarding-step" style="display:none;">
       <div class="onboarding-step-badge">2 / 3</div>
       <div class="onboarding-title">학생 명단을 불러올게요</div>
-      <div class="onboarding-desc">NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.</div>
+      <div class="onboarding-desc" id="ob-step2-desc">
+        NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.
+      </div>
 
-      <div class="upload-zone" id="upload-zone">
-        <div class="upload-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <!-- 담임용: 단일 업로드 영역 -->
+      <div id="ob-step2-homeroom">
+        <div class="upload-zone" id="upload-zone">
+          <div class="upload-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="upload-main" id="upload-main">파일을 끌어다 놓거나 클릭하세요</div>
+          <div class="upload-sub" id="upload-sub">CSV · XLSX · XLS 지원 · 첫 행은 컬럼명</div>
+          <input type="file" id="upload-file-input" accept=".csv,.xlsx,.xls" style="display:none;">
         </div>
-        <div class="upload-main" id="upload-main">파일을 끌어다 놓거나 클릭하세요</div>
-        <div class="upload-sub" id="upload-sub">CSV · XLSX · XLS 지원 · 첫 행은 컬럼명</div>
-        <input type="file" id="upload-file-input" accept=".csv,.xlsx,.xls" style="display:none;">
+        <div class="upload-hint">
+          <strong>필요한 컬럼:</strong> 번호, 이름 (성별은 선택)
+        </div>
+        <div id="upload-preview" style="display:none;"></div>
       </div>
 
-      <div class="upload-hint">
-        <strong>필요한 컬럼:</strong> 번호, 이름 (성별은 선택)
+      <!-- 교과 전담용: 반별 임포트 리스트 -->
+      <div id="ob-step2-subject" style="display:none;">
+        <div class="ob-import-hint">
+          각 반의 명단을 지금 등록하거나 <strong>나중에</strong> 사이드바에서 추가할 수 있어요.
+        </div>
+        <div id="ob-import-list" class="ob-import-list"></div>
       </div>
-
-      <!-- 미리보기 -->
-      <div id="upload-preview" style="display:none;"></div>
 
       <div class="onboarding-actions">
-        <button class="btn-secondary" onclick="loadSampleRoster()">샘플로 시작</button>
+        <button class="btn-secondary" onclick="loadSampleRoster()" id="ob-sample-btn">샘플로 시작</button>
         <div style="flex:1;"></div>
         <button class="btn-secondary" onclick="onboardingNext(1)">← 이전</button>
         <button class="btn-primary" id="ob-next-2" disabled onclick="onboardingNext(3)">다음 →</button>
@@ -8773,11 +8894,13 @@ function calcRiskScore(type, angerMode, legalFlags, message){
 var TEACHER_NAME = '';
 var SCHOOL_GRADE = '';
 var SCHOOL_CLASS = '';
+var SCHOOL_LEVEL = 'middle';  // 'elementary' | 'middle' | 'high'
 
 function saveSettings(){
   try{
     localStorage.setItem('ht2_settings', JSON.stringify({
       teacher: TEACHER_NAME, grade: SCHOOL_GRADE, classNum: SCHOOL_CLASS,
+      schoolLevel: SCHOOL_LEVEL,
       currentClassKey: currentClassKey
     }));
   }catch(e){}
@@ -8790,6 +8913,7 @@ function loadSettings(){
       TEACHER_NAME = d.teacher || TEACHER_NAME;
       SCHOOL_GRADE = d.grade || SCHOOL_GRADE;
       SCHOOL_CLASS = d.classNum || SCHOOL_CLASS;
+      SCHOOL_LEVEL = d.schoolLevel || 'middle';
       if(d.currentClassKey) currentClassKey = d.currentClassKey;
     }
   }catch(e){}
@@ -11743,28 +11867,172 @@ function copySaengibuPrompt(){
    온보딩
 ═══════════════════════════════════════════ */
 var onboardingData = {
+  role: 'homeroom',         // 'homeroom' | 'subject'
+  schoolLevel: 'middle',    // 'elementary' | 'middle' | 'high'
   teacher: '',
+  // 담임 모드
   grade: 0,
   classNum: 0,
-  role: 'homeroom',    // 'homeroom' | 'subject'
-  parsedStudents: []   // 명단 업로드 후 파싱된 학생 데이터
+  parsedStudents: [],       // 명단 업로드 후 파싱된 학생 데이터 (담임용)
+  // 교과 전담 모드 — 여러 반
+  classes: []               // [{ grade, classNum, students[], rosterImported }, ...]
 };
+
+// 현재 임포트 중인 반의 인덱스 (교과 전담 모드용)
+var obImportingClassIdx = null;
 
 function selectOnboardingRole(role){
   onboardingData.role = role;
-  document.getElementById('ob-role-homeroom').classList.toggle('active', role === 'homeroom');
-  document.getElementById('ob-role-subject').classList.toggle('active', role === 'subject');
-  var hint = document.getElementById('ob-subject-hint');
-  hint.style.display = role === 'subject' ? 'block' : 'none';
-  var titleEl = document.getElementById('ob-title');
-  var descEl  = document.getElementById('ob-desc');
-  if(role === 'homeroom'){
-    titleEl.textContent  = '아이엠쌤에 오신 걸 환영합니다';
-    descEl.innerHTML = '먼저 담당하시는 담임반 정보를 알려주세요.<br>모든 데이터는 이 PC에만 저장됩니다.';
-  } else {
-    titleEl.textContent  = '교과 전담 선생님, 환영합니다';
-    descEl.innerHTML = '담당하시는 교과 수업 반 정보를 알려주세요.<br>모든 데이터는 이 PC에만 저장됩니다.';
+  document.querySelectorAll('.ob-role-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.role === role);
+  });
+  var homeroomSection = document.getElementById('ob-homeroom-section');
+  var subjectSection  = document.getElementById('ob-subject-section');
+  if(homeroomSection) homeroomSection.style.display = role === 'homeroom' ? 'block' : 'none';
+  if(subjectSection)  subjectSection.style.display  = role === 'subject'  ? 'block' : 'none';
+  updateOnboardingNextButton();
+}
+
+function selectOnboardingLevel(level){
+  onboardingData.schoolLevel = level;
+  SCHOOL_LEVEL = level;
+  document.querySelectorAll('.ob-level-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.level === level);
+  });
+  var maxGrade = level === 'elementary' ? 6 : 3;
+  ['ob-grade','ob-class-add-grade'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.max = maxGrade; if(el.value && parseInt(el.value) > maxGrade) el.value = ''; }
+  });
+  // 등록된 반 중 학년이 max 초과하면 제거
+  onboardingData.classes = onboardingData.classes.filter(function(c){ return c.grade <= maxGrade; });
+  renderOnboardingClassList();
+  updateOnboardingNextButton();
+}
+
+function addOnboardingClass(){
+  var g = parseInt(document.getElementById('ob-class-add-grade').value);
+  var n = parseInt(document.getElementById('ob-class-add-num').value);
+  var maxGrade = onboardingData.schoolLevel === 'elementary' ? 6 : 3;
+  if(!g || !n || g < 1 || g > maxGrade || n < 1 || n > 20){
+    showToast('학년 1~'+maxGrade+', 반 1~20 범위로 입력해주세요'); return;
   }
+  if(onboardingData.classes.some(function(c){ return c.grade === g && c.classNum === n; })){
+    showToast('이미 추가된 반이에요'); return;
+  }
+  onboardingData.classes.push({ grade: g, classNum: n, students: [], rosterImported: false });
+  document.getElementById('ob-class-add-grade').value = '';
+  document.getElementById('ob-class-add-num').value = '';
+  renderOnboardingClassList();
+  updateOnboardingNextButton();
+  document.getElementById('ob-class-add-grade').focus();
+}
+
+function removeOnboardingClass(idx){
+  onboardingData.classes.splice(idx, 1);
+  renderOnboardingClassList();
+  updateOnboardingNextButton();
+}
+
+function renderOnboardingClassList(){
+  var listEl = document.getElementById('ob-class-list');
+  if(!listEl) return;
+  if(onboardingData.classes.length === 0){ listEl.innerHTML = ''; return; }
+  var html = '';
+  onboardingData.classes.forEach(function(c, i){
+    var statusCls  = c.rosterImported ? 'has-students' : '';
+    var statusText = c.rosterImported ? '✓ '+c.students.length+'명' : '명단 미등록';
+    html += '<div class="ob-class-item">';
+    html += '<span class="ob-class-item-num">'+(i+1)+'</span>';
+    html += '<span class="ob-class-item-label">'+c.grade+'학년 '+c.classNum+'반</span>';
+    html += '<span class="ob-class-item-status '+statusCls+'">'+statusText+'</span>';
+    html += '<button class="ob-class-remove" onclick="removeOnboardingClass('+i+')" aria-label="삭제">';
+    html += '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    html += '</button></div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function updateOnboardingNextButton(){
+  var t = (document.getElementById('ob-teacher') || {}).value || '';
+  t = t.trim();
+  var valid = false;
+  if(onboardingData.role === 'homeroom'){
+    var g = (document.getElementById('ob-grade') || {}).value || '';
+    var c = (document.getElementById('ob-class') || {}).value || '';
+    valid = t.length >= 2 && !!g && !!c;
+  } else {
+    valid = t.length >= 2 && onboardingData.classes.length >= 1;
+  }
+  var btn = document.getElementById('ob-next-1');
+  if(btn) btn.disabled = !valid;
+  var hint = document.getElementById('ob-step1-hint');
+  if(hint){
+    if(onboardingData.role === 'homeroom') hint.textContent = '성함·학년·반을 입력하세요';
+    else hint.textContent = '성함 입력 후 반을 1개 이상 추가하세요';
+  }
+}
+
+function initOnboardingStep2(){
+  if(onboardingData.role === 'homeroom'){
+    document.getElementById('ob-step2-homeroom').style.display = 'block';
+    document.getElementById('ob-step2-subject').style.display  = 'none';
+    document.getElementById('ob-step2-desc').innerHTML =
+      'NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.';
+    document.getElementById('ob-sample-btn').style.display = 'inline-flex';
+    document.getElementById('ob-next-2').disabled = true;
+  } else {
+    document.getElementById('ob-step2-homeroom').style.display = 'none';
+    document.getElementById('ob-step2-subject').style.display  = 'block';
+    document.getElementById('ob-step2-desc').innerHTML =
+      '수업하는 각 반의 학생 명단을 불러옵니다.<br>지금 등록 못 한 반은 사이드바에서 나중에 추가할 수 있어요.';
+    document.getElementById('ob-sample-btn').style.display = 'none';
+    renderOnboardingImportList();
+    document.getElementById('ob-next-2').disabled = false;  // 교과 전담은 명단 없어도 진행 가능
+  }
+}
+
+function renderOnboardingImportList(){
+  var listEl = document.getElementById('ob-import-list');
+  if(!listEl) return;
+  var html = '';
+  onboardingData.classes.forEach(function(c, i){
+    var importedCls = c.rosterImported ? 'imported' : '';
+    var statusText  = c.rosterImported ? c.students.length+'명 등록됨' : '명단 미등록';
+    html += '<div class="ob-import-item '+importedCls+'">';
+    html += '<div class="ob-import-item-head">';
+    html += '<span class="ob-import-item-num">'+(i+1)+'</span>';
+    html += '<span class="ob-import-item-label">'+c.grade+'학년 '+c.classNum+'반</span>';
+    html += '<span class="ob-import-item-status">'+statusText+'</span>';
+    html += '</div>';
+    html += '<div class="ob-import-actions">';
+    if(c.rosterImported){
+      html += '<button class="ob-import-action-btn" onclick="reImportClassRoster('+i+')">↺ 다시 등록</button>';
+      html += '<button class="ob-import-action-btn" onclick="clearClassRoster('+i+')">✕ 초기화</button>';
+    } else {
+      html += '<button class="ob-import-action-btn primary" onclick="importClassRoster('+i+')">↑ 명단 업로드</button>';
+      html += '<button class="ob-import-action-btn later" onclick="markClassAsLater('+i+')">나중에</button>';
+    }
+    html += '</div></div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function importClassRoster(classIdx){
+  obImportingClassIdx = classIdx;
+  var fileInput = document.getElementById('upload-file-input');
+  fileInput.value = '';
+  fileInput.click();
+}
+function reImportClassRoster(classIdx){ importClassRoster(classIdx); }
+function clearClassRoster(classIdx){
+  if(!confirm('이 반의 명단을 초기화할까요?')) return;
+  onboardingData.classes[classIdx].students = [];
+  onboardingData.classes[classIdx].rosterImported = false;
+  renderOnboardingImportList();
+}
+function markClassAsLater(classIdx){
+  showToast('나중에 사이드바에서 추가할 수 있어요');
 }
 
 function showOnboarding(){
@@ -11773,8 +12041,9 @@ function showOnboarding(){
   document.getElementById('onboarding-step-2').style.display = 'none';
   document.getElementById('onboarding-step-3').style.display = 'none';
 
-  // 역할 기본값 적용
+  // 역할·학교급 기본값 적용
   selectOnboardingRole(onboardingData.role || 'homeroom');
+  selectOnboardingLevel(onboardingData.schoolLevel || SCHOOL_LEVEL || 'middle');
 
   // 기존 설정 미리 채우기 (재실행 경우)
   if(TEACHER_NAME && TEACHER_NAME !== '담임 ○○○'){
@@ -11783,18 +12052,17 @@ function showOnboarding(){
   if(SCHOOL_GRADE) document.getElementById('ob-grade').value = SCHOOL_GRADE;
   if(SCHOOL_CLASS) document.getElementById('ob-class').value = SCHOOL_CLASS;
 
-  // 기본정보 입력 핸들러
-  ['ob-teacher','ob-grade','ob-class'].forEach(function(id){
+  // 입력 핸들러
+  ['ob-teacher','ob-grade','ob-class','ob-class-add-grade','ob-class-add-num'].forEach(function(id){
     var el = document.getElementById(id);
-    el.oninput = function(){
-      var t = document.getElementById('ob-teacher').value.trim();
-      var g = document.getElementById('ob-grade').value;
-      var c = document.getElementById('ob-class').value;
-      document.getElementById('ob-next-1').disabled = !(t.length >= 2 && g && c);
-    };
-    // 초기 상태 평가
-    el.dispatchEvent(new Event('input'));
+    if(!el) return;
+    el.oninput = updateOnboardingNextButton;
   });
+  // ob-class-add-num에서 Enter → 반 추가
+  var addNumEl = document.getElementById('ob-class-add-num');
+  if(addNumEl) addNumEl.onkeydown = function(e){ if(e.key === 'Enter'){ e.preventDefault(); addOnboardingClass(); } };
+  // 초기 상태 평가
+  updateOnboardingNextButton();
 
   // 파일 업로드 핸들러
   var zone = document.getElementById('upload-zone');
@@ -11868,17 +12136,29 @@ function saveRosterReplace(){
 }
 
 function onboardingNext(stepNum){
-  // 현재 단계 저장
   if(stepNum === 2){
+    // STEP 1 → 2
     onboardingData.teacher = document.getElementById('ob-teacher').value.trim();
-    onboardingData.grade = parseInt(document.getElementById('ob-grade').value);
-    onboardingData.classNum = parseInt(document.getElementById('ob-class').value);
+    if(onboardingData.role === 'homeroom'){
+      onboardingData.grade    = parseInt(document.getElementById('ob-grade').value);
+      onboardingData.classNum = parseInt(document.getElementById('ob-class').value);
+    }
+    // 교과 전담은 onboardingData.classes에 이미 누적됨
+    initOnboardingStep2();
   }
   if(stepNum === 3){
-    var roleLabel = onboardingData.role === 'homeroom' ? '담임반' : '교과반';
-    var cls = onboardingData.grade+'학년 '+onboardingData.classNum+'반 ('+roleLabel+')';
-    document.getElementById('ob-summary-class').textContent = cls;
-    document.getElementById('ob-summary-count').textContent = onboardingData.parsedStudents.length;
+    // STEP 2 → 3 (completeOnboarding 호출로 이동)
+    if(onboardingData.role === 'homeroom'){
+      var roleLabel = '담임반';
+      var cls = onboardingData.grade+'학년 '+onboardingData.classNum+'반 ('+roleLabel+')';
+      document.getElementById('ob-summary-class').textContent = cls;
+      document.getElementById('ob-summary-count').textContent = onboardingData.parsedStudents.length;
+    } else {
+      var classLabels = onboardingData.classes.map(function(c){ return c.grade+'학년 '+c.classNum+'반'; }).join(', ');
+      var totalStudents = onboardingData.classes.reduce(function(sum, c){ return sum + c.students.length; }, 0);
+      document.getElementById('ob-summary-class').textContent = classLabels || '—';
+      document.getElementById('ob-summary-count').textContent = totalStudents;
+    }
     renderDedupeBanner();
   }
   document.getElementById('onboarding-step-1').style.display = stepNum === 1 ? 'block' : 'none';
@@ -12157,6 +12437,18 @@ function processRoster(rows){
     return;
   }
 
+  // ── 교과 전담 분기: 특정 반에 저장 ──
+  if(onboardingData.role === 'subject' && obImportingClassIdx !== null){
+    var cls = onboardingData.classes[obImportingClassIdx];
+    cls.students = parsed;
+    cls.rosterImported = true;
+    obImportingClassIdx = null;
+    renderOnboardingImportList();
+    showToast(cls.grade+'학년 '+cls.classNum+'반 '+parsed.length+'명 등록됐어요');
+    return;
+  }
+
+  // ── 담임 흐름 (기존) ──
   onboardingData.parsedStudents = parsed;
 
   // 업로드 존 완료 상태
@@ -12207,38 +12499,66 @@ function loadSampleRoster(){
 }
 
 function completeOnboarding(){
-  TEACHER_NAME = onboardingData.teacher;
-  SCHOOL_GRADE = onboardingData.grade;
-  SCHOOL_CLASS = onboardingData.classNum;
+  TEACHER_NAME  = onboardingData.teacher;
+  SCHOOL_LEVEL  = onboardingData.schoolLevel || 'middle';
 
-  // 담임/교과반을 classes에 등록 (또는 명단만 교체)
-  var key = getClassKey(SCHOOL_GRADE, SCHOOL_CLASS);
-  var isPrimary = onboardingData.role === 'homeroom';
-  if(classes[key]){
-    // 재실행: 학번이 같으면 기록 유지, 명단만 교체
-    classes[key].students = onboardingData.parsedStudents.slice();
-    classes[key].isPrimary = isPrimary;
-    // 담임반으로 설정할 경우 다른 반들의 담임 플래그 해제
-    if(isPrimary){
-      Object.keys(classes).forEach(function(k){
-        if(k !== key) classes[k].isPrimary = false;
-      });
-    }
-  } else {
-    // 신규 등록
-    if(isPrimary){
+  if(onboardingData.role === 'homeroom'){
+    // ── 담임 흐름 (기존) ──
+    SCHOOL_GRADE = onboardingData.grade;
+    SCHOOL_CLASS = onboardingData.classNum;
+    var key = getClassKey(SCHOOL_GRADE, SCHOOL_CLASS);
+    var isPrimary = true;
+    if(classes[key]){
+      classes[key].students  = onboardingData.parsedStudents.slice();
+      classes[key].isPrimary = isPrimary;
+      Object.keys(classes).forEach(function(k){ if(k !== key) classes[k].isPrimary = false; });
+    } else {
       Object.keys(classes).forEach(function(k){ classes[k].isPrimary = false; });
+      classes[key] = {
+        grade: SCHOOL_GRADE, classNum: SCHOOL_CLASS,
+        isPrimary: isPrimary,
+        students: onboardingData.parsedStudents.slice(),
+        records: {}
+      };
     }
-    classes[key] = {
-      grade: SCHOOL_GRADE,
-      classNum: SCHOOL_CLASS,
-      isPrimary: isPrimary,
-      students: onboardingData.parsedStudents.slice(),
-      records: {}
-    };
+    currentClassKey = key;
+  } else {
+    // ── 교과 전담 흐름 — 여러 반 등록 ──
+    var firstKey = null;
+    onboardingData.classes.forEach(function(c){
+      var ck = getClassKey(c.grade, c.classNum);
+      if(!firstKey) firstKey = ck;
+      if(classes[ck]){
+        classes[ck].students = c.students.slice();
+        classes[ck].isPrimary = false;
+      } else {
+        classes[ck] = {
+          grade: c.grade, classNum: c.classNum,
+          isPrimary: false,
+          students: c.students.slice(),
+          records: {}
+        };
+      }
+    });
+    var firstCls = onboardingData.classes[0];
+    SCHOOL_GRADE = firstCls ? firstCls.grade    : '';
+    SCHOOL_CLASS = firstCls ? firstCls.classNum : '';
+    currentClassKey = firstKey || '';
   }
-  currentClassKey = key;
+
   syncActiveClass();
+
+  // 출결 모듈 학교급 자동 동기화
+  if(typeof attendanceSettings !== 'undefined'){
+    attendanceSettings.schoolLevel = SCHOOL_LEVEL;
+    attendanceSettings.periodCount = ({elementary:6, middle:7, high:8})[SCHOOL_LEVEL] || 7;
+    if(typeof saveAttendanceSettings === 'function') saveAttendanceSettings();
+  }
+
+  // 생기부 학교급 select 자동 설정
+  var levelMap = {elementary:'초', middle:'중', high:'고'};
+  var sgLevelEl = document.getElementById('sg-school-level');
+  if(sgLevelEl) sgLevelEl.value = levelMap[SCHOOL_LEVEL] || '중';
 
   saveSettings();
   saveAll();
