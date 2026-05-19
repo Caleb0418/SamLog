@@ -1598,6 +1598,12 @@ body{
 .quick-memo-autocomplete-name{
   font-weight:600;color:var(--text);font-size:14px;
 }
+.autoc-all-name{
+  font-weight:600;color:var(--text);font-size:13px;
+}
+.autoc-all-count{
+  font-size:11px;color:var(--text-secondary);margin-left:auto;
+}
 
 .quick-memo-matches{
   display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;
@@ -4692,7 +4698,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
         <span class="quick-memo-tip">⌘+Enter로 저장</span>
       </div>
-      <textarea class="quick-memo-input" id="quick-memo-input" rows="3" placeholder="예) @이수진 쉬는시간에 친구랑 다툼. 점심 후 확인 필요"></textarea>
+      <textarea class="quick-memo-input" id="quick-memo-input" rows="3" placeholder="@이름 학생 멘션  ·  @all 또는 @전 입력하면 반 전체 누가 가능"></textarea>
 
       <!-- 자동완성 드롭다운 -->
       <div class="quick-memo-autocomplete" id="quick-memo-autocomplete" style="display:none;"></div>
@@ -13120,26 +13126,34 @@ function onQuickMemoInput(input){
   var text = input.value;
   document.getElementById('quick-memo-counter').textContent = text.length+'자';
 
-  // @이름 자동완성 - 커서 위치 직전의 @패턴 감지
   var pos = input.selectionStart;
   var before = text.substring(0, pos);
-  var atMatch = before.match(/@([가-힣]{0,5})$/);
+  // 한글 패턴: @ + 0~5글자 한글
+  var korMatch = before.match(/@([가-힣]{0,5})$/);
+  // 영문 패턴: @a / @al / @all (대소문자 무관, 뒤에 글자 없을 때만)
+  var engMatch = before.match(/@(a|al|all)$/i);
 
   var auto = document.getElementById('quick-memo-autocomplete');
-  if(atMatch){
-    var query = atMatch[1];
-    showAutocomplete(query, input);
+  if(korMatch){
+    showAutocomplete(korMatch[1], input);
+  } else if(engMatch){
+    showAutocomplete('__ALL_TRIGGER__', input);
   } else {
     auto.style.display = 'none';
   }
 
-  // 전체 텍스트에서 @이름 매칭 결과 표시
   updateMatchChips(text);
 
-  // 저장 버튼 활성화 조건: 내용이 있고, 매칭된 학생이 1명 이상 (글로벌 풀)
+  // 저장 버튼 활성화: @이름 매칭 또는 @2-3전체 패턴 있고 내용도 있을 때
   var matches = parseMentions(text, {global: true});
-  var hasContent = text.replace(/@[가-힣]{2,5}[A-Z]?(?:#\d{1,3})?/g,'').trim().length > 0;
-  document.getElementById('quick-memo-save-btn').disabled = !(matches.matched.length > 0 && hasContent);
+  var allMentionPattern = /@(\d+)-(\d+)전체(?![가-힣])/g;
+  var hasAllMention = allMentionPattern.test(text);
+  var hasContent = text
+    .replace(/@\d+-\d+전체/g, '')
+    .replace(/@[가-힣]{2,5}[A-Z]?(?:#\d{1,3})?/g, '')
+    .trim().length > 0;
+  var hasMatches = matches.matched.length > 0 || hasAllMention;
+  document.getElementById('quick-memo-save-btn').disabled = !(hasMatches && hasContent);
 }
 
 /* 자동완성 키보드 네비 상태 */
@@ -13148,6 +13162,8 @@ var _autocompleteItems = [];
 
 function showAutocomplete(query, input){
   var auto = document.getElementById('quick-memo-autocomplete');
+  var isAllTrigger = query === '__ALL_TRIGGER__';
+
   // 글로벌 풀 — 모든 반의 학생을 후보로
   var allStuds = getAllStudentsAcrossClasses();
   var pool = allStuds.map(function(item){
@@ -13156,59 +13172,109 @@ function showAutocomplete(query, input){
     s._classLabel = item.classLabel;
     return s;
   });
-  var candidates = pool.filter(function(s){
-    if(!query) return true;
-    return s.name.indexOf(query) >= 0;
-  }).slice(0, 10);
 
-  if(candidates.length === 0){
+  // "전체" 항목 매칭 조건: 빈 쿼리, "전체"의 prefix, 또는 영문 트리거
+  var allMatchesQuery = isAllTrigger || !query || '전체'.indexOf(query) === 0;
+
+  // 학생 후보 필터링 — "전"으로 시작하거나 영문 트리거이면 학생 숨김
+  var candidates;
+  if(isAllTrigger || (query && query.charAt(0) === '전')){
+    candidates = [];
+  } else {
+    candidates = pool.filter(function(s){
+      if(!query) return true;
+      return s.name.indexOf(query) >= 0;
+    }).slice(0, 10);
+  }
+
+  // 전체 멘션 항목: 반 목록 수집
+  var allClassItems = [];
+  if(allMatchesQuery){
+    Object.keys(classes).sort().forEach(function(key){
+      var c = classes[key];
+      if(!c || !c.students || c.students.length === 0) return;
+      var validStudents = c.students.filter(function(s){
+        return s && s.name && !/^[\s\d명/+\-]+$/.test(s.name) && !/총\s*\d+\s*명/.test(s.name);
+      });
+      if(validStudents.length === 0) return;
+      var classShort = c.grade+'-'+c.classNum;
+      allClassItems.push({
+        classKey: key,
+        classShort: classShort,
+        label: c.grade+'학년 '+c.classNum+'반',
+        count: validStudents.length
+      });
+    });
+    allClassItems.sort(function(a,b){ return a.classShort.localeCompare(b.classShort); });
+  }
+
+  if(candidates.length === 0 && allClassItems.length === 0){
     auto.style.display = 'none';
     _autocompleteItems = [];
     _autocompleteIdx = -1;
     return;
   }
 
-  // 동명이인 인덱스 계산 (사이드바·매칭 칩과 일치하는 A/B 알파벳)
   var nameCount = {};
   pool.forEach(function(s){ nameCount[s.name] = (nameCount[s.name]||0)+1; });
 
-  auto.innerHTML = candidates.map(function(s, i){
+  var html = '';
+  // 전체 멘션 항목 (상단)
+  allClassItems.forEach(function(item, i){
+    var isFirst = candidates.length === 0 && i === 0;
+    html += '<div class="quick-memo-autocomplete-item'+(isFirst?' active':'')+'"'+
+      ' data-type="all"'+
+      ' data-classkey="'+escapeAttr(item.classKey)+'"'+
+      ' data-classshort="'+escapeAttr(item.classShort)+'">';
+    html += '<span class="autoc-class-badge">'+escapeHtml(item.classShort)+'</span>';
+    html += '<span class="autoc-all-name">'+escapeHtml(item.label)+' 전체</span>';
+    html += '<span class="autoc-all-count">'+item.count+'명</span>';
+    html += '</div>';
+  });
+
+  // 학생 항목 (하단)
+  candidates.forEach(function(s, i){
     var displayName = getDisplayName(s);
     var classBadge = '<span class="autoc-class-badge">'+escapeHtml(s._classLabel)+'</span>';
     var numBadge = '<span class="autoc-num-badge">'+s.num+'번</span>';
-    return '<div class="quick-memo-autocomplete-item'+(i===0?' active':'')+'" data-idx="'+i+'" data-name="'+escapeHtml(s.name)+'" data-num="'+s.num+'" data-class="'+escapeAttr(s._classKey)+'" data-dup="'+(nameCount[s.name]>1?'1':'0')+'">'+
+    var isFirst = allClassItems.length === 0 && i === 0;
+    html += '<div class="quick-memo-autocomplete-item'+(isFirst?' active':'')+'" data-idx="'+i+'" data-name="'+escapeHtml(s.name)+'" data-num="'+s.num+'" data-class="'+escapeAttr(s._classKey)+'" data-dup="'+(nameCount[s.name]>1?'1':'0')+'">'+
       classBadge+
       numBadge+
       '<span class="quick-memo-autocomplete-name">'+escapeHtml(displayName)+'</span>'+
     '</div>';
-  }).join('');
+  });
 
+  auto.innerHTML = html;
   auto.style.top = (input.offsetTop + input.offsetHeight + 4)+'px';
   auto.style.left = (input.offsetLeft + 20)+'px';
   auto.style.display = 'block';
 
-  // 상태 갱신 (키보드 네비용)
-  _autocompleteItems = candidates;
+  _autocompleteItems = allClassItems.map(function(item){
+    return Object.assign({_type:'all'}, item);
+  }).concat(candidates);
   _autocompleteIdx = 0;
 
-  auto.querySelectorAll('.quick-memo-autocomplete-item').forEach(function(item){
+  auto.querySelectorAll('.quick-memo-autocomplete-item').forEach(function(item, i){
     item.onmouseenter = function(){
-      _autocompleteIdx = parseInt(item.dataset.idx);
+      _autocompleteIdx = i;
       updateAutocompleteActive();
     };
     item.onclick = function(){
-      pickAutocompleteItem(item, input);
+      if(item.dataset.type === 'all'){
+        applyAllMentionToInput(input, item.dataset.classshort, item.dataset.classkey);
+      } else {
+        pickAutocompleteItem(item, input);
+      }
     };
   });
 }
 
 function updateAutocompleteActive(){
   var auto = document.getElementById('quick-memo-autocomplete');
-  auto.querySelectorAll('.quick-memo-autocomplete-item').forEach(function(it){
-    var idx = parseInt(it.dataset.idx);
-    it.classList.toggle('active', idx === _autocompleteIdx);
+  auto.querySelectorAll('.quick-memo-autocomplete-item').forEach(function(it, i){
+    it.classList.toggle('active', i === _autocompleteIdx);
   });
-  // 선택된 항목이 보이도록 스크롤
   var sel = auto.querySelector('.quick-memo-autocomplete-item.active');
   if(sel) sel.scrollIntoView({block:'nearest'});
 }
@@ -13241,10 +13307,36 @@ function pickAutocompleteItem(item, input){
   } else {
     replacement = '@'+name+' ';
   }
-  before = before.replace(/@[가-힣]{0,5}$/, replacement);
+  if(/@(a|al|all)$/i.test(before)){
+    before = before.replace(/@(a|al|all)$/i, replacement);
+  } else {
+    before = before.replace(/@[가-힣]{0,5}$/, replacement);
+  }
   input.value = before + after;
   input.focus();
   input.setSelectionRange(before.length, before.length);
+  document.getElementById('quick-memo-autocomplete').style.display = 'none';
+  _autocompleteItems = [];
+  _autocompleteIdx = -1;
+  onQuickMemoInput(input);
+}
+
+function applyAllMentionToInput(input, classShort, classKey){
+  var text = input.value;
+  var pos = input.selectionStart;
+  var before = text.substring(0, pos);
+  var after = text.substring(pos);
+  var mentionText = '@' + classShort + '전체 ';
+  var newBefore;
+  if(/@(a|al|all)$/i.test(before)){
+    newBefore = before.replace(/@(a|al|all)$/i, mentionText);
+  } else {
+    newBefore = before.replace(/@[가-힣]{0,5}$/, mentionText);
+  }
+  input.value = newBefore + after;
+  var newPos = newBefore.length;
+  input.setSelectionRange(newPos, newPos);
+  input.focus();
   document.getElementById('quick-memo-autocomplete').style.display = 'none';
   _autocompleteItems = [];
   _autocompleteIdx = -1;
@@ -13271,7 +13363,13 @@ function handleAutocompleteKey(e, input){
   if(e.key === 'Enter' || e.key === ' ' || e.key === 'Tab'){
     e.preventDefault();
     var item = auto.querySelector('.quick-memo-autocomplete-item.active');
-    if(item) pickAutocompleteItem(item, input);
+    if(item){
+      if(item.dataset.type === 'all'){
+        applyAllMentionToInput(input, item.dataset.classshort, item.dataset.classkey);
+      } else {
+        pickAutocompleteItem(item, input);
+      }
+    }
     return true;
   }
   if(e.key === 'Escape'){
@@ -13382,13 +13480,43 @@ function parseMentions(text, opts){
 
 function updateMatchChips(text){
   var matches = parseMentions(text, {global: true});
+
+  // @2-3전체 패턴 파싱
+  var allClassChips = [];
+  var allMentionRe = /@(\d+)-(\d+)전체(?![가-힣])/g;
+  var am;
+  while((am = allMentionRe.exec(text)) !== null){
+    var amGrade = am[1], amCls = am[2];
+    var amKey = null;
+    Object.keys(classes).forEach(function(k){
+      if(classes[k].grade == amGrade && classes[k].classNum == amCls) amKey = k;
+    });
+    if(amKey){
+      var amC = classes[amKey];
+      var validCnt = (amC.students||[]).filter(function(s){
+        return s && s.name && !/^[\s\d명/+\-]+$/.test(s.name) && !/총\s*\d+\s*명/.test(s.name);
+      }).length;
+      allClassChips.push({ label: amGrade+'학년 '+amCls+'반', count: validCnt });
+    }
+  }
+
   var wrap = document.getElementById('quick-memo-matches');
-  var hasContent = matches.matched.length > 0 || matches.unknown.length > 0 || matches.ambiguous.length > 0;
+  var hasContent = matches.matched.length > 0 || matches.unknown.length > 0 ||
+    matches.ambiguous.length > 0 || allClassChips.length > 0;
   if(!hasContent){
     wrap.style.display = 'none';
     return;
   }
   var html = '';
+
+  // 전체 멘션 칩
+  allClassChips.forEach(function(item){
+    html += '<span class="match-chip" style="background:var(--bg-elevated);color:var(--text);border-color:var(--border);">'+
+      '<span class="match-chip-avatar" style="background:var(--text-secondary);font-size:8px;">전</span>'+
+      escapeHtml(item.label)+' 전체 <span style="font-size:10px;font-weight:500;opacity:0.7;">'+item.count+'명</span>'+
+    '</span>';
+  });
+
   matches.matched.forEach(function(s){
     var classPill = s._classLabel ? '<span class="home-class-pill" style="margin-right:4px;">'+escapeHtml(s._classLabel)+'</span>' : '';
     html += '<span class="match-chip">'+classPill+'<span class="match-chip-avatar">'+s.name.charAt(0)+'</span>'+escapeHtml(getDisplayName(s))+' <span style="font-size:10px;font-weight:500;opacity:0.7;">'+s.num+'번</span></span>';
@@ -13411,7 +13539,30 @@ function saveQuickMemo(){
   if(!text) return;
   // 홈에서는 모든 반 학생을 후보로 (global)
   var matches = parseMentions(text, {global: true});
-  if(matches.matched.length === 0){
+
+  // @2-3전체 패턴 처리: 해당 반 전체 학생을 추가 매칭
+  var allMentionStudents = [];
+  var allMentionRe3 = /@(\d+)-(\d+)전체(?![가-힣])/g;
+  var am3;
+  while((am3 = allMentionRe3.exec(text)) !== null){
+    var amGrade3 = am3[1], amCls3 = am3[2];
+    var amKey3 = null;
+    Object.keys(classes).forEach(function(k){
+      if(classes[k].grade == amGrade3 && classes[k].classNum == amCls3) amKey3 = k;
+    });
+    if(!amKey3) continue;
+    var amClass3 = classes[amKey3];
+    (amClass3.students||[]).forEach(function(s){
+      if(!s || !s.name || /^[\s\d명/+\-]+$/.test(s.name) || /총\s*\d+\s*명/.test(s.name)) return;
+      var alreadyIn = matches.matched.some(function(m){ return m._classKey === amKey3 && m.num === s.num; });
+      var alreadyAll = allMentionStudents.some(function(m){ return m._classKey === amKey3 && m.num === s.num; });
+      if(!alreadyIn && !alreadyAll){
+        allMentionStudents.push(Object.assign({}, s, { _classKey: amKey3, _classLabel: amGrade3+'-'+amCls3 }));
+      }
+    });
+  }
+
+  if(matches.matched.length === 0 && allMentionStudents.length === 0){
     if(matches.ambiguous.length > 0){
       showToast('동명이인이 있어요. 자동완성에서 정확한 학생을 선택해주세요');
     } else {
@@ -13430,6 +13581,7 @@ function saveQuickMemo(){
   // - "@지훈A 오늘" → "지훈 오늘"  (동명이인 dedup 접미사 A/B/C 제거)
   // - "@지훈#1 오늘" → "지훈 오늘"  (번호 접미사 제거)
   var memoContent = text
+    .replace(/@\d+-\d+전체\s*/g, '')
     .replace(/@([가-힣]{2,5})[A-Z]?(?:#\d{1,3})?/g, '$1')
     .replace(/\s+/g,' ').trim();
   if(!memoContent){
@@ -13462,6 +13614,27 @@ function saveQuickMemo(){
     savedNames.push((s._classLabel?s._classLabel+' ':'')+getDisplayName(s));
     savedRecIds.push({classKey:classKey, num: s.num, id: rec.id});
   });
+
+  allMentionStudents.forEach(function(s){
+    var classKey = s._classKey;
+    var cls = classes[classKey];
+    if(!cls) return;
+    if(!cls.records) cls.records = {};
+    if(!cls.records[s.num]) cls.records[s.num] = [];
+    var rec = {
+      id: genId(),
+      type: 'unsorted',
+      date: formatDateForInput(now),
+      time: formatTimeHHMM(now),
+      content: memoContent,
+      tags: [],
+      createdAt: Date.now()
+    };
+    cls.records[s.num].push(rec);
+    savedNames.push((s._classLabel?s._classLabel+' ':'')+getDisplayName(s));
+    savedRecIds.push({classKey:classKey, num: s.num, id: rec.id});
+  });
+
   // 현재 활성 반 records 객체와 동기화 (현재 반의 학생에 추가된 경우)
   syncActiveClass();
   saveAll();
