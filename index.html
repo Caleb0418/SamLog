@@ -20093,7 +20093,7 @@ function onClassSubjectInput(){
   var grade   = document.getElementById('class-form-grade').value.trim();
   var cls     = document.getElementById('class-form-class').value.trim();
   var subject = document.getElementById('class-form-subject').value.trim();
-  if(!grade || !cls || !subject || !ttSyncState.synced){ hideSuggestChips(); return; }
+  if(!grade || !cls || !subject || Object.keys(schoolTimetable).length === 0){ hideSuggestChips(); return; }
   var slots = findSlotsFromTimetable(grade, cls, subject);
   var wrap = document.getElementById('tt-suggest-chips');
   if(slots.length === 0){
