@@ -2254,6 +2254,299 @@ body{
 .att-notify-btn.primary{background:var(--accent);color:#fff;}
 .att-notify-btn:hover{opacity:.85;}
 
+/* 출결 뷰 토글 */
+.att-view-tabs{
+  display:flex;gap:4px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:18px;
+}
+.att-view-tab{
+  padding:9px 14px;font-size:12px;
+  background:transparent;color:var(--text-secondary);
+  border:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:inherit;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.att-view-tab:hover{color:var(--text);}
+.att-view-tab.active{
+  color:var(--accent);font-weight:600;
+  border-bottom-color:var(--accent);
+}
+
+/* ═══════════════════════════════════════════
+   학생별 월간 뷰
+═══════════════════════════════════════════ */
+.smv-wrap{
+  background:var(--bg-overlay);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px 20px;
+}
+.smv-head{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.smv-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;font-size:13px;flex-shrink:0;
+}
+.smv-info{flex-shrink:0;}
+.smv-name{font-size:15px;font-weight:600;color:var(--text);}
+.smv-name-num{
+  font-size:11px;color:var(--text-tertiary);
+  font-weight:400;margin-left:4px;
+}
+.smv-name-class{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.smv-student-select{
+  padding:6px 10px;font-size:12px;
+  background:var(--bg-surface);
+  border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:inherit;cursor:pointer;
+  max-width:200px;
+}
+.smv-nav{display:flex;align-items:center;gap:6px;margin-left:auto;}
+.smv-nav-btn{
+  width:28px;height:28px;padding:0;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:5px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);
+}
+.smv-nav-btn:hover{background:var(--bg-elevated);}
+.smv-month-label{
+  font-size:13px;font-weight:600;color:var(--text);
+  min-width:90px;text-align:center;
+}
+.smv-stats{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+  margin-bottom:18px;
+}
+.smv-stat{
+  background:var(--bg-surface);border-radius:6px;
+  padding:10px;text-align:center;
+}
+.smv-stat.attend{background:var(--success-dim);}
+.smv-stat.absent{background:var(--danger-dim);}
+.smv-stat.late{background:var(--warning-dim);}
+.smv-stat-val{
+  font-size:20px;font-weight:600;
+  font-variant-numeric:tabular-nums;line-height:1.1;
+  color:var(--text);
+}
+.smv-stat.attend .smv-stat-val{color:var(--success);}
+.smv-stat.absent .smv-stat-val{color:var(--danger);}
+.smv-stat.late .smv-stat-val{color:var(--warning);}
+.smv-stat-lbl{
+  font-size:10px;color:var(--text-tertiary);margin-top:2px;
+}
+.smv-stat.attend .smv-stat-lbl{color:var(--success);}
+.smv-stat.absent .smv-stat-lbl{color:var(--danger);}
+.smv-stat.late .smv-stat-lbl{color:var(--warning);}
+.smv-cal{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:3px;margin-bottom:18px;
+}
+.smv-cal-head{
+  font-size:10px;color:var(--text-tertiary);
+  text-align:center;padding:4px 0;font-weight:500;
+}
+.smv-cal-head.sun{color:var(--danger);}
+.smv-cal-cell{
+  aspect-ratio:1;
+  background:var(--bg-surface);border-radius:5px;
+  padding:4px 5px;
+  display:flex;flex-direction:column;
+  font-size:11px;position:relative;
+  cursor:pointer;
+}
+.smv-cal-cell.empty{
+  background:transparent;cursor:default;
+}
+.smv-cal-cell.weekend{background:var(--bg-elevated);}
+.smv-cal-cell:not(.empty):hover{
+  background:var(--bg-elevated);
+}
+.smv-cal-cell.has-record{
+  outline:1px solid var(--border);
+}
+.smv-cal-day{
+  font-weight:500;color:var(--text-secondary);
+  line-height:1;
+}
+.smv-cal-cell.sun .smv-cal-day{color:var(--danger);}
+.smv-cal-cell.today{
+  outline:1.5px solid var(--accent);outline-offset:-1.5px;
+}
+.smv-cal-cell.today .smv-cal-day{color:var(--accent);font-weight:700;}
+.smv-cal-pill{
+  margin-top:auto;font-size:9px;font-weight:500;
+  padding:1px 4px;border-radius:3px;
+  text-align:center;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.smv-cal-pill.absent{background:#FCEBEB;color:#791F1F;}
+.smv-cal-pill.late{background:#FAEEDA;color:#633806;}
+.smv-cal-pill.early_leave{background:#F1EFE8;color:#2C2C2A;}
+.smv-cal-pill.partial{background:#F1EFE8;color:#2C2C2A;}
+[data-theme="dark"] .smv-cal-pill.absent{background:#2A1412;color:#F09595;}
+[data-theme="dark"] .smv-cal-pill.late{background:#2A1E0A;color:#FAC775;}
+[data-theme="dark"] .smv-cal-pill.early_leave,
+[data-theme="dark"] .smv-cal-pill.partial{background:#2C2C2A;color:#D3D1C7;}
+.smv-cal-multi{
+  position:absolute;top:3px;right:4px;
+  font-size:9px;color:var(--text-tertiary);
+}
+.smv-recent{
+  border-top:1px solid var(--border);padding-top:16px;
+}
+.smv-recent-label{
+  font-size:11px;color:var(--text-tertiary);
+  margin-bottom:8px;font-weight:500;
+}
+.smv-recent-empty{
+  text-align:center;font-size:12px;color:var(--text-tertiary);
+  padding:20px;
+}
+.smv-recent-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 12px;background:var(--bg-surface);
+  border-radius:6px;margin-bottom:4px;font-size:12px;
+  cursor:pointer;
+}
+.smv-recent-row:hover{background:var(--bg-elevated);}
+.smv-recent-date{
+  color:var(--text-secondary);min-width:70px;font-weight:500;
+  flex-shrink:0;
+}
+.smv-recent-tag{
+  font-size:10px;font-weight:500;padding:2px 6px;
+  border-radius:3px;flex-shrink:0;white-space:nowrap;
+}
+.smv-recent-tag.illness{background:#FCEBEB;color:#791F1F;}
+.smv-recent-tag.unjustified{background:#FAEEDA;color:#633806;}
+.smv-recent-tag.other{background:#F1EFE8;color:#2C2C2A;}
+.smv-recent-tag.approved{background:#EAF3DE;color:#27500A;}
+[data-theme="dark"] .smv-recent-tag.illness{background:#2A1412;color:#F09595;}
+[data-theme="dark"] .smv-recent-tag.unjustified{background:#2A1E0A;color:#FAC775;}
+[data-theme="dark"] .smv-recent-tag.other{background:#2C2C2A;color:#D3D1C7;}
+[data-theme="dark"] .smv-recent-tag.approved{background:#0F2A1E;color:#9FE1CB;}
+.smv-recent-info{
+  flex:1;color:var(--text-secondary);
+  word-break:break-word;line-height:1.5;
+}
+
+/* ═══════════════════════════════════════════
+   반 전체 월간 매트릭스
+═══════════════════════════════════════════ */
+.cmm-wrap{
+  background:var(--bg-overlay);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 16px;
+}
+.cmm-head{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:12px;flex-wrap:wrap;
+}
+.cmm-icon{color:var(--text-secondary);flex-shrink:0;}
+.cmm-title{font-size:14px;font-weight:600;color:var(--text);}
+.cmm-nav{display:flex;align-items:center;gap:6px;}
+.cmm-nav-btn{
+  width:26px;height:26px;padding:0;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:5px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);
+}
+.cmm-nav-btn:hover{background:var(--bg-elevated);}
+.cmm-month{
+  font-size:12px;font-weight:600;color:var(--text);
+  min-width:80px;text-align:center;
+}
+.cmm-actions{margin-left:auto;display:flex;gap:6px;}
+.cmm-action-btn{
+  padding:5px 9px;font-size:11px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:5px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:inherit;
+}
+.cmm-action-btn:hover{background:var(--bg-elevated);}
+.cmm-legend{
+  display:flex;gap:14px;margin-bottom:10px;
+  font-size:10px;color:var(--text-tertiary);flex-wrap:wrap;
+}
+.cmm-legend-item{
+  display:inline-flex;align-items:center;gap:4px;
+}
+.cmm-legend-dot{
+  width:10px;height:10px;border-radius:2px;flex-shrink:0;
+}
+.cmm-scroll{
+  overflow-x:auto;
+  border:1px solid var(--border);border-radius:6px;
+  background:var(--bg-surface);
+}
+.cmm-tbl{
+  border-collapse:collapse;font-size:11px;
+  table-layout:fixed;
+}
+.cmm-tbl th,.cmm-tbl td{
+  border:1px solid var(--border);padding:0;
+  text-align:center;
+}
+.cmm-tbl thead th{
+  background:var(--bg-surface);height:28px;
+  font-weight:500;color:var(--text-tertiary);
+}
+.cmm-tbl thead th.weekend{background:var(--bg-elevated);}
+.cmm-tbl thead th.sun{color:var(--danger);}
+.cmm-tbl .cmm-col-num{
+  width:32px;background:var(--bg-surface);
+  color:var(--text-tertiary);font-variant-numeric:tabular-nums;
+}
+.cmm-tbl .cmm-col-name{
+  width:64px;background:var(--bg-surface);
+  text-align:left;padding-left:8px;font-weight:500;
+  color:var(--text);font-size:11px;
+  cursor:pointer;
+}
+.cmm-tbl .cmm-col-name:hover{
+  background:var(--bg-elevated);
+}
+.cmm-tbl .cmm-col-sum{
+  width:34px;background:var(--bg-surface);
+  font-weight:600;font-variant-numeric:tabular-nums;
+}
+.cmm-tbl thead .cmm-col-sum{font-weight:500;color:var(--text-tertiary);}
+.cmm-tbl tbody tr{height:26px;}
+.cmm-tbl tbody td.day{
+  font-variant-numeric:tabular-nums;
+  cursor:pointer;
+}
+.cmm-tbl tbody td.day:hover:not(.weekend){
+  background:var(--bg-elevated);
+}
+.cmm-tbl tbody td.day.weekend{
+  background:var(--bg-elevated);cursor:default;
+}
+.cmm-tbl tbody td.absent{background:#F09595;color:#4A1B0C;font-weight:600;}
+.cmm-tbl tbody td.late{background:#FAC775;color:#412402;font-weight:600;}
+.cmm-tbl tbody td.early_leave,
+.cmm-tbl tbody td.partial{background:#D3D1C7;color:#2C2C2A;font-weight:600;}
+[data-theme="dark"] .cmm-tbl tbody td.absent{background:#791F1F;color:#FCEBEB;}
+[data-theme="dark"] .cmm-tbl tbody td.late{background:#633806;color:#FAEEDA;}
+[data-theme="dark"] .cmm-tbl tbody td.early_leave,
+[data-theme="dark"] .cmm-tbl tbody td.partial{background:#444441;color:#F1EFE8;}
+@media print {
+  .cmm-actions, .cmm-nav, .att-view-tabs, .att-header-actions, .app-sidebar { display: none !important; }
+  .cmm-wrap { border: none; padding: 0; }
+}
+
 .cr-memo-edit{
   margin-left:auto;
   width:24px;height:24px;border-radius:5px;
@@ -4899,6 +5192,24 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </div>
   </div>
 
+  <!-- 뷰 토글 -->
+  <div class="att-view-tabs">
+    <button class="att-view-tab active" data-view="daily" onclick="switchAttView('daily')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      일일
+    </button>
+    <button class="att-view-tab" data-view="student-monthly" onclick="switchAttView('student-monthly')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      학생별 월간
+    </button>
+    <button class="att-view-tab" data-view="class-monthly" onclick="switchAttView('class-monthly')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      반 전체 월간
+    </button>
+  </div>
+
+  <div id="att-view-daily">
+
   <!-- 통계 카드 -->
 
   <div class="att-stats" id="att-stats"></div>
@@ -4950,6 +5261,14 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       삭제
     </button>
   </div>
+
+  </div><!-- /att-view-daily -->
+
+  <!-- 학생별 월간 뷰 -->
+  <div id="att-view-student-monthly" style="display:none;"></div>
+
+  <!-- 반 전체 월간 뷰 -->
+  <div id="att-view-class-monthly" style="display:none;"></div>
 
 </div><!-- /tab-attendance -->
 
@@ -7973,7 +8292,19 @@ function switchTab(tab){
   if(tab === 'students') renderSidebar('');
   if(tab === 'class') renderClassTab();
   if(tab === 'reply') renderReplyFlow();
-  if(tab === 'attendance') renderAttendanceTab();
+  if(tab === 'attendance'){
+    attCurrentView = 'daily';
+    document.querySelectorAll('.att-view-tab').forEach(function(b){
+      b.classList.toggle('active', b.dataset.view === 'daily');
+    });
+    var dailyEl = document.getElementById('att-view-daily');
+    var smEl = document.getElementById('att-view-student-monthly');
+    var cmEl = document.getElementById('att-view-class-monthly');
+    if(dailyEl) dailyEl.style.display = 'block';
+    if(smEl) smEl.style.display = 'none';
+    if(cmEl) cmEl.style.display = 'none';
+    renderAttendanceTab();
+  }
 
   // 모든 탭에서 헤더 NEIS 시간 갱신
   updateTimetableBanner();
@@ -8426,15 +8757,26 @@ function renderStudentAttendanceSummary(num){
   el.style.display = 'flex';
 }
 function goToAttendanceForStudent(num){
+  if(!num) return;
+  var currentStudent = num;
+  smvState.studentNum = currentStudent;
+  var dates = [];
+  Object.keys(attendanceRecords).forEach(function(d){
+    if((attendanceRecords[d][currentStudent] || []).length > 0) dates.push(d);
+  });
+  if(dates.length > 0){
+    dates.sort();
+    var latestDate = dates[dates.length - 1];
+    var parts = latestDate.split('-');
+    smvState.year = parseInt(parts[0]);
+    smvState.month = parseInt(parts[1]);
+  } else {
+    var t = new Date();
+    smvState.year = t.getFullYear();
+    smvState.month = t.getMonth() + 1;
+  }
   switchTab('attendance');
-  setTimeout(function(){
-    var s = students.find(function(st){ return st.num === num; });
-    var q = s ? s.name : String(parseInt(num));
-    var inp = document.getElementById('att-tbl-search');
-    if(inp){ inp.value = q; }
-    attTableState.searchQuery = q;
-    renderAttendanceTable();
-  }, 80);
+  setTimeout(function(){ switchAttView('student-monthly'); }, 0);
 }
 function getTodayDate(){
   var d = new Date();
@@ -13997,6 +14339,9 @@ var attendanceCurrentDate = null;
 
 /* ═══ 출결 테이블 UI ═══ */
 var attTableState = { searchQuery: '', issueOnly: false };
+var attCurrentView = 'daily';
+var smvState = { studentNum: null, year: null, month: null };
+var cmmState = { year: null, month: null };
 
 function renderAttendanceTab(){
   var c = getActiveClass();
@@ -14012,6 +14357,336 @@ function renderAttendanceTab(){
     formatAttendanceDate(attendanceCurrentDate) + ' 출결';
   renderAttendanceStats();
   renderAttendanceTable();
+}
+
+function switchAttView(view){
+  attCurrentView = view;
+  document.querySelectorAll('.att-view-tab').forEach(function(b){
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+  document.getElementById('att-view-daily').style.display = view === 'daily' ? 'block' : 'none';
+  document.getElementById('att-view-student-monthly').style.display = view === 'student-monthly' ? 'block' : 'none';
+  document.getElementById('att-view-class-monthly').style.display = view === 'class-monthly' ? 'block' : 'none';
+  var dateBtn = document.querySelector('.att-header-actions .att-btn-icon');
+  if(dateBtn) dateBtn.style.display = view === 'daily' ? '' : 'none';
+  if(view === 'daily') renderAttendanceTab();
+  else if(view === 'student-monthly') renderStudentMonthlyView();
+  else if(view === 'class-monthly') renderClassMonthlyView();
+}
+
+function renderStudentMonthlyView(){
+  var c = getActiveClass();
+  if(!c || !c.students || c.students.length === 0){
+    document.getElementById('att-view-student-monthly').innerHTML =
+      '<div class="att-empty">활성 반이 없거나 학생 명단이 비어 있어요.</div>';
+    return;
+  }
+  if(!smvState.studentNum) smvState.studentNum = c.students[0].num;
+  if(!smvState.year || !smvState.month){
+    var t = new Date();
+    smvState.year = t.getFullYear();
+    smvState.month = t.getMonth() + 1;
+  }
+  if(!c.students.find(function(s){ return s.num === smvState.studentNum; })){
+    smvState.studentNum = c.students[0].num;
+  }
+  var stu = c.students.find(function(s){ return s.num === smvState.studentNum; });
+  var html = '';
+  html += '<div class="smv-wrap">';
+  html += '<div class="smv-head">';
+  html += '<div class="smv-avatar">'+escapeHtml(stu.name.substring(0,2))+'</div>';
+  html += '<div class="smv-info">';
+  html += '<div class="smv-name">'+escapeHtml(stu.name)+'<span class="smv-name-num">'+parseInt(stu.num)+'번</span></div>';
+  html += '<div class="smv-name-class">'+c.grade+'학년 '+c.classNum+'반</div>';
+  html += '</div>';
+  html += '<select class="smv-student-select" onchange="onSmvStudentChange(this.value)">';
+  c.students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).forEach(function(s){
+    var sel = s.num === smvState.studentNum ? ' selected' : '';
+    html += '<option value="'+escapeHtml(s.num)+'"'+sel+'>'+parseInt(s.num)+'번 '+escapeHtml(s.name)+'</option>';
+  });
+  html += '</select>';
+  html += '<div class="smv-nav">';
+  html += '<button class="smv-nav-btn" onclick="smvShiftMonth(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>';
+  html += '<div class="smv-month-label">'+smvState.year+'년 '+smvState.month+'월</div>';
+  html += '<button class="smv-nav-btn" onclick="smvShiftMonth(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>';
+  html += '</div>';
+  html += '</div>';
+  var monthRecs = getMonthRecordsForStudent(smvState.studentNum, smvState.year, smvState.month);
+  var stats = aggregateMonthlyStats(monthRecs);
+  html += '<div class="smv-stats">';
+  html += '<div class="smv-stat attend"><div class="smv-stat-val">'+stats.attendDays+'</div><div class="smv-stat-lbl">출석일</div></div>';
+  html += '<div class="smv-stat absent"><div class="smv-stat-val">'+stats.absent+'</div><div class="smv-stat-lbl">결석</div></div>';
+  html += '<div class="smv-stat late"><div class="smv-stat-val">'+stats.late+'</div><div class="smv-stat-lbl">지각</div></div>';
+  html += '<div class="smv-stat"><div class="smv-stat-val">'+stats.early_leave+'</div><div class="smv-stat-lbl">조퇴</div></div>';
+  html += '<div class="smv-stat"><div class="smv-stat-val">'+stats.partial+'</div><div class="smv-stat-lbl">결과</div></div>';
+  html += '</div>';
+  html += '<div class="smv-cal">';
+  ['일','월','화','수','목','금','토'].forEach(function(d, i){
+    html += '<div class="smv-cal-head'+(i===0?' sun':'')+'">'+d+'</div>';
+  });
+  var firstDow = new Date(smvState.year, smvState.month-1, 1).getDay();
+  var lastDate = new Date(smvState.year, smvState.month, 0).getDate();
+  var today = getTodayDate();
+  for(var i=0; i<firstDow; i++) html += '<div class="smv-cal-cell empty"></div>';
+  for(var d=1; d<=lastDate; d++){
+    var date = smvState.year+'-'+String(smvState.month).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var dow = new Date(smvState.year, smvState.month-1, d).getDay();
+    var cls = ['smv-cal-cell'];
+    if(dow===0) cls.push('sun');
+    if(dow===0||dow===6) cls.push('weekend');
+    if(date===today) cls.push('today');
+    var recs = (attendanceRecords[date]||{})[smvState.studentNum]||[];
+    if(recs.length>0) cls.push('has-record');
+    html += '<div class="'+cls.join(' ')+'" onclick="onSmvCellClick(\''+date+'\')">';
+    html += '<div class="smv-cal-day">'+d+'</div>';
+    if(recs.length>0){
+      var priorityList=['absent','late','early_leave','partial'];
+      var topStatus=priorityList.find(function(p){ return recs.some(function(r){ return r.status===p; }); })||recs[0].status;
+      html += '<div class="smv-cal-pill '+topStatus+'">'+getStatusLabel(topStatus)+'</div>';
+      if(recs.length>1) html += '<div class="smv-cal-multi">+'+(recs.length-1)+'</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  html += '<div class="smv-recent">';
+  html += '<div class="smv-recent-label">사례 상세 ('+smvState.month+'월)</div>';
+  if(monthRecs.length===0){
+    html += '<div class="smv-recent-empty">이번 달 출결 기록이 없어요</div>';
+  } else {
+    monthRecs.sort(function(a,b){ return b.date.localeCompare(a.date); });
+    monthRecs.forEach(function(item){
+      var r=item.rec;
+      var dobj=new Date(item.date);
+      var dateStr=item.date.slice(5).replace('-','.')+' ('+'일월화수목금토'.charAt(dobj.getDay())+')';
+      html += '<div class="smv-recent-row" onclick="onSmvRecentClick(\''+item.date+'\',\''+r.id+'\')">';
+      html += '<span class="smv-recent-date">'+dateStr+'</span>';
+      html += '<span class="smv-recent-tag '+r.reason+'">'+getReasonLabel(r.reason)+' '+getStatusLabel(r.status)+'</span>';
+      var info=summarizePeriods(r.periods);
+      if(r.memo) info+=' · '+escapeHtml(r.memo);
+      html += '<span class="smv-recent-info">'+escapeHtml(info)+'</span>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  html += '</div>';
+  document.getElementById('att-view-student-monthly').innerHTML = html;
+}
+
+function getMonthRecordsForStudent(studentNum, year, month){
+  var prefix = year+'-'+String(month).padStart(2,'0');
+  var result = [];
+  Object.keys(attendanceRecords).forEach(function(date){
+    if(date.indexOf(prefix)!==0) return;
+    var recs = attendanceRecords[date][studentNum]||[];
+    recs.forEach(function(r){ result.push({ date:date, rec:r }); });
+  });
+  return result;
+}
+
+function aggregateMonthlyStats(monthRecs){
+  var dateStatus = {};
+  monthRecs.forEach(function(item){
+    if(!dateStatus[item.date]) dateStatus[item.date]=[];
+    dateStatus[item.date].push(item.rec);
+  });
+  var counts = { absent:0, late:0, early_leave:0, partial:0 };
+  var issueDates = 0;
+  Object.keys(dateStatus).forEach(function(date){
+    var recs = dateStatus[date];
+    var hasNonApproved = recs.some(function(r){ return r.reason!=='approved'; });
+    if(!hasNonApproved) return;
+    var priorityList = ['absent','late','early_leave','partial'];
+    var topStatus = priorityList.find(function(p){
+      return recs.some(function(r){ return r.status===p && r.reason!=='approved'; });
+    });
+    if(topStatus){ counts[topStatus]++; issueDates++; }
+  });
+  var year=parseInt(smvState.year), month=parseInt(smvState.month);
+  var lastDate=new Date(year,month,0).getDate();
+  var weekdayCount=0;
+  var today=new Date();
+  for(var d=1; d<=lastDate; d++){
+    var date=new Date(year,month-1,d);
+    if(date>today) continue;
+    var dow=date.getDay();
+    if(dow!==0&&dow!==6) weekdayCount++;
+  }
+  return { attendDays:Math.max(0,weekdayCount-issueDates), absent:counts.absent, late:counts.late, early_leave:counts.early_leave, partial:counts.partial };
+}
+
+function onSmvStudentChange(num){
+  smvState.studentNum = num;
+  renderStudentMonthlyView();
+}
+
+function smvShiftMonth(delta){
+  var m=smvState.month+delta, y=smvState.year;
+  if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  smvState.month=m; smvState.year=y;
+  renderStudentMonthlyView();
+}
+
+function onSmvCellClick(date){
+  attendanceCurrentDate = date;
+  switchAttView('daily');
+}
+
+function onSmvRecentClick(date, recordId){
+  attendanceCurrentDate = date;
+  openAttendanceEdit(smvState.studentNum, recordId);
+}
+
+function renderClassMonthlyView(){
+  var c = getActiveClass();
+  if(!c||!c.students||c.students.length===0){
+    document.getElementById('att-view-class-monthly').innerHTML='<div class="att-empty">활성 반이 없거나 학생 명단이 비어 있어요.</div>';
+    return;
+  }
+  if(!cmmState.year||!cmmState.month){
+    var t=new Date(); cmmState.year=t.getFullYear(); cmmState.month=t.getMonth()+1;
+  }
+  var html='';
+  html+='<div class="cmm-wrap">';
+  html+='<div class="cmm-head">';
+  html+='<svg class="cmm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  html+='<div class="cmm-title">'+c.grade+'학년 '+c.classNum+'반 월간 출결표</div>';
+  html+='<div class="cmm-nav">';
+  html+='<button class="cmm-nav-btn" onclick="cmmShiftMonth(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>';
+  html+='<div class="cmm-month">'+cmmState.year+'년 '+cmmState.month+'월</div>';
+  html+='<button class="cmm-nav-btn" onclick="cmmShiftMonth(1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>';
+  html+='</div>';
+  html+='<div class="cmm-actions">';
+  html+='<button class="cmm-action-btn" onclick="exportCmmCsv()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV</button>';
+  html+='<button class="cmm-action-btn" onclick="window.print()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>인쇄</button>';
+  html+='</div>';
+  html+='</div>';
+  html+='<div class="cmm-legend">';
+  html+='<span class="cmm-legend-item"><span class="cmm-legend-dot" style="background:#F09595;"></span>결석</span>';
+  html+='<span class="cmm-legend-item"><span class="cmm-legend-dot" style="background:#FAC775;"></span>지각</span>';
+  html+='<span class="cmm-legend-item"><span class="cmm-legend-dot" style="background:#D3D1C7;"></span>조퇴·결과</span>';
+  html+='<span class="cmm-legend-item"><span class="cmm-legend-dot" style="background:var(--bg-elevated);border:1px solid var(--border);"></span>주말</span>';
+  html+='</div>';
+  var lastDate=new Date(cmmState.year,cmmState.month,0).getDate();
+  var monthPrefix=cmmState.year+'-'+String(cmmState.month).padStart(2,'0');
+  html+='<div class="cmm-scroll"><table class="cmm-tbl"><thead><tr>';
+  html+='<th class="cmm-col-num">번</th><th class="cmm-col-name">이름</th>';
+  for(var d=1;d<=lastDate;d++){
+    var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
+    var thCls='';
+    if(dow===0||dow===6) thCls+=' weekend';
+    if(dow===0) thCls+=' sun';
+    html+='<th class="'+thCls.trim()+'" style="width:24px;">'+d+'</th>';
+  }
+  html+='<th class="cmm-col-sum">결</th><th class="cmm-col-sum">지</th><th class="cmm-col-sum">조·과</th>';
+  html+='</tr></thead><tbody>';
+  c.students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).forEach(function(stu){
+    html+='<tr>';
+    html+='<td class="cmm-col-num">'+parseInt(stu.num)+'</td>';
+    html+='<td class="cmm-col-name" onclick="onCmmNameClick(\''+stu.num+'\')">'+escapeHtml(stu.name)+'</td>';
+    var rowCounts={absent:0,late:0,etc:0};
+    for(var d=1;d<=lastDate;d++){
+      var date=monthPrefix+'-'+String(d).padStart(2,'0');
+      var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
+      var isWeekend=dow===0||dow===6;
+      var recs=(attendanceRecords[date]||{})[stu.num]||[];
+      var cellCls=['day'];
+      var cellText='';
+      if(isWeekend){
+        cellCls.push('weekend');
+      } else if(recs.length>0){
+        var priorityList=['absent','late','early_leave','partial'];
+        var topStatus=priorityList.find(function(p){ return recs.some(function(r){ return r.status===p; }); });
+        if(topStatus){
+          cellCls.push(topStatus);
+          cellText=({absent:'결',late:'지',early_leave:'조',partial:'과'})[topStatus]||'';
+          if(topStatus==='absent') rowCounts.absent++;
+          else if(topStatus==='late') rowCounts.late++;
+          else rowCounts.etc++;
+        }
+      }
+      var onclick=isWeekend?'':' onclick="onCmmCellClick(\''+date+'\')"';
+      html+='<td class="'+cellCls.join(' ')+'"'+onclick+'>'+cellText+'</td>';
+    }
+    html+='<td class="cmm-col-sum">'+rowCounts.absent+'</td>';
+    html+='<td class="cmm-col-sum">'+rowCounts.late+'</td>';
+    html+='<td class="cmm-col-sum">'+rowCounts.etc+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div></div>';
+  document.getElementById('att-view-class-monthly').innerHTML = html;
+}
+
+function cmmShiftMonth(delta){
+  var m=cmmState.month+delta, y=cmmState.year;
+  if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  cmmState.month=m; cmmState.year=y;
+  renderClassMonthlyView();
+}
+
+function onCmmNameClick(studentNum){
+  smvState.studentNum=studentNum;
+  smvState.year=cmmState.year;
+  smvState.month=cmmState.month;
+  switchAttView('student-monthly');
+}
+
+function onCmmCellClick(date){
+  attendanceCurrentDate=date;
+  switchAttView('daily');
+}
+
+function exportCmmCsv(){
+  var c=getActiveClass();
+  if(!c||!c.students||c.students.length===0) return;
+  var lastDate=new Date(cmmState.year,cmmState.month,0).getDate();
+  var monthPrefix=cmmState.year+'-'+String(cmmState.month).padStart(2,'0');
+  var rows=[];
+  var header=['번호','이름'];
+  for(var d=1;d<=lastDate;d++){
+    var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
+    header.push(d+'('+'일월화수목금토'.charAt(dow)+')');
+  }
+  header.push('결석','지각','조퇴/결과');
+  rows.push(header);
+  c.students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).forEach(function(stu){
+    var row=[parseInt(stu.num),stu.name];
+    var rowCounts={absent:0,late:0,etc:0};
+    for(var d=1;d<=lastDate;d++){
+      var date=monthPrefix+'-'+String(d).padStart(2,'0');
+      var recs=(attendanceRecords[date]||{})[stu.num]||[];
+      if(recs.length===0){ row.push(''); }
+      else {
+        var priorityList=['absent','late','early_leave','partial'];
+        var topStatus=priorityList.find(function(p){ return recs.some(function(r){ return r.status===p; }); });
+        var topReason=recs[0].reason;
+        var cell='';
+        if(topStatus){
+          cell=getReasonLabel(topReason)+' '+getStatusLabel(topStatus);
+          if(topStatus==='absent') rowCounts.absent++;
+          else if(topStatus==='late') rowCounts.late++;
+          else rowCounts.etc++;
+        }
+        row.push(cell);
+      }
+    }
+    row.push(rowCounts.absent,rowCounts.late,rowCounts.etc);
+    rows.push(row);
+  });
+  var csv=rows.map(function(r){
+    return r.map(function(cell){
+      var s=String(cell);
+      if(s.indexOf(',')>=0||s.indexOf('"')>=0||s.indexOf('\n')>=0) s='"'+s.replace(/"/g,'""')+'"';
+      return s;
+    }).join(',');
+  }).join('\n');
+  var bom='﻿';
+  var blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download=c.grade+'학년'+c.classNum+'반_'+cmmState.year+'-'+String(cmmState.month).padStart(2,'0')+'_출결.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('CSV 파일이 다운로드됐어요');
 }
 
 function renderAttendanceStats(){
