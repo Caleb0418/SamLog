@@ -1853,6 +1853,188 @@ body{
 .cr-memo-period{
   font-size:11px;color:var(--text-tertiary);
 }
+
+/* ═══════════════════════════════════════════
+   출결 탭
+═══════════════════════════════════════════ */
+.att-header{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-top:20px;margin-bottom:14px;gap:12px;
+}
+.att-date-sub{font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.3px;}
+.att-title{font-size:18px;font-weight:600;color:var(--text);margin:2px 0 0;}
+.att-header-actions{display:flex;gap:6px;}
+.att-btn-icon{
+  padding:6px 10px;font-size:12px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:6px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;font-family:inherit;
+}
+.att-btn-icon:hover{background:var(--bg-elevated);border-color:var(--border-strong,var(--border));}
+/* 통계 카드 */
+.att-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+.att-stat-card{background:var(--bg-surface);border-radius:8px;padding:10px 14px;}
+.att-stat-card.success{background:var(--success-dim);}
+.att-stat-card.danger{background:var(--danger-dim);}
+.att-stat-card.warning{background:var(--warning-dim);}
+.att-stat-label{font-size:11px;color:var(--text-tertiary);margin-bottom:2px;}
+.att-stat-card.success .att-stat-label{color:var(--success);}
+.att-stat-card.danger .att-stat-label{color:var(--danger);}
+.att-stat-card.warning .att-stat-label{color:var(--warning);}
+.att-stat-value{font-size:18px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+.att-stat-card.success .att-stat-value{color:var(--success);}
+.att-stat-card.danger .att-stat-value{color:var(--danger);}
+.att-stat-card.warning .att-stat-value{color:var(--warning);}
+/* 검색 */
+.att-search-wrap{position:relative;margin-bottom:16px;}
+.att-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);pointer-events:none;}
+.att-search-input{
+  width:100%;padding:10px 14px 10px 38px;font-size:13px;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:inherit;box-sizing:border-box;
+}
+.att-search-input:focus{outline:none;border-color:var(--accent);}
+.att-search-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--bg-overlay);border:1px solid var(--border);border-radius:8px;
+  max-height:240px;overflow-y:auto;z-index:50;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+.att-search-item{
+  padding:10px 14px;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.att-search-item:last-child{border-bottom:none;}
+.att-search-item:hover{background:var(--bg-elevated);}
+.att-search-item-num{font-size:11px;color:var(--text-tertiary);min-width:28px;}
+.att-search-item-name{font-weight:500;}
+.att-search-empty{padding:14px;font-size:12px;color:var(--text-tertiary);text-align:center;}
+/* 이슈 학생 헤더 */
+.att-issue-header{
+  font-size:12px;color:var(--text-secondary);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;
+}
+.att-issue-header strong{font-weight:600;color:var(--text);}
+.att-issue-header .att-issue-sep{color:var(--text-tertiary);}
+.att-issue-header .att-issue-hint{color:var(--text-tertiary);}
+/* 이슈 학생 카드 */
+.att-issue-list{display:flex;flex-direction:column;gap:8px;}
+.att-issue-card{background:var(--bg-overlay);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.att-issue-card-head{
+  padding:10px 14px;display:flex;align-items:center;gap:12px;
+  background:var(--bg-surface);border-bottom:1px solid var(--border);
+}
+.att-issue-avatar{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;font-size:12px;
+  background:var(--bg-elevated);color:var(--text);flex-shrink:0;
+}
+.att-issue-info{flex:1;min-width:0;}
+.att-issue-name{font-size:14px;font-weight:600;color:var(--text);}
+.att-issue-num{font-size:11px;color:var(--text-tertiary);font-weight:400;margin-left:4px;}
+.att-issue-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.att-issue-actions{display:flex;gap:6px;}
+.att-notify-btn{
+  padding:5px 10px;font-size:11px;
+  background:var(--bg-overlay);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:5px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;font-family:inherit;
+}
+.att-notify-btn:hover{background:var(--bg-elevated);border-color:var(--border-strong,var(--border));}
+/* 개별 레코드 행 */
+.att-record-row{
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.att-record-row:last-child{border-bottom:none;}
+.att-record-row.reason-illness{border-left:3px solid #E24B4A;}
+.att-record-row.reason-unjustified{border-left:3px solid #BA7517;}
+.att-record-row.reason-other{border-left:3px solid #888780;}
+.att-record-row.reason-approved{border-left:3px solid #1D9E75;}
+.att-record-tags{display:flex;gap:4px;flex-shrink:0;}
+.att-record-tag{font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;white-space:nowrap;}
+.att-record-tag.illness{background:#FCEBEB;color:#791F1F;}
+.att-record-tag.unjustified{background:#FAEEDA;color:#633806;}
+.att-record-tag.other{background:#F1EFE8;color:#2C2C2A;}
+.att-record-tag.approved{background:#EAF3DE;color:#27500A;}
+[data-theme="dark"] .att-record-tag.illness{background:#2A1412;color:#F09595;}
+[data-theme="dark"] .att-record-tag.unjustified{background:#2A1E0A;color:#FAC775;}
+[data-theme="dark"] .att-record-tag.other{background:#2C2C2A;color:#B4B2A9;}
+[data-theme="dark"] .att-record-tag.approved{background:#0F2A1E;color:#9FE1CB;}
+.att-record-summary{flex:1;font-size:12px;color:var(--text-secondary);min-width:0;}
+.att-record-actions{display:flex;gap:2px;}
+.att-record-icon-btn{
+  width:24px;height:24px;padding:0;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--text-tertiary);
+  display:flex;align-items:center;justify-content:center;border-radius:4px;
+}
+.att-record-icon-btn:hover{background:var(--bg-elevated);color:var(--text);}
+.att-record-add{padding:8px 14px;background:var(--bg-surface);border-top:1px solid var(--border);}
+.att-record-add-btn{
+  background:transparent;border:none;cursor:pointer;
+  font-size:11px;color:var(--text-secondary);
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:inherit;padding:4px 8px;border-radius:4px;
+}
+.att-record-add-btn:hover{background:var(--bg-elevated);color:var(--text);}
+/* 빈 상태 */
+.att-empty{
+  text-align:center;padding:40px 20px;
+  color:var(--text-tertiary);font-size:13px;
+  background:var(--bg-surface);border-radius:8px;
+}
+/* 설정 모달 */
+.att-settings-modal-body{padding:0 4px;}
+.att-settings-section{margin-bottom:18px;}
+.att-settings-label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:500;}
+.att-level-group{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.att-level-btn{
+  padding:10px;font-size:12px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:6px;cursor:pointer;
+  font-family:inherit;text-align:center;
+}
+.att-level-btn:hover{background:var(--bg-elevated);}
+.att-level-btn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);border-width:1.5px;font-weight:600;}
+.att-level-btn-sub{display:block;font-size:10px;color:var(--text-tertiary);margin-top:2px;font-weight:400;}
+.att-level-btn.active .att-level-btn-sub{color:var(--accent);opacity:0.8;}
+.att-period-counter{display:flex;align-items:center;gap:10px;}
+.att-period-counter-btn{
+  width:32px;height:32px;padding:0;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--text);
+}
+.att-period-counter-btn:hover{background:var(--bg-elevated);}
+.att-period-counter-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.att-period-counter-display{
+  flex:1;background:var(--bg-surface);border-radius:6px;
+  padding:8px 12px;text-align:center;
+  font-size:18px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;
+}
+.att-period-counter-display small{font-size:12px;color:var(--text-secondary);font-weight:400;margin-left:4px;}
+.att-checkbox-row{display:flex;gap:8px;}
+.att-checkbox-label{
+  flex:1;display:flex;align-items:center;gap:8px;
+  padding:10px 12px;background:var(--bg-surface);
+  border-radius:6px;cursor:pointer;font-size:12px;color:var(--text);
+}
+.att-checkbox-label input{margin:0;}
+.att-preview-box{background:var(--bg-surface);border-radius:6px;padding:12px 14px;}
+.att-preview-label{font-size:11px;color:var(--text-tertiary);margin-bottom:8px;font-weight:500;}
+.att-preview-slots{display:flex;gap:3px;flex-wrap:wrap;}
+.att-preview-slot{
+  width:30px;height:30px;
+  background:var(--bg-overlay);border:1px solid var(--border);
+  border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text-secondary);
+}
+.att-preview-slot.long{font-size:10px;}
+.att-preview-count{font-size:10px;color:var(--text-tertiary);margin-top:6px;}
+
 .cr-memo-edit{
   margin-left:auto;
   width:24px;height:24px;border-radius:5px;
@@ -3951,6 +4133,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       수업 관리
     </button>
+    <button class="nav-item" data-tab="attendance" onclick="switchTab('attendance')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      출결
+    </button>
     <button class="nav-item" data-tab="reply" onclick="switchTab('reply')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       학부모 대응
@@ -4465,6 +4651,93 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
   </div>
 
+</div>
+
+<!-- ═══════════════════════════════════════════
+     출결 탭
+═══════════════════════════════════════════ -->
+<div id="tab-attendance" style="display:none;max-width:960px;margin:0 auto;">
+
+  <!-- 헤더: 날짜 + 액션 버튼 -->
+  <div class="att-header">
+    <div class="att-header-left">
+      <div class="att-date-sub" id="att-date-dow">2026.05.19 (화)</div>
+      <h2 class="att-title" id="att-title">오늘 출결</h2>
+    </div>
+    <div class="att-header-actions">
+      <button class="att-btn-icon" onclick="openAttendanceDatePicker()" title="다른 날짜">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>다른 날짜</span>
+      </button>
+      <button class="att-btn-icon" onclick="openAttendanceSettings()" title="설정">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>설정</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 통계 카드 -->
+  <div class="att-stats" id="att-stats"></div>
+
+  <!-- 학생 추가 검색창 -->
+  <div class="att-search-wrap">
+    <svg class="att-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="att-search" class="att-search-input" placeholder="학생 추가 — 이름 또는 번호 입력" autocomplete="off" oninput="onAttendanceSearchInput(this.value)" onfocus="onAttendanceSearchFocus()" />
+    <div class="att-search-dropdown" id="att-search-dropdown" style="display:none;"></div>
+  </div>
+
+  <!-- 이슈 학생 카드 목록 -->
+  <div class="att-issue-header" id="att-issue-header"></div>
+  <div class="att-issue-list" id="att-issue-list"></div>
+
+</div>
+
+<!-- 출결 설정 모달 -->
+<div id="att-settings-overlay" class="onboarding-overlay" style="display:none;">
+  <div class="onboarding-card" style="max-width:480px;">
+    <div class="onboarding-title" style="margin-bottom:4px;">출결 설정</div>
+    <div class="onboarding-desc" style="margin-bottom:18px;">학교급에 맞게 교시 수를 설정하세요</div>
+    <div class="att-settings-modal-body">
+      <div class="att-settings-section">
+        <label class="att-settings-label">학교급</label>
+        <div class="att-level-group">
+          <button class="att-level-btn" data-level="elementary" onclick="selectAttLevel('elementary')">초등학교<span class="att-level-btn-sub">기본 6교시</span></button>
+          <button class="att-level-btn" data-level="middle" onclick="selectAttLevel('middle')">중학교<span class="att-level-btn-sub">기본 7교시</span></button>
+          <button class="att-level-btn" data-level="high" onclick="selectAttLevel('high')">고등학교<span class="att-level-btn-sub">기본 8교시</span></button>
+        </div>
+      </div>
+      <div class="att-settings-section">
+        <label class="att-settings-label">정규 교시 수 <span style="color:var(--text-tertiary);font-weight:400;">학교 사정에 맞게 조정 가능</span></label>
+        <div class="att-period-counter">
+          <button class="att-period-counter-btn" id="att-period-minus" onclick="adjustAttPeriodCount(-1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <div class="att-period-counter-display"><span id="att-period-count">7</span><small>교시</small></div>
+          <button class="att-period-counter-btn" id="att-period-plus" onclick="adjustAttPeriodCount(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="att-settings-section">
+        <label class="att-settings-label">조회·종례 포함</label>
+        <div class="att-checkbox-row">
+          <label class="att-checkbox-label"><input type="checkbox" id="att-include-morning" onchange="onAttCheckboxChange()" /><span>조회 포함</span></label>
+          <label class="att-checkbox-label"><input type="checkbox" id="att-include-afternoon" onchange="onAttCheckboxChange()" /><span>종례 포함</span></label>
+        </div>
+      </div>
+      <div class="att-settings-section">
+        <div class="att-preview-box">
+          <div class="att-preview-label">출결 입력 시 그리드 미리보기</div>
+          <div class="att-preview-slots" id="att-preview-slots"></div>
+          <div class="att-preview-count" id="att-preview-count"></div>
+        </div>
+      </div>
+    </div>
+    <div class="onboarding-actions">
+      <button class="btn-secondary" onclick="closeAttendanceSettings()">취소</button>
+      <button class="btn-primary" onclick="saveAttSettingsFromModal()">저장</button>
+    </div>
+  </div>
 </div>
 
 <!-- 분류 모달 -->
@@ -5758,6 +6031,22 @@ var ttSyncState = { synced: false, lastSync: null, totalRows: 0 };
 // 구조: { id, date:'YYYY-MM-DD', period, subject, grade, cls, kind:'보강'|'창체'|'기타', note, memos:[] }
 var adhocSlots = [];
 
+// ── 출결 ──────────────────────────────────────────────────────────────────
+// 출결 기록: { 'YYYY-MM-DD': { '학번': [레코드, ...] } }
+// 레코드 구조: { id, status, reason, periods, memo, notifiedParent, createdAt, updatedAt }
+//   status: 'absent'|'late'|'early_leave'|'partial'
+//   reason: 'illness'|'unjustified'|'other'|'approved'
+//   periods: { '조회':true, '1':true, ... }  결시 교시만 true
+var attendanceRecords = {};
+
+// 출결 설정
+var attendanceSettings = {
+  schoolLevel: 'middle',
+  periodCount: 7,
+  includeMorning: true,
+  includeAfternoon: true
+};
+
 // UI 상태
 var currentStudent = null;
 var currentFilter = 'all';
@@ -5962,12 +6251,13 @@ function saveAll(){
     localStorage.setItem('ht2_school_timetable_' + yr, JSON.stringify(schoolTimetable));
     localStorage.setItem('ht2_tt_sync_state_' + yr, JSON.stringify(ttSyncState));
     localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
+    localStorage.setItem('ht2_attendance_' + yr, JSON.stringify(attendanceRecords));
     _addYearToList(yr);
   }catch(e){ console.warn('저장 실패', e); }
 }
 
-var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool'];
-var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme'];
+var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_attendance'];
+var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings'];
 
 /* ─── 백업 폴더 핸들 (IndexedDB) ─── */
 function _openBackupDB(){
@@ -6276,6 +6566,10 @@ function loadAll(){
     if(tts) ttSyncState = JSON.parse(tts);
     var as = _getYearLS('ht2_adhoc_slots');
     if(as) adhocSlots = JSON.parse(as);
+    try{
+      var attRaw = localStorage.getItem('ht2_attendance_' + getActiveYear());
+      if(attRaw) attendanceRecords = JSON.parse(attRaw);
+    }catch(e){ attendanceRecords = {}; }
 
     // 마이그레이션: 잘못 들어간 학생 데이터(NaN/합계행) 제거
     var cleaned = 0;
@@ -7290,11 +7584,13 @@ function switchTab(tab){
   document.getElementById('tab-students').style.display = tab === 'students' ? 'grid' : 'none';
   document.getElementById('tab-class').style.display = tab === 'class' ? 'block' : 'none';
   document.getElementById('tab-reply').style.display = tab === 'reply' ? 'block' : 'none';
+  document.getElementById('tab-attendance').style.display = tab === 'attendance' ? 'block' : 'none';
 
   if(tab === 'home') renderHome();
   if(tab === 'students') renderSidebar('');
   if(tab === 'class') renderClassTab();
   if(tab === 'reply') renderReplyFlow();
+  if(tab === 'attendance') renderAttendanceTab();
 
   // 모든 탭에서 헤더 NEIS 시간 갱신
   updateTimetableBanner();
@@ -7628,6 +7924,65 @@ function loadSettings(){
       if(d.currentClassKey) currentClassKey = d.currentClassKey;
     }
   }catch(e){}
+}
+
+function saveAttendanceSettings(){
+  try{ localStorage.setItem('ht2_attendance_settings', JSON.stringify(attendanceSettings)); }catch(e){}
+}
+function loadAttendanceSettings(){
+  try{
+    var s = localStorage.getItem('ht2_attendance_settings');
+    if(s){
+      var d = JSON.parse(s);
+      attendanceSettings.schoolLevel  = d.schoolLevel || 'middle';
+      attendanceSettings.periodCount  = typeof d.periodCount === 'number' ? d.periodCount : 7;
+      attendanceSettings.includeMorning   = d.includeMorning !== false;
+      attendanceSettings.includeAfternoon = d.includeAfternoon !== false;
+    }
+  }catch(e){}
+}
+
+/* ── 출결 헬퍼 ───────────────────────────────────────────────────────── */
+function getPeriodSlots(){
+  var slots = [];
+  if(attendanceSettings.includeMorning) slots.push('조회');
+  for(var i = 1; i <= attendanceSettings.periodCount; i++) slots.push(String(i));
+  if(attendanceSettings.includeAfternoon) slots.push('종례');
+  return slots;
+}
+function getReasonLabel(code){
+  return ({illness:'질병', unjustified:'미인정', other:'기타', approved:'출석인정'})[code] || code;
+}
+function getReasonColor(code){
+  return ({illness:'#E24B4A', unjustified:'#BA7517', other:'#888780', approved:'#1D9E75'})[code] || '#888780';
+}
+function getStatusLabel(code){
+  return ({absent:'결석', late:'지각', early_leave:'조퇴', partial:'결과'})[code] || code;
+}
+function summarizePeriods(periods){
+  if(!periods) return '';
+  var slots = getPeriodSlots();
+  var missed = slots.filter(function(s){ return periods[s] === true; });
+  if(missed.length === 0) return '결시 없음';
+  if(missed.length === slots.length) return '전체 결시';
+  return missed.join('·') + '교시 결시';
+}
+function getAttendanceRecords(date, studentNum){
+  if(!attendanceRecords[date]) return [];
+  if(!attendanceRecords[date][studentNum]) return [];
+  return attendanceRecords[date][studentNum];
+}
+function getTodayDate(){
+  var d = new Date();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return d.getFullYear() + '-' + m + '-' + day;
+}
+function formatAttendanceDate(date){
+  var parts = date.split('-');
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  var dow = ['일','월','화','수','목','금','토'][d.getDay()];
+  return parts[0]+'.'+parts[1]+'.'+parts[2]+' ('+dow+')';
 }
 
 function resetReplyFlow(){
@@ -13171,6 +13526,249 @@ function updateTimetableBanner(){
 /* ═══════════════════════════════════════════
    수업 관리 렌더링
 ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   출결 탭 — 메인 화면
+═══════════════════════════════════════════ */
+var attendanceCurrentDate = null;
+
+function renderAttendanceTab(){
+  var c = getActiveClass();
+  if(!c || !c.students || c.students.length === 0){
+    document.getElementById('tab-attendance').innerHTML =
+      '<div class="att-empty" style="margin-top:40px;">활성 반이 없거나 학생 명단이 비어 있어요.<br>학급을 먼저 등록해주세요.</div>';
+    return;
+  }
+  if(!attendanceCurrentDate) attendanceCurrentDate = getTodayDate();
+  document.getElementById('att-date-dow').textContent = formatAttendanceDate(attendanceCurrentDate);
+  document.getElementById('att-title').textContent =
+    attendanceCurrentDate === getTodayDate() ? '오늘 출결' :
+    formatAttendanceDate(attendanceCurrentDate) + ' 출결';
+  renderAttendanceStats();
+  renderAttendanceIssueList();
+}
+
+function renderAttendanceStats(){
+  var c = getActiveClass();
+  var total = (c.students || []).length;
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var counts = {absent:0, late:0, early_leave:0, partial:0};
+  Object.keys(dateRecs).forEach(function(num){
+    var recs = dateRecs[num];
+    if(!recs || recs.length === 0) return;
+    var priorityList = ['absent','late','early_leave','partial'];
+    var topStatus = priorityList.find(function(p){
+      return recs.some(function(r){ return r.status === p; });
+    });
+    if(topStatus) counts[topStatus]++;
+  });
+  var issueTotal = counts.absent + counts.late + counts.early_leave + counts.partial;
+  var attended = total - issueTotal;
+  var html = '';
+  html += '<div class="att-stat-card"><div class="att-stat-label">전체</div><div class="att-stat-value">'+total+'명</div></div>';
+  html += '<div class="att-stat-card success"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attended+'명</div></div>';
+  html += '<div class="att-stat-card danger"><div class="att-stat-label">결석</div><div class="att-stat-value">'+counts.absent+'명</div></div>';
+  html += '<div class="att-stat-card warning"><div class="att-stat-label">지각</div><div class="att-stat-value">'+counts.late+'명</div></div>';
+  html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+(counts.early_leave+counts.partial)+'명</div></div>';
+  document.getElementById('att-stats').innerHTML = html;
+}
+
+function renderAttendanceIssueList(){
+  var c = getActiveClass();
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var issueStudentNums = Object.keys(dateRecs).filter(function(num){
+    return (dateRecs[num] || []).length > 0;
+  });
+  var attendedCount = c.students.length - issueStudentNums.length;
+  var header = document.getElementById('att-issue-header');
+  if(issueStudentNums.length === 0){
+    header.innerHTML = '<span class="att-issue-hint">이슈 학생이 없어요. 위 검색창에서 학생을 찾아 출결을 등록하세요.</span>';
+    document.getElementById('att-issue-list').innerHTML = '';
+    return;
+  }
+  header.innerHTML =
+    '<strong>이슈 학생 '+issueStudentNums.length+'명</strong>'+
+    '<span class="att-issue-sep">·</span>'+
+    '<span class="att-issue-hint">나머지 '+attendedCount+'명은 자동 출석 처리됐어요</span>';
+  issueStudentNums.sort(function(a,b){ return parseInt(a)-parseInt(b); });
+  var html = '';
+  issueStudentNums.forEach(function(num){
+    var stu = c.students.find(function(s){ return s.num === num; });
+    if(!stu) return;
+    var recs = dateRecs[num];
+    var initial = stu.name.substring(0,2);
+    html += '<div class="att-issue-card">';
+    html += '<div class="att-issue-card-head">';
+    html += '<div class="att-issue-avatar">'+escapeHtml(initial)+'</div>';
+    html += '<div class="att-issue-info">';
+    html += '<div class="att-issue-name">'+escapeHtml(stu.name)+'<span class="att-issue-num">'+parseInt(num)+'번</span></div>';
+    html += '<div class="att-issue-sub">사례 '+recs.length+'건</div>';
+    html += '</div>';
+    html += '<div class="att-issue-actions">';
+    html += '<button class="att-notify-btn" onclick="openAttendanceNotify(\''+num+'\')">'+
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>통지문구</button>';
+    html += '</div></div>';
+    recs.forEach(function(r){
+      html += '<div class="att-record-row reason-'+r.reason+'">';
+      html += '<div class="att-record-tags">';
+      html += '<span class="att-record-tag '+r.reason+'">'+getReasonLabel(r.reason)+'</span>';
+      html += '<span class="att-record-tag '+r.reason+'">'+getStatusLabel(r.status)+'</span>';
+      html += '</div>';
+      html += '<div class="att-record-summary">'+escapeHtml(summarizePeriods(r.periods));
+      if(r.memo) html += ' · '+escapeHtml(r.memo);
+      html += '</div>';
+      html += '<div class="att-record-actions">';
+      html += '<button class="att-record-icon-btn" onclick="openAttendanceEdit(\''+num+'\',\''+r.id+'\')" title="수정">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>';
+      html += '<button class="att-record-icon-btn" onclick="deleteAttendanceRecord(\''+num+'\',\''+r.id+'\')" title="삭제">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>';
+      html += '</div></div>';
+    });
+    html += '<div class="att-record-add">'+
+      '<button class="att-record-add-btn" onclick="openAttendanceAdd(\''+num+'\')">'+
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>사례 추가</button></div>';
+    html += '</div>';
+  });
+  document.getElementById('att-issue-list').innerHTML = html;
+}
+
+function onAttendanceSearchInput(query){
+  var dropdown = document.getElementById('att-search-dropdown');
+  query = query.trim();
+  if(!query){ dropdown.style.display='none'; return; }
+  var c = getActiveClass();
+  if(!c) return;
+  var matches = (c.students||[]).filter(function(s){
+    return s.name.indexOf(query)>=0 || s.num.indexOf(query)>=0 || parseInt(s.num)===parseInt(query);
+  }).slice(0,8);
+  var html = '';
+  if(matches.length===0){
+    html='<div class="att-search-empty">일치하는 학생이 없어요</div>';
+  } else {
+    matches.forEach(function(s){
+      html+='<div class="att-search-item" onclick="onSelectStudentForAttendance(\''+s.num+'\')">'+
+        '<span class="att-search-item-num">'+parseInt(s.num)+'번</span>'+
+        '<span class="att-search-item-name">'+escapeHtml(s.name)+'</span></div>';
+    });
+  }
+  dropdown.innerHTML=html;
+  dropdown.style.display='block';
+}
+function onAttendanceSearchFocus(){
+  var v=document.getElementById('att-search').value.trim();
+  if(v) onAttendanceSearchInput(v);
+}
+function onSelectStudentForAttendance(num){
+  document.getElementById('att-search').value='';
+  document.getElementById('att-search-dropdown').style.display='none';
+  openAttendanceAdd(num);
+}
+
+/* 모달 함수 — 2/3에서 본격 구현. 현재는 토스트만 */
+function openAttendanceAdd(studentNum){
+  showToast('사례 추가 모달은 다음 단계(2/3)에서 구현됩니다');
+}
+function openAttendanceEdit(studentNum, recordId){
+  showToast('수정 모달은 다음 단계(2/3)에서 구현됩니다');
+}
+function deleteAttendanceRecord(studentNum, recordId){
+  if(!confirm('이 출결 기록을 삭제할까요?')) return;
+  var dayRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var recs = dayRecs[studentNum] || [];
+  var idx = recs.findIndex(function(r){ return r.id === recordId; });
+  if(idx < 0) return;
+  recs.splice(idx, 1);
+  if(recs.length === 0){
+    delete dayRecs[studentNum];
+    if(Object.keys(dayRecs).length === 0) delete attendanceRecords[attendanceCurrentDate];
+  }
+  saveAll();
+  renderAttendanceTab();
+  showToast('삭제됨');
+}
+function openAttendanceNotify(studentNum){
+  showToast('학부모 통지문구는 다음 단계(3/3)에서 구현됩니다');
+}
+function openAttendanceDatePicker(){
+  var d = prompt('날짜를 입력하세요 (YYYY-MM-DD)', attendanceCurrentDate);
+  if(!d) return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ showToast('형식이 올바르지 않아요 (예: 2026-05-19)'); return; }
+  attendanceCurrentDate = d;
+  renderAttendanceTab();
+}
+
+/* 출결 설정 모달 */
+function openAttendanceSettings(){
+  selectAttLevel(attendanceSettings.schoolLevel, true);
+  document.getElementById('att-period-count').textContent = attendanceSettings.periodCount;
+  document.getElementById('att-include-morning').checked = attendanceSettings.includeMorning;
+  document.getElementById('att-include-afternoon').checked = attendanceSettings.includeAfternoon;
+  renderAttSettingsPreview();
+  document.getElementById('att-settings-overlay').style.display = 'flex';
+}
+function closeAttendanceSettings(){
+  document.getElementById('att-settings-overlay').style.display = 'none';
+}
+function selectAttLevel(level, keepCount){
+  document.querySelectorAll('.att-level-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.level === level);
+  });
+  if(!keepCount){
+    var def = ({elementary:6, middle:7, high:8})[level] || 7;
+    document.getElementById('att-period-count').textContent = def;
+  }
+  renderAttSettingsPreview();
+}
+function adjustAttPeriodCount(delta){
+  var el = document.getElementById('att-period-count');
+  var next = parseInt(el.textContent) + delta;
+  if(next < 3 || next > 9) return;
+  el.textContent = next;
+  renderAttSettingsPreview();
+}
+function onAttCheckboxChange(){ renderAttSettingsPreview(); }
+function renderAttSettingsPreview(){
+  var count = parseInt(document.getElementById('att-period-count').textContent);
+  var inclM = document.getElementById('att-include-morning').checked;
+  var inclA = document.getElementById('att-include-afternoon').checked;
+  var slots = [];
+  if(inclM) slots.push('조회');
+  for(var i=1;i<=count;i++) slots.push(String(i));
+  if(inclA) slots.push('종례');
+  var html='';
+  slots.forEach(function(s){
+    var lc=(s==='조회'||s==='종례')?' long':'';
+    html+='<span class="att-preview-slot'+lc+'">'+s+'</span>';
+  });
+  document.getElementById('att-preview-slots').innerHTML=html;
+  var parts=[];
+  if(inclM) parts.push('조회');
+  parts.push(count+'교시');
+  if(inclA) parts.push('종례');
+  document.getElementById('att-preview-count').textContent='총 '+slots.length+'칸 ('+parts.join(' + ')+')';
+  document.getElementById('att-period-minus').disabled = count <= 3;
+  document.getElementById('att-period-plus').disabled  = count >= 9;
+}
+function saveAttSettingsFromModal(){
+  var levelBtn = document.querySelector('.att-level-btn.active');
+  attendanceSettings.schoolLevel  = levelBtn ? levelBtn.dataset.level : 'middle';
+  attendanceSettings.periodCount  = parseInt(document.getElementById('att-period-count').textContent);
+  attendanceSettings.includeMorning   = document.getElementById('att-include-morning').checked;
+  attendanceSettings.includeAfternoon = document.getElementById('att-include-afternoon').checked;
+  saveAttendanceSettings();
+  closeAttendanceSettings();
+  renderAttendanceTab();
+  showToast('출결 설정 저장됨');
+}
+
+/* 검색 외부 클릭 시 드롭다운 닫기 */
+document.addEventListener('click', function(e){
+  var wrap = document.querySelector('.att-search-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    var dd = document.getElementById('att-search-dropdown');
+    if(dd) dd.style.display = 'none';
+  }
+});
+
 function renderClassTab(){
   if(currentClassView === 'today') renderClassToday();
   else if(currentClassView === 'week') renderClassWeek();
@@ -15078,6 +15676,7 @@ function init(){
   }catch(e){}
 
   loadSettings();
+  loadAttendanceSettings();
   loadAlertSettings();
   loadTagPool();
   loadAll();
