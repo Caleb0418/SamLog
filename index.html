@@ -14577,13 +14577,13 @@ function renderClassMonthlyView(){
     if(dow===0) thCls+=' sun';
     html+='<th class="'+thCls.trim()+'" style="width:24px;">'+d+'</th>';
   }
-  html+='<th class="cmm-col-sum">결</th><th class="cmm-col-sum">지</th><th class="cmm-col-sum">조·과</th>';
+  html+='<th class="cmm-col-sum">결</th><th class="cmm-col-sum">지</th><th class="cmm-col-sum">조</th><th class="cmm-col-sum">과</th>';
   html+='</tr></thead><tbody>';
   c.students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).forEach(function(stu){
     html+='<tr>';
     html+='<td class="cmm-col-num">'+parseInt(stu.num)+'</td>';
     html+='<td class="cmm-col-name" onclick="onCmmNameClick(\''+stu.num+'\')">'+escapeHtml(stu.name)+'</td>';
-    var rowCounts={absent:0,late:0,etc:0};
+    var rowCounts={absent:0,late:0,early_leave:0,partial:0};
     for(var d=1;d<=lastDate;d++){
       var date=monthPrefix+'-'+String(d).padStart(2,'0');
       var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
@@ -14601,7 +14601,8 @@ function renderClassMonthlyView(){
           cellText=({absent:'결',late:'지',early_leave:'조',partial:'과'})[topStatus]||'';
           if(topStatus==='absent') rowCounts.absent++;
           else if(topStatus==='late') rowCounts.late++;
-          else rowCounts.etc++;
+          else if(topStatus==='early_leave') rowCounts.early_leave++;
+          else if(topStatus==='partial') rowCounts.partial++;
         }
       }
       var onclick=isWeekend?'':' onclick="onCmmCellClick(\''+date+'\')"';
@@ -14609,7 +14610,8 @@ function renderClassMonthlyView(){
     }
     html+='<td class="cmm-col-sum">'+rowCounts.absent+'</td>';
     html+='<td class="cmm-col-sum">'+rowCounts.late+'</td>';
-    html+='<td class="cmm-col-sum">'+rowCounts.etc+'</td>';
+    html+='<td class="cmm-col-sum">'+rowCounts.early_leave+'</td>';
+    html+='<td class="cmm-col-sum">'+rowCounts.partial+'</td>';
     html+='</tr>';
   });
   html+='</tbody></table></div></div>';
@@ -14646,11 +14648,11 @@ function exportCmmCsv(){
     var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
     header.push(d+'('+'일월화수목금토'.charAt(dow)+')');
   }
-  header.push('결석','지각','조퇴/결과');
+  header.push('결석','지각','조퇴','결과');
   rows.push(header);
   c.students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).forEach(function(stu){
     var row=[parseInt(stu.num),stu.name];
-    var rowCounts={absent:0,late:0,etc:0};
+    var rowCounts={absent:0,late:0,early_leave:0,partial:0};
     for(var d=1;d<=lastDate;d++){
       var date=monthPrefix+'-'+String(d).padStart(2,'0');
       var recs=(attendanceRecords[date]||{})[stu.num]||[];
@@ -14664,12 +14666,13 @@ function exportCmmCsv(){
           cell=getReasonLabel(topReason)+' '+getStatusLabel(topStatus);
           if(topStatus==='absent') rowCounts.absent++;
           else if(topStatus==='late') rowCounts.late++;
-          else rowCounts.etc++;
+          else if(topStatus==='early_leave') rowCounts.early_leave++;
+          else if(topStatus==='partial') rowCounts.partial++;
         }
         row.push(cell);
       }
     }
-    row.push(rowCounts.absent,rowCounts.late,rowCounts.etc);
+    row.push(rowCounts.absent,rowCounts.late,rowCounts.early_leave,rowCounts.partial);
     rows.push(row);
   });
   var csv=rows.map(function(r){
