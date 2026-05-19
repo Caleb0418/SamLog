@@ -13790,7 +13790,12 @@ function saveQuickMemo(){
       '깃발 켜기'
     );
   } else {
-    showToast(savedNames.join(', ')+'에 미분류 메모로 저장됐어요');
+    var toastMsg = allMentionStudents.length > 0 && matches.matched.length === 0
+      ? mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
+      : allMentionStudents.length > 0
+        ? savedNames.slice(0, matches.matched.length).join(', ')+'에 미분류 메모, '+mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
+        : savedNames.join(', ')+'에 미분류 메모로 저장됐어요';
+    showToast(toastMsg);
   }
   renderHome();  // 통계·최근 메모 갱신
   if(document.getElementById('tab-students').style.display === 'grid'){
