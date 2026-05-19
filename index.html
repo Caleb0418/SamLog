@@ -1800,6 +1800,173 @@ body{
 }
 .quick-memo-counter{font-size:11px;color:var(--text-tertiary);}
 
+/* 제출 추적 토글 */
+.qm-submit-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  cursor:pointer;user-select:none;margin-right:4px;
+}
+.qm-toggle-track{
+  width:30px;height:17px;border-radius:9px;
+  background:var(--border);
+  display:flex;align-items:center;padding:2px;
+  transition:background .15s;flex-shrink:0;
+}
+.qm-toggle-track.on{background:var(--accent);}
+.qm-toggle-thumb{
+  width:13px;height:13px;border-radius:50%;
+  background:#fff;transition:transform .15s;
+}
+.qm-toggle-track.on .qm-toggle-thumb{transform:translateX(13px);}
+.qm-toggle-label{
+  font-size:12px;color:var(--text-secondary);white-space:nowrap;
+}
+.qm-toggle-label.on{color:var(--accent);font-weight:500;}
+
+/* 홈 제출 추적 위젯 */
+.home-widget-card{
+  background:var(--bg-overlay);
+  border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;
+}
+.home-widget-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.home-widget-icon{
+  width:26px;height:26px;border-radius:6px;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.home-widget-title{font-size:13px;font-weight:500;color:var(--text);}
+.home-widget-meta{font-size:11px;color:var(--text-tertiary);margin-left:auto;}
+.home-widget-divider{height:1px;background:var(--border);margin:10px 0;}
+.home-widget-item{padding:2px 0;}
+.home-widget-item:hover .home-widget-item-label{color:var(--accent);}
+.home-widget-item-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:5px;
+}
+.home-widget-item-label{font-size:12px;color:var(--text-secondary);}
+.home-widget-item-count{font-size:12px;color:var(--text-tertiary);}
+.home-widget-item-count strong{color:var(--accent);font-weight:500;}
+.home-widget-progress{
+  height:5px;background:var(--border);border-radius:3px;overflow:hidden;
+}
+.home-widget-progress-fill{
+  height:100%;border-radius:3px;background:var(--accent);
+  transition:width .3s;
+}
+
+/* 타임라인 카드 — 제출 추적 행 */
+.submit-tracker-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;margin-top:8px;
+  background:var(--bg-surface);border-radius:6px;
+}
+.st-check{
+  width:18px;height:18px;border-radius:4px;
+  border:1.5px solid var(--border);
+  background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:transparent;
+  transition:background .12s, border-color .12s;
+}
+.st-check.done{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+}
+.st-check:hover:not(.done){border-color:var(--accent);}
+.st-title{font-size:12px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.st-count{font-size:11px;color:var(--text-tertiary);white-space:nowrap;}
+.st-count strong{color:var(--accent);font-weight:500;}
+.rec-card.has-submit-tracker{
+  border-left:2.5px solid var(--accent);
+  border-radius:0 8px 8px 0;
+}
+.submit-tracker-ended{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:8px;
+  font-size:11px;color:var(--text-tertiary);
+}
+.submit-tracker-ended svg{color:var(--success);}
+.st-ended-label{
+  font-size:10px;padding:1px 5px;border-radius:3px;
+  background:var(--bg-surface);color:var(--text-tertiary);margin-left:3px;
+}
+
+/* 제출 현황 모달 */
+.sm-head{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:16px 18px 14px;
+  border-bottom:1px solid var(--border);
+}
+.sm-icon{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sm-head-text{flex:1;min-width:0;}
+.sm-title{font-size:14px;font-weight:500;color:var(--text);}
+.sm-sub{font-size:11px;color:var(--text-tertiary);margin-top:2px;}
+.sm-close{
+  width:26px;height:26px;border-radius:6px;
+  border:none;background:transparent;cursor:pointer;
+  color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.sm-close:hover{background:var(--bg-elevated);}
+.sm-progress-area{padding:12px 18px;border-bottom:1px solid var(--border);}
+.sm-progress-nums{
+  display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;
+}
+.sm-progress-main{font-size:20px;font-weight:500;color:var(--text);}
+.sm-progress-main span{font-size:13px;color:var(--text-tertiary);font-weight:400;margin-left:2px;}
+.sm-progress-pct{font-size:13px;color:var(--accent);font-weight:500;}
+.sm-progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.sm-progress-fill{height:100%;border-radius:3px;background:var(--accent);transition:width .3s;}
+.sm-tab-row{display:flex;border-bottom:1px solid var(--border);}
+.sm-tab{
+  flex:1;padding:10px;font-size:12px;font-weight:500;
+  text-align:center;cursor:pointer;
+  border:none;background:transparent;font-family:inherit;
+  color:var(--text-tertiary);
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.sm-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.sm-list{flex:1;overflow-y:auto;padding:6px 0;}
+.sm-student-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 18px;
+  border-bottom:0.5px solid var(--border);
+}
+.sm-student-row:last-child{border-bottom:none;}
+.sm-s-num{font-size:11px;color:var(--text-tertiary);min-width:22px;text-align:right;}
+.sm-s-name{font-size:13px;color:var(--text);flex:1;}
+.sm-s-badge{
+  font-size:10px;font-weight:500;
+  padding:2px 7px;border-radius:4px;
+}
+.sm-s-badge.done{background:var(--success-dim);color:var(--success);}
+.sm-s-badge.todo{background:var(--danger-dim);color:var(--danger);}
+.sm-s-toggle{
+  width:24px;height:24px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:1.5px solid var(--border);
+  background:transparent;color:var(--text-tertiary);font-size:12px;
+  flex-shrink:0;
+}
+.sm-s-toggle.done{background:var(--accent);border-color:var(--accent);color:#fff;}
+.sm-footer{
+  padding:12px 18px;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-end;
+}
+.btn-danger{
+  padding:7px 14px;font-size:12px;
+  background:transparent;color:var(--danger);
+  border:1px solid var(--danger);border-radius:6px;
+  cursor:pointer;font-family:inherit;
+}
+.btn-danger:hover{background:var(--danger-dim);}
+
 .home-recent{
   margin-top:0;background:var(--warning-dim);
   border:1px solid var(--warning-border);border-top:none;
@@ -5019,6 +5186,38 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 <!-- ═══════════════════════════════════════════
      온보딩 — 처음 진입 시
 ═══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════
+     제출 현황 모달
+═══════════════════════════════════════════ -->
+<div id="submit-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9000;display:none;align-items:center;justify-content:center;" onclick="closeSubmitModal()">
+  <div id="submit-modal" style="background:var(--bg-overlay);border-radius:12px;border:1px solid var(--border);width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;" onclick="event.stopPropagation()">
+    <div class="sm-head">
+      <div class="sm-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <div class="sm-head-text">
+        <div class="sm-title" id="sm-title">—</div>
+        <div class="sm-sub" id="sm-sub">—</div>
+      </div>
+      <button class="sm-close" onclick="closeSubmitModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sm-progress-area">
+      <div class="sm-progress-nums">
+        <span class="sm-progress-main" id="sm-progress-main">0 <span>/ 0명 제출</span></span>
+        <span class="sm-progress-pct" id="sm-progress-pct">0%</span>
+      </div>
+      <div class="sm-progress-bar"><div class="sm-progress-fill" id="sm-progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="sm-tab-row">
+      <button class="sm-tab active" id="sm-tab-pending" onclick="switchSubmitTab('pending')">미제출 <span id="sm-pending-count">0</span>명</button>
+      <button class="sm-tab" id="sm-tab-done" onclick="switchSubmitTab('done')">제출 <span id="sm-done-count">0</span>명</button>
+    </div>
+    <div class="sm-list" id="sm-list"></div>
+    <div class="sm-footer">
+      <button class="btn-secondary" onclick="closeSubmitModal()">닫기</button>
+      <button class="btn-danger" onclick="endSubmitTracking(document.getElementById('submit-modal').dataset.groupId)">추적 종료</button>
+    </div>
+  </div>
+</div>
+
 <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
   <div class="onboarding-card">
     <!-- STEP 1: 환영 + 기본정보 -->
@@ -5339,6 +5538,13 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="quick-memo-foot">
         <span class="quick-memo-counter" id="quick-memo-counter">0자</span>
+        <label class="qm-submit-toggle" id="qm-submit-toggle-wrap" title="제출 추적 켜기">
+          <div class="qm-toggle-track" id="qm-submit-track">
+            <div class="qm-toggle-thumb"></div>
+          </div>
+          <span class="qm-toggle-label" id="qm-submit-label">제출 추적</span>
+          <input type="checkbox" id="qm-submit-checkbox" style="display:none;">
+        </label>
         <button class="btn-primary" id="quick-memo-save-btn" disabled onclick="saveQuickMemo()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           미분류 메모로 저장
@@ -5349,6 +5555,8 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- 알림·공지 영역 -->
     <div class="home-alerts" id="home-alerts" style="display:none;"></div>
 
+    <!-- 제출 추적 위젯 -->
+    <div id="home-submit-widget" style="display:none;margin-bottom:12px;"></div>
 
   </div>
 
@@ -7462,6 +7670,9 @@ var neisSettings = {
 // 학사일정: { 'YYYY-MM-DD': [{event, detail, gradeScope, source}, ...] }
 var schoolSchedule = {};
 
+// 제출 추적 토글 상태 (퀵메모 저장 시 초기화)
+var _submitTrackEnabled = false;
+
 // 시간표 동기화 상태
 var ttSyncState = { synced: false, lastSync: null, totalRows: 0 };
 
@@ -8442,7 +8653,8 @@ function renderTimeline(){
       if(r.needsFollowUp && !r.followedUp) followClass = ' has-followup';
       else if(r.needsFollowUp && r.followedUp) followClass = ' followup-done';
       var riskCls = (r.type === 'parent' && r.parentRiskLevel === 'caution') ? ' parent-caution' : '';
-      html += '<div class="rec-card '+r.type+followClass+riskCls+'" id="rec-card-'+r.id+'">';
+      var trackerCls = (r.submitTracker && r.submitTracker.enabled !== false) ? ' has-submit-tracker' : '';
+      html += '<div class="rec-card '+r.type+followClass+riskCls+trackerCls+'" id="rec-card-'+r.id+'">';
       html += '<div class="rec-head">';
       html += '<div class="rec-type"><span class="rec-dot dot-'+r.type+'"></span><span class="rec-type-name">'+typeKor+'</span>';
       if(r.type === 'bulk' && r.bulkClassLabel){
@@ -8505,6 +8717,30 @@ function renderTimeline(){
           html += '<button class="rec-followup-note-add" onclick="editFollowUpNote(\''+r.id+'\')">+ 처리 내용 추가</button>';
         }
         html += '</div>';
+      }
+
+      // 제출 추적 행
+      if(r.submitTracker){
+        if(r.submitTracker.enabled === false){
+          html += '<div class="submit-tracker-ended">';
+          html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+          html += (r.submitTracker.submitted ? '제출 완료' : '미제출')+'<span class="st-ended-label">추적 종료</span>';
+          html += '</div>';
+        } else {
+          var stGroupId = r.submitTracker.groupId;
+          var stStats = computeSubmitGroupStats(stGroupId);
+          var stCountText = stStats.total > 1
+            ? '<span class="st-count"><strong>'+stStats.submitted+'</strong> / '+stStats.total+'</span>'
+            : '';
+          var stDoneCls = r.submitTracker.submitted ? ' done' : '';
+          html += '<div class="submit-tracker-row">';
+          html += '<button class="st-check'+stDoneCls+'" onclick="toggleSubmit(\''+r.id+'\',\''+stGroupId+'\')" title="'+(r.submitTracker.submitted?'제출 완료 (클릭해서 취소)':'미제출 (클릭해서 제출 처리)') +'">';
+          html += '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+          html += '</button>';
+          html += '<span class="st-title">'+escapeHtml(r.submitTracker.title||'')+'</span>';
+          html += stCountText;
+          html += '</div>';
+        }
       }
 
       if(r.type === 'unsorted'){
@@ -14287,6 +14523,199 @@ function saveAddClass(){
 /* ═══════════════════════════════════════════
    홈 화면 + 퀵 메모
 ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   제출 추적 유틸·위젯·모달
+═══════════════════════════════════════════ */
+function computeSubmitGroupStats(groupId){
+  if(!groupId) return { submitted: 0, total: 0 };
+  var submitted = 0, total = 0;
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls.records) return;
+    Object.keys(cls.records).forEach(function(num){
+      (cls.records[num]||[]).forEach(function(r){
+        if(r.submitTracker && r.submitTracker.groupId === groupId && r.submitTracker.enabled !== false){
+          total++;
+          if(r.submitTracker.submitted) submitted++;
+        }
+      });
+    });
+  });
+  return { submitted: submitted, total: total };
+}
+
+function toggleSubmit(recordId, groupId){
+  if(!currentStudent) return;
+  var recs = records[currentStudent] || [];
+  var rec = recs.find(function(r){ return r.id === recordId; });
+  if(!rec || !rec.submitTracker) return;
+  rec.submitTracker.submitted = !rec.submitTracker.submitted;
+  rec.submitTracker.updatedAt = Date.now();
+  saveAll();
+  renderTimeline();
+  if(document.getElementById('tab-home').style.display === 'block') renderHome();
+}
+
+function endSubmitTracking(groupId){
+  if(!confirm('추적을 종료할까요? 기록은 보존됩니다.')) return;
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls.records) return;
+    Object.keys(cls.records).forEach(function(num){
+      (cls.records[num]||[]).forEach(function(r){
+        if(r.submitTracker && r.submitTracker.groupId === groupId){
+          r.submitTracker.enabled = false;
+          r.submitTracker.endedAt = Date.now();
+        }
+      });
+    });
+  });
+  syncActiveClass();
+  saveAll();
+  closeSubmitModal();
+  renderTimeline();
+  if(document.getElementById('tab-home').style.display === 'block') renderHome();
+  showToast('추적이 종료됐어요. 기록은 카드에 남아있습니다.');
+}
+
+function toggleSubmitInModal(classKey, studentNum, recordId){
+  var cls = classes[classKey];
+  if(!cls || !cls.records || !cls.records[studentNum]) return;
+  var rec = (cls.records[studentNum]||[]).find(function(r){ return r.id === recordId; });
+  if(!rec || !rec.submitTracker) return;
+  rec.submitTracker.submitted = !rec.submitTracker.submitted;
+  saveAll();
+  syncActiveClass();
+  var modalGroupId = document.getElementById('submit-modal').dataset.groupId;
+  var modalTab = document.getElementById('submit-modal').dataset.tab || 'pending';
+  renderSubmitModal(modalGroupId, modalTab);
+  if(currentStudent) renderTimeline();
+}
+
+function renderSubmitTrackersWidget(){
+  var el = document.getElementById('home-submit-widget');
+  if(!el) return;
+  var groups = {};
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls.records) return;
+    Object.keys(cls.records).forEach(function(num){
+      (cls.records[num]||[]).forEach(function(r){
+        if(!r.submitTracker || r.submitTracker.enabled === false) return;
+        var gid = r.submitTracker.groupId;
+        if(!groups[gid]){
+          groups[gid] = { groupId: gid, title: r.submitTracker.title||'', submitted:0, total:0, date:r.date };
+        }
+        groups[gid].total++;
+        if(r.submitTracker.submitted) groups[gid].submitted++;
+      });
+    });
+  });
+  var keys = Object.keys(groups);
+  if(keys.length === 0){ el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  keys.sort(function(a,b){ return (groups[b].date||'') > (groups[a].date||'') ? 1 : -1; });
+  var html = '<div class="home-widget-card">';
+  html += '<div class="home-widget-head">';
+  html += '<div class="home-widget-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>';
+  html += '<span class="home-widget-title">제출 추적 중</span>';
+  html += '<span class="home-widget-meta">'+keys.length+'건</span>';
+  html += '</div>';
+  keys.forEach(function(gid, idx){
+    var g = groups[gid];
+    var pct = g.total > 0 ? Math.round(g.submitted/g.total*100) : 0;
+    if(idx > 0) html += '<div class="home-widget-divider"></div>';
+    html += '<div class="home-widget-item" onclick="openSubmitModal(\''+gid+'\')" style="cursor:pointer;">';
+    html += '<div class="home-widget-item-head">';
+    html += '<span class="home-widget-item-label">'+escapeHtml(g.title)+'</span>';
+    html += '<span class="home-widget-item-count"><strong>'+g.submitted+'</strong> / '+g.total+'명</span>';
+    html += '</div>';
+    html += '<div class="home-widget-progress"><div class="home-widget-progress-fill" style="width:'+pct+'%"></div></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function openSubmitModal(groupId){
+  var overlay = document.getElementById('submit-modal-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('submit-modal').dataset.groupId = groupId;
+  document.getElementById('submit-modal').dataset.tab = 'pending';
+  renderSubmitModal(groupId, 'pending');
+}
+
+function closeSubmitModal(){
+  document.getElementById('submit-modal-overlay').style.display = 'none';
+}
+
+function switchSubmitTab(tab){
+  document.getElementById('submit-modal').dataset.tab = tab;
+  document.getElementById('sm-tab-pending').classList.toggle('active', tab==='pending');
+  document.getElementById('sm-tab-done').classList.toggle('active', tab==='done');
+  var groupId = document.getElementById('submit-modal').dataset.groupId;
+  renderSubmitModal(groupId, tab);
+}
+
+function renderSubmitModal(groupId, tab){
+  var allRecs = [];
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls.records) return;
+    (cls.students||[]).forEach(function(s){
+      if(!s || !s.num) return;
+      (cls.records[s.num]||[]).forEach(function(r){
+        if(r.submitTracker && r.submitTracker.groupId === groupId && r.submitTracker.enabled !== false){
+          allRecs.push({ rec:r, student:s, classKey:ck });
+        }
+      });
+    });
+  });
+  if(allRecs.length === 0){ closeSubmitModal(); return; }
+  var title = allRecs[0].rec.submitTracker.title || '제출 추적';
+  var dateStr = allRecs[0].rec.date || '';
+  document.getElementById('sm-title').textContent = title;
+  var classLabels = [];
+  allRecs.forEach(function(item){
+    var cls = classes[item.classKey];
+    var lbl = cls ? cls.grade+'학년 '+cls.classNum+'반' : item.classKey;
+    if(classLabels.indexOf(lbl)<0) classLabels.push(lbl);
+  });
+  document.getElementById('sm-sub').textContent = classLabels.join(', ')+(dateStr?' · '+dateStr:'');
+  var total = allRecs.length;
+  var submitted = allRecs.filter(function(item){ return item.rec.submitTracker.submitted; }).length;
+  var pct = total>0 ? Math.round(submitted/total*100) : 0;
+  document.getElementById('sm-progress-main').innerHTML = submitted+' <span>/ '+total+'명 제출</span>';
+  document.getElementById('sm-progress-pct').textContent = pct+'%';
+  document.getElementById('sm-progress-fill').style.width = pct+'%';
+  document.getElementById('sm-pending-count').textContent = total-submitted;
+  document.getElementById('sm-done-count').textContent = submitted;
+  var filtered = allRecs.filter(function(item){
+    return tab==='done' ? item.rec.submitTracker.submitted : !item.rec.submitTracker.submitted;
+  });
+  filtered.sort(function(a,b){ return parseInt(a.student.num||0)-parseInt(b.student.num||0); });
+  var html = '';
+  if(filtered.length===0){
+    html='<div style="padding:24px 18px;text-align:center;font-size:13px;color:var(--text-tertiary);">'+(tab==='done'?'제출한 학생이 없어요':'모두 제출했어요 🎉')+'</div>';
+  } else {
+    filtered.forEach(function(item){
+      var s=item.student;
+      var isDone=item.rec.submitTracker.submitted;
+      html+='<div class="sm-student-row">';
+      html+='<span class="sm-s-num">'+escapeHtml(s.num||'')+'</span>';
+      html+='<span class="sm-s-name">'+escapeHtml(getDisplayName(s))+'</span>';
+      html+='<span class="sm-s-badge '+(isDone?'done':'todo')+'">'+(isDone?'제출':'미제출')+'</span>';
+      html+='<button class="sm-s-toggle '+(isDone?'done':'')+'" onclick="toggleSubmitInModal(\''+item.classKey+'\',\''+s.num+'\',\''+item.rec.id+'\')">';
+      html+=isDone
+        ?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        :'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+      html+='</button>';
+      html+='</div>';
+    });
+  }
+  document.getElementById('sm-list').innerHTML = html;
+}
+
 function renderHome(){
   document.getElementById('home-teacher-name').textContent = TEACHER_NAME+'님';
 
@@ -14318,6 +14747,25 @@ function renderHome(){
 
   // 알림·공지
   renderHomeAlerts();
+
+  // 제출 추적 위젯
+  renderSubmitTrackersWidget();
+
+  // 제출 추적 토글 초기화
+  _submitTrackEnabled = false;
+  var submitToggleTrack = document.getElementById('qm-submit-track');
+  var submitToggleLabel = document.getElementById('qm-submit-label');
+  if(submitToggleTrack) submitToggleTrack.classList.remove('on');
+  if(submitToggleLabel) submitToggleLabel.classList.remove('on');
+  var _qmToggleWrap = document.getElementById('qm-submit-toggle-wrap');
+  if(_qmToggleWrap){
+    _qmToggleWrap.onclick = function(e){
+      e.preventDefault();
+      _submitTrackEnabled = !_submitTrackEnabled;
+      document.getElementById('qm-submit-track').classList.toggle('on', _submitTrackEnabled);
+      document.getElementById('qm-submit-label').classList.toggle('on', _submitTrackEnabled);
+    };
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -15194,6 +15642,9 @@ function saveQuickMemo(){
   var FOLLOWUP_KW = /확인|체크|점심\s*후|쉬는\s*시간|나중에|다시/;
   var hasFollowupHint = FOLLOWUP_KW.test(memoContent);
   var savedRecIds = [];   // {classKey, num, id}
+  // 제출 추적: 여러 개인 멘션 동시 저장 시 같은 groupId 공유
+  var soloGroupId = null;
+  var _stTitle = memoContent.length > 20 ? memoContent.slice(0,20)+'…' : memoContent;
 
   matches.matched.forEach(function(s){
     var classKey = s._classKey;
@@ -15201,6 +15652,9 @@ function saveQuickMemo(){
     if(!cls) return;
     if(!cls.records) cls.records = {};
     if(!cls.records[s.num]) cls.records[s.num] = [];
+    if(!soloGroupId && _submitTrackEnabled){
+      soloGroupId = 'sg_'+Date.now()+'_solo';
+    }
     var rec = {
       id: genId(),
       type: 'unsorted',
@@ -15210,6 +15664,14 @@ function saveQuickMemo(){
       tags: [],
       createdAt: Date.now()
     };
+    if(_submitTrackEnabled){
+      rec.submitTracker = {
+        enabled: true,
+        submitted: false,
+        groupId: soloGroupId,
+        title: _stTitle
+      };
+    }
     cls.records[s.num].push(rec);
     savedNames.push((s._classLabel?s._classLabel+' ':'')+getDisplayName(s));
     savedRecIds.push({classKey:classKey, num: s.num, id: rec.id});
@@ -15234,6 +15696,14 @@ function saveQuickMemo(){
       tags: [],
       createdAt: Date.now()
     };
+    if(_submitTrackEnabled){
+      rec.submitTracker = {
+        enabled: true,
+        submitted: false,
+        groupId: bulkGroupIdsByClass[classKey],
+        title: _stTitle
+      };
+    }
     cls.records[s.num].push(rec);
     savedNames.push((s._classLabel?s._classLabel+' ':'')+getDisplayName(s));
     savedRecIds.push({classKey:classKey, num: s.num, id: rec.id});
@@ -15247,6 +15717,12 @@ function saveQuickMemo(){
   document.getElementById('quick-memo-counter').textContent = '0자';
   document.getElementById('quick-memo-save-btn').disabled = true;
   document.getElementById('quick-memo-matches').style.display = 'none';
+  // 제출 추적 토글 초기화
+  _submitTrackEnabled = false;
+  var _tr = document.getElementById('qm-submit-track');
+  var _lb = document.getElementById('qm-submit-label');
+  if(_tr) _tr.classList.remove('on');
+  if(_lb) _lb.classList.remove('on');
 
   if(hasFollowupHint && savedRecIds.length > 0){
     _pendingFollowupIds = savedRecIds;
