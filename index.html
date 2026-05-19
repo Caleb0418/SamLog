@@ -4455,6 +4455,61 @@ details > summary::-webkit-details-marker { display:none; }
   border:1px dashed var(--border);
 }
 .week-cell-session.state-holiday{ display:none; }
+/* 차시 관리 버튼 — 셀 hover 시 표시 */
+.class-week-cell{ position:relative; }
+.week-cell-session-manage{
+  display:none;position:absolute;top:3px;right:3px;
+  background:none;border:none;
+  font-size:12px;color:var(--text-tertiary);
+  cursor:pointer;padding:2px 3px;line-height:1;border-radius:3px;
+}
+.class-week-cell:hover .week-cell-session-manage{ display:block; }
+.week-cell-session-manage:hover{ color:var(--accent);background:var(--accent-dim); }
+/* 범례 토글 버튼 */
+.week-legend-toggle{
+  margin-left:auto;background:none;
+  border:1px solid var(--border);border-radius:4px;
+  font-size:11px;color:var(--text-secondary);
+  padding:2px 8px;cursor:pointer;
+}
+.week-legend-toggle:hover{ background:var(--bg-surface); }
+/* 차시 관리 모달 내부 컴포넌트 */
+.sm-section{
+  margin-bottom:16px;padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.sm-section:last-child{ border-bottom:none;margin-bottom:0; }
+.sm-section-title{ font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:8px; }
+.sm-empty-hint{ font-size:12px;color:var(--text-tertiary); }
+.sm-reset-row{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:5px;font-size:13px;
+}
+.sm-reset-date{ color:var(--text-secondary);min-width:84px;flex-shrink:0; }
+.sm-reset-label{ flex:1;color:var(--text-primary); }
+.sm-del-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--text-tertiary);font-size:12px;padding:2px 5px;
+  border-radius:3px;flex-shrink:0;
+}
+.sm-del-btn:hover{ color:var(--danger);background:var(--danger-dim); }
+.sm-add-row{
+  display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;
+}
+.sm-field{ flex:1;min-width:100px; }
+.sm-label{ font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px; }
+.sm-input{
+  width:100%;padding:6px 8px;border-radius:6px;
+  border:1px solid var(--border);background:var(--bg-surface);
+  color:var(--text-primary);font-size:12.5px;box-sizing:border-box;
+}
+.sm-add-btn{
+  padding:7px 14px;border-radius:6px;
+  background:var(--accent);border:none;
+  color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;
+}
+.sm-add-btn:hover{ filter:brightness(1.08); }
 /* 범례 */
 .week-legend{
   display:flex;align-items:center;gap:14px;flex-wrap:wrap;
@@ -8096,6 +8151,9 @@ var timetableOverrides = {};
 // 시간표 변경 이력: [{syncedAt, effectiveFrom, changes:[{grade,cls,period,dow,oldSubject,newSubject}], appliedCount}]
 var timetableChangeHistory = [];
 
+// 주간 시간표 표시 설정
+var classViewSettings = { showSessionBadge: true };
+
 // NEIS API 설정
 var neisSettings = {
   apiKey: '',
@@ -8348,6 +8406,7 @@ function saveAll(){
     localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
     localStorage.setItem('ht2_attendance_' + yr, JSON.stringify(attendanceRecords));
     localStorage.setItem('ht2_school_schedule_' + yr, JSON.stringify(schoolSchedule));
+    localStorage.setItem('ht2_class_view_settings', JSON.stringify(classViewSettings));
     _addYearToList(yr);
   }catch(e){ console.warn('저장 실패', e); }
 }
@@ -8676,6 +8735,10 @@ function loadAll(){
       var schedRaw = localStorage.getItem('ht2_school_schedule_' + getActiveYear());
       if(schedRaw) schoolSchedule = JSON.parse(schedRaw);
     }catch(e){ schoolSchedule = {}; }
+    try{
+      var cvsRaw = localStorage.getItem('ht2_class_view_settings');
+      if(cvsRaw) classViewSettings = JSON.parse(cvsRaw);
+    }catch(e){ classViewSettings = { showSessionBadge: true }; }
 
     // 마이그레이션: 잘못 들어간 학생 데이터(NaN/합계행) 제거
     var cleaned = 0;
@@ -17218,7 +17281,9 @@ function importAssignSelected(){
       id: 'cm'+Date.now()+'_'+added,
       grade: e.grade, cls: e.cls, subject: e.subject,
       slots: e.slots.slice(),
-      memos: []
+      memos: [],
+      sessionResets: [],
+      sessionOverrides: {}
     });
     added++;
     totalSlots += e.slots.length;
@@ -18683,58 +18748,103 @@ var _sessionCache = {}; // key: entryId+':'+dateStr → result
 
 function getAutoSessionNumber(entry, dateStr){
   if(!entry || !dateStr || !entry.slots || entry.slots.length === 0){
-    return { sessionNum:0, hasProgress:false, isHoliday:false };
+    return { sessionNum:0, hasProgress:false, hasAnyMemo:false, isHoliday:false };
   }
   var cacheKey = (entry.id||'')+':'+dateStr;
   if(_sessionCache[cacheKey]) return _sessionCache[cacheKey];
 
   var grade = entry.grade ? parseInt(entry.grade) : null;
   var isTargetHoliday = isNonSchoolDay(dateStr, grade);
-  var semStart = getSemesterStartDate(dateStr);
-  var semStartDate = new Date(semStart+'T00:00:00');
-  var targetDateObj = new Date(dateStr+'T00:00:00');
 
-  if(targetDateObj < semStartDate){
-    var r0 = { sessionNum:0, hasProgress:false, isHoliday:isTargetHoliday };
-    _sessionCache[cacheKey] = r0; return r0;
-  }
-
-  var sessionCount = 0;
-  var cursor = new Date(semStartDate);
-  while(cursor <= targetDateObj){
-    var cursorStr = formatDateForInput(cursor);
-    var cursorDow = cursor.getDay();
-    if(cursorDow >= 1 && cursorDow <= 5 && !isNonSchoolDay(cursorStr, grade)){
-      var slot = null;
-      for(var si=0; si<entry.slots.length; si++){
-        if(entry.slots[si].day === cursorDow){ slot = entry.slots[si]; break; }
-      }
-      if(slot){
-        // override로 과목이 바뀌었으면 카운트 제외
-        var actualSubj = getTimetableForDate(grade, entry.cls, cursorDow, slot.period, cursorStr);
-        var subjectOk = !actualSubj || actualSubj === entry.subject;
-        if(subjectOk) sessionCount++;
-      }
-    }
-    cursor.setDate(cursor.getDate()+1);
-  }
-
+  // 메모/진도 여부 (공통)
   var hasProgress = false, hasAnyMemo = false;
   if(entry.memos){
-    var memo = null;
     for(var mi=0; mi<entry.memos.length; mi++){
-      if(entry.memos[mi].date === dateStr){ memo = entry.memos[mi]; break; }
+      if(entry.memos[mi].date === dateStr){
+        hasAnyMemo = true;
+        if(entry.memos[mi].progress && entry.memos[mi].progress.trim()) hasProgress = true;
+        break;
+      }
     }
-    if(memo){
-      hasAnyMemo = true;
-      if(memo.progress && memo.progress.trim()) hasProgress = true;
+  }
+
+  // ── 차시 오버라이드 확인 ──
+  var overrides = entry.sessionOverrides || {};
+  if(overrides[dateStr] !== undefined){
+    var ovResult = {
+      sessionNum: isTargetHoliday ? 0 : overrides[dateStr],
+      hasProgress: hasProgress, hasAnyMemo: hasAnyMemo,
+      isHoliday: isTargetHoliday, isOverride: true
+    };
+    _sessionCache[cacheKey] = ovResult;
+    return ovResult;
+  }
+
+  // ── 리셋 기준일 결정 ──
+  var resets = (entry.sessionResets || []).slice().sort(function(a,b){
+    return a.fromDate < b.fromDate ? -1 : 1;
+  });
+  var semStart = getSemesterStartDate(dateStr);
+  var countFromDate = semStart;
+  for(var ri=resets.length-1; ri>=0; ri--){
+    if(resets[ri].fromDate <= dateStr){ countFromDate = resets[ri].fromDate; break; }
+  }
+
+  // ── countFromDate~dateStr 사이 오버라이드 탐색 ──
+  var sortedOvDates = Object.keys(overrides).filter(function(d){
+    return d >= countFromDate && d < dateStr;
+  }).sort();
+
+  var sessionCount = 0;
+  if(sortedOvDates.length > 0){
+    var lastOvDate = sortedOvDates[sortedOvDates.length-1];
+    sessionCount = overrides[lastOvDate];
+    var cursor2 = new Date(lastOvDate+'T00:00:00');
+    cursor2.setDate(cursor2.getDate()+1);
+    var targetDateObj2 = new Date(dateStr+'T00:00:00');
+    while(cursor2 <= targetDateObj2){
+      var cs2 = formatDateForInput(cursor2);
+      var dow2 = cursor2.getDay();
+      if(dow2 >= 1 && dow2 <= 5 && !isNonSchoolDay(cs2, grade)){
+        var slot2 = null;
+        for(var si2=0; si2<entry.slots.length; si2++){
+          if(entry.slots[si2].day === dow2){ slot2 = entry.slots[si2]; break; }
+        }
+        if(slot2){
+          var as2 = getTimetableForDate(grade, entry.cls, dow2, slot2.period, cs2);
+          if(!as2 || as2 === entry.subject) sessionCount++;
+        }
+      }
+      cursor2.setDate(cursor2.getDate()+1);
+    }
+  } else {
+    var countFromDateObj = new Date(countFromDate+'T00:00:00');
+    var targetDateObj = new Date(dateStr+'T00:00:00');
+    if(targetDateObj < countFromDateObj){
+      var r0 = { sessionNum:0, hasProgress:hasProgress, hasAnyMemo:hasAnyMemo, isHoliday:isTargetHoliday };
+      _sessionCache[cacheKey] = r0; return r0;
+    }
+    var cursor = new Date(countFromDateObj);
+    while(cursor <= targetDateObj){
+      var cursorStr = formatDateForInput(cursor);
+      var cursorDow = cursor.getDay();
+      if(cursorDow >= 1 && cursorDow <= 5 && !isNonSchoolDay(cursorStr, grade)){
+        var slot = null;
+        for(var si=0; si<entry.slots.length; si++){
+          if(entry.slots[si].day === cursorDow){ slot = entry.slots[si]; break; }
+        }
+        if(slot){
+          var actualSubj = getTimetableForDate(grade, entry.cls, cursorDow, slot.period, cursorStr);
+          if(!actualSubj || actualSubj === entry.subject) sessionCount++;
+        }
+      }
+      cursor.setDate(cursor.getDate()+1);
     }
   }
 
   var result = {
     sessionNum: isTargetHoliday ? 0 : sessionCount,
-    hasProgress: hasProgress,
-    hasAnyMemo: hasAnyMemo,
+    hasProgress: hasProgress, hasAnyMemo: hasAnyMemo,
     isHoliday: isTargetHoliday
   };
   _sessionCache[cacheKey] = result;
@@ -19177,6 +19287,9 @@ function renderClassWeek(){
     '<span class="week-legend-item"><span class="week-legend-dot state-past-empty"></span>미작성</span>'+
     '<span class="week-legend-item"><span class="week-legend-dot state-future"></span>예정</span>'+
     '<span class="week-legend-item"><span class="week-legend-dot state-holiday"></span>휴업일</span>'+
+    '<button class="week-legend-toggle" onclick="toggleSessionBadgeVisibility()">'+
+      (classViewSettings.showSessionBadge ? '차시 숨기기' : '차시 보기')+
+    '</button>'+
     '</div>';
 
   // 그리드 HTML
@@ -19241,12 +19354,19 @@ function renderClassWeek(){
 
         var sessionPill = '';
         if(sessionInfo.sessionNum > 0){
-          var semStart = getSemesterStartDate(cellDate);
-          var _tip = '학기 시작 '+semStart.replace(/-/g,'.')+' 기준 '+sessionInfo.sessionNum+'차시';
-          if(sessionInfo.hasProgress) _tip += '\n진도: 입력됨';
-          else if(sessionInfo.hasAnyMemo) _tip += '\n메모는 있지만 진도 미입력';
-          else _tip += '\n메모 미작성';
-          sessionPill = '<div class="week-cell-session state-'+cellState+'" title="'+_tip+'">'+sessionInfo.sessionNum+'차시</div>';
+          if(classViewSettings.showSessionBadge){
+            var semStart = getSemesterStartDate(cellDate);
+            var _tip = '학기 시작 '+semStart.replace(/-/g,'.')+' 기준 '+sessionInfo.sessionNum+'차시';
+            if(sessionInfo.isOverride) _tip += '\n(수동 수정됨)';
+            if(sessionInfo.hasProgress) _tip += '\n진도: 입력됨';
+            else if(sessionInfo.hasAnyMemo) _tip += '\n메모는 있지만 진도 미입력';
+            else _tip += '\n메모 미작성';
+            sessionPill = '<div class="week-cell-session state-'+cellState+'"'+
+              ' title="'+_tip+'"'+
+              ' oncontextmenu="event.preventDefault();event.stopPropagation();openSessionOverridePrompt(\''+c0.id+'\',\''+cellDate+'\','+sessionInfo.sessionNum+')"'+
+              ' ontouchstart="handleSessionBadgeLongPress(\''+c0.id+'\',\''+cellDate+'\','+sessionInfo.sessionNum+',event)"'+
+              '>'+sessionInfo.sessionNum+'차시</div>';
+          }
         } else if(cellState === 'future'){
           // 미래 수업은 예측 차시 없이 빈 배지 표시 안 함
         }
@@ -19256,6 +19376,7 @@ function renderClassWeek(){
           '<div class="week-cell-subject">'+escapeHtml(c0.subject)+'</div>'+
           '<div class="week-cell-class">'+escapeHtml(label)+(cells.length>1?' +'+(cells.length-1):'')+'</div>'+
           sessionPill+
+          '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\')" title="차시 관리">⟳</button>'+
         '</div>';
       } else if(adhocCells.length > 0){
         var a0 = adhocCells[0];
@@ -19735,7 +19856,8 @@ function addClassMaster(){
   classMaster.push({
     id: 'cm'+Date.now(),
     grade: grade, cls: cls, subject: subject,
-    slots: slots, memos: []
+    slots: slots, memos: [],
+    sessionResets: [], sessionOverrides: {}
   });
   saveAll();
 
@@ -19813,7 +19935,8 @@ function loadSampleClassData(){
     classMaster.push({
       id: 'cm'+Date.now()+'_'+subject+'_'+Math.random().toString(36).slice(2,6),
       grade: String(g), cls: String(c), subject: subject,
-      slots: slots, memos: []
+      slots: slots, memos: [],
+      sessionResets: [], sessionOverrides: {}
     });
     added++;
   });
@@ -20768,6 +20891,158 @@ function maybeRunAttendanceMigration(){
 }
 
 window.addEventListener('DOMContentLoaded', init);
+
+/* ─── 차시 관리 함수 ─── */
+function openSessionManageModal(entryId){
+  var entry = classMaster.find(function(c){ return c.id === entryId; });
+  if(!entry) return;
+  var modal = document.getElementById('session-manage-modal');
+  var titleEl = document.getElementById('session-manage-title');
+  var body = document.getElementById('session-manage-body');
+  titleEl.textContent = entry.grade+'-'+entry.cls+' '+entry.subject+' 차시 관리';
+
+  var resets = (entry.sessionResets || []).slice().sort(function(a,b){
+    return a.fromDate > b.fromDate ? -1 : 1;
+  });
+
+  var html = '';
+  // 차시 리셋 목록
+  html += '<div class="sm-section">';
+  html += '<div class="sm-section-title">차시 다시 세기 기록</div>';
+  if(resets.length === 0){
+    html += '<div class="sm-empty-hint">리셋 기록 없음 (학기 시작일부터 카운팅 중)</div>';
+  } else {
+    resets.forEach(function(r, idx){
+      html += '<div class="sm-reset-row">'+
+        '<span class="sm-reset-date">'+r.fromDate+'</span>'+
+        '<span class="sm-reset-label">'+escapeHtml(r.label||'리셋')+'부터 1차시</span>'+
+        '<button class="sm-del-btn" onclick="deleteSessionReset(\''+entryId+'\','+idx+')" title="삭제">✕</button>'+
+      '</div>';
+    });
+  }
+  html += '</div>';
+
+  // 새 리셋 추가
+  html += '<div class="sm-section">';
+  html += '<div class="sm-section-title">차시 다시 세기 추가</div>';
+  html += '<div class="sm-add-row">';
+  html += '<div class="sm-field"><label class="sm-label">시작 날짜</label>'+
+    '<input type="date" id="session-reset-date" class="sm-input"></div>';
+  html += '<div class="sm-field"><label class="sm-label">메모 (선택)</label>'+
+    '<input type="text" id="session-reset-label" class="sm-input" placeholder="예) 1차고사 후"></div>';
+  html += '<button class="sm-add-btn" onclick="addSessionReset(\''+entryId+'\')">추가</button>';
+  html += '</div></div>';
+
+  // 오버라이드 목록
+  var overrides = entry.sessionOverrides || {};
+  var ovDates = Object.keys(overrides).sort().reverse();
+  html += '<div class="sm-section">';
+  html += '<div class="sm-section-title">특정 날짜 차시 직접 수정</div>';
+  html += '<div class="sm-empty-hint">주간 시간표에서 차시 배지를 우클릭(PC) 또는 길게 누르면(모바일) 직접 수정할 수 있어요.</div>';
+  if(ovDates.length > 0){
+    html += '<div style="margin-top:8px;">';
+    ovDates.slice(0,5).forEach(function(d){
+      html += '<div class="sm-reset-row">'+
+        '<span class="sm-reset-date">'+d+'</span>'+
+        '<span class="sm-reset-label">→ '+overrides[d]+'차시</span>'+
+        '<button class="sm-del-btn" onclick="deleteSessionOverride(\''+entryId+'\',\''+d+'\')" title="삭제">✕</button>'+
+      '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  body.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeSessionManageModal(){
+  document.getElementById('session-manage-modal').style.display = 'none';
+}
+
+function addSessionReset(entryId){
+  var entry = classMaster.find(function(c){ return c.id === entryId; });
+  if(!entry) return;
+  var dateVal  = document.getElementById('session-reset-date').value;
+  var labelVal = (document.getElementById('session-reset-label').value || '').trim();
+  if(!dateVal){ showToast('날짜를 선택해주세요'); return; }
+  if(!entry.sessionResets) entry.sessionResets = [];
+  entry.sessionResets = entry.sessionResets.filter(function(r){ return r.fromDate !== dateVal; });
+  entry.sessionResets.push({ fromDate: dateVal, label: labelVal || '리셋' });
+  clearSessionCache();
+  saveAll();
+  openSessionManageModal(entryId);
+  renderClassWeek();
+  showToast(dateVal+'부터 1차시로 다시 셉니다');
+}
+
+function deleteSessionReset(entryId, idx){
+  var entry = classMaster.find(function(c){ return c.id === entryId; });
+  if(!entry || !entry.sessionResets) return;
+  var sorted = entry.sessionResets.slice().sort(function(a,b){ return a.fromDate > b.fromDate ? -1 : 1; });
+  var target = sorted[idx];
+  if(!target) return;
+  entry.sessionResets = entry.sessionResets.filter(function(r){ return r.fromDate !== target.fromDate; });
+  clearSessionCache();
+  saveAll();
+  openSessionManageModal(entryId);
+  renderClassWeek();
+}
+
+function deleteSessionOverride(entryId, dateStr){
+  var entry = classMaster.find(function(c){ return c.id === entryId; });
+  if(!entry || !entry.sessionOverrides) return;
+  delete entry.sessionOverrides[dateStr];
+  clearSessionCache();
+  saveAll();
+  openSessionManageModal(entryId);
+  renderClassWeek();
+}
+
+function openSessionOverridePrompt(entryId, dateStr, currentNum){
+  var newVal = prompt(dateStr+' 차시를 직접 입력하세요\n(이후 날짜는 자동으로 +1씩 매겨집니다)', currentNum);
+  if(newVal === null) return;
+  var n = parseInt(newVal);
+  if(isNaN(n) || n < 1){ showToast('1 이상의 숫자를 입력하세요'); return; }
+  var entry = classMaster.find(function(c){ return c.id === entryId; });
+  if(!entry) return;
+  if(!entry.sessionOverrides) entry.sessionOverrides = {};
+  entry.sessionOverrides[dateStr] = n;
+  clearSessionCache();
+  saveAll();
+  renderClassWeek();
+  showToast(dateStr+' 차시를 '+n+'으로 수정했습니다');
+}
+
+var _sessionBadgePressTimer = null;
+function handleSessionBadgeLongPress(entryId, dateStr, currentNum, event){
+  _sessionBadgePressTimer = setTimeout(function(){
+    event.preventDefault();
+    openSessionOverridePrompt(entryId, dateStr, currentNum);
+  }, 600);
+  event.target.addEventListener('touchend', function(){
+    clearTimeout(_sessionBadgePressTimer);
+  }, { once: true });
+}
+
+function toggleSessionBadgeVisibility(){
+  classViewSettings.showSessionBadge = !classViewSettings.showSessionBadge;
+  localStorage.setItem('ht2_class_view_settings', JSON.stringify(classViewSettings));
+  renderClassWeek();
+}
 </script>
+
+<!-- ═══════════════════════════════════════════
+     차시 관리 모달
+═══════════════════════════════════════════ -->
+<div id="session-manage-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9100;align-items:center;justify-content:center;" onclick="if(event.target===this)closeSessionManageModal()">
+  <div style="background:var(--bg-overlay);border-radius:14px;border:1px solid var(--border);width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18);" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <span id="session-manage-title" style="font-size:14px;font-weight:700;color:var(--text-primary);"></span>
+      <button style="background:none;border:none;cursor:pointer;color:var(--text-tertiary);font-size:16px;padding:2px 6px;border-radius:4px;line-height:1;" onclick="closeSessionManageModal()">✕</button>
+    </div>
+    <div id="session-manage-body" style="flex:1;overflow-y:auto;padding:16px 18px;"></div>
+  </div>
+</div>
 </body>
 </html>
