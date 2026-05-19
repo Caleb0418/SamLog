@@ -972,11 +972,13 @@ body{
 }
 /* 사이드바 학생 중요 배지 */
 .student-caution-badge{
-  display:inline-flex;align-items:center;gap:2px;
+  display:inline-flex;align-items:center;gap:3px;
   font-size:10px;font-weight:600;
-  padding:1px 5px;border-radius:3px;
-  background:var(--danger-dim,#fef2f2);color:var(--danger,#ef4444);
-  margin-left:4px;flex-shrink:0;
+  color:var(--danger,#C03A2B);
+  background:var(--danger-dim,rgba(192,58,43,0.08));
+  border:0.5px solid var(--danger,#C03A2B);
+  border-radius:4px;padding:1px 5px;
+  flex-shrink:0;
 }
 .rec-bulk-label{
   display:inline-flex;align-items:center;gap:4px;
@@ -8276,15 +8278,17 @@ function studentRowHTML(s, isUnsorted){
   }
   var cautionCount = getCautionParentCount(s.num);
   var cautionBadge = cautionCount > 0
-    ? '<span class="student-caution-badge" title="중요 학부모 메모 '+cautionCount+'건"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+cautionCount+'</span>'
+    ? '<span class="student-caution-badge" title="주의 학부모 메모 '+cautionCount+'건"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>주의</span>'
     : '';
   return '<div class="student-row'+activeCls+'" data-num="'+s.num+'">'+
     '<div class="student-avatar">'+firstChar+'</div>'+
     '<div class="student-info">'+
       '<span class="student-num">'+s.num+'</span>'+
-      '<span class="student-name">'+escapeHtml(getDisplayName(s))+cautionBadge+'</span>'+
+      '<span class="student-name">'+escapeHtml(getDisplayName(s))+'</span>'+
     '</div>'+
-    rightContent+
+    (cautionBadge || rightContent
+      ? '<div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;">'+cautionBadge+rightContent+'</div>'
+      : '')+
   '</div>';
 }
 
@@ -8453,7 +8457,7 @@ function renderTimeline(){
         var _pTypeLabel = _pTypeMap[r.parentTypeId] || '';
         if(_pTypeLabel) html += '<span class="rec-parent-type">'+escapeHtml(_pTypeLabel)+'</span>';
         if(r.parentRiskLevel === 'caution'){
-          html += '<span class="rec-parent-caution-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>중요</span>';
+          html += '<span class="rec-parent-caution-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>주의</span>';
         }
       }
       html += '</div>';
@@ -8520,7 +8524,6 @@ function renderTimeline(){
         var bulkMeta = r.bulkRecipientCount ? r.bulkRecipientCount+'명에게 동일 발송됨' : '학급 전체 발송';
         html += '<div class="rec-bulk-actions">';
         html += '<span class="rec-bulk-meta">'+escapeHtml(bulkMeta)+'</span>';
-        html += '<button class="rec-bulk-convert-btn" onclick="openBulkConvertModal(\''+r.id+'\')">유형 변경</button>';
         html += '</div>';
       }
       html += '</div>';
@@ -15174,9 +15177,7 @@ function saveQuickMemo(){
     return;
   }
   if(matches.ambiguous.length > 0){
-    if(!confirm('일부 학생이 명확하지 않아요 (동명이인 등). 매칭된 '+matches.matched.length+'명에게만 저장하시겠어요?')){
-      return;
-    }
+    // 동명이인 ambiguous — 저장은 matches.matched 기준으로 진행 (confirm 팝업 제거)
   }
 
   // @표기만 떼고 이름은 본문에 남김 (익명화는 프롬프트 생성 시점에 일괄 처리)
@@ -15277,7 +15278,32 @@ function saveQuickMemo(){
       : allMentionStudents.length > 0
         ? savedNames.slice(0, matches.matched.length).join(', ')+'에 미분류 메모, '+mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
         : savedNames.join(', ')+'에 미분류 메모로 저장됐어요';
-    showToast(toastMsg);
+
+    if(mentionedClassKeys.length >= 2 && allMentionStudents.length > 0){
+      // 다중 반 bulk 저장 — undo 토스트 제공
+      var undoIds = savedRecIds.filter(function(p){
+        return allMentionStudents.some(function(s){ return s._classKey === p.classKey && s.num === p.num; });
+      });
+      var totalCount = allMentionStudents.length;
+      var classLabels = mentionedClassKeys.map(function(ck){
+        var c = classes[ck]; return c.grade+'학년 '+c.classNum+'반';
+      }).join(', ');
+      showToast(classLabels+' 총 '+totalCount+'명에 공지로 저장됐어요', function(){
+        undoIds.forEach(function(p){
+          var cls = classes[p.classKey];
+          if(!cls || !cls.records || !cls.records[p.num]) return;
+          cls.records[p.num] = cls.records[p.num].filter(function(r){ return r.id !== p.id; });
+        });
+        syncActiveClass();
+        saveAll();
+        renderHome();
+        if(document.getElementById('tab-students').style.display === 'grid'){
+          renderSidebar(document.getElementById('search-input').value);
+        }
+      }, '되돌리기');
+    } else {
+      showToast(toastMsg);
+    }
   }
   renderHome();  // 통계·최근 메모 갱신
   if(document.getElementById('tab-students').style.display === 'grid'){
