@@ -7880,13 +7880,20 @@ function openRecordForm(type){
   document.getElementById('form-content').value = '';
   document.getElementById('form-meta').textContent = '0자';
   document.getElementById('form-save-btn').disabled = true;
-  document.getElementById('form-content').oninput = function(){
+  var formContent = document.getElementById('form-content');
+  formContent.oninput = function(){
     document.getElementById('form-meta').textContent = this.value.length+'자';
     document.getElementById('form-save-btn').disabled = this.value.trim().length === 0;
   };
+  formContent.onkeydown = function(e){
+    if((e.metaKey||e.ctrlKey) && e.key === 'Enter'){
+      e.preventDefault();
+      saveRecord();
+    }
+  };
 
   document.getElementById('record-form').classList.add('open');
-  document.getElementById('form-content').focus();
+  formContent.focus();
 }
 
 function closeRecordForm(){
@@ -8122,7 +8129,16 @@ function openEditRecord(recordId){
 
   card.appendChild(form);
   var ta = form.querySelector('textarea');
-  if(ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  if(ta){
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+    ta.addEventListener('keydown', function(e){
+      if((e.metaKey||e.ctrlKey) && e.key === 'Enter'){
+        e.preventDefault();
+        saveEditRecord(recordId);
+      }
+    });
+  }
 }
 
 /* 유형 칩 클릭 — 선택 표시 + 태그 풀 갱신 (유형 바꾸면 기존 태그는 다른 풀이라 빠짐) */
@@ -8287,7 +8303,7 @@ function editFollowUpNote(recordId){
   input.addEventListener('input', autoResize);
   autoResize();
   input.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && !e.shiftKey){
+    if((e.key === 'Enter' && !e.shiftKey) || ((e.metaKey||e.ctrlKey) && e.key === 'Enter')){
       e.preventDefault();
       saveFollowUpNote(recordId);
     } else if(e.key === 'Escape'){
@@ -16067,7 +16083,19 @@ function openAdhocMemo(id){
   if(deleteLabel) deleteLabel.textContent = '수업 삭제';
 
   document.getElementById('memo-modal').classList.add('show');
-  setTimeout(function(){ document.getElementById('memo-progress').focus(); }, 50);
+  setTimeout(function(){
+    document.getElementById('memo-progress').focus();
+    ['memo-progress','memo-content'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('keydown', function(e){
+        if((e.metaKey||e.ctrlKey) && e.key === 'Enter'){
+          e.preventDefault();
+          saveClassMemo();
+        }
+      });
+    });
+  }, 50);
 }
 
 function renderClassWeek(){
@@ -16876,7 +16904,19 @@ function openClassMemo(classId, dateStr){
   if(deleteLabel) deleteLabel.textContent = '삭제';
 
   document.getElementById('memo-modal').classList.add('show');
-  setTimeout(function(){ document.getElementById('memo-progress').focus(); }, 50);
+  setTimeout(function(){
+    document.getElementById('memo-progress').focus();
+    ['memo-progress','memo-content'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('keydown', function(e){
+        if((e.metaKey||e.ctrlKey) && e.key === 'Enter'){
+          e.preventDefault();
+          saveClassMemo();
+        }
+      });
+    });
+  }, 50);
 }
 
 function closeClassMemo(){
