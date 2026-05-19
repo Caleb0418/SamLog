@@ -3017,6 +3017,9 @@ body{
 }
 .btn-link:hover{color:var(--accent);}
 
+details > summary { list-style:none; }
+details > summary::-webkit-details-marker { display:none; }
+
 /* ── 학생 월간 달력 학사일정 ── */
 .smv-cal-event{
   font-size:9px;color:var(--accent);
@@ -5390,128 +5393,178 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div class="memo-modal-head">
         <div class="memo-modal-head-text">
           <div class="memo-modal-eyebrow">수업 관리</div>
-          <div class="memo-modal-title">시간표·담당 수업</div>
+          <div class="memo-modal-title">담당 수업</div>
         </div>
         <button class="memo-modal-close" onclick="closeClassSettings()">×</button>
       </div>
 
       <div class="memo-modal-body">
-        <!-- 샘플 데이터 체험 배너 (처음 사용자용) -->
-        <div id="sample-data-banner" style="margin-bottom:18px;padding:12px 14px;background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <div style="display:flex;align-items:center;gap:11px;min-width:0;flex:1;">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--bg-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-            </div>
-            <div style="min-width:0;">
-              <div style="font-size:13px;font-weight:600;color:var(--text);">처음이세요? 샘플로 체험해보세요</div>
-              <div id="sample-data-banner-sub" style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;">담임반에 1주일 시간표 + 담당 수업 5건이 자동 등록돼요</div>
-            </div>
+        <!-- 샘플 데이터 체험 배너 (한 줄, 항상 노출) -->
+        <div id="sample-data-banner" style="margin-bottom:14px;padding:8px 12px;background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            <span id="sample-data-banner-label" style="font-size:12px;color:var(--accent);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">샘플 데이터로 먼저 둘러보기</span>
+            <span id="sample-data-banner-sub" style="font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;">· 기능 둘러보기용</span>
           </div>
-          <button class="btn-small primary" onclick="loadSampleClassData()" style="flex-shrink:0;">샘플 적용</button>
+          <button class="btn-small" onclick="loadSampleClassData()" id="sample-data-banner-btn" style="flex-shrink:0;font-size:11px;padding:4px 10px;border:0.5px solid var(--border-accent);background:var(--bg-surface);color:var(--accent);font-weight:500;">샘플 적용</button>
         </div>
 
-        <!-- ① NEIS 자동 연동 배너 -->
-        <div class="class-master-title" style="margin-bottom:6px;">NEIS 자동 연동</div>
-        <div class="class-master-sub" style="margin-bottom:10px;">인증키 + 학교를 한 번 설정하면 시간표·학사일정을 자동으로 가져옵니다.</div>
+        <!-- ① NEIS 자동 연동 (메인 경로) -->
         <div class="neis-banner" id="neis-banner">
-          <!-- 미설정 상태 -->
-          <div class="neis-banner-setup" id="neis-banner-setup">
-            <div class="neis-banner-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div class="neis-banner-text">
-                <div class="neis-banner-title">NEIS 자동 연동 <span class="neis-banner-optional">선택</span></div>
-                <div class="neis-banner-sub">5분 설정으로 시간표·학사일정을 자동으로. 엑셀 업로드로도 가능해요.</div>
+          <!-- 상태 1: 미설정 — 권장 카드 -->
+          <div class="neis-banner-setup" id="neis-banner-setup" style="border:1.5px solid var(--border-accent);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
+                  <div style="font-size:14px;font-weight:600;color:var(--text);">NEIS 자동 연동</div>
+                  <span style="font-size:10px;background:var(--accent-dim);color:var(--accent);padding:2px 7px;border-radius:4px;font-weight:600;">권장</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-tertiary);line-height:1.5;">인증키 + 학교를 한 번 설정하면 시간표·학사일정을 자동으로</div>
               </div>
-              <button class="btn-small primary" onclick="openNeisSetupModal()">설정 시작</button>
+              <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="btn-small primary" onclick="openNeisSetupModal()">설정하기</button>
+                <button class="btn-small secondary" onclick="skipNeisSetup()" style="font-size:11px;color:var(--text-tertiary);">나중에</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;padding-top:10px;border-top:0.5px solid var(--border);flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                시간표 자동 매칭
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                학사일정 자동 반영
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                변경 자동 감지
+              </span>
             </div>
           </div>
-          <!-- 설정 완료 상태 -->
-          <div class="neis-banner-active" id="neis-banner-active" style="display:none;">
-            <div class="neis-banner-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success,#22c55e);"><polyline points="20 6 9 17 4 12"/></svg>
-              <div class="neis-banner-text">
-                <div class="neis-banner-title" id="neis-school-name-label">—</div>
-                <div class="neis-banner-sub" id="neis-last-synced-label">아직 동기화 안 됨</div>
+
+          <!-- 상태 3: 건너뜀 — 중립 회색 안내 -->
+          <div class="neis-banner-skipped" id="neis-banner-skipped" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--bg-elevated);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <div style="min-width:0;">
+                  <div style="font-size:13px;color:var(--text);margin-bottom:1px;">시간표를 자동으로 채우려면 NEIS 연동을 사용할 수 있어요</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);">학사일정도 함께 가져옵니다</div>
+                </div>
               </div>
-              <button class="btn-small primary" onclick="onNeisSyncClick()" id="neis-sync-btn">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                지금 동기화
-              </button>
-              <button class="btn-small secondary" onclick="openNeisSetupModal()" title="설정 수정">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              </button>
+              <button class="btn-small secondary" onclick="openNeisSetupModal()" style="flex-shrink:0;font-size:11px;">연동하기</button>
             </div>
-            <div class="neis-sync-result" id="neis-sync-result" style="display:none;"></div>
+          </div>
+
+          <!-- 상태 2: 설정 완료 -->
+          <div class="neis-banner-active" id="neis-banner-active" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--bg-surface);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0;flex:1;">
+                <div style="width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style="min-width:0;">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;flex-wrap:wrap;">
+                    <span style="font-size:13px;font-weight:600;color:var(--text);" id="neis-school-name-label">—</span>
+                    <span style="font-size:10px;background:var(--accent-dim);color:var(--accent);padding:1px 6px;border-radius:4px;font-weight:600;">NEIS 연동</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-tertiary);" id="neis-last-synced-label">아직 동기화 안 됨</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="btn-small secondary" onclick="onNeisSyncClick()" id="neis-sync-btn" style="font-size:11px;padding:5px 10px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  동기화
+                </button>
+                <button class="btn-small secondary" onclick="openNeisSetupModal()" title="설정 수정" style="padding:5px 8px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="neis-sync-result" id="neis-sync-result" style="display:none;margin-top:8px;"></div>
           </div>
         </div>
 
-        <!-- ② NEIS 시간표 업로드 (엑셀 fallback) -->
-        <div class="class-master-title" style="margin-bottom:8px;">시간표 연동</div>
-        <div class="class-master-sub" style="margin-bottom:10px;">NEIS 포털 → 학교생활 → 시간표 → 엑셀 다운로드 후 업로드하면 담당 수업 요일·교시가 자동으로 채워져요</div>
-        <div class="tt-upload-banner" id="tt-upload-banner">
-          <div class="tt-upload-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <!-- ② 담당 수업 (메인 작업) -->
+        <div style="margin-top:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px;">
+            <div style="min-width:0;">
+              <div class="class-master-title" style="margin-bottom:2px;">담당 수업 <span id="class-master-count" style="font-weight:400;color:var(--text-tertiary);font-size:12px;"></span></div>
+              <div class="class-master-sub" id="class-master-sub-hint" style="font-size:11px;">학년·반·과목을 등록하면 NEIS 시간표와 자동으로 매칭돼요</div>
+            </div>
           </div>
-          <div class="tt-upload-text">
-            <div class="tt-upload-title">NEIS 시간표 파일</div>
-            <div class="tt-upload-sub">CSV · XLSX 지원</div>
-          </div>
-          <div class="tt-upload-actions">
-            <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
-            <button class="btn-small primary" onclick="document.getElementById('tt-file-input').click()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              업로드
-            </button>
-            <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTimetableFile(this.files[0]);this.value='';">
+
+          <div class="class-master-section">
+            <div class="class-master-head" onclick="toggleClassMaster()">
+              <div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;">
+                <div class="class-master-title">직접 입력</div>
+                <svg id="class-master-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;flex-shrink:0;color:var(--text-tertiary);"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <button class="btn-small secondary" onclick="event.stopPropagation();document.getElementById('assign-file-input').click()" style="flex-shrink:0;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                파일로 등록
+              </button>
+              <input type="file" id="assign-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAssignFile(this.files[0]);this.value='';">
+              <button class="assign-help-btn" onclick="event.stopPropagation();openAssignGuide()" style="margin-left:4px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
+                형식 안내
+              </button>
+            </div>
+            <div class="class-master-body" id="class-master-body" style="display:none;">
+              <div class="class-form">
+                <div class="class-form-row">
+                  <div class="class-form-field" style="width:74px;">
+                    <label class="form-label" style="display:block;">학년</label>
+                    <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2">
+                  </div>
+                  <div class="class-form-field" style="width:74px;">
+                    <label class="form-label" style="display:block;">반</label>
+                    <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3">
+                  </div>
+                  <div class="class-form-field" style="flex:1;min-width:120px;">
+                    <label class="form-label" style="display:block;">과목</label>
+                    <input type="text" class="form-input-text" id="class-form-subject" placeholder="예) 수학"
+                      oninput="onClassSubjectInput()" autocomplete="off">
+                  </div>
+                  <button class="btn-small primary" onclick="addClassMaster()" style="height:34px;align-self:flex-end;">추가</button>
+                </div>
+                <div id="tt-suggest-chips" class="tt-suggest-chips" style="display:none;"></div>
+                <div id="class-form-hint" style="margin-top:8px;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  시간표 업로드 시 과목이 일치하는 모든 요일·교시가 자동으로 채워져요.
+                </div>
+              </div>
+              <div id="class-master-list"></div>
+            </div>
           </div>
         </div>
 
-        <!-- ② 담당 수업 등록 -->
-        <div class="class-master-title" style="margin-bottom:8px;margin-top:20px;">담당 수업 등록</div>
-        <div class="class-master-sub" style="margin-bottom:10px;">학년·반·과목을 직접 입력하거나 엑셀·CSV 파일로 일괄 등록할 수 있어요</div>
-        <div class="class-master-section">
-          <div class="class-master-head" onclick="toggleClassMaster()">
-            <div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;">
-              <div class="class-master-title">직접 입력</div>
-              <svg id="class-master-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;flex-shrink:0;color:var(--text-tertiary);"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <button class="btn-small secondary" onclick="event.stopPropagation();document.getElementById('assign-file-input').click()" style="flex-shrink:0;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              파일로 등록
-            </button>
-            <input type="file" id="assign-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAssignFile(this.files[0]);this.value='';">
-            <button class="assign-help-btn" onclick="event.stopPropagation();openAssignGuide()" style="margin-left:4px;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
-              형식 안내
-            </button>
-          </div>
-          <div class="class-master-body" id="class-master-body" style="display:none;">
-            <div class="class-form">
-              <div class="class-form-row">
-                <div class="class-form-field" style="width:74px;">
-                  <label class="form-label" style="display:block;">학년</label>
-                  <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2">
-                </div>
-                <div class="class-form-field" style="width:74px;">
-                  <label class="form-label" style="display:block;">반</label>
-                  <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3">
-                </div>
-                <div class="class-form-field" style="flex:1;min-width:120px;">
-                  <label class="form-label" style="display:block;">과목</label>
-                  <input type="text" class="form-input-text" id="class-form-subject" placeholder="예) 수학"
-                    oninput="onClassSubjectInput()" autocomplete="off">
-                </div>
-                <button class="btn-small primary" onclick="addClassMaster()" style="height:34px;align-self:flex-end;">추가</button>
+        <!-- ③ 다른 방법으로 시간표 가져오기 (접힘) -->
+        <details style="margin-top:16px;">
+          <summary id="alt-method-summary" style="cursor:pointer;padding:8px 4px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;list-style:none;user-select:none;">
+            <svg id="alt-method-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="alt-method-label">다른 방법으로 시간표 가져오기</span>
+          </summary>
+          <div style="padding:8px 4px 4px;">
+            <div class="tt-upload-banner" id="tt-upload-banner" style="margin-top:6px;">
+              <div class="tt-upload-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
-              <div id="tt-suggest-chips" class="tt-suggest-chips" style="display:none;"></div>
-              <div id="class-form-hint" style="margin-top:8px;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                시간표 업로드 시 과목이 일치하는 모든 요일·교시가 자동으로 채워져요.
+              <div class="tt-upload-text">
+                <div class="tt-upload-title">NEIS 시간표 엑셀 업로드</div>
+                <div class="tt-upload-sub">NEIS 포털 → 학교생활 → 시간표 → 엑셀 다운로드 후 업로드</div>
+              </div>
+              <div class="tt-upload-actions">
+                <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
+                <button class="btn-small secondary" onclick="document.getElementById('tt-file-input').click()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  업로드
+                </button>
+                <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTimetableFile(this.files[0]);this.value='';">
               </div>
             </div>
-            <div id="class-master-list"></div>
           </div>
-        </div>
+        </details>
 
       </div>
     </div>
@@ -7400,7 +7453,8 @@ var neisSettings = {
   schulCode: '',
   schoolName: '',
   schoolKind: '',      // 'els' | 'mis' | 'his'
-  lastSyncedAt: null
+  lastSyncedAt: null,
+  skipped: false       // 사용자가 "나중에"를 눌러 명시적으로 건너뛴 상태
 };
 
 // 학사일정: { 'YYYY-MM-DD': [{event, detail, gradeScope, source}, ...] }
@@ -9703,21 +9757,63 @@ function neisSyncAll(){
 var neisSetupState = { selectedSchoolRow: null };
 
 function refreshNeisBanner(){
-  var setupEl = document.getElementById('neis-banner-setup');
-  var activeEl = document.getElementById('neis-banner-active');
-  if(!setupEl || !activeEl) return;
+  var setupEl   = document.getElementById('neis-banner-setup');
+  var activeEl  = document.getElementById('neis-banner-active');
+  var skippedEl = document.getElementById('neis-banner-skipped');
+  if(!setupEl || !activeEl || !skippedEl) return;
+
   if(neisSettings.atptCode && neisSettings.schulCode){
-    setupEl.style.display = 'none'; activeEl.style.display = 'block';
+    // 상태 2: 연동 완료
+    setupEl.style.display   = 'none';
+    skippedEl.style.display = 'none';
+    activeEl.style.display  = 'block';
     document.getElementById('neis-school-name-label').textContent = neisSettings.schoolName || '학교 미지정';
     var syncEl = document.getElementById('neis-last-synced-label');
     if(neisSettings.lastSyncedAt){
       var d = new Date(neisSettings.lastSyncedAt);
-      syncEl.textContent = '마지막 동기화: '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+
+      syncEl.textContent = '시간표·학사일정 자동 · 마지막 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+
         String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    } else { syncEl.textContent = '아직 동기화 안 됨'; }
+    } else {
+      syncEl.textContent = '시간표·학사일정 자동 · 아직 동기화 안 됨';
+    }
+  } else if(neisSettings.skipped){
+    // 상태 3: 건너뜀
+    setupEl.style.display   = 'none';
+    activeEl.style.display  = 'none';
+    skippedEl.style.display = 'block';
   } else {
-    setupEl.style.display = 'block'; activeEl.style.display = 'none';
+    // 상태 1: 미설정 (신규)
+    setupEl.style.display   = 'block';
+    activeEl.style.display  = 'none';
+    skippedEl.style.display = 'none';
   }
+
+  updateClassMasterMeta();
+}
+
+function updateClassMasterMeta(){
+  var countEl = document.getElementById('class-master-count');
+  var hintEl  = document.getElementById('class-master-sub-hint');
+  if(!countEl || !hintEl) return;
+  var n = (typeof classMaster !== 'undefined' && classMaster) ? classMaster.length : 0;
+  countEl.textContent = n > 0 ? ('· '+n+'개') : '';
+  var hasNeis = !!(neisSettings.atptCode && neisSettings.schulCode);
+  if(hasNeis && n > 0){
+    hintEl.textContent = 'NEIS 시간표와 자동 매칭됐어요';
+  } else if(hasNeis){
+    hintEl.textContent = '학년·반·과목을 등록하면 NEIS 시간표와 자동으로 매칭돼요';
+  } else if(neisSettings.skipped){
+    hintEl.textContent = '시간표는 직접 채워주셔야 해요';
+  } else {
+    hintEl.textContent = '학년·반·과목을 등록하면 NEIS 시간표와 자동으로 매칭돼요';
+  }
+}
+
+function skipNeisSetup(){
+  neisSettings.skipped = true;
+  saveSettings();
+  refreshNeisBanner();
+  showToast('나중에 언제든 연동할 수 있어요.');
 }
 
 function openNeisSetupModal(){
@@ -9824,6 +9920,7 @@ function saveNeisSetup(){
   neisSettings.schulCode = row.SD_SCHUL_CODE;
   neisSettings.schoolName = row.SCHUL_NM;
   neisSettings.schoolKind = row._detectedKind || 'mis';
+  neisSettings.skipped = false;
   saveSettings();
   refreshNeisBanner();
   closeNeisSetupModal();
@@ -18870,27 +18967,51 @@ function saveClassMemo(){
 
 function openClassSettings(){
   document.getElementById('class-settings-modal').classList.add('show');
-  // 샘플 배너: 시간표 또는 담당 수업 데이터가 이미 있으면 숨김
+
+  // 샘플 배너: 항상 노출, 상태에 따라 라벨만 변경
   var banner = document.getElementById('sample-data-banner');
   if(banner){
-    var hasTimetable = ttSyncState && ttSyncState.synced;
-    var hasClassMaster = classMaster && classMaster.length > 0;
-    banner.style.display = (hasTimetable || hasClassMaster) ? 'none' : 'flex';
-
-    // sub-text를 지정된 담임반에 맞게 동적 변경
-    var subText = document.getElementById('sample-data-banner-sub');
-    if(subText){
-      var primaryKey = Object.keys(classes).find(function(k){return classes[k].isPrimary;});
-      if(primaryKey){
-        var p = classes[primaryKey];
-        subText.textContent = '담임반('+p.grade+'학년 '+p.classNum+'반)에 1주일 시간표 + 담당 수업 5건이 자동 등록돼요';
-      } else {
-        subText.textContent = '3학년 2반을 담임반으로 만들고 1주일 시간표 + 담당 수업 5건이 등록돼요';
-      }
+    banner.style.display = 'flex';
+    var hasData = (ttSyncState && ttSyncState.synced) || (classMaster && classMaster.length > 0);
+    var labelEl = document.getElementById('sample-data-banner-label');
+    var subEl   = document.getElementById('sample-data-banner-sub');
+    var btnEl   = document.getElementById('sample-data-banner-btn');
+    if(hasData){
+      if(labelEl) labelEl.textContent = '샘플 데이터 추가';
+      if(subEl){ subEl.style.display = 'inline'; subEl.textContent = '· 기능 둘러보기용'; }
+      if(btnEl) btnEl.textContent = '샘플 추가';
+    } else {
+      if(labelEl) labelEl.textContent = '샘플 데이터로 먼저 둘러보기';
+      if(subEl) subEl.style.display = 'none';
+      if(btnEl) btnEl.textContent = '샘플 적용';
     }
   }
+
   refreshNeisBanner();
+
+  // "다른 방법" 토글 라벨 조정
+  var altLabel = document.getElementById('alt-method-label');
+  if(altLabel){
+    if(!neisSettings.atptCode && !neisSettings.skipped){
+      altLabel.textContent = 'NEIS 연동이 어려우세요? 다른 방법 보기';
+    } else {
+      altLabel.textContent = '다른 방법으로 시간표 가져오기';
+    }
+  }
 }
+
+/* details 토글 시 화살표 회전 (한 번만 등록) */
+(function(){
+  document.addEventListener('toggle', function(e){
+    if(e.target.tagName === 'DETAILS'){
+      var chev = e.target.querySelector('#alt-method-chev');
+      if(chev){
+        chev.style.transform = e.target.open ? 'rotate(90deg)' : 'rotate(0deg)';
+      }
+    }
+  }, true);
+})();
+
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
 }
