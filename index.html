@@ -14589,6 +14589,7 @@ function toggleSubmitInModal(classKey, studentNum, recordId){
   var modalGroupId = document.getElementById('submit-modal').dataset.groupId;
   var modalTab = document.getElementById('submit-modal').dataset.tab || 'pending';
   renderSubmitModal(modalGroupId, modalTab);
+  renderSubmitTrackersWidget();
   if(currentStudent) renderTimeline();
 }
 
@@ -14647,6 +14648,7 @@ function openSubmitModal(groupId){
 
 function closeSubmitModal(){
   document.getElementById('submit-modal-overlay').style.display = 'none';
+  renderSubmitTrackersWidget();
 }
 
 function switchSubmitTab(tab){
