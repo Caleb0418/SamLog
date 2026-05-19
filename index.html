@@ -2545,6 +2545,41 @@ body{
 .att-period-section{background:var(--bg-surface);border-radius:8px;padding:12px 14px;}
 .att-period-hint{font-size:11px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5;}
 .att-period-grid{display:flex;gap:4px;flex-wrap:wrap;}
+/* 상태별 교시 입력 섹션 */
+.att-period-section{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;margin-bottom:8px;
+}
+.att-period-section:last-child{margin-bottom:0;}
+.att-period-section-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:8px;margin-bottom:8px;flex-wrap:wrap;
+}
+.att-period-section-title{font-size:12px;font-weight:600;color:var(--text);}
+.att-period-section-head.late .att-period-section-title{color:#A16207;}
+[data-theme="dark"] .att-period-section-head.late .att-period-section-title{color:#FAC775;}
+.att-period-section-hint{font-size:10px;color:var(--text-tertiary);}
+.att-period-section-hint strong{color:var(--text-secondary);font-weight:600;}
+.att-period-section-summary{
+  margin-top:8px;padding:5px 9px;
+  background:var(--bg-overlay);border-radius:5px;
+  font-size:11px;color:var(--text-secondary);
+}
+.att-period-section-summary strong{color:var(--text);font-weight:600;}
+.att-period-section.absent-info{
+  display:flex;align-items:center;gap:8px;
+  background:var(--danger-dim);border-color:var(--danger);
+  font-size:12px;color:var(--danger);
+}
+.att-period-section.absent-info svg{flex-shrink:0;}
+/* 상태카드 선택 표시 */
+.att-status-card{position:relative;}
+.att-status-card.active::after{
+  content:'✓';
+  position:absolute;top:4px;right:5px;
+  font-size:9px;font-weight:700;
+  color:var(--danger);
+}
 .att-period-cell{
   width:36px;height:36px;
   background:var(--bg-overlay);border:1px solid var(--border);
@@ -6359,17 +6394,13 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
       </div>
 
-      <!-- 3단계: 교시 그리드 (지각/조퇴/결과만) -->
+      <!-- 3단계: 교시 그리드 (동적 렌더) -->
       <div class="att-step att-step-disabled" id="att-step-periods" style="display:none;">
         <div class="att-step-header">
           <span class="att-step-num">3</span>
-          <span class="att-step-label" id="att-step-periods-label">결시 교시</span>
+          <span class="att-step-label">결시 교시</span>
         </div>
-        <div class="att-period-section">
-          <div class="att-period-hint" id="att-period-hint"></div>
-          <div class="att-period-grid" id="att-period-grid"></div>
-          <div class="att-period-summary" id="att-period-summary"></div>
-        </div>
+        <div id="att-period-sections"></div>
       </div>
 
       <!-- 4단계: 메모 -->
@@ -17280,12 +17311,13 @@ function onRowMenuDelete(){
    출결 사례 추가/수정 모달
 ═══════════════════════════════════════════ */
 var attModalState = {
-  mode: 'add',
-  studentNum: null,
-  recordId: null,
-  reason: null,
-  status: null,
-  periods: {},
+  mode: 'add', studentNum: null, recordId: null, reason: null,
+  selections: {
+    absent:      { active: false, periods: {} },
+    late:        { active: false, periods: {} },
+    early_leave: { active: false, periods: {} },
+    partial:     { active: false, periods: {} }
+  },
   memo: ''
 };
 
@@ -17293,7 +17325,9 @@ function openAttendanceAdd(studentNum){
   var c = getActiveClass();
   var stu = c && c.students.find(function(s){ return s.num === studentNum; });
   if(!stu){ showToast('학생을 찾을 수 없어요'); return; }
-  attModalState = { mode:'add', studentNum:studentNum, recordId:null, reason:null, status:null, periods:{}, memo:'' };
+  attModalState = { mode:'add', studentNum:studentNum, recordId:null, reason:null,
+    selections:{ absent:{active:false,periods:{}}, late:{active:false,periods:{}}, early_leave:{active:false,periods:{}}, partial:{active:false,periods:{}} },
+    memo:'' };
   setupAttModalForStudent(stu);
   document.getElementById('att-modal-overlay').style.display = 'flex';
 }
@@ -17306,24 +17340,18 @@ function openAttendanceEdit(studentNum, recordId){
   var rec = recs.find(function(r){ return r.id === recordId; });
   if(!rec){ showToast('기록을 찾을 수 없어요'); return; }
   attModalState = {
-    mode: 'edit', studentNum:studentNum, recordId:recordId,
-    reason: rec.reason, status: rec.status,
-    periods: Object.assign({}, rec.periods || {}),
+    mode: 'edit', studentNum:studentNum, recordId:recordId, reason:rec.reason,
+    selections:{ absent:{active:false,periods:{}}, late:{active:false,periods:{}}, early_leave:{active:false,periods:{}}, partial:{active:false,periods:{}} },
     memo: rec.memo || ''
   };
+  // 해당 레코드의 status만 active로 복원
+  attModalState.selections[rec.status].active = true;
+  attModalState.selections[rec.status].periods = Object.assign({}, rec.periods || {});
   setupAttModalForStudent(stu);
-  // 기존 값 반영
   selectAttReason(rec.reason, true);
-  selectAttStatus(rec.status, true);
-  renderAttPeriodGrid();
-  refreshAttPeriodSummary();
+  applyEditSelectionUI();
   document.getElementById('att-memo').value = rec.memo || '';
-  // 수정 모드: 모든 단계 활성화
   document.getElementById('att-step-status').classList.remove('att-step-disabled');
-  if(rec.status !== 'absent'){
-    document.getElementById('att-step-periods').style.display = 'block';
-    document.getElementById('att-step-periods').classList.remove('att-step-disabled');
-  }
   document.getElementById('att-step-memo').classList.remove('att-step-disabled');
   updateAttSaveButton();
   document.getElementById('att-modal-overlay').style.display = 'flex';
@@ -17344,8 +17372,8 @@ function setupAttModalForStudent(stu){
   document.getElementById('att-step-periods').classList.add('att-step-disabled');
   document.getElementById('att-step-memo').classList.add('att-step-disabled');
   document.getElementById('att-memo').value = '';
-  document.getElementById('att-period-grid').innerHTML = '';
-  document.getElementById('att-period-summary').textContent = '';
+  var _pSec = document.getElementById('att-period-sections');
+  if(_pSec) _pSec.innerHTML = '';
   document.getElementById('att-save-btn').disabled = true;
 }
 
@@ -17362,28 +17390,39 @@ function selectAttReason(reason, suppressNext){
   updateAttSaveButton();
 }
 
-function selectAttStatus(status, suppressNext){
+function selectAttStatus(status){
   if(!attModalState.reason) return;
-  attModalState.status = status;
-  document.querySelectorAll('.att-status-card').forEach(function(b){
-    b.classList.toggle('active', b.dataset.status === status);
-  });
-  if(suppressNext) return;
+  var sel = attModalState.selections;
   if(status === 'absent'){
-    var allMissed = {};
-    getPeriodSlots().forEach(function(s){ allMissed[s] = true; });
-    attModalState.periods = allMissed;
-    document.getElementById('att-step-periods').style.display = 'none';
-    document.getElementById('att-step-periods').classList.add('att-step-disabled');
+    if(sel.absent.active){
+      sel.absent.active = false;
+      sel.absent.periods = {};
+    } else {
+      sel.absent.active = true;
+      var allMissed = {};
+      getPeriodSlots().forEach(function(s){ allMissed[s] = true; });
+      sel.absent.periods = allMissed;
+      ['late','early_leave','partial'].forEach(function(k){ sel[k].active = false; sel[k].periods = {}; });
+    }
   } else {
-    attModalState.periods = {};
-    document.getElementById('att-step-periods').style.display = 'block';
-    document.getElementById('att-step-periods').classList.remove('att-step-disabled');
-    renderAttPeriodGrid();
-    refreshAttPeriodSummary();
+    if(sel.absent.active){ sel.absent.active = false; sel.absent.periods = {}; }
+    if(sel[status].active){ sel[status].active = false; sel[status].periods = {}; }
+    else { sel[status].active = true; sel[status].periods = {}; }
   }
+  document.querySelectorAll('.att-status-card').forEach(function(b){
+    b.classList.toggle('active', sel[b.dataset.status].active);
+  });
+  refreshPeriodSections();
   document.getElementById('att-step-memo').classList.remove('att-step-disabled');
   updateAttSaveButton();
+}
+
+function applyEditSelectionUI(){
+  var sel = attModalState.selections;
+  document.querySelectorAll('.att-status-card').forEach(function(b){
+    b.classList.toggle('active', sel[b.dataset.status].active);
+  });
+  refreshPeriodSections();
 }
 
 function renderAttPeriodGrid(){
@@ -17410,23 +17449,77 @@ function renderAttPeriodGrid(){
   document.getElementById('att-period-grid').innerHTML = html;
 }
 
-function onAttPeriodClick(slot){
-  var status = attModalState.status;
+function refreshPeriodSections(){
+  var sel = attModalState.selections;
+  var stepEl = document.getElementById('att-step-periods');
+  var anyActive = sel.absent.active || sel.late.active || sel.early_leave.active || sel.partial.active;
+  if(!anyActive){
+    stepEl.style.display = 'none';
+    stepEl.classList.add('att-step-disabled');
+    return;
+  }
+  stepEl.style.display = 'block';
+  stepEl.classList.remove('att-step-disabled');
+  if(sel.absent.active){
+    document.getElementById('att-period-sections').innerHTML =
+      '<div class="att-period-section absent-info">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+
+        '<span>결석은 전체 교시가 자동으로 결시 처리됩니다</span>'+
+      '</div>';
+    return;
+  }
+  var html = '';
+  if(sel.late.active)        html += renderPeriodSection('late');
+  if(sel.early_leave.active) html += renderPeriodSection('early_leave');
+  if(sel.partial.active)     html += renderPeriodSection('partial');
+  document.getElementById('att-period-sections').innerHTML = html;
+}
+
+function renderPeriodSection(status){
+  var slots = getPeriodSlots();
+  var sel = attModalState.selections[status];
+  var meta = {
+    late:        { title:'지각 — 몇 교시까지 못 왔는지', hint:'클릭한 교시 <strong>이전까지 모두</strong> 결시', colorCls:'late' },
+    early_leave: { title:'조퇴 — 몇 교시부터 빠지는지', hint:'클릭한 교시 <strong>이후까지 모두</strong> 결시', colorCls:'early' },
+    partial:     { title:'결과 — 결시 교시 개별 선택',  hint:'결시한 교시를 <strong>하나씩 클릭</strong>해서 선택', colorCls:'partial' }
+  }[status];
+  var html = '<div class="att-period-section" data-status="'+status+'">';
+  html += '<div class="att-period-section-head '+meta.colorCls+'">';
+  html += '<span class="att-period-section-title">'+escapeHtml(meta.title)+'</span>';
+  html += '<span class="att-period-section-hint">'+meta.hint+'</span>';
+  html += '</div>';
+  html += '<div class="att-period-grid">';
+  slots.forEach(function(s){
+    var longCls = (s==='조회'||s==='종례') ? ' long' : '';
+    var missedCls = sel.periods[s] === true ? ' missed' : '';
+    html += '<button class="att-period-cell'+longCls+missedCls+'" onclick="onAttPeriodClick(\''+status+'\',\''+s.replace(/'/g,"\\'")+'\')">' + escapeHtml(s) + '</button>';
+  });
+  html += '</div>';
+  var missed = slots.filter(function(s){ return sel.periods[s] === true; });
+  if(missed.length > 0){
+    html += '<div class="att-period-section-summary">결시: <strong>'+missed.length+'교시</strong> ('+missed.join(', ')+')</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function onAttPeriodClick(status, slot){
   var slots = getPeriodSlots();
   var idx = slots.indexOf(slot);
   if(idx < 0) return;
+  var sel = attModalState.selections[status];
+  if(!sel) return;
   if(status === 'late'){
-    attModalState.periods = {};
-    for(var i=0;i<=idx;i++) attModalState.periods[slots[i]] = true;
+    sel.periods = {};
+    for(var i=0;i<=idx;i++) sel.periods[slots[i]] = true;
   } else if(status === 'early_leave'){
-    attModalState.periods = {};
-    for(var i=idx;i<slots.length;i++) attModalState.periods[slots[i]] = true;
+    sel.periods = {};
+    for(var i=idx;i<slots.length;i++) sel.periods[slots[i]] = true;
   } else {
-    if(attModalState.periods[slot]) delete attModalState.periods[slot];
-    else attModalState.periods[slot] = true;
+    if(sel.periods[slot]) delete sel.periods[slot];
+    else sel.periods[slot] = true;
   }
-  renderAttPeriodGrid();
-  refreshAttPeriodSummary();
+  refreshPeriodSections();
   updateAttSaveButton();
 }
 
@@ -17446,20 +17539,27 @@ function refreshAttPeriodSummary(){
 
 function updateAttSaveButton(){
   var btn = document.getElementById('att-save-btn');
-  if(!attModalState.reason || !attModalState.status){ btn.disabled=true; return; }
-  if(attModalState.status !== 'absent'){
-    var cnt = Object.keys(attModalState.periods).filter(function(k){ return attModalState.periods[k]===true; }).length;
-    if(cnt === 0){ btn.disabled=true; return; }
-  }
-  btn.disabled = false;
+  if(!attModalState.reason){ btn.disabled=true; return; }
+  var sel = attModalState.selections;
+  var active = ['absent','late','early_leave','partial'].filter(function(k){ return sel[k].active; });
+  if(active.length === 0){ btn.disabled=true; return; }
+  var allValid = active.every(function(st){
+    if(st === 'absent') return true;
+    return Object.keys(sel[st].periods).some(function(k){ return sel[st].periods[k] === true; });
+  });
+  btn.disabled = !allValid;
 }
 
 function saveAttendanceRecord(){
-  if(!attModalState.reason || !attModalState.status){ showToast('사유와 상태를 모두 선택해주세요'); return; }
-  if(attModalState.status !== 'absent'){
-    var cnt = Object.keys(attModalState.periods).filter(function(k){ return attModalState.periods[k]===true; }).length;
-    if(cnt === 0){ showToast('결시 교시를 선택해주세요'); return; }
-  }
+  if(!attModalState.reason){ showToast('사유를 선택해주세요'); return; }
+  var sel = attModalState.selections;
+  var active = ['absent','late','early_leave','partial'].filter(function(k){ return sel[k].active; });
+  if(active.length === 0){ showToast('상태를 하나 이상 선택해주세요'); return; }
+  var invalidSt = active.find(function(st){
+    if(st === 'absent') return false;
+    return !Object.keys(sel[st].periods).some(function(k){ return sel[st].periods[k] === true; });
+  });
+  if(invalidSt){ showToast(getStatusLabel(invalidSt)+' 교시를 선택해주세요'); return; }
   attModalState.memo = document.getElementById('att-memo').value.trim();
   var date = attendanceCurrentDate;
   var num  = attModalState.studentNum;
@@ -17469,30 +17569,32 @@ function saveAttendanceRecord(){
     var recs = attendanceRecords[date][num];
     var idx  = recs.findIndex(function(r){ return r.id === attModalState.recordId; });
     if(idx >= 0){
+      var firstSt = active[0];
       recs[idx].reason  = attModalState.reason;
-      recs[idx].status  = attModalState.status;
-      recs[idx].periods = Object.assign({}, attModalState.periods);
+      recs[idx].status  = firstSt;
+      recs[idx].periods = Object.assign({}, sel[firstSt].periods);
       recs[idx].memo    = attModalState.memo;
       recs[idx].updatedAt = new Date().toISOString();
+      syncAttendanceToTimeline(date, num, recs[idx]);
     }
     showToast('수정됨');
   } else {
-    var newRec = {
-      id: 'att_'+Date.now()+'_'+Math.random().toString(36).substr(2,6),
-      status: attModalState.status,
-      reason: attModalState.reason,
-      periods: Object.assign({}, attModalState.periods),
-      memo: attModalState.memo,
-      notifiedParent: false,
-      createdAt: new Date().toISOString()
-    };
-    attendanceRecords[date][num].push(newRec);
-    showToast('저장됨');
-  }
-  if(attModalState.mode === 'edit'){
-    syncAttendanceToTimeline(date, num, attendanceRecords[date][num].find(function(r){ return r.id === attModalState.recordId; }));
-  } else {
-    syncAttendanceToTimeline(date, num, attendanceRecords[date][num][attendanceRecords[date][num].length-1]);
+    var labels = [];
+    active.forEach(function(st){
+      var newRec = {
+        id: 'att_'+Date.now()+'_'+Math.random().toString(36).substr(2,6),
+        status: st,
+        reason: attModalState.reason,
+        periods: Object.assign({}, sel[st].periods),
+        memo: attModalState.memo,
+        notifiedParent: false,
+        createdAt: new Date().toISOString()
+      };
+      attendanceRecords[date][num].push(newRec);
+      syncAttendanceToTimeline(date, num, newRec);
+      labels.push(getStatusLabel(st));
+    });
+    showToast(labels.join('+') + ' 저장됨');
   }
   saveAll();
   closeAttendanceModal();
