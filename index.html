@@ -2174,6 +2174,15 @@ body{
   color:var(--warning);background:var(--warning-dim);
   border-color:var(--warning-border);
 }
+/* 차시 배지 - 진도 입력 여부 */
+.cr-session-badge.state-progress{
+  background:var(--success-dim);color:var(--success,#1f9e75);
+  border-color:var(--success,#1f9e75);
+}
+.cr-session-badge.state-empty{
+  background:var(--warning-dim,rgba(186,117,23,0.1));
+  color:var(--warning,#d97706);border-color:var(--warning-border,#d97706);
+}
 .class-records-empty-sub{
   padding:20px;text-align:center;
   font-size:12px;color:var(--text-tertiary);
@@ -19339,8 +19348,15 @@ function renderClassRecords(){
       return (b.memo.date||'').localeCompare(a.memo.date||'');
     });
 
-    var totalSessions = memos.length;
     var lastDate = memos.length > 0 ? memos[0].memo.date : null;
+    var totalSessions;
+    if(g.kind === 'regular' && memos.length > 0 && lastDate){
+      var _lastEntry = memos[0].entry;
+      var _lastInfo  = getAutoSessionNumber(_lastEntry, lastDate);
+      totalSessions  = (_lastInfo.sessionNum > 0) ? _lastInfo.sessionNum : memos.length;
+    } else {
+      totalSessions = memos.length;
+    }
 
     // 그룹 헤더
     var kindBadgeHtml = '';
@@ -19367,11 +19383,12 @@ function renderClassRecords(){
       var src = it.source;
       var entry = it.entry;
 
-      // 차시(정규) or 임시 라벨
+      // 차시(정규) or 임시 라벨 — getAutoSessionNumber(학기 누적 차시 + 진도 상태)
       var badgeHtml;
       if(src === 'regular'){
-        var sessionNum = getSessionNumber(entry, m.date);
-        badgeHtml = '<span class="cr-session-badge">'+sessionNum+'차시</span>';
+        var _info = getAutoSessionNumber(entry, m.date);
+        var _cls  = _info.hasProgress ? ' state-progress' : ' state-empty';
+        badgeHtml = '<span class="cr-session-badge'+_cls+'">'+_info.sessionNum+'차시</span>';
       } else {
         badgeHtml = '<span class="cr-session-badge adhoc">'+escapeHtml(entry.kind||'임시')+'</span>';
       }
