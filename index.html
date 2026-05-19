@@ -944,6 +944,40 @@ body{
 .rec-card.unsorted{background:var(--memo-unsorted-dim);border-color:var(--memo-unsorted-border);}
 .rec-card.bulk{background:var(--memo-bulk-dim);border-color:var(--memo-bulk-border);}
 [data-theme="dark"] .rec-card.bulk{background:var(--memo-bulk-dim);border-color:var(--memo-bulk-border);}
+
+/* 학부모 caution 카드 — 좌측 빨간 막대 강조 */
+.rec-card.parent-caution{
+  border-left:3px solid var(--danger,#ef4444);
+  border-radius:0 8px 8px 0;
+}
+/* 카테고리 라벨 (예: "학교폭력", "민원·항의") */
+.rec-parent-type{
+  display:inline-block;font-size:10px;font-weight:500;
+  padding:2px 7px;border-radius:3px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  margin-left:6px;
+}
+/* 중요 배지 (caution용) */
+.rec-parent-caution-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;font-weight:600;
+  padding:2px 7px;border-radius:3px;
+  background:var(--danger-dim,#fef2f2);color:var(--danger,#ef4444);
+  margin-left:4px;
+}
+.rec-parent-caution-badge svg{flex-shrink:0;}
+/* caution 카드의 카테고리 라벨은 더 강조 */
+.rec-card.parent-caution .rec-parent-type{
+  background:var(--danger-dim,#fef2f2);color:var(--danger,#ef4444);font-weight:600;
+}
+/* 사이드바 학생 중요 배지 */
+.student-caution-badge{
+  display:inline-flex;align-items:center;gap:2px;
+  font-size:10px;font-weight:600;
+  padding:1px 5px;border-radius:3px;
+  background:var(--danger-dim,#fef2f2);color:var(--danger,#ef4444);
+  margin-left:4px;flex-shrink:0;
+}
 .rec-bulk-label{
   display:inline-flex;align-items:center;gap:4px;
   font-size:10px;font-weight:500;
@@ -7624,6 +7658,11 @@ function getStudentRecords(num){
 function getUnsortedCount(num){
   return getStudentRecords(num).filter(function(r){return r.type==='unsorted';}).length;
 }
+function getCautionParentCount(num){
+  return getStudentRecords(num).filter(function(r){
+    return r.type === 'parent' && r.parentRiskLevel === 'caution';
+  }).length;
+}
 function getLastRecordedDate(num){
   var recs = getStudentRecords(num);
   if(recs.length === 0) return null;
@@ -7710,11 +7749,15 @@ function studentRowHTML(s, isUnsorted){
       rightContent = '<span class="last-recorded-meta '+cls+'">'+txt+'</span>';
     }
   }
+  var cautionCount = getCautionParentCount(s.num);
+  var cautionBadge = cautionCount > 0
+    ? '<span class="student-caution-badge" title="중요 학부모 메모 '+cautionCount+'건"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+cautionCount+'</span>'
+    : '';
   return '<div class="student-row'+activeCls+'" data-num="'+s.num+'">'+
     '<div class="student-avatar">'+firstChar+'</div>'+
     '<div class="student-info">'+
       '<span class="student-num">'+s.num+'</span>'+
-      '<span class="student-name">'+escapeHtml(getDisplayName(s))+'</span>'+
+      '<span class="student-name">'+escapeHtml(getDisplayName(s))+cautionBadge+'</span>'+
     '</div>'+
     rightContent+
   '</div>';
@@ -7873,11 +7916,20 @@ function renderTimeline(){
       var followClass = '';
       if(r.needsFollowUp && !r.followedUp) followClass = ' has-followup';
       else if(r.needsFollowUp && r.followedUp) followClass = ' followup-done';
-      html += '<div class="rec-card '+r.type+followClass+'" id="rec-card-'+r.id+'">';
+      var riskCls = (r.type === 'parent' && r.parentRiskLevel === 'caution') ? ' parent-caution' : '';
+      html += '<div class="rec-card '+r.type+followClass+riskCls+'" id="rec-card-'+r.id+'">';
       html += '<div class="rec-head">';
       html += '<div class="rec-type"><span class="rec-dot dot-'+r.type+'"></span><span class="rec-type-name">'+typeKor+'</span>';
       if(r.type === 'bulk' && r.bulkClassLabel){
         html += '<span class="rec-bulk-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'+escapeHtml(r.bulkClassLabel)+' 전체</span>';
+      }
+      if(r.type === 'parent' && r.parentTypeId){
+        var _pTypeMap = {general:'일반 문의',concern:'우려·호소',complaint:'민원·항의',bullying:'학교폭력',authority:'교권 침해',etc:'기타'};
+        var _pTypeLabel = _pTypeMap[r.parentTypeId] || '';
+        if(_pTypeLabel) html += '<span class="rec-parent-type">'+escapeHtml(_pTypeLabel)+'</span>';
+        if(r.parentRiskLevel === 'caution'){
+          html += '<span class="rec-parent-caution-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>중요</span>';
+        }
       }
       html += '</div>';
       // 확인 필요 깃발 — 켜져 있으면 빨강 또는 회색(완료), 꺼져 있으면 호버 시만 표시
@@ -10040,6 +10092,8 @@ function saveReplyFinal(){
     time: formatTimeHHMM(new Date()),
     content: '[받은 메시지]\n'+replyState.message+'\n\n[보낸 답장]\n'+finalText,
     tags: ['답장'],
+    parentTypeId: replyState.type || null,
+    parentRiskLevel: replyState.typeRisk || 'normal',
     createdAt: Date.now()
   };
   if(!records[replyState.studentNum]) records[replyState.studentNum] = [];
@@ -11115,6 +11169,8 @@ function savePrepFinal(){
     time: formatTimeHHMM(new Date()),
     content: content,
     tags: ['전화상담'],
+    parentTypeId: prepState.type || null,
+    parentRiskLevel: (PREP_TYPES.find(function(x){return x.id===prepState.type;}) || {}).risk === 'caution' ? 'caution' : 'normal',
     createdAt: Date.now()
   };
   if(!records[prepState.studentNum]) records[prepState.studentNum] = [];
