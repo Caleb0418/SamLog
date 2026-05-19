@@ -972,11 +972,13 @@ body{
 }
 /* 사이드바 학생 중요 배지 */
 .student-caution-badge{
-  display:inline-flex;align-items:center;gap:2px;
+  display:inline-flex;align-items:center;gap:3px;
   font-size:10px;font-weight:600;
-  padding:1px 5px;border-radius:3px;
-  background:var(--danger-dim,#fef2f2);color:var(--danger,#ef4444);
-  margin-left:4px;flex-shrink:0;
+  color:var(--danger,#C03A2B);
+  background:var(--danger-dim,rgba(192,58,43,0.08));
+  border:0.5px solid var(--danger,#C03A2B);
+  border-radius:4px;padding:1px 5px;
+  flex-shrink:0;
 }
 .rec-bulk-label{
   display:inline-flex;align-items:center;gap:4px;
@@ -1356,6 +1358,7 @@ body{
   display:flex;align-items:center;justify-content:center;
   padding:30px 20px;
 }
+#neis-setup-overlay{z-index:600;}
 .onboarding-card{
   background:var(--bg-surface);border:1px solid var(--border);
   border-radius:var(--radius-lg);max-width:520px;width:100%;
@@ -2850,6 +2853,174 @@ body{
   display:inline-block;font-size:10px;padding:2px 7px;
   background:var(--success,#22c55e);color:#fff;border-radius:3px;margin-top:4px;
 }
+
+/* ── NEIS 가이드 토글 ── */
+.neis-guide-toggle{
+  display:flex;align-items:center;gap:6px;
+  width:100%;padding:8px 11px;margin-top:8px;
+  background:var(--bg-surface);
+  border:1px dashed var(--border);
+  border-radius:6px;cursor:pointer;
+  font-size:11px;color:var(--text-secondary);
+  font-family:inherit;font-weight:500;
+}
+.neis-guide-toggle:hover{
+  background:var(--bg-elevated);border-color:var(--accent);color:var(--accent);
+}
+.neis-guide-toggle svg:first-child{color:var(--accent);flex-shrink:0;}
+.neis-guide-toggle > span{flex:1;text-align:left;}
+.neis-guide-toggle.open #neis-guide-chev{transform:rotate(180deg);}
+
+.neis-guide{
+  margin-top:10px;padding:14px 16px;
+  background:var(--bg-surface);
+  border:1px solid var(--border);border-radius:8px;
+}
+.neis-guide-intro{
+  font-size:12px;color:var(--text-secondary);
+  line-height:1.5;margin-bottom:12px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.neis-guide-step{display:flex;gap:10px;margin-bottom:14px;}
+.neis-guide-step:last-of-type{margin-bottom:0;}
+.neis-guide-step-num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.neis-guide-step-body{flex:1;min-width:0;}
+.neis-guide-step-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.neis-guide-step-desc{font-size:11px;color:var(--text-secondary);line-height:1.6;}
+.neis-guide-step-sub{font-size:10px;color:var(--text-tertiary);margin-top:3px;}
+.neis-guide-link{
+  display:inline-flex;align-items:center;gap:4px;
+  color:var(--accent);font-weight:500;text-decoration:none;
+}
+.neis-guide-link:hover{text-decoration:underline;}
+
+.neis-guide-copy-box{
+  display:flex;align-items:center;gap:6px;
+  margin-top:6px;padding:7px 10px;
+  background:var(--bg-overlay);
+  border:1px solid var(--border);border-radius:5px;
+  font-size:11px;color:var(--text);
+}
+.neis-guide-copy-box span{flex:1;word-break:keep-all;}
+.neis-guide-copy-btn{
+  background:transparent;border:none;cursor:pointer;
+  color:var(--text-tertiary);
+  display:flex;align-items:center;justify-content:center;
+  padding:3px;border-radius:3px;flex-shrink:0;
+}
+.neis-guide-copy-btn:hover{background:var(--bg-surface);color:var(--accent);}
+.neis-guide-copy-btn.copied{color:var(--success);}
+
+.neis-guide-faq{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.neis-guide-faq details{margin-bottom:6px;}
+.neis-guide-faq details:last-child{margin-bottom:0;}
+.neis-guide-faq summary{
+  cursor:pointer;font-size:11px;font-weight:500;
+  color:var(--text-secondary);padding:4px 0;
+}
+.neis-guide-faq summary:hover{color:var(--accent);}
+.neis-guide-faq details p{
+  font-size:11px;color:var(--text-tertiary);
+  line-height:1.6;margin:4px 0 0 0;
+  padding-left:8px;border-left:2px solid var(--border);
+}
+
+.neis-remember-hint{
+  font-size:10px;color:var(--text-tertiary);
+  margin-top:3px;margin-left:24px;
+}
+
+.neis-skip-notice{
+  display:flex;align-items:center;gap:6px;
+  padding:9px 11px;margin-top:14px;
+  background:var(--bg-surface);border-radius:6px;
+  font-size:11px;color:var(--text-secondary);line-height:1.5;
+}
+.neis-skip-notice svg{color:var(--text-tertiary);flex-shrink:0;}
+.neis-skip-notice strong{color:var(--text);font-weight:600;}
+
+.neis-banner-optional{
+  display:inline-block;font-size:9px;font-weight:600;
+  padding:1px 6px;border-radius:3px;
+  background:var(--bg-elevated);color:var(--text-tertiary);
+  margin-left:4px;vertical-align:middle;
+}
+
+/* ── 온보딩 STEP 2 데이터 섹션 ── */
+.ob-data-section{
+  margin-bottom:20px;padding:16px 0;
+  border-top:1px solid var(--border);
+}
+.ob-data-section:first-of-type{border-top:none;padding-top:0;}
+.ob-data-section-head{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:4px;
+}
+.ob-data-section-title{
+  font-size:14px;font-weight:600;color:var(--text);
+  margin:0;
+}
+.ob-data-section-badge{
+  display:inline-block;font-size:10px;font-weight:600;
+  padding:2px 7px;border-radius:3px;
+}
+.ob-badge-recommended{
+  background:var(--accent-dim);color:var(--accent);
+}
+.ob-data-section-desc{
+  font-size:12px;color:var(--text-secondary);
+  margin-bottom:12px;line-height:1.5;
+}
+
+.ob-neis-banner-pending{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  background:var(--accent-dim);
+  border:1px solid var(--accent);border-radius:8px;
+}
+.ob-neis-banner-pending > svg{color:var(--accent);flex-shrink:0;}
+.ob-neis-text{flex:1;min-width:0;}
+.ob-neis-title{font-size:13px;font-weight:600;color:var(--text);}
+.ob-neis-sub{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+.ob-neis-actions{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+
+.ob-neis-banner-done{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  background:var(--success-dim);
+  border:1px solid var(--success);border-radius:8px;
+}
+.ob-neis-banner-done > svg{flex-shrink:0;}
+
+.ob-neis-banner-skipped{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  background:var(--bg-surface);
+  border:1px solid var(--border);border-radius:6px;
+  font-size:11px;color:var(--text-secondary);line-height:1.5;
+}
+.ob-neis-banner-skipped > svg{color:var(--text-tertiary);flex-shrink:0;}
+.ob-neis-banner-skipped strong{color:var(--text);font-weight:600;}
+.ob-neis-banner-skipped > span{flex:1;}
+
+.btn-link{
+  background:none;border:none;cursor:pointer;
+  font-size:11px;color:var(--text-tertiary);
+  font-family:inherit;padding:4px 2px;
+  text-decoration:underline;white-space:nowrap;
+}
+.btn-link:hover{color:var(--accent);}
+
+details > summary { list-style:none; }
+details > summary::-webkit-details-marker { display:none; }
 
 /* ── 학생 월간 달력 학사일정 ── */
 .smv-cal-event{
@@ -4732,15 +4903,84 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <span class="neis-step-num">1</span>
         <span class="neis-step-label">NEIS 인증키</span>
       </div>
-      <input type="text" id="neis-key-input" placeholder="발급받은 인증키 (40자 내외)" class="form-input-text" autocomplete="off" />
-      <div class="neis-step-hint">
-        키가 없으면 <a href="https://open.neis.go.kr/portal/myPage/actKey/actKeyPage.do" target="_blank">NEIS 인증키 발급 페이지</a>에서 소셜 로그인 후 신청 (즉시 발급, 무료)
+      <input type="text" id="neis-key-input" placeholder="발급받은 인증키를 붙여넣으세요" class="form-input-text" autocomplete="off" />
+
+      <button type="button" class="neis-guide-toggle" id="neis-guide-toggle" onclick="toggleNeisGuide()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>인증키 처음이세요? 5분 가이드 보기</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="neis-guide-chev" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <div class="neis-guide" id="neis-guide" style="display:none;">
+        <div class="neis-guide-intro">
+          NEIS OpenAPI는 누구나 무료로 받을 수 있는 인증키예요. 5분이면 발급되고, 한 번 받으면 학기 내내 사용합니다.
+        </div>
+
+        <div class="neis-guide-step">
+          <div class="neis-guide-step-num">1</div>
+          <div class="neis-guide-step-body">
+            <div class="neis-guide-step-title">NEIS 인증키 페이지 접속</div>
+            <div class="neis-guide-step-desc">
+              <a href="https://open.neis.go.kr/portal/myPage/actKey/actKeyPage.do" target="_blank" class="neis-guide-link">open.neis.go.kr → 인증키 신청<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+              <div class="neis-guide-step-sub">소셜 로그인 (네이버·카카오·구글) 가능</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="neis-guide-step">
+          <div class="neis-guide-step-num">2</div>
+          <div class="neis-guide-step-body">
+            <div class="neis-guide-step-title">신청 폼 작성</div>
+            <div class="neis-guide-step-desc">
+              "활용 목적"란에 아래 문구를 그대로 사용하면 됩니다:
+              <div class="neis-guide-copy-box">
+                <span id="neis-guide-purpose-text">교내 시간표·학사일정 자동 조회 (개인 사용)</span>
+                <button type="button" class="neis-guide-copy-btn" onclick="copyNeisGuidePurpose(event)" title="클립보드 복사">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+              </div>
+              <div class="neis-guide-step-sub">활용 분야는 "교육" 선택</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="neis-guide-step">
+          <div class="neis-guide-step-num">3</div>
+          <div class="neis-guide-step-body">
+            <div class="neis-guide-step-title">즉시 발급 → 키 복사</div>
+            <div class="neis-guide-step-desc">신청 직후 마이페이지에서 인증키 확인 가능. 40자 정도 영문·숫자 문자열을 통째로 복사하세요.</div>
+          </div>
+        </div>
+
+        <div class="neis-guide-step">
+          <div class="neis-guide-step-num">4</div>
+          <div class="neis-guide-step-body">
+            <div class="neis-guide-step-title">위 입력란에 붙여넣기</div>
+            <div class="neis-guide-step-desc">그 다음 학교 검색 → 학교 선택 → 저장하면 끝.</div>
+          </div>
+        </div>
+
+        <div class="neis-guide-faq">
+          <details>
+            <summary>이 키는 어디에 사용되나요?</summary>
+            <p>본인 학교의 공개된 시간표·학사일정을 조회하는 데만 사용됩니다. 학생 개인정보 조회 같은 민감한 기능은 NEIS OpenAPI에 아예 없어요.</p>
+          </details>
+          <details>
+            <summary>키가 다른 사람에게 노출되면 어떻게 되나요?</summary>
+            <p>NEIS 인증키는 공개 정보 조회만 가능해서 노출되어도 큰 피해는 없습니다. 다만 신경 쓰이면 NEIS 마이페이지에서 키를 폐기·재발급할 수 있어요.</p>
+          </details>
+          <details>
+            <summary>매번 새로 받아야 하나요?</summary>
+            <p>아니요. 한 번 받으면 계속 사용 가능. 위 "이 PC에 키 저장" 체크하면 다음에 자동으로 불러옵니다.</p>
+          </details>
+        </div>
       </div>
+
       <label class="neis-remember-toggle">
         <input type="checkbox" id="neis-remember-checkbox" />
         <span>이 PC에 키 저장 (다음에 자동 로그인)</span>
       </label>
-      <div class="neis-step-hint" style="margin-top:4px;font-size:10px;">체크 안 하면 새로고침 시 키가 사라집니다. 공용 PC에서는 체크하지 마세요.</div>
+      <div class="neis-remember-hint">학교 PC 등 공용 환경에서는 체크하지 마세요.</div>
     </div>
 
     <!-- 2단계: 학교 검색 -->
@@ -4765,8 +5005,12 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div class="neis-confirm-card" id="neis-confirm-card"></div>
     </div>
 
+    <div class="neis-skip-notice">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>지금 설정 안 해도 됩니다. <strong>NEIS 엑셀 업로드</strong>로도 시간표를 등록할 수 있어요.</span>
+    </div>
     <div class="onboarding-actions">
-      <button class="btn-secondary" onclick="closeNeisSetupModal()">취소</button>
+      <button class="btn-secondary" onclick="closeNeisSetupModal()">나중에 하기</button>
       <button class="btn-primary" id="neis-save-btn" disabled onclick="saveNeisSetup()">저장</button>
     </div>
   </div>
@@ -4846,43 +5090,97 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
     </div>
 
-    <!-- STEP 2: 명단 업로드 -->
+    <!-- STEP 2: 학교 데이터 가져오기 -->
     <div id="onboarding-step-2" class="onboarding-step" style="display:none;">
       <div class="onboarding-step-badge">2 / 3</div>
-      <div class="onboarding-title">학생 명단을 불러올게요</div>
-      <div class="onboarding-desc" id="ob-step2-desc">
-        NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.
-      </div>
+      <div class="onboarding-title">학교 데이터 가져오기</div>
+      <div class="onboarding-desc">시간표·학사일정은 NEIS에서 자동, 학생 명단은 엑셀로 등록합니다.</div>
 
-      <!-- 담임용: 단일 업로드 영역 -->
-      <div id="ob-step2-homeroom">
-        <div class="upload-zone" id="upload-zone">
-          <div class="upload-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <!-- 섹션 A: NEIS 자동 연동 -->
+      <div class="ob-data-section">
+        <div class="ob-data-section-head">
+          <h3 class="ob-data-section-title">NEIS 자동 연동</h3>
+          <span class="ob-data-section-badge ob-badge-recommended">권장</span>
+        </div>
+        <div class="ob-data-section-desc">시간표·학사일정을 자동으로 가져옵니다.</div>
+
+        <!-- 미설정 상태 -->
+        <div id="ob-neis-pending" class="ob-neis-state">
+          <div class="ob-neis-banner-pending">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <div class="ob-neis-text">
+              <div class="ob-neis-title">5분 설정으로 시간표·학사일정 자동화</div>
+              <div class="ob-neis-sub">인증키 + 학교 등록 (가이드 포함)</div>
+            </div>
+            <div class="ob-neis-actions">
+              <button class="btn-small primary" onclick="openOnboardingNeisSetup()">설정 시작</button>
+              <button class="btn-link" onclick="skipOnboardingNeis()">나중에</button>
+            </div>
           </div>
-          <div class="upload-main" id="upload-main">파일을 끌어다 놓거나 클릭하세요</div>
-          <div class="upload-sub" id="upload-sub">CSV · XLSX · XLS 지원 · 첫 행은 컬럼명</div>
-          <input type="file" id="upload-file-input" accept=".csv,.xlsx,.xls" style="display:none;">
         </div>
-        <div class="upload-hint">
-          <strong>필요한 컬럼:</strong> 번호, 이름 (성별은 선택)
+
+        <!-- 설정 완료 상태 -->
+        <div id="ob-neis-done" class="ob-neis-state" style="display:none;">
+          <div class="ob-neis-banner-done">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success);"><polyline points="20 6 9 17 4 12"/></svg>
+            <div class="ob-neis-text">
+              <div class="ob-neis-title" id="ob-neis-school-label">—</div>
+              <div class="ob-neis-sub" id="ob-neis-sync-label">동기화 준비 완료</div>
+            </div>
+            <button class="btn-link" onclick="reopenOnboardingNeisSetup()">변경</button>
+          </div>
         </div>
-        <div id="upload-preview" style="display:none;"></div>
+
+        <!-- 건너뜀 상태 -->
+        <div id="ob-neis-skipped" class="ob-neis-state" style="display:none;">
+          <div class="ob-neis-banner-skipped">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>나중에 <strong>수업 관리</strong>에서 설정할 수 있어요. 시간표는 엑셀 업로드로도 등록 가능합니다.</span>
+            <button class="btn-link" onclick="undoSkipOnboardingNeis()">다시 보기</button>
+          </div>
+        </div>
       </div>
 
-      <!-- 교과 전담용: 반별 임포트 리스트 -->
-      <div id="ob-step2-subject" style="display:none;">
-        <div class="ob-import-hint">
-          각 반의 명단을 지금 등록하거나 <strong>나중에</strong> 사이드바에서 추가할 수 있어요.
+      <!-- 섹션 B: 학생 명단 -->
+      <div class="ob-data-section">
+        <div class="ob-data-section-head">
+          <h3 class="ob-data-section-title">학생 명단</h3>
         </div>
-        <div id="ob-import-list" class="ob-import-list"></div>
+        <div class="ob-data-section-desc" id="ob-roster-desc">
+          엑셀 파일을 올리거나 나중에 사이드바에서 추가할 수 있어요.
+        </div>
+
+        <!-- 담임용: 단일 업로드 영역 -->
+        <div id="ob-step2-homeroom">
+          <div class="upload-zone" id="upload-zone">
+            <div class="upload-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="upload-main" id="upload-main">파일을 끌어다 놓거나 클릭하세요</div>
+            <div class="upload-sub" id="upload-sub">CSV · XLSX · XLS 지원 · 첫 행은 컬럼명</div>
+            <input type="file" id="upload-file-input" accept=".csv,.xlsx,.xls" style="display:none;">
+          </div>
+          <div class="upload-hint">
+            <strong>필요한 컬럼:</strong> 번호, 이름 (성별은 선택)
+          </div>
+          <div id="upload-preview" style="display:none;"></div>
+        </div>
+
+        <!-- 교과 전담용: 반별 임포트 리스트 -->
+        <div id="ob-step2-subject" style="display:none;">
+          <div class="ob-import-hint">
+            <i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>
+            각 반의 명단을 지금 등록하거나 <strong>나중에</strong> 사이드바에서 추가할 수 있어요.
+          </div>
+          <div id="ob-import-list" class="ob-import-list"></div>
+        </div>
       </div>
 
       <div class="onboarding-actions">
         <button class="btn-secondary" onclick="loadSampleRoster()" id="ob-sample-btn">샘플로 시작</button>
         <div style="flex:1;"></div>
         <button class="btn-secondary" onclick="onboardingNext(1)">← 이전</button>
-        <button class="btn-primary" id="ob-next-2" disabled onclick="onboardingNext(3)">다음 →</button>
+        <button class="btn-primary" id="ob-next-2" onclick="onboardingNext(3)">다음 →</button>
       </div>
     </div>
 
@@ -5097,128 +5395,178 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div class="memo-modal-head">
         <div class="memo-modal-head-text">
           <div class="memo-modal-eyebrow">수업 관리</div>
-          <div class="memo-modal-title">시간표·담당 수업</div>
+          <div class="memo-modal-title">담당 수업</div>
         </div>
         <button class="memo-modal-close" onclick="closeClassSettings()">×</button>
       </div>
 
       <div class="memo-modal-body">
-        <!-- 샘플 데이터 체험 배너 (처음 사용자용) -->
-        <div id="sample-data-banner" style="margin-bottom:18px;padding:12px 14px;background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <div style="display:flex;align-items:center;gap:11px;min-width:0;flex:1;">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--bg-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-            </div>
-            <div style="min-width:0;">
-              <div style="font-size:13px;font-weight:600;color:var(--text);">처음이세요? 샘플로 체험해보세요</div>
-              <div id="sample-data-banner-sub" style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;">담임반에 1주일 시간표 + 담당 수업 5건이 자동 등록돼요</div>
-            </div>
+        <!-- 샘플 데이터 체험 배너 (한 줄, 항상 노출) -->
+        <div id="sample-data-banner" style="margin-bottom:14px;padding:8px 12px;background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            <span id="sample-data-banner-label" style="font-size:12px;color:var(--accent);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">샘플 데이터로 먼저 둘러보기</span>
+            <span id="sample-data-banner-sub" style="font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;">· 기능 둘러보기용</span>
           </div>
-          <button class="btn-small primary" onclick="loadSampleClassData()" style="flex-shrink:0;">샘플 적용</button>
+          <button class="btn-small" onclick="loadSampleClassData()" id="sample-data-banner-btn" style="flex-shrink:0;font-size:11px;padding:4px 10px;border:0.5px solid var(--border-accent);background:var(--bg-surface);color:var(--accent);font-weight:500;">샘플 적용</button>
         </div>
 
-        <!-- ① NEIS 자동 연동 배너 -->
-        <div class="class-master-title" style="margin-bottom:6px;">NEIS 자동 연동</div>
-        <div class="class-master-sub" style="margin-bottom:10px;">인증키 + 학교를 한 번 설정하면 시간표·학사일정을 자동으로 가져옵니다.</div>
+        <!-- ① NEIS 자동 연동 (메인 경로) -->
         <div class="neis-banner" id="neis-banner">
-          <!-- 미설정 상태 -->
-          <div class="neis-banner-setup" id="neis-banner-setup">
-            <div class="neis-banner-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div class="neis-banner-text">
-                <div class="neis-banner-title">NEIS 인증키 미설정</div>
-                <div class="neis-banner-sub">무료, 즉시 발급, 학교 공개 정보만 조회</div>
+          <!-- 상태 1: 미설정 — 권장 카드 -->
+          <div class="neis-banner-setup" id="neis-banner-setup" style="border:1.5px solid var(--border-accent);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
+                  <div style="font-size:14px;font-weight:600;color:var(--text);">NEIS 자동 연동</div>
+                  <span style="font-size:10px;background:var(--accent-dim);color:var(--accent);padding:2px 7px;border-radius:4px;font-weight:600;">권장</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-tertiary);line-height:1.5;">인증키 + 학교를 한 번 설정하면 시간표·학사일정을 자동으로</div>
               </div>
-              <button class="btn-small primary" onclick="openNeisSetupModal()">설정 시작</button>
+              <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="btn-small primary" onclick="openNeisSetupModal()">설정하기</button>
+                <button class="btn-small secondary" onclick="skipNeisSetup()" style="font-size:11px;color:var(--text-tertiary);">나중에</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;padding-top:10px;border-top:0.5px solid var(--border);flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                시간표 자동 매칭
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                학사일정 자동 반영
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                변경 자동 감지
+              </span>
             </div>
           </div>
-          <!-- 설정 완료 상태 -->
-          <div class="neis-banner-active" id="neis-banner-active" style="display:none;">
-            <div class="neis-banner-row">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success,#22c55e);"><polyline points="20 6 9 17 4 12"/></svg>
-              <div class="neis-banner-text">
-                <div class="neis-banner-title" id="neis-school-name-label">—</div>
-                <div class="neis-banner-sub" id="neis-last-synced-label">아직 동기화 안 됨</div>
+
+          <!-- 상태 3: 건너뜀 — 중립 회색 안내 -->
+          <div class="neis-banner-skipped" id="neis-banner-skipped" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--bg-elevated);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <div style="min-width:0;">
+                  <div style="font-size:13px;color:var(--text);margin-bottom:1px;">시간표를 자동으로 채우려면 NEIS 연동을 사용할 수 있어요</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);">학사일정도 함께 가져옵니다</div>
+                </div>
               </div>
-              <button class="btn-small primary" onclick="onNeisSyncClick()" id="neis-sync-btn">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                지금 동기화
-              </button>
-              <button class="btn-small secondary" onclick="openNeisSetupModal()" title="설정 수정" style="padding:0 8px;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              </button>
+              <button class="btn-small secondary" onclick="openNeisSetupModal()" style="flex-shrink:0;font-size:11px;">연동하기</button>
             </div>
-            <div class="neis-sync-result" id="neis-sync-result" style="display:none;"></div>
+          </div>
+
+          <!-- 상태 2: 설정 완료 -->
+          <div class="neis-banner-active" id="neis-banner-active" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--bg-surface);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0;flex:1;">
+                <div style="width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success,#22c55e)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style="min-width:0;">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;flex-wrap:wrap;">
+                    <span style="font-size:13px;font-weight:600;color:var(--text);" id="neis-school-name-label">—</span>
+                    <span style="font-size:10px;background:var(--accent-dim);color:var(--accent);padding:1px 6px;border-radius:4px;font-weight:600;">NEIS 연동</span>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-tertiary);" id="neis-last-synced-label">아직 동기화 안 됨</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="btn-small secondary" onclick="onNeisSyncClick()" id="neis-sync-btn" style="font-size:11px;padding:5px 10px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  동기화
+                </button>
+                <button class="btn-small secondary" onclick="openNeisSetupModal()" title="설정 수정" style="padding:5px 8px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="neis-sync-result" id="neis-sync-result" style="display:none;margin-top:8px;"></div>
           </div>
         </div>
 
-        <!-- ② NEIS 시간표 업로드 (엑셀 fallback) -->
-        <div class="class-master-title" style="margin-bottom:8px;">시간표 연동</div>
-        <div class="class-master-sub" style="margin-bottom:10px;">NEIS 포털 → 학교생활 → 시간표 → 엑셀 다운로드 후 업로드하면 담당 수업 요일·교시가 자동으로 채워져요</div>
-        <div class="tt-upload-banner" id="tt-upload-banner">
-          <div class="tt-upload-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <!-- ② 담당 수업 (메인 작업) -->
+        <div style="margin-top:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px;">
+            <div style="min-width:0;">
+              <div class="class-master-title" style="margin-bottom:2px;">담당 수업 <span id="class-master-count" style="font-weight:400;color:var(--text-tertiary);font-size:12px;"></span></div>
+              <div class="class-master-sub" id="class-master-sub-hint" style="font-size:11px;">학년·반·과목을 등록하면 NEIS 시간표와 자동으로 매칭돼요</div>
+            </div>
           </div>
-          <div class="tt-upload-text">
-            <div class="tt-upload-title">NEIS 시간표 파일</div>
-            <div class="tt-upload-sub">CSV · XLSX 지원</div>
-          </div>
-          <div class="tt-upload-actions">
-            <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
-            <button class="btn-small primary" onclick="document.getElementById('tt-file-input').click()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              업로드
-            </button>
-            <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTimetableFile(this.files[0]);this.value='';">
+
+          <div class="class-master-section">
+            <div class="class-master-head" onclick="toggleClassMaster()">
+              <div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;">
+                <div class="class-master-title">직접 입력</div>
+                <svg id="class-master-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;flex-shrink:0;color:var(--text-tertiary);"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <button class="btn-small secondary" onclick="event.stopPropagation();document.getElementById('assign-file-input').click()" style="flex-shrink:0;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                파일로 등록
+              </button>
+              <input type="file" id="assign-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAssignFile(this.files[0]);this.value='';">
+              <button class="assign-help-btn" onclick="event.stopPropagation();openAssignGuide()" style="margin-left:4px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
+                형식 안내
+              </button>
+            </div>
+            <div class="class-master-body" id="class-master-body" style="display:none;">
+              <div class="class-form">
+                <div class="class-form-row">
+                  <div class="class-form-field" style="width:74px;">
+                    <label class="form-label" style="display:block;">학년</label>
+                    <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2">
+                  </div>
+                  <div class="class-form-field" style="width:74px;">
+                    <label class="form-label" style="display:block;">반</label>
+                    <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3">
+                  </div>
+                  <div class="class-form-field" style="flex:1;min-width:120px;">
+                    <label class="form-label" style="display:block;">과목</label>
+                    <input type="text" class="form-input-text" id="class-form-subject" placeholder="예) 수학"
+                      oninput="onClassSubjectInput()" autocomplete="off">
+                  </div>
+                  <button class="btn-small primary" onclick="addClassMaster()" style="height:34px;align-self:flex-end;">추가</button>
+                </div>
+                <div id="tt-suggest-chips" class="tt-suggest-chips" style="display:none;"></div>
+                <div id="class-form-hint" style="margin-top:8px;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  시간표 업로드 시 과목이 일치하는 모든 요일·교시가 자동으로 채워져요.
+                </div>
+              </div>
+              <div id="class-master-list"></div>
+            </div>
           </div>
         </div>
 
-        <!-- ② 담당 수업 등록 -->
-        <div class="class-master-title" style="margin-bottom:8px;margin-top:20px;">담당 수업 등록</div>
-        <div class="class-master-sub" style="margin-bottom:10px;">학년·반·과목을 직접 입력하거나 엑셀·CSV 파일로 일괄 등록할 수 있어요</div>
-        <div class="class-master-section">
-          <div class="class-master-head" onclick="toggleClassMaster()">
-            <div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;">
-              <div class="class-master-title">직접 입력</div>
-              <svg id="class-master-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;flex-shrink:0;color:var(--text-tertiary);"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <button class="btn-small secondary" onclick="event.stopPropagation();document.getElementById('assign-file-input').click()" style="flex-shrink:0;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              파일로 등록
-            </button>
-            <input type="file" id="assign-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAssignFile(this.files[0]);this.value='';">
-            <button class="assign-help-btn" onclick="event.stopPropagation();openAssignGuide()" style="margin-left:4px;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
-              형식 안내
-            </button>
-          </div>
-          <div class="class-master-body" id="class-master-body" style="display:none;">
-            <div class="class-form">
-              <div class="class-form-row">
-                <div class="class-form-field" style="width:74px;">
-                  <label class="form-label" style="display:block;">학년</label>
-                  <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2">
-                </div>
-                <div class="class-form-field" style="width:74px;">
-                  <label class="form-label" style="display:block;">반</label>
-                  <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3">
-                </div>
-                <div class="class-form-field" style="flex:1;min-width:120px;">
-                  <label class="form-label" style="display:block;">과목</label>
-                  <input type="text" class="form-input-text" id="class-form-subject" placeholder="예) 수학"
-                    oninput="onClassSubjectInput()" autocomplete="off">
-                </div>
-                <button class="btn-small primary" onclick="addClassMaster()" style="height:34px;align-self:flex-end;">추가</button>
+        <!-- ③ 다른 방법으로 시간표 가져오기 (접힘) -->
+        <details style="margin-top:16px;">
+          <summary id="alt-method-summary" style="cursor:pointer;padding:8px 4px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;list-style:none;user-select:none;">
+            <svg id="alt-method-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="alt-method-label">다른 방법으로 시간표 가져오기</span>
+          </summary>
+          <div style="padding:8px 4px 4px;">
+            <div class="tt-upload-banner" id="tt-upload-banner" style="margin-top:6px;">
+              <div class="tt-upload-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
-              <div id="tt-suggest-chips" class="tt-suggest-chips" style="display:none;"></div>
-              <div id="class-form-hint" style="margin-top:8px;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                시간표 업로드 시 과목이 일치하는 모든 요일·교시가 자동으로 채워져요.
+              <div class="tt-upload-text">
+                <div class="tt-upload-title">NEIS 시간표 엑셀 업로드</div>
+                <div class="tt-upload-sub">NEIS 포털 → 학교생활 → 시간표 → 엑셀 다운로드 후 업로드</div>
+              </div>
+              <div class="tt-upload-actions">
+                <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
+                <button class="btn-small secondary" onclick="document.getElementById('tt-file-input').click()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  업로드
+                </button>
+                <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTimetableFile(this.files[0]);this.value='';">
               </div>
             </div>
-            <div id="class-master-list"></div>
           </div>
-        </div>
+        </details>
 
       </div>
     </div>
@@ -7107,7 +7455,8 @@ var neisSettings = {
   schulCode: '',
   schoolName: '',
   schoolKind: '',      // 'els' | 'mis' | 'his'
-  lastSyncedAt: null
+  lastSyncedAt: null,
+  skipped: false       // 사용자가 "나중에"를 눌러 명시적으로 건너뛴 상태
 };
 
 // 학사일정: { 'YYYY-MM-DD': [{event, detail, gradeScope, source}, ...] }
@@ -7933,7 +8282,9 @@ function studentRowHTML(s, isUnsorted){
       '<span class="student-num">'+s.num+'</span>'+
       '<span class="student-name">'+escapeHtml(getDisplayName(s))+'</span>'+
     '</div>'+
-    rightContent+
+    (rightContent
+      ? '<div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;">'+rightContent+'</div>'
+      : '')+
   '</div>';
 }
 
@@ -8102,7 +8453,7 @@ function renderTimeline(){
         var _pTypeLabel = _pTypeMap[r.parentTypeId] || '';
         if(_pTypeLabel) html += '<span class="rec-parent-type">'+escapeHtml(_pTypeLabel)+'</span>';
         if(r.parentRiskLevel === 'caution'){
-          html += '<span class="rec-parent-caution-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>중요</span>';
+          html += '<span class="rec-parent-caution-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>주의</span>';
         }
       }
       html += '</div>';
@@ -8169,7 +8520,6 @@ function renderTimeline(){
         var bulkMeta = r.bulkRecipientCount ? r.bulkRecipientCount+'명에게 동일 발송됨' : '학급 전체 발송';
         html += '<div class="rec-bulk-actions">';
         html += '<span class="rec-bulk-meta">'+escapeHtml(bulkMeta)+'</span>';
-        html += '<button class="rec-bulk-convert-btn" onclick="openBulkConvertModal(\''+r.id+'\')">유형 변경</button>';
         html += '</div>';
       }
       html += '</div>';
@@ -9171,6 +9521,54 @@ function loadSettings(){
 ═══════════════════════════════════════════ */
 var NEIS_BASE = 'https://open.neis.go.kr/hub/';
 
+function toggleNeisGuide(){
+  var guide = document.getElementById('neis-guide');
+  var toggle = document.getElementById('neis-guide-toggle');
+  if(guide.style.display === 'none'){
+    guide.style.display = 'block';
+    toggle.classList.add('open');
+  } else {
+    guide.style.display = 'none';
+    toggle.classList.remove('open');
+  }
+}
+
+function copyNeisGuidePurpose(ev){
+  var text = document.getElementById('neis-guide-purpose-text').textContent;
+  var btn = ev.currentTarget;
+
+  var copyFunc = navigator.clipboard && navigator.clipboard.writeText
+    ? navigator.clipboard.writeText(text)
+    : new Promise(function(resolve, reject){
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          resolve();
+        } catch(e){ reject(e); }
+      });
+
+  copyFunc.then(function(){
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(function(){
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    }, 1500);
+    showToast('활용 목적 텍스트가 복사됐어요');
+  }).catch(function(){
+    showToast('복사 실패 — 직접 선택해서 복사해주세요');
+  });
+}
+
+// NOTE (v2 마이그레이션): 사용자 수 50명+ 또는 NEIS 호출 한도 도달 시 백엔드 도입 검토.
+// 그때는 이 함수만 우리 서버 프록시 호출로 교체하면 나머지 코드(검색·동기화)는 그대로 작동.
+// 인증키는 서버가 관리하므로 neisSettings.apiKey 의존성도 함께 제거 필요.
 function neisCallApi(endpoint, params){
   var url = NEIS_BASE + endpoint + '?';
   var arr = [];
@@ -9358,21 +9756,63 @@ function neisSyncAll(){
 var neisSetupState = { selectedSchoolRow: null };
 
 function refreshNeisBanner(){
-  var setupEl = document.getElementById('neis-banner-setup');
-  var activeEl = document.getElementById('neis-banner-active');
-  if(!setupEl || !activeEl) return;
+  var setupEl   = document.getElementById('neis-banner-setup');
+  var activeEl  = document.getElementById('neis-banner-active');
+  var skippedEl = document.getElementById('neis-banner-skipped');
+  if(!setupEl || !activeEl || !skippedEl) return;
+
   if(neisSettings.atptCode && neisSettings.schulCode){
-    setupEl.style.display = 'none'; activeEl.style.display = 'block';
+    // 상태 2: 연동 완료
+    setupEl.style.display   = 'none';
+    skippedEl.style.display = 'none';
+    activeEl.style.display  = 'block';
     document.getElementById('neis-school-name-label').textContent = neisSettings.schoolName || '학교 미지정';
     var syncEl = document.getElementById('neis-last-synced-label');
     if(neisSettings.lastSyncedAt){
       var d = new Date(neisSettings.lastSyncedAt);
-      syncEl.textContent = '마지막 동기화: '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+
+      syncEl.textContent = '시간표·학사일정 자동 · 마지막 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+
         String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    } else { syncEl.textContent = '아직 동기화 안 됨'; }
+    } else {
+      syncEl.textContent = '시간표·학사일정 자동 · 아직 동기화 안 됨';
+    }
+  } else if(neisSettings.skipped){
+    // 상태 3: 건너뜀
+    setupEl.style.display   = 'none';
+    activeEl.style.display  = 'none';
+    skippedEl.style.display = 'block';
   } else {
-    setupEl.style.display = 'block'; activeEl.style.display = 'none';
+    // 상태 1: 미설정 (신규)
+    setupEl.style.display   = 'block';
+    activeEl.style.display  = 'none';
+    skippedEl.style.display = 'none';
   }
+
+  updateClassMasterMeta();
+}
+
+function updateClassMasterMeta(){
+  var countEl = document.getElementById('class-master-count');
+  var hintEl  = document.getElementById('class-master-sub-hint');
+  if(!countEl || !hintEl) return;
+  var n = (typeof classMaster !== 'undefined' && classMaster) ? classMaster.length : 0;
+  countEl.textContent = n > 0 ? ('· '+n+'개') : '';
+  var hasNeis = !!(neisSettings.atptCode && neisSettings.schulCode);
+  if(hasNeis && n > 0){
+    hintEl.textContent = 'NEIS 시간표와 자동 매칭됐어요';
+  } else if(hasNeis){
+    hintEl.textContent = '학년·반·과목을 등록하면 NEIS 시간표와 자동으로 매칭돼요';
+  } else if(neisSettings.skipped){
+    hintEl.textContent = '시간표는 직접 채워주셔야 해요';
+  } else {
+    hintEl.textContent = '학년·반·과목을 등록하면 NEIS 시간표와 자동으로 매칭돼요';
+  }
+}
+
+function skipNeisSetup(){
+  neisSettings.skipped = true;
+  saveSettings();
+  refreshNeisBanner();
+  showToast('나중에 언제든 연동할 수 있어요.');
 }
 
 function openNeisSetupModal(){
@@ -9479,10 +9919,78 @@ function saveNeisSetup(){
   neisSettings.schulCode = row.SD_SCHUL_CODE;
   neisSettings.schoolName = row.SCHUL_NM;
   neisSettings.schoolKind = row._detectedKind || 'mis';
+  neisSettings.skipped = false;
   saveSettings();
   refreshNeisBanner();
   closeNeisSetupModal();
   showToast('NEIS 연동 완료');
+
+  if(onboardingData && onboardingData._neisOnboardingFlow){
+    onboardingData._neisOnboardingFlow = false;
+    onboardingData._neisSkipped = false;
+    refreshOnboardingNeisState();
+    autoSyncOnboardingSchedule();
+  }
+}
+
+function autoSyncOnboardingSchedule(){
+  if(!neisSettings.apiKey) return;
+  var syncEl = document.getElementById('ob-neis-sync-label');
+  if(syncEl) syncEl.textContent = '학사일정 가져오는 중...';
+  neisFetchSchedule(neisSettings.apiKey).then(function(res){
+    if(res && res.ok){
+      var added = mergeNeisSchedule(res.rows);
+      neisSettings.lastSyncedAt = new Date().toISOString();
+      saveAll(); saveSettings();
+      if(syncEl) syncEl.textContent = '학사일정 ' + added + '건 가져옴 · 시간표는 완료 후 자동 동기화';
+    } else {
+      if(syncEl) syncEl.textContent = '학사일정 동기화 실패 — 나중에 다시 시도하세요';
+    }
+  });
+}
+
+function refreshOnboardingNeisState(){
+  var pending = document.getElementById('ob-neis-pending');
+  var done    = document.getElementById('ob-neis-done');
+  var skipped = document.getElementById('ob-neis-skipped');
+  if(!pending) return;
+  pending.style.display = 'none';
+  done.style.display    = 'none';
+  skipped.style.display = 'none';
+  if(neisSettings.atptCode && neisSettings.schulCode){
+    done.style.display = 'block';
+    document.getElementById('ob-neis-school-label').textContent = neisSettings.schoolName || '학교 미지정';
+    var syncEl = document.getElementById('ob-neis-sync-label');
+    if(neisSettings.lastSyncedAt){
+      var d = new Date(neisSettings.lastSyncedAt);
+      syncEl.textContent = (d.getMonth()+1) + '월 ' + d.getDate() + '일 동기화 완료';
+    } else {
+      syncEl.textContent = '동기화 준비 완료';
+    }
+  } else if(onboardingData && onboardingData._neisSkipped){
+    skipped.style.display = 'block';
+  } else {
+    pending.style.display = 'block';
+  }
+}
+
+function openOnboardingNeisSetup(){
+  onboardingData._neisOnboardingFlow = true;
+  openNeisSetupModal();
+}
+
+function reopenOnboardingNeisSetup(){
+  openOnboardingNeisSetup();
+}
+
+function skipOnboardingNeis(){
+  onboardingData._neisSkipped = true;
+  refreshOnboardingNeisState();
+}
+
+function undoSkipOnboardingNeis(){
+  onboardingData._neisSkipped = false;
+  refreshOnboardingNeisState();
 }
 
 function onNeisSyncClick(){
@@ -12578,19 +13086,20 @@ function initOnboardingStep2(){
   if(onboardingData.role === 'homeroom'){
     document.getElementById('ob-step2-homeroom').style.display = 'block';
     document.getElementById('ob-step2-subject').style.display  = 'none';
-    document.getElementById('ob-step2-desc').innerHTML =
+    document.getElementById('ob-roster-desc').innerHTML =
       'NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.';
     document.getElementById('ob-sample-btn').style.display = 'inline-flex';
     document.getElementById('ob-next-2').disabled = true;
   } else {
     document.getElementById('ob-step2-homeroom').style.display = 'none';
     document.getElementById('ob-step2-subject').style.display  = 'block';
-    document.getElementById('ob-step2-desc').innerHTML =
+    document.getElementById('ob-roster-desc').innerHTML =
       '수업하는 각 반의 학생 명단을 불러옵니다.<br>지금 등록 못 한 반은 사이드바에서 나중에 추가할 수 있어요.';
     document.getElementById('ob-sample-btn').style.display = 'none';
     renderOnboardingImportList();
-    document.getElementById('ob-next-2').disabled = false;  // 교과 전담은 명단 없어도 진행 가능
+    document.getElementById('ob-next-2').disabled = false;
   }
+  refreshOnboardingNeisState();
 }
 
 function renderOnboardingImportList(){
@@ -13168,6 +13677,16 @@ function completeOnboarding(){
   document.getElementById('onboarding-overlay').style.display = 'none';
   updateHeaderClass();
   switchTab('home');
+
+  if(neisSettings.apiKey && neisSettings.atptCode && Object.keys(classes).length > 0){
+    setTimeout(function(){
+      neisSyncAll().then(function(result){
+        if(result && result.timetable && result.timetable.added > 0){
+          showToast('NEIS 시간표 ' + result.timetable.added + '건 자동 동기화 완료');
+        }
+      });
+    }, 500);
+  }
 }
 
 /* 현재 활성 반의 역할 레이블 반환 */
@@ -14654,9 +15173,7 @@ function saveQuickMemo(){
     return;
   }
   if(matches.ambiguous.length > 0){
-    if(!confirm('일부 학생이 명확하지 않아요 (동명이인 등). 매칭된 '+matches.matched.length+'명에게만 저장하시겠어요?')){
-      return;
-    }
+    // 동명이인 ambiguous — 저장은 matches.matched 기준으로 진행 (confirm 팝업 제거)
   }
 
   // @표기만 떼고 이름은 본문에 남김 (익명화는 프롬프트 생성 시점에 일괄 처리)
@@ -14757,7 +15274,32 @@ function saveQuickMemo(){
       : allMentionStudents.length > 0
         ? savedNames.slice(0, matches.matched.length).join(', ')+'에 미분류 메모, '+mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
         : savedNames.join(', ')+'에 미분류 메모로 저장됐어요';
-    showToast(toastMsg);
+
+    if(mentionedClassKeys.length >= 2 && allMentionStudents.length > 0){
+      // 다중 반 bulk 저장 — undo 토스트 제공
+      var undoIds = savedRecIds.filter(function(p){
+        return allMentionStudents.some(function(s){ return s._classKey === p.classKey && s.num === p.num; });
+      });
+      var totalCount = allMentionStudents.length;
+      var classLabels = mentionedClassKeys.map(function(ck){
+        var c = classes[ck]; return c.grade+'학년 '+c.classNum+'반';
+      }).join(', ');
+      showToast(classLabels+' 총 '+totalCount+'명에 공지로 저장됐어요', function(){
+        undoIds.forEach(function(p){
+          var cls = classes[p.classKey];
+          if(!cls || !cls.records || !cls.records[p.num]) return;
+          cls.records[p.num] = cls.records[p.num].filter(function(r){ return r.id !== p.id; });
+        });
+        syncActiveClass();
+        saveAll();
+        renderHome();
+        if(document.getElementById('tab-students').style.display === 'grid'){
+          renderSidebar(document.getElementById('search-input').value);
+        }
+      }, '되돌리기');
+    } else {
+      showToast(toastMsg);
+    }
   }
   renderHome();  // 통계·최근 메모 갱신
   if(document.getElementById('tab-students').style.display === 'grid'){
@@ -18447,27 +18989,51 @@ function saveClassMemo(){
 
 function openClassSettings(){
   document.getElementById('class-settings-modal').classList.add('show');
-  // 샘플 배너: 시간표 또는 담당 수업 데이터가 이미 있으면 숨김
+
+  // 샘플 배너: 항상 노출, 상태에 따라 라벨만 변경
   var banner = document.getElementById('sample-data-banner');
   if(banner){
-    var hasTimetable = ttSyncState && ttSyncState.synced;
-    var hasClassMaster = classMaster && classMaster.length > 0;
-    banner.style.display = (hasTimetable || hasClassMaster) ? 'none' : 'flex';
-
-    // sub-text를 지정된 담임반에 맞게 동적 변경
-    var subText = document.getElementById('sample-data-banner-sub');
-    if(subText){
-      var primaryKey = Object.keys(classes).find(function(k){return classes[k].isPrimary;});
-      if(primaryKey){
-        var p = classes[primaryKey];
-        subText.textContent = '담임반('+p.grade+'학년 '+p.classNum+'반)에 1주일 시간표 + 담당 수업 5건이 자동 등록돼요';
-      } else {
-        subText.textContent = '3학년 2반을 담임반으로 만들고 1주일 시간표 + 담당 수업 5건이 등록돼요';
-      }
+    banner.style.display = 'flex';
+    var hasData = (ttSyncState && ttSyncState.synced) || (classMaster && classMaster.length > 0);
+    var labelEl = document.getElementById('sample-data-banner-label');
+    var subEl   = document.getElementById('sample-data-banner-sub');
+    var btnEl   = document.getElementById('sample-data-banner-btn');
+    if(hasData){
+      if(labelEl) labelEl.textContent = '샘플 데이터 추가';
+      if(subEl){ subEl.style.display = 'inline'; subEl.textContent = '· 기능 둘러보기용'; }
+      if(btnEl) btnEl.textContent = '샘플 추가';
+    } else {
+      if(labelEl) labelEl.textContent = '샘플 데이터로 먼저 둘러보기';
+      if(subEl) subEl.style.display = 'none';
+      if(btnEl) btnEl.textContent = '샘플 적용';
     }
   }
+
   refreshNeisBanner();
+
+  // "다른 방법" 토글 라벨 조정
+  var altLabel = document.getElementById('alt-method-label');
+  if(altLabel){
+    if(!neisSettings.atptCode && !neisSettings.skipped){
+      altLabel.textContent = 'NEIS 연동이 어려우세요? 다른 방법 보기';
+    } else {
+      altLabel.textContent = '다른 방법으로 시간표 가져오기';
+    }
+  }
 }
+
+/* details 토글 시 화살표 회전 (한 번만 등록) */
+(function(){
+  document.addEventListener('toggle', function(e){
+    if(e.target.tagName === 'DETAILS'){
+      var chev = e.target.querySelector('#alt-method-chev');
+      if(chev){
+        chev.style.transform = e.target.open ? 'rotate(90deg)' : 'rotate(0deg)';
+      }
+    }
+  }, true);
+})();
+
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
 }
