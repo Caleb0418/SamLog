@@ -8804,6 +8804,25 @@ function loadAll(){
       }
     })();
 
+    // 마이그레이션: schoolTimetable에서 휴업일/특수일 키워드 제거 (1회성)
+    (function migrateSchoolTimetableCleanup(){
+      var SPECIAL_RE = /어린이날|선거일|개교기념|삼일절|광복절|개천절|한글날|현충일|성탄절|노동절|부처님|석가|설날|추석|신정|휴업|방학|공휴|대체휴|재량휴|기념일/;
+      var removed = 0;
+      Object.keys(schoolTimetable).forEach(function(k){
+        if(SPECIAL_RE.test(schoolTimetable[k])){
+          delete schoolTimetable[k];
+          removed++;
+        }
+      });
+      if(removed > 0){
+        try{
+          var yr = getActiveYear ? getActiveYear() : new Date().getFullYear();
+          localStorage.setItem('ht2_school_timetable_' + yr, JSON.stringify(schoolTimetable));
+          console.log('[마이그레이션] schoolTimetable에서 특수일 키워드 '+removed+'건 제거');
+        }catch(e){}
+      }
+    })();
+
     // 마이그레이션: 잘못 들어간 학생 데이터(NaN/합계행) 제거
     var cleaned = 0;
     Object.keys(classes).forEach(function(key){
@@ -10646,22 +10665,85 @@ function adjustToWeekday(dateStr){
 }
 
 /* ─── NEIS 시간표 변경 감지 ─── */
-function detectNeisTimetableChanges(rows){
-  var changes = [];
+/* NEIS rows를 (요일,교시) 기준 빈도 통계로 변환
+   - 정규 시간표: 같은 키에서 가장 많이 등장한 과목
+   - 휴업일/특수일 행은 카운트에서 제외하고 오버라이드 후보로만 저장 */
+var _NEIS_SPECIAL_RE = /어린이날|선거일|개교기념|삼일절|광복절|개천절|한글날|현충일|성탄절|노동절|부처님|석가|설날|추석|신정|휴업|방학|공휴|대체휴|재량휴|기념일/;
+function buildRegularTimetableFromRows(rows){
+  var freq = {};    // key → { subject → count }
+  var dateMap = {}; // 'YYYY-MM-DD:grade-cls-period' → subject (오버라이드 후보)
+
   rows.forEach(function(r){
     if(!r.GRADE || !r.CLASS_NM || !r.ALL_TI_YMD || !r.PERIO || !r.ITRT_CNTNT) return;
     var dow = ymdToDow(r.ALL_TI_YMD);
     if(dow > 5) return;
-    var grade = parseInt(r.GRADE);
-    var cls   = parseInt(r.CLASS_NM);
-    var period= parseInt(r.PERIO);
-    var key   = grade+'-'+cls+'-'+dow+'-'+period;
-    var newSubj = r.ITRT_CNTNT.trim();
+    var grade  = parseInt(r.GRADE);
+    var cls    = parseInt(r.CLASS_NM);
+    var period = parseInt(r.PERIO);
+    var subj   = r.ITRT_CNTNT.trim();
+    if(!subj) return;
+
+    // 날짜 문자열 변환 (YYYYMMDD → YYYY-MM-DD)
+    var ymd = r.ALL_TI_YMD;
+    var ds  = ymd.substr(0,4)+'-'+ymd.substr(4,2)+'-'+ymd.substr(6,2);
+
+    // 특수일 판정: 학사일정 dayType 또는 과목명 키워드
+    var isSpecialDay = false;
+    var schedEvents = (schoolSchedule && schoolSchedule[ds]) || [];
+    if(schedEvents.some(function(ev){ return ev.dayType === '휴업일'; })){
+      isSpecialDay = true;
+    }
+    if(!isSpecialDay && _NEIS_SPECIAL_RE.test(subj)){
+      isSpecialDay = true;
+    }
+
+    var key = grade+'-'+cls+'-'+dow+'-'+period;
+
+    if(isSpecialDay){
+      // 정규 통계에서 제외, 오버라이드 후보로만 기록
+      dateMap[ds+':'+grade+'-'+cls+'-'+period] = subj;
+      return;
+    }
+
+    if(!freq[key]) freq[key] = {};
+    freq[key][subj] = (freq[key][subj] || 0) + 1;
+  });
+
+  // 각 키별 최빈 과목 추출
+  var regular = {};
+  Object.keys(freq).forEach(function(key){
+    var subjects = freq[key];
+    var best = null, bestCount = 0;
+    Object.keys(subjects).forEach(function(s){
+      if(subjects[s] > bestCount){ best = s; bestCount = subjects[s]; }
+    });
+    if(best) regular[key] = best;
+  });
+
+  return { regular: regular, specialDays: dateMap };
+}
+
+function detectNeisTimetableChanges(rows){
+  var normalized = buildRegularTimetableFromRows(rows);
+  var changes = [];
+  Object.keys(normalized.regular).forEach(function(key){
+    var newSubj = normalized.regular[key];
     var oldSubj = schoolTimetable[key] || null;
     if(oldSubj !== newSubj){
-      changes.push({ grade:grade, cls:cls, period:period, dow:dow, oldSubject:oldSubj, newSubject:newSubj, _key:key });
+      var parts = key.split('-');
+      changes.push({
+        grade:  parseInt(parts[0]),
+        cls:    parseInt(parts[1]),
+        dow:    parseInt(parts[2]),
+        period: parseInt(parts[3]),
+        oldSubject: oldSubj,
+        newSubject: newSubj,
+        _key: key
+      });
     }
   });
+  // 특수일 오버라이드를 함께 반환 (neisSyncAll에서 처리)
+  changes._specialDays = normalized.specialDays;
   return changes;
 }
 
@@ -10760,25 +10842,32 @@ function neisSyncAll(){
       chain = chain.then(function(){
         return neisFetchTimetableForClass(neisSettings.apiKey, c.grade, c.classNum)
           .then(function(res){
-            if(res.ok){
-              var chgs = detectNeisTimetableChanges(res.rows);
-              // 첫 동기화(schoolTimetable이 비어있음)이면 바로 적용
-              var isFirstSync = Object.keys(schoolTimetable).length === 0;
-              if(isFirstSync || chgs.length === 0){
-                chgs.forEach(function(ch){ schoolTimetable[ch._key] = ch.newSubject; });
-                // 신규 행 카운트
-                res.rows.forEach(function(r){
-                  if(!r.GRADE||!r.CLASS_NM||!r.ALL_TI_YMD||!r.PERIO||!r.ITRT_CNTNT) return;
-                  var dow=ymdToDow(r.ALL_TI_YMD); if(dow>5) return;
-                  timetableAdded++;
-                });
-              } else {
-                detectedAll = detectedAll.concat(chgs);
-                // 이미 있는 항목(변경 없음)도 추가 카운트
-                res.rows.forEach(function(r){ if(r.ITRT_CNTNT) timetableAdded++; });
-              }
-            } else {
+            if(!res.ok){
               timetableErrors.push({ class: c.grade+'-'+c.classNum, error: res.error, detail: res.detail });
+              return;
+            }
+            var chgs = detectNeisTimetableChanges(res.rows);
+            var specialDays = chgs._specialDays || {};
+
+            // 특수일 오버라이드는 항상 즉시 반영 (변경 감지 대상 아님)
+            Object.keys(specialDays).forEach(function(ovKey){
+              timetableOverrides[ovKey] = {
+                subject: specialDays[ovKey],
+                source: 'neis_special',
+                appliedAt: new Date().toISOString()
+              };
+            });
+
+            // 정규 시간표 변경 감지
+            var isFirstSync = Object.keys(schoolTimetable).length === 0;
+            if(isFirstSync || chgs.length === 0){
+              // 첫 동기화 또는 변경 없음 → 정규만 바로 반영
+              chgs.forEach(function(ch){ schoolTimetable[ch._key] = ch.newSubject; });
+              timetableAdded += chgs.length;
+            } else {
+              // 변경 있음 → 사용자에게 확인 모달
+              detectedAll = detectedAll.concat(chgs);
+              timetableAdded += chgs.length;
             }
           });
       });
