@@ -5142,6 +5142,112 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .sg-confirm-btn-cancel:hover { background: var(--bg-overlay, #EFEDE6); }
 .sg-confirm-btn-proceed { background: var(--warn, #92550A); border: none; color: #fff; }
 .sg-confirm-btn-proceed:hover { background: #6B3F08; }
+
+/* ─── 시간표 변경 확인 모달 ─── */
+.tt-change-modal{
+  background:var(--bg-overlay);border-radius:14px;border:1px solid var(--border);
+  width:100%;max-width:440px;max-height:85vh;display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18);
+}
+.tt-change-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.tt-change-title{
+  display:flex;align-items:center;gap:7px;
+  font-size:14px;font-weight:700;color:var(--text-primary);
+}
+.tt-change-title svg{color:var(--accent,#5b6fe8);flex-shrink:0;}
+.tt-change-close-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--text-tertiary);font-size:16px;padding:2px 6px;border-radius:4px;
+  line-height:1;
+}
+.tt-change-close-btn:hover{background:var(--bg-surface);color:var(--text-primary);}
+.tt-change-desc{
+  padding:12px 18px 10px;font-size:12.5px;color:var(--text-secondary);
+  line-height:1.55;flex-shrink:0;
+}
+.tt-change-options{
+  padding:4px 18px 8px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;
+}
+.tt-change-option{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  border:1.5px solid transparent;transition:all .12s;
+}
+.tt-change-option:hover{background:var(--bg-surface);}
+.tt-change-option input[type="radio"]{
+  margin-top:2px;accent-color:var(--accent,#5b6fe8);flex-shrink:0;cursor:pointer;
+}
+.tt-change-option input[type="radio"]:checked ~ .tt-change-option-inner .tt-change-option-title{
+  color:var(--accent,#5b6fe8);
+}
+.tt-change-option:has(input:checked){
+  border-color:var(--accent,#5b6fe8);background:color-mix(in srgb,var(--accent,#5b6fe8) 8%,transparent);
+}
+.tt-change-option-inner{display:flex;flex-direction:column;gap:2px;}
+.tt-change-option-title{font-size:13px;font-weight:600;color:var(--text-primary);}
+.tt-change-option-sub{font-size:11px;color:var(--text-tertiary);}
+.tt-custom-date-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 18px 10px;flex-shrink:0;
+}
+.tt-custom-date-label{font-size:12px;color:var(--text-secondary);white-space:nowrap;}
+.tt-custom-date-input{
+  flex:1;padding:5px 8px;border-radius:6px;
+  border:1px solid var(--border);background:var(--bg-surface);
+  color:var(--text-primary);font-size:12.5px;
+}
+.tt-change-list-header{
+  padding:8px 18px 6px;font-size:11.5px;font-weight:600;
+  color:var(--text-secondary);border-top:1px solid var(--border);flex-shrink:0;
+}
+.tt-change-list{
+  flex:1;overflow-y:auto;padding:4px 18px 8px;
+  min-height:80px;max-height:260px;
+}
+.tt-change-group-label{
+  font-size:11px;font-weight:700;color:var(--text-tertiary);
+  text-transform:uppercase;letter-spacing:.04em;
+  padding:6px 0 3px;
+}
+.tt-change-row{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 0;border-bottom:1px solid var(--border-subtle,var(--border));
+  font-size:12.5px;
+}
+.tt-change-row:last-child{border-bottom:none;}
+.tt-change-dow{font-weight:600;color:var(--text-primary);min-width:32px;}
+.tt-change-period{color:var(--text-tertiary);min-width:34px;}
+.tt-change-old{color:var(--text-secondary);text-decoration:line-through;min-width:48px;}
+.tt-change-arrow{color:var(--text-tertiary);flex-shrink:0;}
+.tt-change-new{color:var(--accent,#5b6fe8);font-weight:600;}
+.tt-change-new-badge{
+  display:inline-block;padding:1px 5px;border-radius:3px;
+  background:color-mix(in srgb,var(--accent,#5b6fe8) 15%,transparent);
+  color:var(--accent,#5b6fe8);font-size:10px;font-weight:700;text-decoration:none;
+}
+.tt-change-empty{padding:20px 0;text-align:center;color:var(--text-tertiary);font-size:12.5px;}
+.tt-change-footer{
+  display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  padding:12px 18px;border-top:1px solid var(--border);flex-shrink:0;
+}
+.tt-change-cancel-btn{
+  padding:8px 16px;border-radius:8px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);font-size:13px;cursor:pointer;
+  transition:all .12s;
+}
+.tt-change-cancel-btn:hover{background:var(--bg-surface);}
+.tt-change-confirm-btn{
+  padding:8px 20px;border-radius:8px;
+  background:var(--accent,#5b6fe8);border:none;
+  color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .12s;
+}
+.tt-change-confirm-btn:hover{filter:brightness(1.08);}
+[data-theme="dark"] .tt-change-modal{box-shadow:0 8px 32px rgba(0,0,0,0.45);}
 </style>
 </head>
 <body>
@@ -5276,6 +5382,62 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 <!-- ═══════════════════════════════════════════
      온보딩 — 처음 진입 시
 ═══════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════
+     시간표 변경 확인 모달
+═══════════════════════════════════════════ -->
+<div id="tt-change-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9200;align-items:center;justify-content:center;" onclick="closeTimetableChangeModal()">
+  <div class="tt-change-modal" onclick="event.stopPropagation()">
+    <div class="tt-change-header">
+      <div class="tt-change-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        시간표 변경 감지
+      </div>
+      <button class="tt-change-close-btn" onclick="closeTimetableChangeModal()">✕</button>
+    </div>
+    <div class="tt-change-desc">NEIS에서 가져온 시간표가 현재와 다릅니다.<br>언제부터 새 시간표를 적용할까요?</div>
+    <div class="tt-change-options">
+      <label class="tt-change-option">
+        <input type="radio" name="tt-apply-mode" value="next-week" checked onchange="onTtApplyModeChange(this.value)">
+        <span class="tt-change-option-inner">
+          <span class="tt-change-option-title">다음 주부터</span>
+          <span class="tt-change-option-sub">다음 월요일 이후 날짜에 적용</span>
+        </span>
+      </label>
+      <label class="tt-change-option">
+        <input type="radio" name="tt-apply-mode" value="today" onchange="onTtApplyModeChange(this.value)">
+        <span class="tt-change-option-inner">
+          <span class="tt-change-option-title">오늘부터</span>
+          <span class="tt-change-option-sub">오늘 이후 날짜에 적용</span>
+        </span>
+      </label>
+      <label class="tt-change-option">
+        <input type="radio" name="tt-apply-mode" value="custom" onchange="onTtApplyModeChange(this.value)">
+        <span class="tt-change-option-inner">
+          <span class="tt-change-option-title">날짜 지정</span>
+          <span class="tt-change-option-sub">직접 날짜를 선택해서 그날부터 적용</span>
+        </span>
+      </label>
+      <label class="tt-change-option">
+        <input type="radio" name="tt-apply-mode" value="all" onchange="onTtApplyModeChange(this.value)">
+        <span class="tt-change-option-inner">
+          <span class="tt-change-option-title">전체 적용</span>
+          <span class="tt-change-option-sub">기준 시간표만 업데이트 (날짜별 기록 없음)</span>
+        </span>
+      </label>
+    </div>
+    <div class="tt-custom-date-row" style="display:none;">
+      <label class="tt-custom-date-label">적용 시작일</label>
+      <input type="date" id="tt-custom-date-input" class="tt-custom-date-input" oninput="onTtCustomDateChange(this.value)">
+    </div>
+    <div class="tt-change-list-header">변경된 수업 <span id="tt-change-count"></span></div>
+    <div id="tt-change-list" class="tt-change-list"></div>
+    <div class="tt-change-footer">
+      <button class="tt-change-cancel-btn" onclick="closeTimetableChangeModal()">취소</button>
+      <button class="tt-change-confirm-btn" onclick="confirmTimetableChange()">적용하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════
      제출 현황 모달
 ═══════════════════════════════════════════ -->
@@ -7741,6 +7903,11 @@ var classMaster = [];
 // NEIS 시간표 파일 업로드 후 누적됨
 var schoolTimetable = {};
 
+// 시간표 날짜별 오버라이드: key='YYYY-MM-DD:grade-cls-period', value={subject, source, appliedAt}
+var timetableOverrides = {};
+// 시간표 변경 이력: [{syncedAt, effectiveFrom, changes:[{grade,cls,period,dow,oldSubject,newSubject}], appliedCount}]
+var timetableChangeHistory = [];
+
 // NEIS API 설정
 var neisSettings = {
   apiKey: '',
@@ -7877,7 +8044,7 @@ function getActiveTab(){
    학년도 관리
 ═══════════════════════════════════════════ */
 var MAX_YEARS = 3;
-var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_school_schedule'];
+var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_school_schedule'];
 
 function getActiveYear(){
   return localStorage.getItem('ht2_active_year') || String(new Date().getFullYear());
@@ -7931,6 +8098,8 @@ function startNewYear(){
   localStorage.setItem('ht2_classes_' + year, JSON.stringify({}));
   localStorage.setItem('ht2_class_master_' + year, JSON.stringify([]));
   localStorage.setItem('ht2_school_timetable_' + year, JSON.stringify({}));
+  localStorage.setItem('ht2_timetable_overrides_' + year, JSON.stringify({}));
+  localStorage.setItem('ht2_timetable_history_' + year, JSON.stringify([]));
   localStorage.setItem('ht2_tt_sync_state_' + year, JSON.stringify({}));
   localStorage.setItem('ht2_adhoc_slots_' + year, JSON.stringify([]));
   _addYearToList(year);
@@ -7985,6 +8154,8 @@ function saveAll(){
     localStorage.setItem('ht2_classes_' + yr, JSON.stringify(classes));
     localStorage.setItem('ht2_class_master_' + yr, JSON.stringify(classMaster));
     localStorage.setItem('ht2_school_timetable_' + yr, JSON.stringify(schoolTimetable));
+    localStorage.setItem('ht2_timetable_overrides_' + yr, JSON.stringify(timetableOverrides));
+    localStorage.setItem('ht2_timetable_history_' + yr, JSON.stringify(timetableChangeHistory));
     localStorage.setItem('ht2_tt_sync_state_' + yr, JSON.stringify(ttSyncState));
     localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
     localStorage.setItem('ht2_attendance_' + yr, JSON.stringify(attendanceRecords));
@@ -7993,7 +8164,7 @@ function saveAll(){
   }catch(e){ console.warn('저장 실패', e); }
 }
 
-var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
+var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
 var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings','ht2_neis_key'];
 
 /* ─── 백업 폴더 핸들 (IndexedDB) ─── */
@@ -8299,6 +8470,12 @@ function loadAll(){
     }
     var st = _getYearLS('ht2_school_timetable');
     if(st) schoolTimetable = JSON.parse(st);
+    try{
+      var ovStr = _getYearLS('ht2_timetable_overrides');
+      if(ovStr) timetableOverrides = JSON.parse(ovStr);
+      var histStr = _getYearLS('ht2_timetable_history');
+      if(histStr) timetableChangeHistory = JSON.parse(histStr);
+    }catch(e){ timetableOverrides={}; timetableChangeHistory=[]; }
     var tts = _getYearLS('ht2_tt_sync_state');
     if(tts) ttSyncState = JSON.parse(tts);
     var as = _getYearLS('ht2_adhoc_slots');
@@ -10007,14 +10184,96 @@ function neisFetchSchedule(apiKey, opts){
   });
 }
 
+/* ─── 시간표 헬퍼 ─── */
+function getTimetableForDate(grade, cls, day, period, dateStr){
+  if(dateStr){
+    var ovKey = dateStr+':'+grade+'-'+cls+'-'+period;
+    if(timetableOverrides[ovKey]) return timetableOverrides[ovKey].subject;
+  }
+  return schoolTimetable[grade+'-'+cls+'-'+day+'-'+period] || null;
+}
+
+function getWeeklyTimetable(grade, cls, mondayDateStr){
+  var result = {}; // {dow: {period: subject}}
+  var base = new Date(mondayDateStr);
+  for(var dow=1; dow<=5; dow++){
+    result[dow] = {};
+    var d = new Date(base); d.setDate(base.getDate()+(dow-1));
+    var ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    for(var p=1; p<=8; p++){
+      var subj = getTimetableForDate(grade, cls, dow, p, ds);
+      if(subj) result[dow][p] = subj;
+    }
+  }
+  return result;
+}
+
+/* ─── NEIS 시간표 변경 감지 ─── */
+function detectNeisTimetableChanges(rows){
+  var changes = [];
+  rows.forEach(function(r){
+    if(!r.GRADE || !r.CLASS_NM || !r.ALL_TI_YMD || !r.PERIO || !r.ITRT_CNTNT) return;
+    var dow = ymdToDow(r.ALL_TI_YMD);
+    if(dow > 5) return;
+    var grade = parseInt(r.GRADE);
+    var cls   = parseInt(r.CLASS_NM);
+    var period= parseInt(r.PERIO);
+    var key   = grade+'-'+cls+'-'+dow+'-'+period;
+    var newSubj = r.ITRT_CNTNT.trim();
+    var oldSubj = schoolTimetable[key] || null;
+    if(oldSubj !== newSubj){
+      changes.push({ grade:grade, cls:cls, period:period, dow:dow, oldSubject:oldSubj, newSubject:newSubj, _key:key });
+    }
+  });
+  return changes;
+}
+
+/* 변경사항 일괄 적용 */
+function applyDetectedChanges(changes, effectiveFrom){
+  var now = new Date().toISOString();
+  // schoolTimetable(기준 시간표) 업데이트
+  changes.forEach(function(c){ schoolTimetable[c._key] = c.newSubject; });
+  // effectiveFrom이 특정 날짜면 그 날짜부터 오버라이드도 추가
+  if(effectiveFrom && effectiveFrom !== 'all'){
+    var from = new Date(effectiveFrom);
+    var endOfYear = new Date(from.getFullYear(), 11, 31);
+    // 해당 요일의 앞으로 모든 날짜에 오버라이드
+    var d = new Date(from);
+    while(d <= endOfYear){
+      changes.forEach(function(c){
+        if(dowOfDate(d) === c.dow){
+          var ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+          var ovKey = ds+':'+c.grade+'-'+c.cls+'-'+c.period;
+          timetableOverrides[ovKey] = { subject: c.newSubject, source: 'neis_change', appliedAt: now };
+        }
+      });
+      d.setDate(d.getDate()+1);
+    }
+  }
+  timetableChangeHistory.unshift({
+    syncedAt: now,
+    effectiveFrom: effectiveFrom || 'all',
+    changes: changes.map(function(c){ return { grade:c.grade, cls:c.cls, period:c.period, dow:c.dow, oldSubject:c.oldSubject, newSubject:c.newSubject }; }),
+    appliedCount: changes.length
+  });
+  if(timetableChangeHistory.length > 50) timetableChangeHistory = timetableChangeHistory.slice(0,50);
+}
+
+function dowOfDate(d){
+  var n = d.getDay(); // 0=일, 1=월 … 6=토
+  return n === 0 ? 7 : n; // 1=월 … 7=일
+}
+
+/* 하위호환 래퍼 (기존 코드에서 직접 호출하던 곳이 있을 경우 대비) */
 function mergeNeisTimetable(rows){
+  var changes = detectNeisTimetableChanges(rows);
+  changes.forEach(function(c){ schoolTimetable[c._key] = c.newSubject; });
+  // 신규(oldSubject===null) 포함 전체 업데이트된 수 반환 (added 개념)
   var added = 0;
   rows.forEach(function(r){
     if(!r.GRADE || !r.CLASS_NM || !r.ALL_TI_YMD || !r.PERIO || !r.ITRT_CNTNT) return;
     var dow = ymdToDow(r.ALL_TI_YMD);
     if(dow > 5) return;
-    var key = parseInt(r.GRADE)+'-'+parseInt(r.CLASS_NM)+'-'+dow+'-'+parseInt(r.PERIO);
-    schoolTimetable[key] = r.ITRT_CNTNT.trim();
     added++;
   });
   return added;
@@ -10054,21 +10313,39 @@ function neisSyncAll(){
 
     var classList = Object.keys(classes).map(function(k){ return { grade: classes[k].grade, classNum: classes[k].classNum }; });
     if(classList.length === 0){
-      return { schedule: { added: scheduleAdded, error: scheduleError }, timetable: { added: 0, errors: [] } };
+      return { schedule: { added: scheduleAdded, error: scheduleError }, timetable: { added: 0, errors: [], detected: [] } };
     }
-    var timetableAdded = 0, timetableErrors = [];
+    var timetableAdded = 0, timetableErrors = [], detectedAll = [];
     var chain = Promise.resolve();
     classList.forEach(function(c){
       chain = chain.then(function(){
         return neisFetchTimetableForClass(neisSettings.apiKey, c.grade, c.classNum)
           .then(function(res){
-            if(res.ok){ timetableAdded += mergeNeisTimetable(res.rows); }
-            else { timetableErrors.push({ class: c.grade+'-'+c.classNum, error: res.error, detail: res.detail }); }
+            if(res.ok){
+              var chgs = detectNeisTimetableChanges(res.rows);
+              // 첫 동기화(schoolTimetable이 비어있음)이면 바로 적용
+              var isFirstSync = Object.keys(schoolTimetable).length === 0;
+              if(isFirstSync || chgs.length === 0){
+                chgs.forEach(function(ch){ schoolTimetable[ch._key] = ch.newSubject; });
+                // 신규 행 카운트
+                res.rows.forEach(function(r){
+                  if(!r.GRADE||!r.CLASS_NM||!r.ALL_TI_YMD||!r.PERIO||!r.ITRT_CNTNT) return;
+                  var dow=ymdToDow(r.ALL_TI_YMD); if(dow>5) return;
+                  timetableAdded++;
+                });
+              } else {
+                detectedAll = detectedAll.concat(chgs);
+                // 이미 있는 항목(변경 없음)도 추가 카운트
+                res.rows.forEach(function(r){ if(r.ITRT_CNTNT) timetableAdded++; });
+              }
+            } else {
+              timetableErrors.push({ class: c.grade+'-'+c.classNum, error: res.error, detail: res.detail });
+            }
           });
       });
     });
     return chain.then(function(){
-      return { schedule: { added: scheduleAdded, error: scheduleError }, timetable: { added: timetableAdded, errors: timetableErrors } };
+      return { schedule: { added: scheduleAdded, error: scheduleError }, timetable: { added: timetableAdded, errors: timetableErrors, detected: detectedAll } };
     });
   }).then(function(result){
     if(!result) return result;
@@ -10329,6 +10606,14 @@ function onNeisSyncClick(){
     btn.disabled = false;
     btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>지금 동기화';
     if(!result){ return; }
+
+    // 변경사항이 감지된 경우 변경 확인 모달 오픈
+    var detected = (result.timetable && result.timetable.detected) || [];
+    if(detected.length > 0){
+      openTimetableChangeModal(detected, result);
+      return;
+    }
+
     var html = '', hasError = false;
     if(result.schedule.error){
       hasError = true;
@@ -10349,6 +10634,124 @@ function onNeisSyncClick(){
     resultEl.style.display = 'block';
     refreshNeisBanner();
   });
+}
+
+/* ─── 시간표 변경 확인 모달 ─── */
+var ttChangeState = { detected: [], syncResult: null, applyMode: 'next-week', customDate: '' };
+
+function openTimetableChangeModal(detected, syncResult){
+  ttChangeState.detected = detected;
+  ttChangeState.syncResult = syncResult;
+  ttChangeState.applyMode = 'next-week';
+  // 기본 커스텀 날짜: 오늘
+  var t = new Date();
+  ttChangeState.customDate = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  var el = document.getElementById('tt-change-overlay');
+  if(!el) return;
+  el.style.display = 'flex';
+  // 라디오 초기화
+  var radios = el.querySelectorAll('input[name="tt-apply-mode"]');
+  radios.forEach(function(r){ r.checked = (r.value === ttChangeState.applyMode); });
+  // 커스텀 날짜 필드
+  var cdate = el.querySelector('#tt-custom-date-input');
+  if(cdate){ cdate.value = ttChangeState.customDate; cdate.closest('.tt-custom-date-row').style.display = ttChangeState.applyMode==='custom'?'flex':'none'; }
+  renderTtChangeList();
+}
+
+function closeTimetableChangeModal(){
+  var el = document.getElementById('tt-change-overlay');
+  if(el) el.style.display = 'none';
+}
+
+function onTtApplyModeChange(val){
+  ttChangeState.applyMode = val;
+  var row = document.querySelector('.tt-custom-date-row');
+  if(row) row.style.display = val==='custom' ? 'flex' : 'none';
+}
+
+function onTtCustomDateChange(val){
+  ttChangeState.customDate = val;
+}
+
+var DOW_KO = ['','월','화','수','목','금'];
+
+function getEffectiveFromDate(){
+  var mode = ttChangeState.applyMode;
+  if(mode === 'all') return 'all';
+  if(mode === 'today'){
+    var t = new Date();
+    return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  }
+  if(mode === 'next-week'){
+    var t = new Date();
+    var day = t.getDay(); // 0=일
+    var daysUntilMon = (day === 0) ? 1 : (8 - day);
+    t.setDate(t.getDate()+daysUntilMon);
+    return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  }
+  if(mode === 'custom') return ttChangeState.customDate || 'all';
+  return 'all';
+}
+
+function renderTtChangeList(){
+  var el = document.getElementById('tt-change-list');
+  if(!el) return;
+  var chgs = ttChangeState.detected;
+  var countEl = document.getElementById('tt-change-count');
+  if(countEl) countEl.textContent = chgs && chgs.length ? '('+chgs.length+'건)' : '';
+  if(!chgs || chgs.length === 0){ el.innerHTML = '<div class="tt-change-empty">변경된 수업이 없어요</div>'; return; }
+  // grade-cls별로 그룹
+  var grouped = {};
+  chgs.forEach(function(c){
+    var gk = c.grade+'학년 '+c.cls+'반';
+    if(!grouped[gk]) grouped[gk] = [];
+    grouped[gk].push(c);
+  });
+  var html = '';
+  Object.keys(grouped).forEach(function(gk){
+    html += '<div class="tt-change-group-label">'+escapeHtml(gk)+'</div>';
+    grouped[gk].forEach(function(c){
+      var dow = DOW_KO[c.dow] || c.dow;
+      var oldTxt = c.oldSubject ? escapeHtml(c.oldSubject) : '<span class="tt-change-new-badge">신규</span>';
+      html += '<div class="tt-change-row">'
+        + '<span class="tt-change-dow">'+dow+'요일</span>'
+        + '<span class="tt-change-period">'+c.period+'교시</span>'
+        + '<span class="tt-change-old">'+oldTxt+'</span>'
+        + '<svg class="tt-change-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'
+        + '<span class="tt-change-new">'+escapeHtml(c.newSubject)+'</span>'
+        + '</div>';
+    });
+  });
+  el.innerHTML = html;
+}
+
+function confirmTimetableChange(){
+  var effectiveFrom = getEffectiveFromDate();
+  applyDetectedChanges(ttChangeState.detected, effectiveFrom);
+  saveAll();
+  closeTimetableChangeModal();
+
+  // 동기화 결과 메시지 표시
+  var result = ttChangeState.syncResult;
+  var resultEl = document.getElementById('neis-sync-result');
+  var html = '', hasError = false;
+  if(result){
+    if(result.schedule && result.schedule.error){
+      hasError = true;
+      var sd = result.schedule.error.error==='network'?'CORS/네트워크 차단':(result.schedule.error.detail||result.schedule.error.error);
+      html += '<div>학사일정: <strong style="color:var(--danger,#ef4444);">실패</strong> — '+escapeHtml(sd)+'</div>';
+    } else if(result.schedule){
+      html += '<div>학사일정: <strong>'+result.schedule.added+'건</strong> 추가</div>';
+    }
+    html += '<div>시간표: <strong>'+ttChangeState.detected.length+'건</strong> 변경 적용 완료</div>';
+  }
+  if(resultEl){
+    resultEl.className = 'neis-sync-result'+(hasError?'':' success');
+    resultEl.innerHTML = html;
+    resultEl.style.display = 'block';
+  }
+  refreshNeisBanner();
+  showToast('시간표 변경사항이 적용됐어요');
 }
 
 function saveAttendanceSettings(){
