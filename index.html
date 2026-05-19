@@ -2035,6 +2035,123 @@ body{
 .att-preview-slot.long{font-size:10px;}
 .att-preview-count{font-size:10px;color:var(--text-tertiary);margin-top:6px;}
 
+/* ═══════════════════════════════════════════
+   출결 사례 추가/수정 모달
+═══════════════════════════════════════════ */
+.att-modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.45);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.att-modal{
+  background:var(--bg-overlay);border-radius:12px;
+  width:100%;max-width:540px;max-height:90vh;overflow-y:auto;
+  border:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.att-modal-head{
+  padding:16px 20px;display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);
+}
+.att-modal-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;font-size:13px;flex-shrink:0;
+}
+.att-modal-info{flex:1;min-width:0;}
+.att-modal-name{font-size:14px;font-weight:600;color:var(--text);}
+.att-modal-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+.att-modal-close{
+  width:28px;height:28px;padding:0;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--text-secondary);
+  display:flex;align-items:center;justify-content:center;border-radius:5px;
+}
+.att-modal-close:hover{background:var(--bg-elevated);}
+.att-modal-body{padding:18px 20px;}
+/* 단계 헤더 */
+.att-step{margin-bottom:18px;}
+.att-step:last-child{margin-bottom:0;}
+.att-step-disabled{opacity:0.35;pointer-events:none;}
+.att-step-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.att-step-num{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.att-step-disabled .att-step-num{background:var(--text-tertiary);}
+.att-step-label{font-size:12px;color:var(--text-secondary);font-weight:500;}
+/* 사유 칩 */
+.att-reason-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.att-reason-chip{
+  padding:10px 6px;font-size:12px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:4px;font-family:inherit;
+}
+.att-reason-chip:hover{background:var(--bg-elevated);}
+.att-reason-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.att-reason-chip.illness.active{background:#FCEBEB;color:#791F1F;border-color:#E24B4A;border-width:1.5px;font-weight:600;}
+.att-reason-chip.unjustified.active{background:#FAEEDA;color:#633806;border-color:#BA7517;border-width:1.5px;font-weight:600;}
+.att-reason-chip.other.active{background:#F1EFE8;color:#2C2C2A;border-color:#888780;border-width:1.5px;font-weight:600;}
+.att-reason-chip.approved.active{background:#EAF3DE;color:#27500A;border-color:#1D9E75;border-width:1.5px;font-weight:600;}
+[data-theme="dark"] .att-reason-chip.illness.active{background:#2A1412;color:#F09595;border-color:#E24B4A;}
+[data-theme="dark"] .att-reason-chip.unjustified.active{background:#2A1E0A;color:#FAC775;border-color:#BA7517;}
+[data-theme="dark"] .att-reason-chip.other.active{background:#2C2C2A;color:#D3D1C7;border-color:#888780;}
+[data-theme="dark"] .att-reason-chip.approved.active{background:#0F2A1E;color:#9FE1CB;border-color:#1D9E75;}
+/* 상태 카드 */
+.att-status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.att-status-card{
+  padding:11px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--bg-surface);color:var(--text-secondary);
+  border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;
+}
+.att-status-card:hover{background:var(--bg-elevated);}
+.att-status-card.active{background:#FCEBEB;color:#791F1F;border-color:#E24B4A;border-width:1.5px;font-weight:600;}
+[data-theme="dark"] .att-status-card.active{background:#2A1412;color:#F09595;border-color:#E24B4A;}
+.att-status-icon{font-size:16px;line-height:1;}
+.att-status-name{font-size:11px;font-weight:500;}
+/* 교시 그리드 */
+.att-period-section{background:var(--bg-surface);border-radius:8px;padding:12px 14px;}
+.att-period-hint{font-size:11px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5;}
+.att-period-grid{display:flex;gap:4px;flex-wrap:wrap;}
+.att-period-cell{
+  width:36px;height:36px;
+  background:var(--bg-overlay);border:1px solid var(--border);
+  color:var(--text-secondary);border-radius:6px;
+  font-size:13px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-family:inherit;
+}
+.att-period-cell.long{font-size:11px;}
+.att-period-cell:hover{background:var(--bg-elevated);}
+.att-period-cell.missed{background:#FCEBEB;border-color:#E24B4A;color:#791F1F;font-weight:600;}
+[data-theme="dark"] .att-period-cell.missed{background:#2A1412;border-color:#E24B4A;color:#F09595;}
+.att-period-summary{font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;}
+.att-period-summary-emph{color:var(--danger);font-weight:600;}
+/* 메모 */
+.att-memo-input{
+  width:100%;padding:10px 12px;font-size:12px;
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:inherit;box-sizing:border-box;
+}
+.att-memo-input:focus{outline:none;border-color:var(--accent);}
+/* 푸터 */
+.att-modal-footer{
+  padding:12px 20px;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-end;
+  background:var(--bg-surface);border-radius:0 0 12px 12px;
+}
+.att-modal-footer button{font-family:inherit;padding:8px 14px;font-size:13px;border-radius:6px;cursor:pointer;}
+.att-modal-footer .btn-cancel{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
+.att-modal-footer .btn-cancel:hover{background:var(--bg-elevated);}
+.att-modal-footer .btn-save{background:var(--accent);color:#fff;border:none;font-weight:500;}
+.att-modal-footer .btn-save:hover{background:var(--accent-hover,var(--accent));}
+.att-modal-footer .btn-save:disabled{opacity:0.4;cursor:not-allowed;}
+
 .cr-memo-edit{
   margin-left:auto;
   width:24px;height:24px;border-radius:5px;
@@ -4737,6 +4854,103 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <button class="btn-secondary" onclick="closeAttendanceSettings()">취소</button>
       <button class="btn-primary" onclick="saveAttSettingsFromModal()">저장</button>
     </div>
+  </div>
+</div>
+
+<!-- 출결 사례 추가/수정 모달 -->
+<div id="att-modal-overlay" class="att-modal-overlay" style="display:none;">
+  <div class="att-modal">
+
+    <div class="att-modal-head">
+      <div class="att-modal-avatar" id="att-modal-avatar">--</div>
+      <div class="att-modal-info">
+        <div class="att-modal-name" id="att-modal-name">-</div>
+        <div class="att-modal-sub" id="att-modal-sub">-</div>
+      </div>
+      <button class="att-modal-close" onclick="closeAttendanceModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="att-modal-body">
+
+      <!-- 1단계: 사유 -->
+      <div class="att-step" id="att-step-reason">
+        <div class="att-step-header">
+          <span class="att-step-num">1</span>
+          <span class="att-step-label">결시 사유</span>
+        </div>
+        <div class="att-reason-grid">
+          <button class="att-reason-chip illness" data-reason="illness" onclick="selectAttReason('illness')">
+            <span class="att-reason-dot" style="background:#E24B4A;"></span>질병
+          </button>
+          <button class="att-reason-chip unjustified" data-reason="unjustified" onclick="selectAttReason('unjustified')">
+            <span class="att-reason-dot" style="background:#BA7517;"></span>미인정
+          </button>
+          <button class="att-reason-chip other" data-reason="other" onclick="selectAttReason('other')">
+            <span class="att-reason-dot" style="background:#888780;"></span>기타
+          </button>
+          <button class="att-reason-chip approved" data-reason="approved" onclick="selectAttReason('approved')">
+            <span class="att-reason-dot" style="background:#1D9E75;"></span>출석인정
+          </button>
+        </div>
+      </div>
+
+      <!-- 2단계: 상태 -->
+      <div class="att-step att-step-disabled" id="att-step-status">
+        <div class="att-step-header">
+          <span class="att-step-num">2</span>
+          <span class="att-step-label">출결 상태</span>
+        </div>
+        <div class="att-status-grid">
+          <button class="att-status-card" data-status="absent" onclick="selectAttStatus('absent')">
+            <span class="att-status-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+            <span class="att-status-name">결석</span>
+          </button>
+          <button class="att-status-card" data-status="late" onclick="selectAttStatus('late')">
+            <span class="att-status-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            <span class="att-status-name">지각</span>
+          </button>
+          <button class="att-status-card" data-status="early_leave" onclick="selectAttStatus('early_leave')">
+            <span class="att-status-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+            <span class="att-status-name">조퇴</span>
+          </button>
+          <button class="att-status-card" data-status="partial" onclick="selectAttStatus('partial')">
+            <span class="att-status-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
+            <span class="att-status-name">결과</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3단계: 교시 그리드 (지각/조퇴/결과만) -->
+      <div class="att-step att-step-disabled" id="att-step-periods" style="display:none;">
+        <div class="att-step-header">
+          <span class="att-step-num">3</span>
+          <span class="att-step-label" id="att-step-periods-label">결시 교시</span>
+        </div>
+        <div class="att-period-section">
+          <div class="att-period-hint" id="att-period-hint"></div>
+          <div class="att-period-grid" id="att-period-grid"></div>
+          <div class="att-period-summary" id="att-period-summary"></div>
+        </div>
+      </div>
+
+      <!-- 4단계: 메모 -->
+      <div class="att-step att-step-disabled" id="att-step-memo">
+        <div class="att-step-header">
+          <span class="att-step-num">4</span>
+          <span class="att-step-label">메모 <span style="color:var(--text-tertiary);font-weight:400;">선택</span></span>
+        </div>
+        <input type="text" id="att-memo" class="att-memo-input" placeholder="예) 어머님 전화 확인, 오전 몸살" maxlength="200" />
+      </div>
+
+    </div>
+
+    <div class="att-modal-footer">
+      <button class="btn-cancel" onclick="closeAttendanceModal()">취소</button>
+      <button class="btn-save" id="att-save-btn" disabled onclick="saveAttendanceRecord()">저장</button>
+    </div>
+
   </div>
 </div>
 
@@ -13663,13 +13877,229 @@ function onSelectStudentForAttendance(num){
   openAttendanceAdd(num);
 }
 
-/* 모달 함수 — 2/3에서 본격 구현. 현재는 토스트만 */
+/* ═══════════════════════════════════════════
+   출결 사례 추가/수정 모달
+═══════════════════════════════════════════ */
+var attModalState = {
+  mode: 'add',
+  studentNum: null,
+  recordId: null,
+  reason: null,
+  status: null,
+  periods: {},
+  memo: ''
+};
+
 function openAttendanceAdd(studentNum){
-  showToast('사례 추가 모달은 다음 단계(2/3)에서 구현됩니다');
+  var c = getActiveClass();
+  var stu = c && c.students.find(function(s){ return s.num === studentNum; });
+  if(!stu){ showToast('학생을 찾을 수 없어요'); return; }
+  attModalState = { mode:'add', studentNum:studentNum, recordId:null, reason:null, status:null, periods:{}, memo:'' };
+  setupAttModalForStudent(stu);
+  document.getElementById('att-modal-overlay').style.display = 'flex';
 }
+
 function openAttendanceEdit(studentNum, recordId){
-  showToast('수정 모달은 다음 단계(2/3)에서 구현됩니다');
+  var c = getActiveClass();
+  var stu = c && c.students.find(function(s){ return s.num === studentNum; });
+  if(!stu){ showToast('학생을 찾을 수 없어요'); return; }
+  var recs = getAttendanceRecords(attendanceCurrentDate, studentNum);
+  var rec = recs.find(function(r){ return r.id === recordId; });
+  if(!rec){ showToast('기록을 찾을 수 없어요'); return; }
+  attModalState = {
+    mode: 'edit', studentNum:studentNum, recordId:recordId,
+    reason: rec.reason, status: rec.status,
+    periods: Object.assign({}, rec.periods || {}),
+    memo: rec.memo || ''
+  };
+  setupAttModalForStudent(stu);
+  // 기존 값 반영
+  selectAttReason(rec.reason, true);
+  selectAttStatus(rec.status, true);
+  renderAttPeriodGrid();
+  refreshAttPeriodSummary();
+  document.getElementById('att-memo').value = rec.memo || '';
+  // 수정 모드: 모든 단계 활성화
+  document.getElementById('att-step-status').classList.remove('att-step-disabled');
+  if(rec.status !== 'absent'){
+    document.getElementById('att-step-periods').style.display = 'block';
+    document.getElementById('att-step-periods').classList.remove('att-step-disabled');
+  }
+  document.getElementById('att-step-memo').classList.remove('att-step-disabled');
+  updateAttSaveButton();
+  document.getElementById('att-modal-overlay').style.display = 'flex';
 }
+
+function setupAttModalForStudent(stu){
+  var c = getActiveClass();
+  var schoolName = c ? (c.grade+'학년 '+c.classNum+'반') : '';
+  var dateLabel = formatAttendanceDate(attendanceCurrentDate);
+  document.getElementById('att-modal-avatar').textContent = stu.name.substring(0,2);
+  document.getElementById('att-modal-name').textContent = stu.name + ' (' + parseInt(stu.num) + '번)';
+  document.getElementById('att-modal-sub').textContent = schoolName + ' · ' + dateLabel;
+  // UI 초기화
+  document.querySelectorAll('.att-reason-chip').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.att-status-card').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('att-step-status').classList.add('att-step-disabled');
+  document.getElementById('att-step-periods').style.display = 'none';
+  document.getElementById('att-step-periods').classList.add('att-step-disabled');
+  document.getElementById('att-step-memo').classList.add('att-step-disabled');
+  document.getElementById('att-memo').value = '';
+  document.getElementById('att-period-grid').innerHTML = '';
+  document.getElementById('att-period-summary').textContent = '';
+  document.getElementById('att-save-btn').disabled = true;
+}
+
+function closeAttendanceModal(){
+  document.getElementById('att-modal-overlay').style.display = 'none';
+}
+
+function selectAttReason(reason, suppressNext){
+  attModalState.reason = reason;
+  document.querySelectorAll('.att-reason-chip').forEach(function(b){
+    b.classList.toggle('active', b.dataset.reason === reason);
+  });
+  if(!suppressNext) document.getElementById('att-step-status').classList.remove('att-step-disabled');
+  updateAttSaveButton();
+}
+
+function selectAttStatus(status, suppressNext){
+  if(!attModalState.reason) return;
+  attModalState.status = status;
+  document.querySelectorAll('.att-status-card').forEach(function(b){
+    b.classList.toggle('active', b.dataset.status === status);
+  });
+  if(suppressNext) return;
+  if(status === 'absent'){
+    var allMissed = {};
+    getPeriodSlots().forEach(function(s){ allMissed[s] = true; });
+    attModalState.periods = allMissed;
+    document.getElementById('att-step-periods').style.display = 'none';
+    document.getElementById('att-step-periods').classList.add('att-step-disabled');
+  } else {
+    attModalState.periods = {};
+    document.getElementById('att-step-periods').style.display = 'block';
+    document.getElementById('att-step-periods').classList.remove('att-step-disabled');
+    renderAttPeriodGrid();
+    refreshAttPeriodSummary();
+  }
+  document.getElementById('att-step-memo').classList.remove('att-step-disabled');
+  updateAttSaveButton();
+}
+
+function renderAttPeriodGrid(){
+  var status = attModalState.status;
+  var slots = getPeriodSlots();
+  var label = document.getElementById('att-step-periods-label');
+  var hint  = document.getElementById('att-period-hint');
+  if(status === 'late'){
+    label.textContent = '몇 교시까지 못 왔는지 선택';
+    hint.innerHTML = '클릭한 교시 <strong style="color:var(--text);">이전까지 모두 결시</strong>로 처리됩니다';
+  } else if(status === 'early_leave'){
+    label.textContent = '몇 교시부터 빠지는지 선택';
+    hint.innerHTML = '클릭한 교시 <strong style="color:var(--text);">이후까지 모두 결시</strong>로 처리됩니다';
+  } else {
+    label.textContent = '결시 교시 개별 선택';
+    hint.innerHTML = '결시한 교시를 <strong style="color:var(--text);">하나씩 클릭</strong>해서 선택하세요 (다중 선택)';
+  }
+  var html = '';
+  slots.forEach(function(s){
+    var longCls = (s==='조회'||s==='종례') ? ' long' : '';
+    var missedCls = attModalState.periods[s] === true ? ' missed' : '';
+    html += '<button class="att-period-cell'+longCls+missedCls+'" onclick="onAttPeriodClick(\''+s.replace(/'/g,"\\'")+'\')">' + escapeHtml(s) + '</button>';
+  });
+  document.getElementById('att-period-grid').innerHTML = html;
+}
+
+function onAttPeriodClick(slot){
+  var status = attModalState.status;
+  var slots = getPeriodSlots();
+  var idx = slots.indexOf(slot);
+  if(idx < 0) return;
+  if(status === 'late'){
+    attModalState.periods = {};
+    for(var i=0;i<=idx;i++) attModalState.periods[slots[i]] = true;
+  } else if(status === 'early_leave'){
+    attModalState.periods = {};
+    for(var i=idx;i<slots.length;i++) attModalState.periods[slots[i]] = true;
+  } else {
+    if(attModalState.periods[slot]) delete attModalState.periods[slot];
+    else attModalState.periods[slot] = true;
+  }
+  renderAttPeriodGrid();
+  refreshAttPeriodSummary();
+  updateAttSaveButton();
+}
+
+function refreshAttPeriodSummary(){
+  var slots = getPeriodSlots();
+  var missed   = slots.filter(function(s){ return attModalState.periods[s] === true; });
+  var attended = slots.filter(function(s){ return !attModalState.periods[s]; });
+  var summary  = document.getElementById('att-period-summary');
+  if(missed.length === 0){
+    summary.innerHTML = '<span style="color:var(--text-tertiary);">결시 교시 없음 — 교시를 선택해주세요</span>';
+  } else {
+    summary.innerHTML =
+      '<span class="att-period-summary-emph">'+missed.join('·')+'교시 결시</span>' +
+      (attended.length > 0 ? ' · <span style="color:var(--text-tertiary);">'+attended.join('·')+' 출석</span>' : '');
+  }
+}
+
+function updateAttSaveButton(){
+  var btn = document.getElementById('att-save-btn');
+  if(!attModalState.reason || !attModalState.status){ btn.disabled=true; return; }
+  if(attModalState.status !== 'absent'){
+    var cnt = Object.keys(attModalState.periods).filter(function(k){ return attModalState.periods[k]===true; }).length;
+    if(cnt === 0){ btn.disabled=true; return; }
+  }
+  btn.disabled = false;
+}
+
+function saveAttendanceRecord(){
+  if(!attModalState.reason || !attModalState.status){ showToast('사유와 상태를 모두 선택해주세요'); return; }
+  if(attModalState.status !== 'absent'){
+    var cnt = Object.keys(attModalState.periods).filter(function(k){ return attModalState.periods[k]===true; }).length;
+    if(cnt === 0){ showToast('결시 교시를 선택해주세요'); return; }
+  }
+  attModalState.memo = document.getElementById('att-memo').value.trim();
+  var date = attendanceCurrentDate;
+  var num  = attModalState.studentNum;
+  if(!attendanceRecords[date]) attendanceRecords[date] = {};
+  if(!attendanceRecords[date][num]) attendanceRecords[date][num] = [];
+  if(attModalState.mode === 'edit'){
+    var recs = attendanceRecords[date][num];
+    var idx  = recs.findIndex(function(r){ return r.id === attModalState.recordId; });
+    if(idx >= 0){
+      recs[idx].reason  = attModalState.reason;
+      recs[idx].status  = attModalState.status;
+      recs[idx].periods = Object.assign({}, attModalState.periods);
+      recs[idx].memo    = attModalState.memo;
+      recs[idx].updatedAt = new Date().toISOString();
+    }
+    showToast('수정됨');
+  } else {
+    var newRec = {
+      id: 'att_'+Date.now()+'_'+Math.random().toString(36).substr(2,6),
+      status: attModalState.status,
+      reason: attModalState.reason,
+      periods: Object.assign({}, attModalState.periods),
+      memo: attModalState.memo,
+      notifiedParent: false,
+      createdAt: new Date().toISOString()
+    };
+    attendanceRecords[date][num].push(newRec);
+    showToast('저장됨');
+  }
+  saveAll();
+  closeAttendanceModal();
+  renderAttendanceTab();
+}
+
+/* 오버레이 외부 클릭 시 닫기 */
+(function(){
+  var el = document.getElementById('att-modal-overlay');
+  if(el) el.addEventListener('click', function(e){ if(e.target===this) closeAttendanceModal(); });
+})();
 function deleteAttendanceRecord(studentNum, recordId){
   if(!confirm('이 출결 기록을 삭제할까요?')) return;
   var dayRecs = attendanceRecords[attendanceCurrentDate] || {};
