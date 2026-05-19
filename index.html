@@ -1864,17 +1864,24 @@ body{
   background:var(--bg-surface);border-radius:6px;
 }
 .st-check{
-  width:18px;height:18px;border-radius:4px;
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 10px;
+  border-radius:6px;
   border:1.5px solid var(--border);
   background:transparent;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;color:transparent;
-  transition:background .12s, border-color .12s;
+  font-size:11px;font-weight:500;font-family:inherit;
+  color:var(--text-tertiary);
+  white-space:nowrap;flex-shrink:0;
+  transition:background .12s, border-color .12s, color .12s;
+}
+.st-check:hover:not(.done){
+  border-color:var(--accent);color:var(--accent);
 }
 .st-check.done{
-  background:var(--accent);border-color:var(--accent);color:#fff;
+  background:var(--accent-dim);
+  border-color:var(--accent);
+  color:var(--accent);
 }
-.st-check:hover:not(.done){border-color:var(--accent);}
 .st-title{font-size:12px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .st-count{font-size:11px;color:var(--text-tertiary);white-space:nowrap;}
 .st-count strong{color:var(--accent);font-weight:500;}
@@ -8734,8 +8741,13 @@ function renderTimeline(){
             : '';
           var stDoneCls = r.submitTracker.submitted ? ' done' : '';
           html += '<div class="submit-tracker-row">';
-          html += '<button class="st-check'+stDoneCls+'" onclick="toggleSubmit(\''+r.id+'\',\''+stGroupId+'\')" title="'+(r.submitTracker.submitted?'제출 완료 (클릭해서 취소)':'미제출 (클릭해서 제출 처리)') +'">';
-          html += '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+          html += '<button class="st-check'+stDoneCls+'" onclick="toggleSubmit(\''+r.id+'\',\''+stGroupId+'\')">';
+          if(r.submitTracker.submitted){
+            html += '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+            html += '<span style="font-size:11px;font-weight:500;margin-left:4px;">제출 완료</span>';
+          } else {
+            html += '<span style="font-size:11px;font-weight:500;">제출 완료로 표시</span>';
+          }
           html += '</button>';
           html += '<span class="st-title">'+escapeHtml(r.submitTracker.title||'')+'</span>';
           html += stCountText;
