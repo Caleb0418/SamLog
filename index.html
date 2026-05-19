@@ -2686,13 +2686,6 @@ body{
 [data-theme="dark"] .smv-unauth-converted{background:rgba(0,0,0,0.2);}
 .smv-unauth-converted strong{font-weight:700;}
 .smv-unauth-empty{font-size:11px;color:var(--text-tertiary);flex:1;}
-.smv-unauth-hint{
-  width:16px;height:16px;border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;
-  background:var(--danger);color:#fff;
-  font-size:10px;font-weight:700;cursor:help;flex-shrink:0;
-}
-.smv-unauth.empty .smv-unauth-hint{background:var(--text-tertiary);}
 .smv-name-class{font-size:11px;color:var(--text-secondary);margin-top:1px;}
 .smv-student-select{
   padding:5px 8px;font-size:12px;
@@ -16778,7 +16771,6 @@ function renderStudentMonthlyView(){
   } else {
     html += '<span class="smv-unauth-empty">없음</span>';
   }
-  html += '<span class="smv-unauth-hint" title="미인정 지각/조퇴/결과 3회는 결석 1일로 환산됩니다">?</span>';
   html += '</div>';
   html += '<div class="smv-cal">';
   ['일','월','화','수','목','금','토'].forEach(function(d, i){
