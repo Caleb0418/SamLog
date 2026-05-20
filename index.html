@@ -14816,6 +14816,8 @@ function _areaForCreative(area){
   if(area === '동아리')   return '동아리';
   return null;
 }
+// 5-A: 빌더 영역명 → classSchedule.category (단일값) 매핑 (= _areaForCreative 별칭)
+function _csAreaForBuilder(builderArea){ return _areaForCreative(builderArea); }
 // builderArea → adhocSlot.kind 매핑
 function _adhocKindsForArea(builderArea){
   if(builderArea === '창체자율') return ['창체','자율'];
@@ -14929,27 +14931,90 @@ function getClassScheduleCreativeForStudent(builderArea, student, classData){
   return Object.keys(dedupMap).map(function(k){ return dedupMap[k]; });
 }
 
-// 설정탭 + 임시슬롯 + 반 시간표 통합 (날짜순)
-function getAllCreativeForStudent(builderArea, student, classKey){
-  var classData = classes[classKey] || getActiveClass();
-  // ① 반 시간표 (담임반 전용, 최우선)
-  var fromClassSchedule = getClassScheduleCreativeForStudent(builderArea, student, classData);
-  // ② 설정탭(creativeActivities)
-  var fromSettings = getCreativeActivitiesForStudent(builderArea, student, classKey)
-    .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
-  // ③ 임시슬롯(adhocSlots)
-  var fromAdhoc = getAdhocCreativeForStudent(builderArea, student, classData);
-  // 중복 제거 (같은 날짜+이름): 반시간표 > 설정탭 > 임시슬롯 우선순위
+/* ═══════════════════════════════════════════
+   반 시간표 → 생기부 매칭 (5-A)
+═══════════════════════════════════════════ */
+// 학생이 실제로 참여한 classSchedule 항목 반환 (spec 로직)
+// - 영역 카테고리가 일치하고
+// - target 학년에 포함되고 (target 비어있으면 전체 적용)
+// - periods 중 하나라도 결시면 제외
+function getClassScheduleForStudent(builderArea, student, classKey){
+  var category = _csAreaForBuilder(builderArea);
+  if(!category) return [];
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
+
+  var classData = classKey ? (classes[classKey] || getActiveClass()) : getActiveClass();
+  // 반 시간표는 담임반 전용
+  if(!classData || !classData.isPrimary) return [];
+
+  var attended = classSchedule.filter(function(c){
+    if(!c || c.category !== category) return false;
+    if(!_csIsTargetForStudent(c, student, classData)) return false;
+    if(_csIsStudentMissingActivity(student, c)) return false;
+    return true;
+  });
+
+  // {date, name, note} 통일 형식으로 변환
+  var unified = attended.map(function(c){
+    return {
+      date: c.date,
+      name: c.activity,
+      note: c.note && c.note.indexOf('확인 필요') >= 0 ? '' : (c.note || ''),
+      _source: 'classSchedule'
+    };
+  });
+
+  // 같은 날짜+이름 중복 제거
   var seen = {};
-  fromClassSchedule.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
-  fromSettings = fromSettings.filter(function(c){ return !seen[c.date+'|'+c.name]; });
-  fromSettings.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
-  fromAdhoc = fromAdhoc.filter(function(c){ return !seen[c.date+'|'+c.name]; });
-  var all = fromClassSchedule.concat(fromSettings).concat(fromAdhoc);
-  all.sort(function(a,b){
+  unified = unified.filter(function(u){
+    var key = u.date + '|' + u.name;
+    if(seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+
+  unified.sort(function(a, b){
     return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
   });
-  return all;
+  return unified;
+}
+
+// 반 시간표 + 설정탭 + 임시슬롯 통합 (날짜순)
+// 우선순위: 반 시간표(classSchedule) > 설정탭(creativeActivities) > 임시슬롯(adhocSlots)
+function getAllCreativeForStudent(builderArea, student, classKey){
+  var classData = classKey ? (classes[classKey] || getActiveClass()) : getActiveClass();
+
+  // 1순위: 반 시간표 (새 함수 사용)
+  var fromSchedule = getClassScheduleForStudent(builderArea, student, classKey)
+    .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
+
+  // 2순위: 설정탭 (기존)
+  var fromSettings = getCreativeActivitiesForStudent(builderArea, student, classKey)
+    .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
+
+  // 3순위: 임시슬롯 (기존)
+  var fromAdhoc = getAdhocCreativeForStudent(builderArea, student, classData);
+
+  // 중복 제거: 1순위 → 2순위 → 3순위 (date+name 기준)
+  var seen = {};
+  var result = [];
+  fromSchedule.forEach(function(c){
+    var key = c.date + '|' + c.name;
+    if(!seen[key]){ seen[key] = true; result.push(c); }
+  });
+  fromSettings.forEach(function(c){
+    var key = c.date + '|' + c.name;
+    if(!seen[key]){ seen[key] = true; result.push(c); }
+  });
+  fromAdhoc.forEach(function(c){
+    var key = c.date + '|' + c.name;
+    if(!seen[key]){ seen[key] = true; result.push(c); }
+  });
+
+  result.sort(function(a, b){
+    return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+  });
+  return result;
 }
 function formatCreativeNameDateForPrompt(activities, areaLabel){
   if(!activities || activities.length === 0) return [];
