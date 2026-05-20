@@ -2878,6 +2878,24 @@ body{
   position:absolute;top:3px;right:4px;
   font-size:9px;color:var(--text-tertiary);
 }
+.smv-cal-pills{
+  display:flex;flex-direction:column;gap:1px;
+  width:100%;
+}
+.smv-cal-pill-sm{
+  font-size:8px;font-weight:600;
+  padding:1px 3px;border-radius:2px;
+  line-height:1.4;text-align:center;
+  white-space:nowrap;overflow:hidden;
+}
+.smv-cal-pill-sm.absent{background:#FCEBEB;color:#791F1F;}
+.smv-cal-pill-sm.late{background:#FAEEDA;color:#633806;}
+.smv-cal-pill-sm.early_leave{background:#F1EFE8;color:#2C2C2A;}
+.smv-cal-pill-sm.partial{background:#F1EFE8;color:#2C2C2A;}
+[data-theme="dark"] .smv-cal-pill-sm.absent{background:#2A1412;color:#F09595;}
+[data-theme="dark"] .smv-cal-pill-sm.late{background:#2A1E0A;color:#FAC775;}
+[data-theme="dark"] .smv-cal-pill-sm.early_leave,
+[data-theme="dark"] .smv-cal-pill-sm.partial{background:#2C2C2A;color:#D3D1C7;}
 .smv-recent{
   border-top:1px solid var(--border);padding-top:12px;
 }
@@ -3005,6 +3023,12 @@ body{
 .cmm-tbl tbody td.day{
   font-variant-numeric:tabular-nums;
   cursor:pointer;
+}
+.cmm-tbl tbody td.day.multi-status{
+  font-size:8px;
+  letter-spacing:-0.5px;
+  padding:0 1px;
+  line-height:1;
 }
 .cmm-tbl tbody td.day:hover:not(.weekend){
   background:var(--bg-elevated);
@@ -18038,8 +18062,15 @@ function renderStudentMonthlyView(){
     if(recs.length>0){
       var priorityList=['absent','late','early_leave','partial'];
       var topStatus=priorityList.find(function(p){ return recs.some(function(r){ return r.status===p; }); })||recs[0].status;
-      html += '<div class="smv-cal-pill '+topStatus+'">'+getStatusLabel(topStatus)+'</div>';
-      if(recs.length>1) html += '<div class="smv-cal-multi">+'+(recs.length-1)+'</div>';
+      var priorityOrder=['absent','late','early_leave','partial'];
+      var shownStatuses=priorityOrder.filter(function(p){
+        return recs.some(function(r){ return r.status===p; });
+      });
+      html += '<div class="smv-cal-pills">';
+      shownStatuses.forEach(function(st){
+        html += '<div class="smv-cal-pill-sm '+st+'">'+getStatusLabel(st)+'</div>';
+      });
+      html += '</div>';
     }
     var schedEvents = schoolSchedule[date]||[];
     if(schedEvents.length>0){
@@ -18213,14 +18244,20 @@ function renderClassMonthlyView(){
         cellCls.push('weekend');
       } else if(recs.length>0){
         var priorityList=['absent','late','early_leave','partial'];
+        var shortLabel={absent:'결',late:'지',early_leave:'조',partial:'과'};
         var topStatus=priorityList.find(function(p){ return recs.some(function(r){ return r.status===p; }); });
-        if(topStatus){
-          cellCls.push(topStatus);
-          cellText=({absent:'결',late:'지',early_leave:'조',partial:'과'})[topStatus]||'';
-          // 셀 표시는 topStatus 하나, 카운팅은 모든 상태 각각
-          recs.forEach(function(r){
-            if(rowCounts[r.status] !== undefined) rowCounts[r.status]++;
-          });
+        if(topStatus) cellCls.push(topStatus);
+        recs.forEach(function(r){
+          if(rowCounts[r.status] !== undefined) rowCounts[r.status]++;
+        });
+        var presentStatuses=priorityList.filter(function(p){
+          return recs.some(function(r){ return r.status===p; });
+        });
+        if(presentStatuses.length === 1){
+          cellText = shortLabel[presentStatuses[0]] || '';
+        } else {
+          cellText = presentStatuses.map(function(p){ return shortLabel[p]||''; }).join('·');
+          cellCls.push('multi-status');
         }
       }
       var onclick='';
