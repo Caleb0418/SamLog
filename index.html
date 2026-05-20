@@ -14519,6 +14519,7 @@ function buildBehaviorPrompt(ctx) {
 }
 
 function buildJayulPrompt(ctx) {
+  try { console.log('[buildJayulPrompt 진입]', { studentNum: ctx && ctx.student && ctx.student.num, currentClassKey: currentClassKey }); } catch(e){}
   var lines = buildPromptHeader(ctx);
   var meta = ctx.areaMeta;
   lines.push('[영역 특성]');
@@ -14640,6 +14641,7 @@ var AREA_BUILDER_MAP = {
    generateSaengibuPrompt — 영역별 빌더 라우팅
 ═══════════════════════════════════════════ */
 function generateSaengibuPrompt(){
+  try { console.log('[generateSaengibuPrompt 진입]', { area: sgState.area, studentNum: sgState.studentNum, selectedRecs: sgState.selectedRecIds.length, adhocSlotsLen: (adhocSlots||[]).length }); } catch(e){}
   if(sgState.selectedRecIds.length === 0) return;
 
   // ─── 세특 과목 필수 검증 ───
