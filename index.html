@@ -19626,7 +19626,7 @@ function renderClassWeek(){
             '<span class="wct-subject">'+escapeHtml(c0.subject)+'</span> '+
             '<span class="wct-class">'+escapeHtml(label)+'</span>'+
             (cells.length>1
-              ? '<span class="wct-more" title="이 슬롯에 다른 반 수업도 있어요: '+escapeHtml(cells.slice(1).map(function(x){return x.entry.grade+'-'+x.entry.cls;}).join(', '))+'">+'+(cells.length-1)+'</span>'
+              ? '<span class="wct-more" title="이 슬롯에 다른 반 수업도 있어요: '+escapeHtml(cells.slice(1).filter(function(x){return x&&x.entry;}).map(function(x){return x.entry.grade+'-'+x.entry.cls;}).join(', '))+'">+'+(cells.length-1)+'</span>'
               : '')+
           '</div>'+
           sessionPill+
