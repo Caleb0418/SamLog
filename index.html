@@ -4480,12 +4480,16 @@ details > summary::-webkit-details-marker { display:none; }
 .class-week-cell{ position:relative; }
 .week-cell-session-manage{
   display:none;position:absolute;top:3px;right:3px;
-  background:none;border:none;
-  font-size:12px;color:var(--text-tertiary);
-  cursor:pointer;padding:2px 3px;line-height:1;border-radius:3px;
+  background:var(--bg-elevated,#fff);border:1px solid var(--border);border-radius:4px;
+  font-size:10px;color:var(--text-secondary);
+  cursor:pointer;padding:2px 5px;line-height:1.2;font-family:inherit;
+  gap:3px;align-items:center;
 }
-.class-week-cell:hover .week-cell-session-manage{ display:block; }
-.week-cell-session-manage:hover{ color:var(--accent);background:var(--accent-dim); }
+.class-week-cell:hover .week-cell-session-manage{ display:inline-flex; }
+.week-cell-session-manage:hover{ color:var(--accent);border-color:var(--accent);background:var(--accent-dim); }
+.week-cell-session-manage .ssm-label{ font-weight:500; }
+.week-cell-session-manage .ssm-icon{ font-size:11px;opacity:0.7; }
+.week-cell-session-manage:hover .ssm-icon{ opacity:1; }
 /* 범례 토글 버튼 */
 .week-legend-toggle{
   margin-left:auto;background:none;
@@ -19585,7 +19589,7 @@ function renderClassWeek(){
           '<div class="week-cell-subject">'+escapeHtml(c0.subject)+'</div>'+
           '<div class="week-cell-class">'+escapeHtml(label)+(cells.length>1?' +'+(cells.length-1):'')+'</div>'+
           sessionPill+
-          '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\',\''+cellDate+'\')" title="차시 관리">⟳</button>'+
+          '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\',\''+cellDate+'\')" title="차시 관리"><span class="ssm-label">차시</span><span class="ssm-icon">⟳</span></button>'+
         '</div>';
       } else if(adhocCells.length > 0){
         var a0 = adhocCells[0];
