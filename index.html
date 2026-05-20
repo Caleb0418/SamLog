@@ -7156,13 +7156,21 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <label class="form-label" style="display:block;">날짜</label>
         <input type="date" id="adhoc-date" class="form-input-text" onchange="onAdhocDateChange()">
       </div>
-      <div style="width:110px;">
+      <div style="width:auto;">
         <label class="form-label" style="display:block;">교시</label>
-        <select id="adhoc-period" class="form-select" onchange="onAdhocDateChange()">
-          <option value="1">1교시</option><option value="2">2교시</option><option value="3">3교시</option>
-          <option value="4">4교시</option><option value="5">5교시</option><option value="6">6교시</option>
-          <option value="7">7교시</option>
-        </select>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <select id="adhoc-period-from" class="form-select" onchange="onAdhocDateChange()" style="width:76px;">
+            <option value="1">1교시</option><option value="2">2교시</option><option value="3">3교시</option>
+            <option value="4">4교시</option><option value="5">5교시</option><option value="6">6교시</option>
+            <option value="7">7교시</option>
+          </select>
+          <span id="adhoc-period-range-sep" style="font-size:13px;color:var(--text-secondary);padding:0 2px;">~</span>
+          <select id="adhoc-period-to" class="form-select" onchange="onAdhocDateChange()" style="width:76px;">
+            <option value="1">1교시</option><option value="2">2교시</option><option value="3">3교시</option>
+            <option value="4">4교시</option><option value="5">5교시</option><option value="6">6교시</option>
+            <option value="7">7교시</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -19477,9 +19485,12 @@ function openAddAdhoc(period, dayOfWeek){
     target = addDays(currentWeekStart, dayOfWeek - 1);
   }
   var targetStr = formatDateForInput(target);
-  updateAdhocModalTitle(target, period);
+  updateAdhocModalTitle(target, period, period);
   document.getElementById('adhoc-date').value = targetStr;
-  document.getElementById('adhoc-period').value = String(period);
+  document.getElementById('adhoc-period-from').value = String(period);
+  document.getElementById('adhoc-period-to').value = String(period);
+  document.getElementById('adhoc-period-range-sep').style.display = '';
+  document.getElementById('adhoc-period-to').style.display = '';
   document.getElementById('adhoc-kind').value = '보강';
   Array.from(document.querySelectorAll('input[name="adhoc-kind-radio"]')).forEach(function(r){
     r.checked = (r.value === '보강');
@@ -19500,9 +19511,13 @@ function openEditAdhoc(id){
   if(!a) return;
   editingAdhocId = id;
   var d = new Date(a.date+'T00:00:00');
-  updateAdhocModalTitle(d, a.period);
+  updateAdhocModalTitle(d, a.period, a.period);
   document.getElementById('adhoc-date').value = a.date;
-  document.getElementById('adhoc-period').value = String(a.period);
+  document.getElementById('adhoc-period-from').value = String(a.period);
+  document.getElementById('adhoc-period-to').value = String(a.period);
+  // 수정 모드: 단일 교시만 표시
+  document.getElementById('adhoc-period-range-sep').style.display = 'none';
+  document.getElementById('adhoc-period-to').style.display = 'none';
   document.getElementById('adhoc-kind').value = a.kind||'보강';
   Array.from(document.querySelectorAll('input[name="adhoc-kind-radio"]')).forEach(function(r){
     r.checked = (r.value === (a.kind||'보강'));
@@ -19518,17 +19533,24 @@ function openEditAdhoc(id){
   setTimeout(function(){ document.getElementById('adhoc-subject').focus(); }, 50);
 }
 
-function updateAdhocModalTitle(target, period){
+function updateAdhocModalTitle(target, periodFrom, periodTo){
+  var periodLabel = (periodFrom === periodTo)
+    ? periodFrom+'교시'
+    : periodFrom+'~'+periodTo+'교시';
   document.getElementById('adhoc-modal-title').textContent =
-    (target.getMonth()+1)+'월 '+target.getDate()+'일 ('+WEEKDAYS[target.getDay()]+') '+period+'교시';
+    (target.getMonth()+1)+'월 '+target.getDate()+'일 ('+WEEKDAYS[target.getDay()]+') '+periodLabel;
 }
 
 function onAdhocDateChange(){
   var dateStr = document.getElementById('adhoc-date').value;
-  var period = document.getElementById('adhoc-period').value;
-  if(!dateStr || !period) return;
+  var pFrom = parseInt(document.getElementById('adhoc-period-from').value);
+  var pToEl = document.getElementById('adhoc-period-to');
+  var pTo = (pToEl.style.display === 'none') ? pFrom : parseInt(pToEl.value);
+  // 종료 교시가 시작 교시보다 작아지면 자동 보정
+  if(pTo < pFrom){ pToEl.value = String(pFrom); pTo = pFrom; }
+  if(!dateStr) return;
   var d = new Date(dateStr+'T00:00:00');
-  updateAdhocModalTitle(d, parseInt(period));
+  updateAdhocModalTitle(d, pFrom, pTo);
 }
 
 function closeAddAdhoc(){
@@ -19540,39 +19562,47 @@ function saveAddAdhoc(){
   var subject = document.getElementById('adhoc-subject').value.trim();
   var kind = document.getElementById('adhoc-kind').value;
   var date = document.getElementById('adhoc-date').value;
-  var period = parseInt(document.getElementById('adhoc-period').value);
+  var pFrom = parseInt(document.getElementById('adhoc-period-from').value);
+  var pToEl = document.getElementById('adhoc-period-to');
+  var pTo = (pToEl.style.display === 'none') ? pFrom : parseInt(pToEl.value);
+  if(pTo < pFrom) pTo = pFrom;
   var grade = document.getElementById('adhoc-grade').value.trim();
   var cls = document.getElementById('adhoc-cls').value.trim();
   var note = document.getElementById('adhoc-note').value.trim();
   if(!subject){ showToast('과목을 입력해주세요'); return; }
-  if(!date || !period){ showToast('날짜·교시가 필요해요'); return; }
+  if(!date || !pFrom){ showToast('날짜·교시가 필요해요'); return; }
 
   if(editingAdhocId){
-    // 수정 모드
+    // 수정 모드: 단일 교시만 수정
     var a = adhocSlots.find(function(x){ return x.id === editingAdhocId; });
     if(a){
       a.subject = subject; a.kind = kind; a.date = date;
-      a.period = period; a.grade = grade; a.cls = cls; a.note = note;
+      a.period = pFrom; a.grade = grade; a.cls = cls; a.note = note;
     }
     saveAll();
     closeAddAdhoc();
     renderClassTab();
     showToast(kind+' "'+subject+'" 수정됨');
   } else {
-    // 신규 추가
-    var item = {
-      id: 'adhoc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-      date: date, period: period,
-      subject: subject, kind: kind,
-      grade: grade, cls: cls, note: note,
-      memos: []
-    };
-    adhocSlots.push(item);
+    // 신규 추가: 교시 범위만큼 개별 슬롯 생성
+    var added = 0;
+    for(var p = pFrom; p <= pTo; p++){
+      var item = {
+        id: 'adhoc_'+Date.now()+'_'+p+'_'+Math.random().toString(36).slice(2,6),
+        date: date, period: p,
+        subject: subject, kind: kind,
+        grade: grade, cls: cls, note: note,
+        memos: []
+      };
+      adhocSlots.push(item);
+      added++;
+    }
     saveAll();
     closeAddAdhoc();
     renderClassTab();
     if(document.getElementById('tab-home').style.display === 'block') renderHome();
-    showToast(kind+' "'+subject+'" 추가됨');
+    var periodLabel = (pFrom === pTo) ? pFrom+'교시' : pFrom+'~'+pTo+'교시';
+    showToast(kind+' "'+subject+'" '+periodLabel+' 추가됨'+(added>1?' ('+added+'개)':''));
   }
 }
 
