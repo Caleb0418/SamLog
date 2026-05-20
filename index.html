@@ -6355,6 +6355,24 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </details>
 
+<!-- ④ 교시별 시작 시간 (접힘) -->
+<details style="margin-top:8px;" id="period-times-details">
+  <summary style="cursor:pointer;padding:8px 4px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;list-style:none;user-select:none;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+    <span>교시별 시작 시간</span>
+    <span style="font-size:10px;color:var(--text-tertiary);font-weight:400;">· 알람 정확도 향상</span>
+  </summary>
+  <div style="padding:10px 4px 4px;">
+    <div style="font-size:11px;color:var(--text-tertiary);line-height:1.5;margin-bottom:10px;">
+      학교 시정에 맞게 각 교시 시작 시각을 설정해주세요. 이 시간을 기준으로 수업 시작 전 알람과 미기록 수업 경과 시간이 계산돼요.
+    </div>
+    <div id="period-times-list"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+      <button class="btn-small secondary" onclick="resetPeriodTimesToDefault()" style="font-size:11px;">기본값으로 되돌리기</button>
+    </div>
+  </div>
+</details>
+
       </div>
 
       <div class="class-modal-footer">
@@ -7183,6 +7201,33 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <div class="modal-actions">
       <button class="btn-small secondary" onclick="closeAddAdhoc()">취소</button>
       <button class="btn-small primary" onclick="saveAddAdhoc()"><span id="adhoc-save-label">추가하기</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- 슬롯 편집 모달 (담당 수업의 요일·교시 다중 선택) -->
+<div class="modal-overlay" id="slot-editor-modal" onclick="if(event.target===this)closeSlotEditor()">
+  <div class="modal" style="max-width:520px;">
+    <div class="memo-modal-head">
+      <div class="memo-modal-head-text">
+        <div class="memo-modal-eyebrow">시간표 슬롯</div>
+        <div class="memo-modal-title" id="slot-editor-title">—</div>
+      </div>
+      <button class="memo-modal-close" onclick="closeSlotEditor()">×</button>
+    </div>
+    <div class="memo-modal-body">
+      <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px;line-height:1.5;">
+        이 수업이 들어가는 요일·교시를 모두 선택하세요. 여러 칸을 동시에 선택할 수 있어요.
+      </div>
+      <div id="slot-editor-grid" style="border:0.5px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg-surface);"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--text-secondary);">
+        <span id="slot-editor-count">0개 슬롯 선택됨</span>
+        <button class="btn-small secondary" onclick="clearSlotEditor()" style="font-size:11px;">모두 해제</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="padding:12px 18px 16px;display:flex;justify-content:flex-end;gap:8px;">
+      <button class="btn-small secondary" onclick="closeSlotEditor()">취소</button>
+      <button class="btn-small primary" onclick="saveSlotEditor()">저장</button>
     </div>
   </div>
 </div>
@@ -14034,6 +14079,77 @@ function formatRecordsForPrompt(contextRecords) {
   return lines;
 }
 
+/* ─────────────────────────────────────────
+   창체 수업 자동 연동 (영역: 자율·진로·동아리)
+───────────────────────────────────────── */
+function _isStudentMissingSlot(studentNum, date, period){
+  if(!attendanceRecords || !attendanceRecords[date]) return false;
+  var recs = attendanceRecords[date][studentNum] || [];
+  for(var i=0; i<recs.length; i++){
+    var r = recs[i];
+    if(r.status === 'absent') return true;
+    if(r.periods && r.periods[String(period)]) return true;
+  }
+  return false;
+}
+function _matchAreaKinds(area){
+  if(area === '창체자율')  return ['창체','자율'];
+  if(area === '창체진로')  return ['창체','진로','자율'];
+  if(area === '동아리')    return ['동아리','창체'];
+  return [];
+}
+function getAttendedCreativeSlotsForStudent(area, student, classKey){
+  var kinds = _matchAreaKinds(area);
+  if(kinds.length === 0) return [];
+  if(!Array.isArray(adhocSlots) || adhocSlots.length === 0) return [];
+  var classData = classes[classKey] || getActiveClass();
+  var stuGrade = classData ? String(classData.grade) : '';
+  var stuCls   = classData ? String(classData.classNum) : '';
+  var attended = adhocSlots.filter(function(a){
+    if(!a || !a.kind) return false;
+    if(kinds.indexOf(a.kind) < 0) return false;
+    if(a.grade && stuGrade && String(a.grade) !== stuGrade) return false;
+    if(a.cls   && stuCls   && String(a.cls)   !== stuCls)   return false;
+    if(_isStudentMissingSlot(student.num, a.date, a.period)) return false;
+    return true;
+  });
+  attended.sort(function(a,b){
+    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return (a.period||0) - (b.period||0);
+  });
+  return attended;
+}
+function _slotMemoSummary(slot){
+  var memos = slot.memos || [];
+  if(memos.length === 0) return '';
+  var first = memos[0];
+  var txt = '';
+  if(first.progress) txt += first.progress;
+  if(first.content){ if(txt) txt += ' / '; txt += first.content; }
+  if(txt.length > 80) txt = txt.slice(0, 80) + '…';
+  return txt;
+}
+function formatCreativeSlotsForPrompt(slots){
+  if(!slots || slots.length === 0) return [];
+  var lines = [];
+  lines.push('');
+  lines.push('[학생이 실제 이수한 창의적 체험활동 수업 — ' + slots.length + '건]');
+  lines.push('· 아래는 교사가 [수업 관리]에서 직접 등록한 창체·자율·동아리 임시 수업 중,');
+  lines.push('  학생의 출결을 확인했을 때 실제로 참석한 것으로 확인된 수업이야.');
+  lines.push('· 활동명과 날짜는 정확히 반영하고, 메모의 진도/특이사항이 있다면');
+  lines.push('  학생이 보고·확인·발표한 구체적 내용으로 한두 줄에 녹여 써.');
+  lines.push('· 표기 예) "소방안전교육(2026.05.20.)에서 화재 예방 방법을 확인하고');
+  lines.push('   우리 학교에 적용할 수 있는 방안을 발표함."');
+  slots.forEach(function(s){
+    var line = '· ' + s.date + ' ' + (s.period||'?') + '교시 [' + (s.kind||'창체') + '] ' + (s.subject||'(활동명 미지정)');
+    var memo = _slotMemoSummary(s);
+    if(memo) line += ' — ' + memo;
+    else if(s.note) line += ' — ' + s.note;
+    lines.push(line);
+  });
+  return lines;
+}
+
 /* ═══════════════════════════════════════════
    영역별 프롬프트 빌더 — 5개 영역
 ═══════════════════════════════════════════ */
@@ -14083,6 +14199,8 @@ function buildJayulPrompt(ctx) {
   lines.push('· 활동 사실의 단순 나열 금지 — 학생만의 역할·기여·변화 중심');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  var jayulSlots = getAttendedCreativeSlotsForStudent('창체자율', ctx.student, currentClassKey);
+  lines.push.apply(lines, formatCreativeSlotsForPrompt(jayulSlots));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
   return lines.join('\n');
@@ -14109,6 +14227,8 @@ function buildJinroPrompt(ctx) {
   lines.push('· 학생의 흥미·적성과 활동이 일관되게 보이도록 구성');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  var jinroSlots = getAttendedCreativeSlotsForStudent('창체진로', ctx.student, currentClassKey);
+  lines.push.apply(lines, formatCreativeSlotsForPrompt(jinroSlots));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
   return lines.join('\n');
@@ -14133,6 +14253,8 @@ function buildDongariPrompt(ctx) {
   lines.push('· "최우수" 같은 등급 표현 대신 구체적 활동·역할로 서술');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
+  var dongariSlots = getAttendedCreativeSlotsForStudent('동아리', ctx.student, currentClassKey);
+  lines.push.apply(lines, formatCreativeSlotsForPrompt(dongariSlots));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
   return lines.join('\n');
@@ -15980,11 +16102,66 @@ function toggleHomeAlertsExpanded(){
    교시별 시작·종료 시각 테이블
    시작: {교시: [시, 분]}, 종료: {교시: 시}
 ═══════════════════════════════════════════ */
-var PERIOD_START = {
+var PERIOD_START_DEFAULT = {
   1:[8,40], 2:[9,40], 3:[10,40], 4:[11,40],
   5:[13,20], 6:[14,20], 7:[15,10]
 };
+var PERIOD_START = JSON.parse(JSON.stringify(PERIOD_START_DEFAULT));
 var PERIOD_END_HOUR = {1:9, 2:10, 3:11, 4:12, 5:14, 6:15, 7:16};
+function savePeriodTimes(){
+  try{ localStorage.setItem('ht2_period_times', JSON.stringify(PERIOD_START)); }catch(e){}
+  recomputePeriodEndHour();
+}
+function loadPeriodTimes(){
+  try{
+    var s = localStorage.getItem('ht2_period_times');
+    if(s){
+      var d = JSON.parse(s);
+      Object.keys(d).forEach(function(k){
+        var v = d[k];
+        if(Array.isArray(v) && v.length===2 && Number.isFinite(v[0]) && Number.isFinite(v[1])){
+          PERIOD_START[k] = [v[0]|0, v[1]|0];
+        }
+      });
+    }
+  }catch(e){}
+  recomputePeriodEndHour();
+}
+function recomputePeriodEndHour(){
+  for(var p=1; p<=7; p++){
+    var start = PERIOD_START[p];
+    if(!start) continue;
+    var next = PERIOD_START[p+1];
+    var endH;
+    if(next){
+      var startTotal = start[0]*60+start[1];
+      var nextTotal  = next[0]*60+next[1];
+      if(nextTotal - startTotal > 90){
+        var endMin = startTotal + 50;
+        endH = Math.floor(endMin/60);
+      } else {
+        endH = next[0];
+      }
+    } else {
+      var endMin2 = start[0]*60+start[1]+50;
+      endH = Math.floor(endMin2/60);
+    }
+    PERIOD_END_HOUR[p] = endH;
+  }
+}
+function formatPeriodTime(p){
+  var s = PERIOD_START[p];
+  if(!s) return '--:--';
+  return (s[0]<10?'0':'')+s[0]+':'+(s[1]<10?'0':'')+s[1];
+}
+function parseHHMM(str){
+  if(!str) return null;
+  var m = String(str).match(/^(\d{1,2}):(\d{2})$/);
+  if(!m) return null;
+  var h = parseInt(m[1]), mm = parseInt(m[2]);
+  if(isNaN(h)||isNaN(mm)||h<0||h>23||mm<0||mm>59) return null;
+  return [h, mm];
+}
 
 /* ─── 알람 설정 ─── */
 var ALERT_SETTINGS = {
@@ -16197,11 +16374,16 @@ function computeAlerts(){
         return label+': '+staleByClass[label]+'명';
       });
       staleDesc = staleDescParts.join(' · ');
+    } else {
+      staleDesc = '최근 일주일 동안 어떤 기록도 남기지 않은 학생들이에요';
     }
+    var staleTitle = primaryKey
+      ? '담임반 학생 '+staleTotal+'명, 일주일째 기록 없음'
+      : staleTotal+'명, 일주일째 기록 없음';
     alerts.push({
       kind:'info',
       icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-      title: (primaryKey ? '담임반 ' : '')+'7일+ 기록 없는 학생 '+staleTotal+'명',
+      title: staleTitle,
       desc: staleDesc,
       cta:'학생 보기 →',
       action: primaryKey ? "switchClassKey('"+primaryKey+"');switchTab('students')" : "switchTab('students')",
@@ -20152,6 +20334,9 @@ function renderClassMasterList(){
         '</div>'+
         '<div class="cmi-slots">'+slotsHtml+'</div>'+
       '</div>'+
+      '<button class="cmi-delete" onclick="openSlotEditor(\''+c.id+'\')" title="시간표 슬롯 편집" style="margin-right:4px;">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+
+      '</button>'+
       '<button class="cmi-delete" onclick="deleteClassMaster(\''+c.id+'\')" title="삭제">'+
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'+
       '</button>'+
@@ -20177,12 +20362,13 @@ function addClassMaster(){
   // 시간표에서 자동 슬롯 탐색
   var slots = findSlotsFromTimetable(grade, cls, subject);
 
-  classMaster.push({
+  var newCm = {
     id: 'cm'+Date.now(),
     grade: grade, cls: cls, subject: subject,
     slots: slots, memos: [],
     sessionResets: [], sessionOverrides: {}
-  });
+  };
+  classMaster.push(newCm);
   saveAll();
 
   // 폼 리셋
@@ -20198,6 +20384,10 @@ function addClassMaster(){
 
   renderClassTab();
   if(document.getElementById('tab-home').style.display === 'block') renderHome();
+  // 시간표 자동 매칭 실패 시 슬롯 편집기 자동 오픈
+  if(slots.length === 0){
+    setTimeout(function(){ openSlotEditor(newCm.id); }, 200);
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -20283,6 +20473,95 @@ function loadSampleClassData(){
   if(banner) banner.style.display = 'none';
 
   showToast('샘플 데이터 적용됨! 모달을 닫고 \'오늘 수업\'에서 확인해보세요.');
+}
+
+/* ─── 슬롯 편집 모달 (담당 수업의 요일·교시 다중 선택) ─── */
+var _slotEditorId = null;
+var _slotEditorSelected = {};
+function openSlotEditor(classMasterId){
+  var c = classMaster.find(function(x){return x.id === classMasterId;});
+  if(!c) return;
+  _slotEditorId = classMasterId;
+  _slotEditorSelected = {};
+  (c.slots || []).forEach(function(s){
+    _slotEditorSelected[s.day + '-' + s.period] = true;
+  });
+  document.getElementById('slot-editor-title').textContent =
+    c.grade + '학년 ' + c.cls + '반 ' + c.subject;
+  renderSlotEditorGrid();
+  document.getElementById('slot-editor-modal').classList.add('show');
+}
+function closeSlotEditor(){
+  document.getElementById('slot-editor-modal').classList.remove('show');
+  _slotEditorId = null;
+  _slotEditorSelected = {};
+}
+function renderSlotEditorGrid(){
+  var container = document.getElementById('slot-editor-grid');
+  if(!container) return;
+  var days = [1,2,3,4,5];
+  var periods = [1,2,3,4,5,6,7];
+  var html = '';
+  html += '<div style="display:grid;grid-template-columns:48px repeat(5,1fr);gap:0;border-bottom:0.5px solid var(--border);background:var(--bg-elevated);">';
+  html += '<div style="padding:8px 4px;text-align:center;font-size:11px;color:var(--text-tertiary);font-weight:600;"></div>';
+  days.forEach(function(d){
+    html += '<div style="padding:8px 4px;text-align:center;font-size:12px;color:var(--text);font-weight:600;border-left:0.5px solid var(--border);">' + WEEKDAYS[d] + '</div>';
+  });
+  html += '</div>';
+  periods.forEach(function(p){
+    html += '<div style="display:grid;grid-template-columns:48px repeat(5,1fr);gap:0;border-top:0.5px solid var(--border);">';
+    html += '<div style="padding:10px 4px;text-align:center;font-size:11px;color:var(--text-secondary);font-weight:600;background:var(--bg-elevated);">' + p + '교시</div>';
+    days.forEach(function(d){
+      var key = d + '-' + p;
+      var isSel = !!_slotEditorSelected[key];
+      var bg = isSel ? 'var(--accent-dim)' : 'transparent';
+      var color = isSel ? 'var(--accent)' : 'var(--text-tertiary)';
+      var icon = isSel
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '';
+      html += '<button type="button" data-key="' + key + '" onclick="toggleSlotEditorCell(this)" ' +
+        'style="padding:10px 4px;border:none;border-left:0.5px solid var(--border);background:' + bg + ';color:' + color + ';cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:40px;transition:background 0.12s;">' +
+        icon +
+        '</button>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+  updateSlotEditorCount();
+}
+function toggleSlotEditorCell(btn){
+  var key = btn.getAttribute('data-key');
+  if(_slotEditorSelected[key]) delete _slotEditorSelected[key];
+  else _slotEditorSelected[key] = true;
+  renderSlotEditorGrid();
+}
+function clearSlotEditor(){
+  _slotEditorSelected = {};
+  renderSlotEditorGrid();
+}
+function updateSlotEditorCount(){
+  var n = Object.keys(_slotEditorSelected).length;
+  var el = document.getElementById('slot-editor-count');
+  if(el) el.textContent = n + '개 슬롯 선택됨';
+}
+function saveSlotEditor(){
+  if(!_slotEditorId){ closeSlotEditor(); return; }
+  var c = classMaster.find(function(x){return x.id === _slotEditorId;});
+  if(!c){ closeSlotEditor(); return; }
+  var slots = Object.keys(_slotEditorSelected).map(function(key){
+    var parts = key.split('-');
+    return { day: parseInt(parts[0]), period: parseInt(parts[1]) };
+  }).sort(function(a,b){
+    if(a.day !== b.day) return a.day - b.day;
+    return a.period - b.period;
+  });
+  c.slots = slots;
+  saveAll();
+  closeSlotEditor();
+  renderClassMasterList();
+  if(typeof renderClassTab === 'function') renderClassTab();
+  if(document.getElementById('tab-home').style.display === 'block') renderHome();
+  showToast(slots.length > 0 ? slots.length + '개 슬롯이 저장됐어요.' : '슬롯이 모두 비워졌어요.');
 }
 
 function deleteClassMaster(id){
@@ -21128,6 +21407,44 @@ function openClassSettings(){
     }
   }
 
+  // 교시별 시간 편집 UI 렌더
+  renderPeriodTimesList();
+}
+
+function renderPeriodTimesList(){
+  var container = document.getElementById('period-times-list');
+  if(!container) return;
+  var rows = [];
+  for(var p = 1; p <= 7; p++){
+    var t = formatPeriodTime(p);
+    rows.push(
+      '<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--bg-surface);">' +
+        '<div style="width:46px;font-size:12px;font-weight:600;color:var(--text);">' + p + '교시</div>' +
+        '<input type="time" class="form-input-text" value="' + t + '" ' +
+          'data-period="' + p + '" onchange="onPeriodTimeChange(this)" ' +
+          'style="flex:1;max-width:140px;height:30px;font-size:13px;padding:4px 8px;">' +
+      '</div>'
+    );
+  }
+  container.innerHTML = rows.join('');
+}
+function onPeriodTimeChange(input){
+  var p = parseInt(input.getAttribute('data-period'));
+  var parsed = parseHHMM(input.value);
+  if(!parsed){
+    showToast('시각 형식이 올바르지 않아요');
+    input.value = formatPeriodTime(p);
+    return;
+  }
+  PERIOD_START[p] = parsed;
+  savePeriodTimes();
+}
+function resetPeriodTimesToDefault(){
+  if(!confirm('교시별 시작 시간을 기본값으로 되돌릴까요?')) return;
+  PERIOD_START = JSON.parse(JSON.stringify(PERIOD_START_DEFAULT));
+  savePeriodTimes();
+  renderPeriodTimesList();
+  showToast('기본값으로 되돌렸어요');
 }
 
 /* details 토글 시 화살표 회전 (한 번만 등록) */
@@ -21236,6 +21553,7 @@ function init(){
   loadSettings();
   loadAttendanceSettings();
   loadAlertSettings();
+  loadPeriodTimes();
   loadTagPool();
   loadAll();
   maybeRunAttendanceMigration();
@@ -21343,7 +21661,7 @@ function openSessionManageModal(entryId, defaultDate){
   html += '<div class="sm-field"><label class="sm-label">시작 날짜</label>'+
     '<input type="date" id="session-reset-date" class="sm-input" value="'+preDate+'"></div>';
   html += '<div class="sm-field"><label class="sm-label">메모 (선택)</label>'+
-    '<input type="text" id="session-reset-label" class="sm-input" placeholder="예) 1차고사 후"></div>';
+    '<input type="text" id="session-reset-label" class="sm-input" placeholder="예) 1회고사 후"></div>';
   html += '<button class="sm-add-btn" onclick="addSessionReset(\''+entryId+'\')">추가</button>';
   html += '</div></div>';
 
