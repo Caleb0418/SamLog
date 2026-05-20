@@ -19574,11 +19574,7 @@ function renderClassWeek(){
             if(sessionInfo.hasProgress) _tip += '\n진도: 입력됨';
             else if(sessionInfo.hasAnyMemo) _tip += '\n메모는 있지만 진도 미입력';
             else _tip += '\n메모 미작성';
-            sessionPill = '<div class="week-cell-session state-'+cellState+'"'+
-              ' title="'+_tip+'"'+
-              ' oncontextmenu="event.preventDefault();event.stopPropagation();openSessionOverridePrompt(\''+c0.id+'\',\''+cellDate+'\','+sessionInfo.sessionNum+')"'+
-              ' ontouchstart="handleSessionBadgeLongPress(\''+c0.id+'\',\''+cellDate+'\','+sessionInfo.sessionNum+',event)"'+
-              '>'+sessionInfo.sessionNum+'차시</div>';
+            sessionPill = '<div class="week-cell-session state-'+cellState+'" title="'+_tip+'">'+sessionInfo.sessionNum+'차시</div>';
           }
         } else if(cellState === 'future'){
           // 미래 수업은 예측 차시 없이 빈 배지 표시 안 함
@@ -21232,10 +21228,19 @@ function openSessionManageModal(entryId){
   var ovDates = Object.keys(overrides).sort().reverse();
   html += '<div class="sm-section">';
   html += '<div class="sm-section-title">특정 날짜 차시 직접 수정</div>';
-  html += '<div class="sm-empty-hint">주간 시간표에서 차시 배지를 우클릭(PC) 또는 길게 누르면(모바일) 직접 수정할 수 있어요.</div>';
+  html += '<div class="sm-empty-hint">날짜와 차시 번호를 지정하면 그 날짜 차시가 고정되고, 이후 날짜는 자동으로 +1씩 매겨집니다.</div>';
+  // 입력 폼
+  html += '<div class="sm-add-row" style="margin-top:8px;">';
+  html += '<div class="sm-field"><label class="sm-label">날짜</label>'+
+    '<input type="date" id="session-override-date" class="sm-input"></div>';
+  html += '<div class="sm-field"><label class="sm-label">차시 번호</label>'+
+    '<input type="number" id="session-override-num" class="sm-input" min="1" placeholder="예) 7"></div>';
+  html += '<button class="sm-add-btn" onclick="addSessionOverrideFromModal(\''+entryId+'\')">추가</button>';
+  html += '</div>';
+  // 기존 오버라이드 목록
   if(ovDates.length > 0){
     html += '<div style="margin-top:8px;">';
-    ovDates.slice(0,5).forEach(function(d){
+    ovDates.slice(0,10).forEach(function(d){
       html += '<div class="sm-reset-row">'+
         '<span class="sm-reset-date">'+d+'</span>'+
         '<span class="sm-reset-label">→ '+overrides[d]+'차시</span>'+
@@ -21293,30 +21298,21 @@ function deleteSessionOverride(entryId, dateStr){
   renderClassWeek();
 }
 
-function openSessionOverridePrompt(entryId, dateStr, currentNum){
-  var newVal = prompt(dateStr+' 차시를 직접 입력하세요\n(이후 날짜는 자동으로 +1씩 매겨집니다)', currentNum);
-  if(newVal === null) return;
-  var n = parseInt(newVal);
-  if(isNaN(n) || n < 1){ showToast('1 이상의 숫자를 입력하세요'); return; }
+function addSessionOverrideFromModal(entryId){
   var entry = classMaster.find(function(c){ return c.id === entryId; });
   if(!entry) return;
+  var dateVal = (document.getElementById('session-override-date') || {}).value || '';
+  var numVal  = (document.getElementById('session-override-num')  || {}).value || '';
+  if(!dateVal){ showToast('날짜를 선택해주세요'); return; }
+  var n = parseInt(numVal);
+  if(isNaN(n) || n < 1){ showToast('1 이상의 차시 번호를 입력하세요'); return; }
   if(!entry.sessionOverrides) entry.sessionOverrides = {};
-  entry.sessionOverrides[dateStr] = n;
+  entry.sessionOverrides[dateVal] = n;
   clearSessionCache();
   saveAll();
-  renderClassWeek();
-  showToast(dateStr+' 차시를 '+n+'으로 수정했습니다');
-}
-
-var _sessionBadgePressTimer = null;
-function handleSessionBadgeLongPress(entryId, dateStr, currentNum, event){
-  _sessionBadgePressTimer = setTimeout(function(){
-    event.preventDefault();
-    openSessionOverridePrompt(entryId, dateStr, currentNum);
-  }, 600);
-  event.target.addEventListener('touchend', function(){
-    clearTimeout(_sessionBadgePressTimer);
-  }, { once: true });
+  openSessionManageModal(entryId); // 모달 새로고침
+  if(typeof renderClassWeek === 'function') renderClassWeek();
+  showToast(dateVal+' 차시를 '+n+'으로 수정했습니다');
 }
 
 function toggleSessionBadgeVisibility(){
