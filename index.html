@@ -2650,6 +2650,11 @@ body{
 .att-modal-footer .btn-save{background:var(--accent);color:#fff;border:none;font-weight:500;}
 .att-modal-footer .btn-save:hover{background:var(--accent-hover,var(--accent));}
 .att-modal-footer .btn-save:disabled{opacity:0.4;cursor:not-allowed;}
+.class-modal-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-top:1px solid var(--border);background:var(--bg-elevated,var(--bg-primary));border-bottom-left-radius:12px;border-bottom-right-radius:12px;}
+.class-modal-footer-hint{font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;}
+.class-modal-footer-hint::before{content:'✓';color:var(--success,#1f9e75);font-weight:700;}
+.btn-class-modal-done{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-class-modal-done:hover{background:var(--accent-hover,var(--accent));}
 .att-notify-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:400;
   display:flex;align-items:center;justify-content:center;padding:20px;
@@ -6310,6 +6315,11 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </details>
 
+      </div>
+
+      <div class="class-modal-footer">
+        <div class="class-modal-footer-hint">변경사항은 자동으로 저장됩니다</div>
+        <button class="btn-class-modal-done" onclick="closeClassSettings()">확인</button>
       </div>
     </div>
   </div>
