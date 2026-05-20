@@ -4809,6 +4809,32 @@ details > summary::-webkit-details-marker { display:none; }
 }
 .class-week-cell.adhoc:hover{background:#fff;border-color:var(--warning);}
 
+/* 한 칸에 정규+임시가 함께 있을 때: 정규 위, 임시 아래로 스택 */
+.class-week-cell-stack{
+  display:flex;flex-direction:column;gap:3px;min-height:48px;
+}
+.class-week-cell-stack > .class-week-cell,
+.class-week-cell-stack > .class-week-cell-adhoc-mini{
+  min-height:auto;padding:5px 6px;
+}
+.class-week-cell-adhoc-mini{
+  background:var(--warning-dim);border:1px solid var(--warning-border);
+  border-radius:6px;cursor:pointer;transition:all 0.12s;
+}
+.class-week-cell-adhoc-mini:hover{
+  background:#fff;border-color:var(--warning);
+}
+.class-week-cell-adhoc-mini.has-memo{
+  background:var(--success-dim);border-color:var(--success-border);
+}
+.class-week-cell-adhoc-mini .wcam-title{
+  font-size:11px;font-weight:600;color:var(--warning);
+  line-height:1.3;
+}
+.class-week-cell-adhoc-mini .wcam-class{
+  font-size:10px;color:var(--text-tertiary);margin-top:1px;
+}
+
 /* 달력 popover */
 .week-picker{
   position:absolute;top:calc(100% + 4px);left:36px;z-index:100;
@@ -19431,10 +19457,13 @@ function expandTodaySlots(){
 function getTodayFullGrid(){
   var slots = expandTodaySlots();
   var byPeriod = {};
-  slots.forEach(function(it){ byPeriod[it.slot.period] = it; });
+  slots.forEach(function(it){
+    if(!byPeriod[it.slot.period]) byPeriod[it.slot.period] = [];
+    byPeriod[it.slot.period].push(it);
+  });
   var grid = [];
   for(var p=1; p<=7; p++){
-    grid.push({period:p, item: byPeriod[p] || null});
+    grid.push({period:p, items: byPeriod[p] || []});
   }
   return grid;
 }
@@ -19643,8 +19672,8 @@ function renderClassToday(){
   '</div>';
 
   grid.forEach(function(row){
-    var it = row.item;
-    if(!it){
+    var items = row.items || [];
+    if(items.length === 0){
       // 빈 교시 — 가운데 큰 "+추가" 버튼
       html += '<div class="class-period-item is-empty">'+
         '<div class="class-period-num">'+row.period+'</div>'+
@@ -19655,56 +19684,67 @@ function renderClassToday(){
       '</div>';
       return;
     }
-    if(it.kind === 'adhoc'){
-      var a = it.entry;
-      var kindBadge = '<span class="class-kind-badge adhoc">'+escapeHtml(a.kind||'보강')+'</span>';
-      var hasMemo = (a.memos && a.memos.length > 0);
-      var classLabel = (a.grade && a.cls) ? ' ('+escapeHtml(a.grade)+'-'+escapeHtml(a.cls)+')' : '';
-      var sessionLabel = hasMemo ? a.memos.length+'회 기록' : '';
-      html += '<div class="class-period-item is-adhoc'+(hasMemo?' has-memo':'')+'">'+
-        '<div class="class-period-num adhoc">'+row.period+'</div>'+
-        '<div class="class-period-info">'+
-          '<div class="class-period-subject">'+escapeHtml(a.subject||'보강')+classLabel+kindBadge+(sessionLabel?'<span class="class-period-session-pill">'+sessionLabel+'</span>':'')+'</div>'+
-        '</div>'+
-        '<button class="class-period-memo-btn'+(hasMemo?' has-memo':'')+'" onclick="openAdhocMemo(\''+a.id+'\')">'+
-          (hasMemo
-            ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>기록됨'
-            : '메모')+
-        '</button>'+
-      '</div>';
-    } else {
-      // 정규 수업
-      var c = it.entry;
-      var hasMemo = hasMemoToday(c);
-      var todayStr = formatDateForInput(new Date());
-
-      // 학기 누적 차시 (주간뷰와 동일한 함수)
-      var sessionInfo = getAutoSessionNumber(c, todayStr);
-      var displayNum = sessionInfo.sessionNum;
-
-      // 차시 표시: 메모 작성 여부에 따라 라벨 변경
-      var sessionLabel;
-      if(sessionInfo.isHoliday){
-        sessionLabel = '휴업일';
-      } else if(displayNum === 0){
-        sessionLabel = '-';
+    // 정규 먼저, 임시는 뒤에 오게 정렬
+    items.sort(function(a, b){
+      if(a.kind === b.kind) return 0;
+      return a.kind === 'regular' ? -1 : 1;
+    });
+    // 각 항목 렌더 (교시 번호는 첫 번째에만 표시)
+    items.forEach(function(it, idx){
+      var periodNumHtml = idx === 0
+        ? '<div class="class-period-num'+(it.kind==='adhoc'?' adhoc':'')+'">'+row.period+'</div>'
+        : '<div class="class-period-num" style="visibility:hidden;">'+row.period+'</div>';
+      if(it.kind === 'adhoc'){
+        var a = it.entry;
+        var kindBadge = '<span class="class-kind-badge adhoc">'+escapeHtml(a.kind||'보강')+'</span>';
+        var hasMemo = (a.memos && a.memos.length > 0);
+        var classLabel = (a.grade && a.cls) ? ' ('+escapeHtml(a.grade)+'-'+escapeHtml(a.cls)+')' : '';
+        var sessionLabel = hasMemo ? a.memos.length+'회 기록' : '';
+        html += '<div class="class-period-item is-adhoc'+(hasMemo?' has-memo':'')+'">'+
+          periodNumHtml+
+          '<div class="class-period-info">'+
+            '<div class="class-period-subject">'+escapeHtml(a.subject||'보강')+classLabel+kindBadge+(sessionLabel?'<span class="class-period-session-pill">'+sessionLabel+'</span>':'')+'</div>'+
+          '</div>'+
+          '<button class="class-period-memo-btn'+(hasMemo?' has-memo':'')+'" onclick="openAdhocMemo(\''+a.id+'\')">'+
+            (hasMemo
+              ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>기록됨'
+              : '메모')+
+          '</button>'+
+        '</div>';
       } else {
-        sessionLabel = hasMemo ? displayNum+'차시' : displayNum+'차시 예정';
+        // 정규 수업
+        var c = it.entry;
+        var hasMemo = hasMemoToday(c);
+        var todayStr = formatDateForInput(new Date());
+
+        // 학기 누적 차시 (주간뷰와 동일한 함수)
+        var sessionInfo = getAutoSessionNumber(c, todayStr);
+        var displayNum = sessionInfo.sessionNum;
+
+        // 차시 표시: 메모 작성 여부에 따라 라벨 변경
+        var sessionLabel;
+        if(sessionInfo.isHoliday){
+          sessionLabel = '휴업일';
+        } else if(displayNum === 0){
+          sessionLabel = '-';
+        } else {
+          sessionLabel = hasMemo ? displayNum+'차시' : displayNum+'차시 예정';
+        }
+        var sessionPill = '<span class="class-period-session-pill'+(hasMemo?'':' upcoming')+'">'+sessionLabel+'</span>';
+        var classLabel = ' ('+escapeHtml(c.grade)+'-'+escapeHtml(c.cls)+')';
+        html += '<div class="class-period-item'+(hasMemo?' has-memo':'')+'">'+
+          periodNumHtml+
+          '<div class="class-period-info">'+
+            '<div class="class-period-subject">'+escapeHtml(c.subject)+classLabel+sessionPill+'</div>'+
+          '</div>'+
+          '<button class="class-period-memo-btn'+(hasMemo?' has-memo':'')+'" onclick="openClassMemo(\''+c.id+'\')">'+
+            (hasMemo
+              ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>기록됨'
+              : '메모')+
+          '</button>'+
+        '</div>';
       }
-      var sessionPill = '<span class="class-period-session-pill'+(hasMemo?'':' upcoming')+'">'+sessionLabel+'</span>';
-      var classLabel = ' ('+escapeHtml(c.grade)+'-'+escapeHtml(c.cls)+')';
-      html += '<div class="class-period-item'+(hasMemo?' has-memo':'')+'">'+
-        '<div class="class-period-num">'+row.period+'</div>'+
-        '<div class="class-period-info">'+
-          '<div class="class-period-subject">'+escapeHtml(c.subject)+classLabel+sessionPill+'</div>'+
-        '</div>'+
-        '<button class="class-period-memo-btn'+(hasMemo?' has-memo':'')+'" onclick="openClassMemo(\''+c.id+'\')">'+
-          (hasMemo
-            ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>기록됨'
-            : '메모')+
-        '</button>'+
-      '</div>';
-    }
+    });
   });
   html += '</div>';
   container.innerHTML = html;
@@ -20119,49 +20159,68 @@ function renderClassWeek(){
       if(isHolidayCell){
         var primary = dayD2.schedInfo.primaryEvent || '휴업';
         html += '<div class="class-week-cell-holiday" title="휴업일 — '+escapeHtml(primary)+'"></div>';
-      } else if(cells.length > 0){
-        var c0 = cells[0];
-        var cellDate = formatDateForInput(weekDates[d2-1]);
-        var label = c0.grade+'-'+c0.cls;
+      } else if(cells.length > 0 || adhocCells.length > 0){
+        var hasRegular = cells.length > 0;
+        var hasAdhoc = adhocCells.length > 0;
+        var needsStack = hasRegular && hasAdhoc;
+        if(needsStack){ html += '<div class="class-week-cell-stack">'; }
 
-        // 자동 차시 계산 + 셀 상태
-        var sessionInfo = getAutoSessionNumber(c0, cellDate);
-        var cellState   = getCellState(sessionInfo, cellDate);
+        if(hasRegular){
+          var c0 = cells[0];
+          var cellDate = formatDateForInput(weekDates[d2-1]);
+          var label = c0.grade+'-'+c0.cls;
 
-        var sessionPill = '';
-        if(sessionInfo.sessionNum > 0){
-          if(classViewSettings.showSessionBadge){
-            var semStart = getSemesterStartDate(cellDate);
-            var _tip = '학기 시작 '+semStart.replace(/-/g,'.')+' 기준 '+sessionInfo.sessionNum+'차시';
-            if(sessionInfo.isOverride) _tip += '\n(수동 수정됨)';
-            if(sessionInfo.hasProgress) _tip += '\n진도: 입력됨';
-            else if(sessionInfo.hasAnyMemo) _tip += '\n메모는 있지만 진도 미입력';
-            else _tip += '\n메모 미작성';
-            sessionPill = '<div class="week-cell-session state-'+cellState+'" title="'+_tip+'">'+sessionInfo.sessionNum+'차시</div>';
+          // 자동 차시 계산 + 셀 상태
+          var sessionInfo = getAutoSessionNumber(c0, cellDate);
+          var cellState   = getCellState(sessionInfo, cellDate);
+
+          var sessionPill = '';
+          if(sessionInfo.sessionNum > 0){
+            if(classViewSettings.showSessionBadge){
+              var semStart = getSemesterStartDate(cellDate);
+              var _tip = '학기 시작 '+semStart.replace(/-/g,'.')+' 기준 '+sessionInfo.sessionNum+'차시';
+              if(sessionInfo.isOverride) _tip += '\n(수동 수정됨)';
+              if(sessionInfo.hasProgress) _tip += '\n진도: 입력됨';
+              else if(sessionInfo.hasAnyMemo) _tip += '\n메모는 있지만 진도 미입력';
+              else _tip += '\n메모 미작성';
+              sessionPill = '<div class="week-cell-session state-'+cellState+'" title="'+_tip+'">'+sessionInfo.sessionNum+'차시</div>';
+            }
+          } else if(cellState === 'future'){
+            // 미래 수업은 예측 차시 없이 빈 배지 표시 안 함
           }
-        } else if(cellState === 'future'){
-          // 미래 수업은 예측 차시 없이 빈 배지 표시 안 함
+
+          var cellCls = 'class-week-cell state-'+cellState;
+          html += '<div class="'+cellCls+'" onclick="openClassMemo(\''+c0.id+'\',\''+cellDate+'\')">'+
+            '<div class="week-cell-title">'+
+              '<span class="wct-subject">'+escapeHtml(c0.subject)+'</span> '+
+              '<span class="wct-class">'+escapeHtml(label)+'</span>'+
+              (cells.length>1
+                ? '<span class="wct-more" title="이 슬롯에 다른 반 수업도 있어요: '+escapeHtml(cells.slice(1).filter(function(x){return x&&x.entry;}).map(function(x){return x.entry.grade+'-'+x.entry.cls;}).join(', '))+'">+'+(cells.length-1)+'</span>'
+                : '')+
+            '</div>'+
+            sessionPill+
+            '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\',\''+cellDate+'\')" title="차시 관리"><span class="ssm-label">차시</span><span class="ssm-icon">⟳</span></button>'+
+          '</div>';
         }
 
-        var cellCls = 'class-week-cell state-'+cellState;
-        html += '<div class="'+cellCls+'" onclick="openClassMemo(\''+c0.id+'\',\''+cellDate+'\')">'+
-          '<div class="week-cell-title">'+
-            '<span class="wct-subject">'+escapeHtml(c0.subject)+'</span> '+
-            '<span class="wct-class">'+escapeHtml(label)+'</span>'+
-            (cells.length>1
-              ? '<span class="wct-more" title="이 슬롯에 다른 반 수업도 있어요: '+escapeHtml(cells.slice(1).filter(function(x){return x&&x.entry;}).map(function(x){return x.entry.grade+'-'+x.entry.cls;}).join(', '))+'">+'+(cells.length-1)+'</span>'
-              : '')+
-          '</div>'+
-          sessionPill+
-          '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\',\''+cellDate+'\')" title="차시 관리"><span class="ssm-label">차시</span><span class="ssm-icon">⟳</span></button>'+
-        '</div>';
-      } else if(adhocCells.length > 0){
-        var a0 = adhocCells[0];
-        var hasA = (a0.memos && a0.memos.length > 0);
-        html += '<div class="class-week-cell adhoc'+(hasA?' has-memo':'')+'" onclick="openAdhocMemo(\''+a0.id+'\')">'+
-          '<div class="week-cell-subject adhoc">'+escapeHtml(a0.kind||'보강')+'·'+escapeHtml(a0.subject||'')+'</div>'+
-          (a0.grade ? '<div class="week-cell-class">'+escapeHtml(a0.grade)+'-'+escapeHtml(a0.cls||'')+'</div>' : '')+
-        '</div>';
+        if(hasAdhoc){
+          adhocCells.forEach(function(a0){
+            var hasA = (a0.memos && a0.memos.length > 0);
+            if(needsStack){
+              html += '<div class="class-week-cell-adhoc-mini'+(hasA?' has-memo':'')+'" onclick="openAdhocMemo(\''+a0.id+'\')">'+
+                '<div class="wcam-title">'+escapeHtml(a0.kind||'보강')+'·'+escapeHtml(a0.subject||'')+'</div>'+
+                (a0.grade ? '<div class="wcam-class">'+escapeHtml(a0.grade)+'-'+escapeHtml(a0.cls||'')+'</div>' : '')+
+              '</div>';
+            } else {
+              html += '<div class="class-week-cell adhoc'+(hasA?' has-memo':'')+'" onclick="openAdhocMemo(\''+a0.id+'\')">'+
+                '<div class="week-cell-subject adhoc">'+escapeHtml(a0.kind||'보강')+'·'+escapeHtml(a0.subject||'')+'</div>'+
+                (a0.grade ? '<div class="week-cell-class">'+escapeHtml(a0.grade)+'-'+escapeHtml(a0.cls||'')+'</div>' : '')+
+              '</div>';
+            }
+          });
+        }
+
+        if(needsStack){ html += '</div>'; }
       } else {
         // 빈 슬롯
         html += '<div class="class-week-cell-empty" onclick="openAddAdhoc('+p+', '+d2+')" title="추가">'+
