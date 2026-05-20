@@ -10633,14 +10633,23 @@ function isHolidayDayType(dt){
   return dt === '휴업일' || dt === '공휴일';
 }
 function isNonSchoolDay(dateStr, grade){
+  // 1. 학사일정 기반 휴업일 체크
   var events = getScheduleForDate(dateStr, grade);
-  if(events.length === 0) return false;
   if(events.some(function(ev){ return isHolidayDayType(ev.dayType); })) return true;
   // fallback: dayType 없는 구 데이터 — 키워드 기반
-  return events.some(function(ev){
+  if(events.some(function(ev){
     if(ev.dayType) return false;
     return NON_SCHOOL_KEYWORDS.test(ev.event);
-  });
+  })) return true;
+
+  // 2. 학기 시작일 기준 체크 — 방학 기간이 학사일정에 없는 경우 대비
+  // getSemesterStartDate는 대상 날짜 기준으로 해당 학기 시작일 반환
+  if(typeof getSemesterStartDate === 'function'){
+    var semStart = getSemesterStartDate(dateStr);
+    if(semStart && dateStr < semStart) return true;
+  }
+
+  return false;
 }
 
 // 주간 시간표에서 사용할 종합 일정 정보
