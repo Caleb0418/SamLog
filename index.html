@@ -19137,12 +19137,20 @@ function renderClassToday(){
       var c = it.entry;
       var hasMemo = hasMemoToday(c);
       var todayStr = formatDateForInput(new Date());
-      var sessionNum = getSessionNumber(c, todayStr);
-      // 오늘 메모가 있으면 그 차시, 없으면 다음 차시 예상 (총 메모 수 + 1)
-      var displayNum = sessionNum > 0 ? sessionNum : ((c.memos||[]).length + 1);
-      var sessionLabel = hasMemo
-        ? displayNum+'차시'
-        : displayNum+'차시 예정';
+
+      // 학기 누적 차시 (주간뷰와 동일한 함수)
+      var sessionInfo = getAutoSessionNumber(c, todayStr);
+      var displayNum = sessionInfo.sessionNum;
+
+      // 차시 표시: 메모 작성 여부에 따라 라벨 변경
+      var sessionLabel;
+      if(sessionInfo.isHoliday){
+        sessionLabel = '휴업일';
+      } else if(displayNum === 0){
+        sessionLabel = '-';
+      } else {
+        sessionLabel = hasMemo ? displayNum+'차시' : displayNum+'차시 예정';
+      }
       var sessionPill = '<span class="class-period-session-pill'+(hasMemo?'':' upcoming')+'">'+sessionLabel+'</span>';
       var classLabel = ' ('+escapeHtml(c.grade)+'-'+escapeHtml(c.cls)+')';
       html += '<div class="class-period-item'+(hasMemo?' has-memo':'')+'">'+
