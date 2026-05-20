@@ -14341,8 +14341,12 @@ function _isStudentMissingSlot(studentNum, date, period){
   var recs = attendanceRecords[date][studentNum] || [];
   for(var i=0; i<recs.length; i++){
     var r = recs[i];
-    if(r.status === 'absent') return true;
-    if(r.periods && r.periods[String(period)]) return true;
+    var pKey = String(period);
+    var hasPeriods = r.periods && Object.keys(r.periods).some(function(k){ return r.periods[k]; });
+    // 결석: 교시 미지정이면 전일 결석으로 간주 → 모든 교시 결시
+    if(r.status === 'absent' && !hasPeriods) return true;
+    // 그 외 (또는 교시 명시된 결석): 해당 교시 명시되었을 때만 결시
+    if(r.periods && r.periods[pKey]) return true;
   }
   return false;
 }
@@ -14418,6 +14422,23 @@ function getAllCreativeForStudent(builderArea, student, classKey){
     .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
   // 임시슬롯
   var fromAdhoc = getAdhocCreativeForStudent(builderArea, student, classData);
+  // 디버그 로그 (브라우저 콘솔에서 확인)
+  try {
+    console.log('[생기부 창체 매칭]', {
+      builderArea: builderArea,
+      studentNum: student && student.num,
+      classKey: classKey,
+      classData_grade: classData && classData.grade,
+      classData_classNum: classData && classData.classNum,
+      adhocSlots_total: (adhocSlots||[]).length,
+      adhocSlots_sample: (adhocSlots||[]).slice(0,5).map(function(a){
+        return { kind:a.kind, subject:a.subject, date:a.date, period:a.period, grade:a.grade, cls:a.cls };
+      }),
+      fromSettings_count: fromSettings.length,
+      fromAdhoc_count: fromAdhoc.length,
+      fromAdhoc: fromAdhoc
+    });
+  } catch(e){}
   // 중복 제거 (같은 날짜+이름): 설정탭 우선
   var seen = {};
   fromSettings.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
