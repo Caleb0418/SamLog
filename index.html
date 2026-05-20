@@ -20573,7 +20573,7 @@ function _csRenderPeriodChips(selected){
   var container = document.getElementById('cs-form-periods');
   if(!container) return;
   var html = '';
-  for(var p = 1; p <= 7; p++){
+  for(var p = 1; p <= 8; p++){
     var isOn = selected.indexOf(p) >= 0;
     html += '<button type="button" class="cs-period-chip" data-period="' + p + '"' +
       (isOn ? ' data-on="1"' : '') +
