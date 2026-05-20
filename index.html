@@ -14944,13 +14944,12 @@ function getClassScheduleForStudent(builderArea, student, classKey){
   if(!category) return [];
   if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
 
-  var classData = classKey ? (classes[classKey] || getActiveClass()) : getActiveClass();
-  // 반 시간표는 담임반 전용
-  if(!classData || !classData.isPrimary) return [];
+  var classData = classes[classKey] || getActiveClass();
+  if(!classData) return [];
 
   var attended = classSchedule.filter(function(c){
     if(!c || c.category !== category) return false;
-    if(!_csIsTargetForStudent(c, student, classData)) return false;
+    if(!_csTargetMatchesClass(c.target, classData.grade, classData.classNum)) return false;
     if(_csIsStudentMissingActivity(student, c)) return false;
     return true;
   });
