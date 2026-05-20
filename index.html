@@ -4614,9 +4614,10 @@ details > summary::-webkit-details-marker { display:none; }
 }
 .week-nav-label svg{color:var(--text-tertiary);}
 .week-nav-this{
-  font-size:10px;font-weight:600;color:var(--accent);
+  margin-left:auto;
+  font-size:11px;font-weight:600;color:var(--accent);
   background:var(--accent-dim);border:1px solid var(--border-accent);
-  border-radius:5px;padding:2px 7px;flex-shrink:0;
+  border-radius:6px;padding:5px 12px;flex-shrink:0;
 }
 .week-nav-today{
   margin-left:auto;
@@ -19491,9 +19492,6 @@ function renderClassWeek(){
     weekLabel = (startD.getMonth()+1)+'/'+startD.getDate()+' – '+(endD.getMonth()+1)+'/'+endD.getDate();
   }
   var isThisWeek = isCurrentWeekThisWeek();
-  var weekSuffix = isThisWeek
-    ? '<span class="week-nav-this">이번 주</span>'
-    : '';
 
   // 헤더: ← 이전 | 날짜 라벨 (클릭=달력) | 다음 → | 오늘로
   var headerHtml = '<div class="week-nav">'+
@@ -19507,8 +19505,9 @@ function renderClassWeek(){
     '<button class="week-nav-btn" onclick="shiftWeek(1)" title="다음 주">'+
       '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'+
     '</button>'+
-    weekSuffix+
-    (isThisWeek ? '' : '<button class="week-nav-today" onclick="goToThisWeek()">이번 주로</button>')+
+    (isThisWeek
+      ? '<span class="week-nav-this">이번 주</span>'
+      : '<button class="week-nav-today" onclick="goToThisWeek()">이번 주로</button>')+
     '<div class="week-picker" id="week-picker" style="display:none;"></div>'+
   '</div>';
 
