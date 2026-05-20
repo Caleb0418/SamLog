@@ -16893,83 +16893,141 @@ function renderHome(){
    - 담임반 활성 시에만 표시
    - 오늘 + 다가오는 7일 이내 일정
 ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   반 시간표 — 홈 화면용 일정 조회 (6-A)
+═══════════════════════════════════════════ */
+
+// 오늘의 창체 일정 (담임반)
+function getCsForToday(){
+  return getCsByDate(formatDateForInput(new Date()));
+}
+
+// 특정 날짜의 창체 일정 (날짜 정확 매칭)
+function getCsByDate(dateStr){
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
+  var activeClass = getActiveClass();
+  if(!activeClass || !activeClass.isPrimary) return [];
+  return classSchedule
+    .filter(function(c){ return c.date === dateStr; })
+    .sort(function(a, b){
+      var ap = (a.periods && a.periods[0]) || 99;
+      var bp = (b.periods && b.periods[0]) || 99;
+      return ap - bp;
+    });
+}
+
+// 앞으로 N일간 (오늘 포함)의 창체 일정
+function getCsUpcoming(days){
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
+  var activeClass = getActiveClass();
+  if(!activeClass || !activeClass.isPrimary) return [];
+  var today = new Date(); today.setHours(0,0,0,0);
+  var endDate = new Date(today); endDate.setDate(endDate.getDate() + days);
+  return classSchedule
+    .filter(function(c){
+      var d = new Date(c.date + 'T00:00:00');
+      return d >= today && d <= endDate;
+    })
+    .sort(function(a, b){
+      if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+      var ap = (a.periods && a.periods[0]) || 99;
+      var bp = (b.periods && b.periods[0]) || 99;
+      return ap - bp;
+    });
+}
+
+// 짧은 날짜 라벨: 'YYYY-MM-DD' → '3.4.(수)'
+function _csShortDateLabel(ymd){
+  if(!ymd) return '';
+  var d = new Date(ymd + 'T00:00:00');
+  var wd = ['일','월','화','수','목','금','토'][d.getDay()];
+  return (d.getMonth()+1) + '.' + d.getDate() + '.(' + wd + ')';
+}
+
 function renderHomeClassSchedule(){
+  renderHomeCsToday();
+}
+
+/* ─── 홈 창체 일정 카드 (6-B · 6-C) ─── */
+function renderHomeCsToday(){
   var card = document.getElementById('home-class-schedule');
   if(!card) return;
 
-  if(!isHomeroomActive()){
+  var activeClass = getActiveClass();
+  if(!activeClass || !activeClass.isPrimary){
     card.style.display = 'none';
     card.innerHTML = '';
     return;
   }
-  var c = getActiveClass();
-  var grade = parseInt(c.grade);
-  var all = getClassScheduleForGrade(grade);
-  if(all.length === 0){
-    // 담임반이지만 데이터 없음 — 살짝 안내
-    card.innerHTML = '<div class="home-cs-card">'+
-      '<div class="home-cs-head">'+
-        '<div class="home-cs-title">'+
-          '<span class="home-cs-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>'+
-          '반 시간표 (창체)'+
-        '</div>'+
-        '<button class="home-cs-link" onclick="goToClassScheduleView()">시간표 등록 →</button>'+
-      '</div>'+
-      '<div class="home-cs-empty">아직 등록된 일정이 없어요. 수업 관리 → 반 시간표에서 추가해보세요.</div>'+
+
+  var todayStr = formatDateForInput(new Date());
+  var todayItems   = getCsForToday();
+  var upcomingItems = getCsUpcoming(7).filter(function(c){ return c.date !== todayStr; });
+
+  if(todayItems.length === 0 && upcomingItems.length === 0){
+    // 담임반이지만 7일 내 일정 없음 — 등록 안내
+    card.innerHTML = '<div class="home-cs-card">' +
+      '<div class="home-cs-head">' +
+        '<div class="home-cs-title">' +
+          '<span class="home-cs-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>' +
+          '창체 일정' +
+        '</div>' +
+        '<button class="home-cs-link" onclick="goToClassScheduleView()">일정 등록 →</button>' +
+      '</div>' +
+      '<div class="home-cs-empty">다가오는 7일 이내 창체 일정이 없어요.</div>' +
     '</div>';
     card.style.display = 'block';
     return;
   }
 
-  var today = new Date();
-  var todayStr = formatDateForInput(today);
-  var endDate = new Date(today); endDate.setDate(endDate.getDate() + 7);
-  var endStr = formatDateForInput(endDate);
+  var calSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 
-  // 오늘 ~ 7일 이내 일정
-  var upcoming = all.filter(function(it){
-    return it.date >= todayStr && it.date <= endStr;
-  }).slice(0, 5);
+  var html =
+    '<div class="home-cs-card">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:6px;">' + calSvg +
+        '<div style="font-size:13px;font-weight:600;">창체 일정</div>' +
+      '</div>' +
+      '<button class="home-cs-link" onclick="goToClassScheduleView()">전체 보기 →</button>' +
+    '</div>';
 
-  var rowsHtml = '';
-  if(upcoming.length === 0){
-    rowsHtml = '<div class="home-cs-empty">다가오는 7일 이내 일정이 없어요. 전체 일정은 반 시간표에서 확인하세요.</div>';
-  } else {
-    rowsHtml = '<div class="home-cs-list">';
-    upcoming.forEach(function(it){
-      var dt = new Date(it.date+'T00:00:00');
-      var dayName = ['일','월','화','수','목','금','토'][dt.getDay()];
-      var dateLabel = (dt.getMonth()+1)+'/'+dt.getDate()+'('+dayName+')';
-      var isToday = it.date === todayStr;
-      var pStr = _formatPeriodsLabel(it.periods);
-      var metaParts = [];
-      if(it.category) metaParts.push(it.category);
-      if(it.target) metaParts.push(it.target);
-      if(it.note) metaParts.push(it.note);
-
-      rowsHtml += '<div class="home-cs-row'+(isToday?' today':'')+'" onclick="goToClassScheduleView()">'+
-        '<div class="home-cs-row-date">'+dateLabel+'</div>'+
-        '<div class="home-cs-row-period">'+pStr+'</div>'+
-        '<div class="home-cs-row-body">'+
-          '<div class="home-cs-row-activity">'+escapeHtml(it.activity||'')+'</div>'+
-          (metaParts.length ? '<div class="home-cs-row-meta">'+escapeHtml(metaParts.join(' · '))+'</div>' : '')+
-        '</div>'+
-        (isToday ? '<div class="home-cs-row-badge">오늘</div>' : '<div></div>')+
+  // 오늘 섹션
+  if(todayItems.length > 0){
+    html += '<div style="margin-bottom:' + (upcomingItems.length > 0 ? '10px' : '0') + ';">';
+    html += '<div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:4px;letter-spacing:0.04em;">오늘</div>';
+    todayItems.forEach(function(item){
+      var periodsStr = _formatPeriodsLabel(item.periods);
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-elevated);border-radius:6px;margin-bottom:4px;">' +
+        '<span style="font-size:10px;font-weight:600;color:' + _csCategoryColor(item.category) + ';">' + _csCategoryLabel(item.category) + '</span>' +
+        '<span style="font-size:11px;color:var(--text-secondary);min-width:50px;">' + periodsStr + '</span>' +
+        '<span style="font-size:12px;color:var(--text);flex:1;">' + escapeHtml(item.activity) + '</span>' +
+        (item.target ? '<span style="font-size:10px;color:var(--text-tertiary);">' + escapeHtml(item.target) + '</span>' : '') +
       '</div>';
     });
-    rowsHtml += '</div>';
+    html += '</div>';
   }
 
-  card.innerHTML = '<div class="home-cs-card">'+
-    '<div class="home-cs-head">'+
-      '<div class="home-cs-title">'+
-        '<span class="home-cs-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>'+
-        '반 시간표 (창체) <span style="font-size:11px;font-weight:500;color:var(--text-tertiary);margin-left:4px;">다가오는 7일</span>'+
-      '</div>'+
-      '<button class="home-cs-link" onclick="goToClassScheduleView()">전체 보기 →</button>'+
-    '</div>'+
-    rowsHtml +
-  '</div>';
+  // 앞으로 7일 섹션 (오늘 제외)
+  if(upcomingItems.length > 0){
+    html += '<div>';
+    html += '<div style="font-size:10px;font-weight:600;color:var(--text-tertiary);margin-bottom:4px;letter-spacing:0.04em;">앞으로 7일</div>';
+    upcomingItems.slice(0, 5).forEach(function(item){
+      var periodsStr = _formatPeriodsLabel(item.periods);
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:11px;">' +
+        '<span style="color:var(--text-tertiary);min-width:56px;">' + _csShortDateLabel(item.date) + '</span>' +
+        '<span style="font-weight:600;color:' + _csCategoryColor(item.category) + ';font-size:10px;min-width:36px;">' + _csCategoryLabel(item.category) + '</span>' +
+        '<span style="color:var(--text-tertiary);min-width:50px;">' + periodsStr + '</span>' +
+        '<span style="color:var(--text-secondary);flex:1;">' + escapeHtml(item.activity) + '</span>' +
+      '</div>';
+    });
+    if(upcomingItems.length > 5){
+      html += '<div style="font-size:10px;color:var(--text-tertiary);text-align:center;margin-top:4px;">외 ' + (upcomingItems.length - 5) + '건</div>';
+    }
+    html += '</div>';
+  }
+
+  html += '</div>';
+  card.innerHTML = html;
   card.style.display = 'block';
 }
 
@@ -20409,10 +20467,26 @@ function _csRenderRow(item){
       noteHtml +
     '</div>' +
     '<div style="display:flex;gap:4px;flex-shrink:0;">' +
+      '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;" onclick="_csCopyOriginal(\'' + item.id + '\')" title="NEIS 원문 복사">📋</button>' +
       '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;" onclick="openCsFormModal(\'' + item.id + '\')">수정</button>' +
       '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;color:var(--danger);" onclick="deleteCsItem(\'' + item.id + '\')">삭제</button>' +
     '</div>' +
   '</div>';
+}
+
+// NEIS 원문 클립보드 복사 (📋 버튼)
+function _csCopyOriginal(id){
+  var item = classSchedule.find(function(c){ return c.id === id; });
+  if(!item) return;
+  var text = item.originalText || item.activity;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('NEIS 원문 복사됨: ' + text);
+    }).catch(function(){ _csFallbackCopy(text); });
+  } else {
+    _csFallbackCopy(text);
+    showToast('NEIS 원문 복사됨: ' + text);
+  }
 }
 
 // "5,6" → "5·6교시", "3~4" → "3~4교시"
