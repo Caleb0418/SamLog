@@ -3393,6 +3393,7 @@ details > summary::-webkit-details-marker { display:none; }
   padding:48px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;
   background:var(--bg-surface);border:1px solid var(--border);
   border-radius:var(--radius-lg);
+  display:flex;flex-direction:column;align-items:center;
 }
 
 .class-master-section{
@@ -4299,10 +4300,11 @@ details > summary::-webkit-details-marker { display:none; }
   background:var(--success);color:#fff;border-color:var(--success);
 }
 .class-empty-state{
-  padding:36px 18px;text-align:center;font-size:13px;
+  padding:40px 18px;text-align:center;font-size:13px;
   color:var(--text-tertiary);line-height:1.8;
   background:var(--bg-surface);border:0.5px solid var(--border);
   border-radius:var(--radius-lg);margin-bottom:14px;
+  display:flex;flex-direction:column;align-items:center;
 }
 
 /* 빈 교시 카드 — dashed 테두리, 얇은 높이 */
@@ -19149,9 +19151,14 @@ function renderClassToday(){
   var anyClass = classMaster.length > 0 || adhocSlots.some(function(a){return a.date===todayStr;});
   if(!anyClass){
     var hint = ttSyncState.synced
-      ? '<br>위 "시간표·수업 설정"에서 추가하세요.'
-      : '<br>위 "시간표·수업 설정"에서 NEIS 시간표를 업로드하면 자동으로 채워져요.';
-    container.innerHTML = '<div class="class-empty-state">오늘 등록된 수업이 없어요.'+hint+'</div>';
+      ? 'NEIS 시간표가 연동되어 있어요.<br>수업을 직접 추가하거나 시간표를 확인해 보세요.'
+      : 'NEIS 시간표를 연동하면 수업이 자동으로 채워져요.';
+    container.innerHTML = '<div class="class-empty-state">'+
+      '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);margin-bottom:10px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+
+      '<div style="font-weight:600;margin-bottom:6px;">오늘 등록된 수업이 없어요</div>'+
+      '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">'+hint+'</div>'+
+      '<button class="btn-small primary" onclick="openClassSettings()">수업 추가하기</button>'+
+    '</div>';
     return;
   }
 
@@ -19471,9 +19478,14 @@ function renderClassWeek(){
   // 빈 상태 처리 (담당 수업이 전혀 없을 때만)
   if(classMaster.length === 0 && adhocSlots.length === 0){
     var hint = ttSyncState.synced
-      ? '<br>위 "시간표·수업 설정"에서 추가하세요.'
-      : '<br>위 "시간표·수업 설정"에서 시간표 파일을 업로드하면 자동으로 채워져요.';
-    container.innerHTML = '<div class="class-empty-state">표시할 수업이 없어요.'+hint+'</div>';
+      ? 'NEIS 시간표가 연동되어 있어요.<br>수업을 직접 추가하거나 시간표를 확인해 보세요.'
+      : 'NEIS 시간표를 연동하면 수업이 자동으로 채워져요.';
+    container.innerHTML = '<div class="class-empty-state">'+
+      '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);margin-bottom:10px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+
+      '<div style="font-weight:600;margin-bottom:6px;">표시할 수업이 없어요</div>'+
+      '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">'+hint+'</div>'+
+      '<button class="btn-small primary" onclick="openClassSettings()">수업 추가하기</button>'+
+    '</div>';
     return;
   }
 
