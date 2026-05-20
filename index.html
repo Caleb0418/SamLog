@@ -7572,13 +7572,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div style="flex:1;">
         <label class="form-label" style="display:block;">카테고리</label>
         <select id="cs-category" class="form-select" style="width:100%;">
-          <option value="자율·자치">자율·자치</option>
-          <option value="진로">진로</option>
+          <option value="자율">자율</option>
           <option value="동아리">동아리</option>
           <option value="봉사">봉사</option>
-          <option value="안전">안전</option>
-          <option value="행사">행사</option>
-          <option value="기타">기타</option>
+          <option value="진로">진로</option>
         </select>
       </div>
       <div style="flex:1;">
@@ -8898,7 +8895,7 @@ function getActiveTab(){
    학년도 관리
 ═══════════════════════════════════════════ */
 var MAX_YEARS = 3;
-var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_tag_pool','ht2_school_schedule'];
+var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_class_schedule','ht2_tag_pool','ht2_school_schedule'];
 
 function getActiveYear(){
   return localStorage.getItem('ht2_active_year') || String(new Date().getFullYear());
@@ -8957,6 +8954,7 @@ function startNewYear(){
   localStorage.setItem('ht2_tt_sync_state_' + year, JSON.stringify({}));
   localStorage.setItem('ht2_adhoc_slots_' + year, JSON.stringify([]));
   localStorage.setItem('ht2_creative_activities_' + year, JSON.stringify([]));
+  localStorage.setItem('ht2_class_schedule_' + year, JSON.stringify([]));
   _addYearToList(year);
   showToast(year + '학년도를 시작해요!');
   setTimeout(function(){ location.reload(); }, 1200);
@@ -9143,7 +9141,7 @@ function renderCreativeList(){
   }).join('');
 }
 
-var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
+var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_class_schedule','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
 var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings','ht2_neis_key'];
 
 /* ─── 백업 폴더 핸들 (IndexedDB) ─── */
@@ -14759,9 +14757,8 @@ function _adhocKindsForArea(builderArea){
   return [];
 }
 // builderArea → classSchedule.category 매핑
-// (자율·자치 영역에는 학교 차원 일정성 활동도 포함: 안전·행사·봉사)
 function _classScheduleCatsForArea(builderArea){
-  if(builderArea === '창체자율') return ['자율·자치','안전','행사','봉사','기타'];
+  if(builderArea === '창체자율') return ['자율','봉사'];
   if(builderArea === '창체진로') return ['진로'];
   if(builderArea === '동아리')   return ['동아리'];
   return [];
@@ -20220,7 +20217,7 @@ function openClassScheduleEdit(id){
 
   document.getElementById('cs-date').value      = editing ? (editing.date || '') : formatDateForInput(new Date());
   document.getElementById('cs-periods').value   = editing ? (editing.periods || []).join(',') : '';
-  document.getElementById('cs-category').value  = editing ? (editing.category || '자율·자치') : '자율·자치';
+  document.getElementById('cs-category').value  = editing ? (editing.category || '자율') : '자율';
   document.getElementById('cs-target').value    = editing ? (editing.target || '') : '';
   document.getElementById('cs-activity').value  = editing ? (editing.activity || '') : '';
   document.getElementById('cs-original').value  = editing ? (editing.originalText || '') : '';
@@ -20323,7 +20320,7 @@ function buildClassSchedulePrompt(){
 '  {\n'+
 '    "date": "YYYY-MM-DD",          // 필수, ISO 형식\n'+
 '    "periods": [1,2,3],            // 필수, 정수 배열. "5~6교시" → [5,6], "5,6교시" → [5,6]\n'+
-'    "category": "자율·자치|진로|동아리|봉사|안전|행사|기타",\n'+
+'    "category": "자율|동아리|봉사|진로",\n'+
 '    "activity": "활동명(간결한 표기)",  // 필수\n'+
 '    "originalText": "원문 표기 그대로",  // NEIS 누가기록용. 없으면 빈 문자열\n'+
 '    "target": "1학년 / 전학년 / ...",  // 학년 한정이면 적고, 모두 적용이면 \"전학년\"\n'+
@@ -20335,7 +20332,7 @@ function buildClassSchedulePrompt(){
 '2. date는 항상 YYYY-MM-DD. 연도 누락 시 ' + yr + '으로 보정.\n'+
 '3. periods는 정수 배열 (예: "5~6교시" → [5,6], "1교시" → [1]).\n'+
 '4. 같은 활동이 여러 교시에 걸치면 periods 배열로 한 줄에 합침. 다른 활동이면 별도 항목.\n'+
-'5. category는 위 7개 중 하나로 정규화. 애매하면 "기타".\n'+
+'5. category는 위 4개(자율·동아리·봉사·진로) 중 하나로 정규화. 애매하면 "자율".\n'+
 '6. originalText는 입력 원문을 가능한 한 그대로 유지 (NEIS 누가기록에 그대로 들어감).\n'+
 '7. activity는 NEIS 양식에 맞게 5~30자 내외로 간결하게.\n'+
 '8. 의미가 모호한 줄(요일만 적힌 줄, 메모, 페이지 번호 등)은 결과에서 제외.\n\n'+
@@ -20397,7 +20394,7 @@ function parseClassScheduleJson(){
 
   var reviewed = [];
   var dateRe = /^\d{4}-\d{2}-\d{2}$/;
-  var validCats = ['자율·자치','진로','동아리','봉사','안전','행사','기타'];
+  var validCats = ['자율','동아리','봉사','진로'];
 
   data.forEach(function(it, idx){
     var errs = [];
@@ -20412,7 +20409,7 @@ function parseClassScheduleJson(){
     if(!dateRe.test(date)) errs.push('date 형식 오류');
     if(periods.length === 0) errs.push('periods 비어있음');
     if(!activity) errs.push('activity 누락');
-    if(validCats.indexOf(category) < 0) category = '기타';
+    if(validCats.indexOf(category) < 0) category = '자율';
 
     reviewed.push({
       idx: idx+1,
