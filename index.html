@@ -14350,18 +14350,26 @@ function _areaForCreative(area){
   if(area === '동아리')   return '동아리';
   return null;
 }
+// builderArea → adhocSlot.kind 매핑
+function _adhocKindsForArea(builderArea){
+  if(builderArea === '창체자율') return ['창체','자율'];
+  if(builderArea === '창체진로') return ['진로'];
+  if(builderArea === '동아리')   return ['동아리'];
+  return [];
+}
 function _isStudentMissingDate(studentNum, date){
   if(!attendanceRecords || !attendanceRecords[date]) return false;
   var recs = attendanceRecords[date][studentNum] || [];
   return recs.length > 0;
 }
+// 설정 탭(creativeActivities)에서 매칭
 function getCreativeActivitiesForStudent(builderArea, student, classKey){
   var area = _areaForCreative(builderArea);
   if(!area) return [];
   if(!Array.isArray(creativeActivities) || creativeActivities.length === 0) return [];
   var classData = classes[classKey] || getActiveClass();
   var stuGrade = classData ? parseInt(classData.grade) : null;
-  if(stuGrade == null) return [];
+  if(stuGrade == null || isNaN(stuGrade)) return [];
   var attended = creativeActivities.filter(function(c){
     if(!c || c.area !== area) return false;
     if(!Array.isArray(c.grades) || c.grades.indexOf(stuGrade) < 0) return false;
@@ -14373,6 +14381,50 @@ function getCreativeActivitiesForStudent(builderArea, student, classKey){
     return 0;
   });
   return attended;
+}
+// 수업관리 임시슬롯(adhocSlots)에서 매칭 → {date, name, note} 통일 형식 반환
+function getAdhocCreativeForStudent(builderArea, student, classData){
+  var kinds = _adhocKindsForArea(builderArea);
+  if(kinds.length === 0) return [];
+  if(!Array.isArray(adhocSlots) || adhocSlots.length === 0) return [];
+  var stuGrade = classData ? String(classData.grade) : null;
+  var stuCls   = classData ? String(classData.classNum) : null;
+  var attended = adhocSlots.filter(function(a){
+    if(!a || !a.kind) return false;
+    if(kinds.indexOf(a.kind) < 0) return false;
+    // 학년·반 필터 (미지정이면 전체 적용)
+    if(a.grade && stuGrade && String(a.grade) !== stuGrade) return false;
+    if(a.cls   && stuCls   && String(a.cls)   !== stuCls)   return false;
+    // 출결 검사: 해당 날짜+교시에 결시 기록이 있으면 제외
+    if(_isStudentMissingSlot(student.num, a.date, a.period)) return false;
+    return true;
+  });
+  attended.sort(function(a,b){
+    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return (a.period||0) - (b.period||0);
+  });
+  // 통일 형식으로 변환
+  return attended.map(function(a){
+    return { date: a.date, name: a.subject || '창체활동', note: a.note || '' };
+  });
+}
+// 설정탭 + 임시슬롯 통합 (날짜순)
+function getAllCreativeForStudent(builderArea, student, classKey){
+  var classData = classes[classKey] || getActiveClass();
+  // 설정탭
+  var fromSettings = getCreativeActivitiesForStudent(builderArea, student, classKey)
+    .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
+  // 임시슬롯
+  var fromAdhoc = getAdhocCreativeForStudent(builderArea, student, classData);
+  // 중복 제거 (같은 날짜+이름): 설정탭 우선
+  var seen = {};
+  fromSettings.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
+  fromAdhoc = fromAdhoc.filter(function(c){ return !seen[c.date+'|'+c.name]; });
+  var all = fromSettings.concat(fromAdhoc);
+  all.sort(function(a,b){
+    return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+  });
+  return all;
 }
 function formatCreativeNameDateForPrompt(activities, areaLabel){
   if(!activities || activities.length === 0) return [];
@@ -14462,7 +14514,7 @@ function buildJayulPrompt(ctx) {
   lines.push('· 활동 사실의 단순 나열 금지 — 학생만의 역할·기여·변화 중심');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var jayulActs = getCreativeActivitiesForStudent('창체자율', ctx.student, currentClassKey);
+  var jayulActs = getAllCreativeForStudent('창체자율', ctx.student, currentClassKey);
   lines.push.apply(lines, formatCreativeNameDateForPrompt(jayulActs, '자율·자치활동'));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
@@ -14490,7 +14542,7 @@ function buildJinroPrompt(ctx) {
   lines.push('· 학생의 흥미·적성과 활동이 일관되게 보이도록 구성');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var jinroActs = getCreativeActivitiesForStudent('창체진로', ctx.student, currentClassKey);
+  var jinroActs = getAllCreativeForStudent('창체진로', ctx.student, currentClassKey);
   lines.push.apply(lines, formatCreativeNameDateForPrompt(jinroActs, '진로활동'));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
@@ -14516,7 +14568,7 @@ function buildDongariPrompt(ctx) {
   lines.push('· "최우수" 같은 등급 표현 대신 구체적 활동·역할로 서술');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var dongariActs = getCreativeActivitiesForStudent('동아리', ctx.student, currentClassKey);
+  var dongariActs = getAllCreativeForStudent('동아리', ctx.student, currentClassKey);
   lines.push.apply(lines, formatCreativeDongariForPrompt(dongariActs));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
