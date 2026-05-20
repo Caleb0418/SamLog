@@ -6420,8 +6420,8 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="class-view-toggle">
           <button class="class-view-btn active" data-view="today" onclick="switchClassView('today')">오늘</button>
           <button class="class-view-btn" data-view="week" onclick="switchClassView('week')">주간</button>
-          <button class="class-view-btn" data-view="schedule" id="class-view-btn-schedule" onclick="switchClassView('schedule')" style="display:none;">반 시간표</button>
           <button class="class-view-btn" data-view="records" onclick="switchClassView('records')">기록</button>
+          <button class="class-view-btn" data-view="schedule" id="class-view-btn-schedule" onclick="switchClassView('schedule')" style="display:none;">반 시간표</button>
         </div>
       </div>
     </div>
@@ -20203,10 +20203,20 @@ function saveAttSettingsFromModal(){
 }
 
 function renderClassTab(){
-  updateClassScheduleBtnVisibility();
+  // 담임반 여부 확인 후 반시간표 버튼 표시 토글
+  var _activeForCs = getActiveClass();
+  var _isPrimaryForCs = _activeForCs && _activeForCs.isPrimary;
+  var _scheduleBtn = document.getElementById('class-view-btn-schedule');
+  if(_scheduleBtn) _scheduleBtn.style.display = _isPrimaryForCs ? '' : 'none';
+  if(!_isPrimaryForCs && currentClassView === 'schedule'){
+    currentClassView = 'today';
+  }
+  if(currentClassView === 'schedule'){
+    renderClassSchedule();
+    return;
+  }
   if(currentClassView === 'today') renderClassToday();
   else if(currentClassView === 'week') renderClassWeek();
-  else if(currentClassView === 'schedule') renderClassScheduleView();
   else if(currentClassView === 'records') renderClassRecords();
   renderClassMasterList();
   updateTimetableBanner();
@@ -20318,6 +20328,33 @@ function _csParseTargetGrades(target){
     if(g >= 1 && g <= 6 && grades.indexOf(g) < 0) grades.push(g);
   });
   return grades;
+}
+
+// target이 특정 반(grade, cls)에 해당하는지 판단
+// "1학년" → 1학년 전반 OK, "1학년 3반" → 정확히 1-3만 OK, "전교/전체" → 항상 OK
+function _csTargetMatchesClass(target, grade, cls){
+  if(!target) return true;
+  var t = String(target);
+  if(t.indexOf('전교') >= 0 || t.indexOf('전체') >= 0) return true;
+  var grades = _csParseTargetGrades(t);
+  if(grades.indexOf(parseInt(grade)) < 0) return false;
+  // "N학년 M반" 패턴이 있으면 반 번호까지 검사
+  var classPattern = new RegExp(grade + '\\s*학년\\s*(\\d+)\\s*반');
+  var m = t.match(classPattern);
+  if(m) return parseInt(m[1]) === parseInt(cls);
+  return true;
+}
+
+// 특정 날짜·교시 셀에 매칭되는 classSchedule 항목 목록
+// weekDate: Date 객체 또는 'YYYY-MM-DD' 문자열
+function _csMatchCell(grade, cls, weekDate, period){
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
+  var dateStr = typeof weekDate === 'string' ? weekDate : formatDateForInput(weekDate);
+  return classSchedule.filter(function(c){
+    if(c.date !== dateStr) return false;
+    if(!Array.isArray(c.periods) || c.periods.indexOf(period) < 0) return false;
+    return _csTargetMatchesClass(c.target, grade, cls);
+  });
 }
 
 // 학생이 해당 활동 대상인지 (학년 기준)
