@@ -2818,6 +2818,12 @@ body{
 .smv-stat.attend .smv-stat-lbl{color:var(--success);}
 .smv-stat.absent .smv-stat-lbl{color:var(--danger);}
 .smv-stat.late .smv-stat-lbl{color:var(--warning);}
+/* 0인 통계 약화 */
+.smv-stat.is-zero{background:var(--bg-elevated,var(--bg-secondary));opacity:0.45;}
+.smv-stat.is-zero .smv-stat-val{color:var(--text-tertiary);font-weight:500;}
+.smv-stat.is-zero .smv-stat-lbl{color:var(--text-tertiary);}
+/* 출석일 / 평일 suffix */
+.smv-stat-suffix{font-size:14px;font-weight:400;color:var(--text-tertiary);margin-left:2px;}
 .smv-cal{
   display:grid;grid-template-columns:repeat(7,1fr);
   gap:2px;margin-bottom:12px;
@@ -2826,7 +2832,7 @@ body{
   font-size:10px;color:var(--text-tertiary);
   text-align:center;padding:3px 0;font-weight:500;
 }
-.smv-cal-head.sun{color:var(--danger);}
+.smv-cal-head.sun{color:var(--text-tertiary);}
 .smv-cal-cell{
   height:52px;
   background:var(--bg-surface);border-radius:4px;
@@ -2849,7 +2855,7 @@ body{
   font-weight:500;color:var(--text-secondary);
   line-height:1;
 }
-.smv-cal-cell.sun .smv-cal-day{color:var(--danger);}
+.smv-cal-cell.sun .smv-cal-day{color:var(--text-tertiary);}
 .smv-cal-cell.today{
   outline:1.5px solid var(--accent);outline-offset:-1.5px;
 }
@@ -3318,9 +3324,9 @@ details > summary::-webkit-details-marker { display:none; }
 
 /* ── 학생 월간 달력 학사일정 ── */
 .smv-cal-event{
-  font-size:9px;color:var(--accent);
+  font-size:9px;color:var(--text-tertiary);
   margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  font-weight:500;
+  font-weight:400;
 }
 
 /* 통합 설정 모달 — 가로 탭 */
@@ -17737,12 +17743,25 @@ function renderStudentMonthlyView(){
   html += '<button class="smv-nav-btn" onclick="smvShiftMonth(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>';
   html += '</div>';
   html += '</div>';
+  // 평일 수 계산 (휴업일 제외)
+  var weekdayCount = 0;
+  var lastDateSt = new Date(smvState.year, smvState.month, 0).getDate();
+  for(var di = 1; di <= lastDateSt; di++){
+    var ddow = new Date(smvState.year, smvState.month-1, di).getDay();
+    if(ddow >= 1 && ddow <= 5){
+      var ddate = smvState.year+'-'+String(smvState.month).padStart(2,'0')+'-'+String(di).padStart(2,'0');
+      var schedEv = schoolSchedule[ddate] || [];
+      var isHolidayDay = schedEv.some(function(ev){ return ev.dayType === '휴업일'; });
+      if(!isHolidayDay) weekdayCount++;
+    }
+  }
+
   html += '<div class="smv-stats">';
-  html += '<div class="smv-stat attend"><div class="smv-stat-val">'+stats.attendDays+'</div><div class="smv-stat-lbl">출석일</div></div>';
-  html += '<div class="smv-stat absent"><div class="smv-stat-val">'+stats.absent+'</div><div class="smv-stat-lbl">결석</div></div>';
-  html += '<div class="smv-stat late"><div class="smv-stat-val">'+stats.late+'</div><div class="smv-stat-lbl">지각</div></div>';
-  html += '<div class="smv-stat"><div class="smv-stat-val">'+stats.early_leave+'</div><div class="smv-stat-lbl">조퇴</div></div>';
-  html += '<div class="smv-stat"><div class="smv-stat-val">'+stats.partial+'</div><div class="smv-stat-lbl">결과</div></div>';
+  html += '<div class="smv-stat attend"><div class="smv-stat-val">'+stats.attendDays+'<span class="smv-stat-suffix"> / '+weekdayCount+'</span></div><div class="smv-stat-lbl">출석일</div></div>';
+  html += '<div class="smv-stat absent'+(stats.absent===0?' is-zero':'')+'"><div class="smv-stat-val">'+stats.absent+'</div><div class="smv-stat-lbl">결석</div></div>';
+  html += '<div class="smv-stat late'+(stats.late===0?' is-zero':'')+'"><div class="smv-stat-val">'+stats.late+'</div><div class="smv-stat-lbl">지각</div></div>';
+  html += '<div class="smv-stat'+(stats.early_leave===0?' is-zero':'')+'"><div class="smv-stat-val">'+stats.early_leave+'</div><div class="smv-stat-lbl">조퇴</div></div>';
+  html += '<div class="smv-stat'+(stats.partial===0?' is-zero':'')+'"><div class="smv-stat-val">'+stats.partial+'</div><div class="smv-stat-lbl">결과</div></div>';
   html += '</div>';
   // 미인정 출결 영역
   var u = stats.unauth;
@@ -17797,11 +17816,9 @@ function renderStudentMonthlyView(){
     html += '</div>';
   }
   html += '</div>';
-  html += '<div class="smv-recent">';
-  html += '<div class="smv-recent-label">사례 상세 ('+smvState.month+'월)</div>';
-  if(monthRecs.length===0){
-    html += '<div class="smv-recent-empty">이번 달 출결 기록이 없어요</div>';
-  } else {
+  if(monthRecs.length > 0){
+    html += '<div class="smv-recent">';
+    html += '<div class="smv-recent-label">사례 상세 ('+smvState.month+'월)</div>';
     monthRecs.sort(function(a,b){ return b.date.localeCompare(a.date); });
     monthRecs.forEach(function(item){
       var r=item.rec;
@@ -17815,8 +17832,8 @@ function renderStudentMonthlyView(){
       html += '<span class="smv-recent-info">'+escapeHtml(info)+'</span>';
       html += '</div>';
     });
+    html += '</div>';
   }
-  html += '</div>';
   html += '</div>';
   document.getElementById('att-view-student-monthly').innerHTML = html;
 }
