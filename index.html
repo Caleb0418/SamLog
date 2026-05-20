@@ -20093,6 +20093,67 @@ function _isStudentMissingAnyPeriod(studentNum, date, periods){
   return false;
 }
 
+/* ═══════════════════════════════════════════
+   반 시간표 — 헬퍼 함수 (2-E)
+═══════════════════════════════════════════ */
+
+// 카테고리 표시 라벨
+function _csCategoryLabel(cat){
+  return ({'자율':'자율·자치','동아리':'동아리','봉사':'봉사','진로':'진로'})[cat] || cat;
+}
+
+// 카테고리 색 (생기부 빌더 영역 색과 매칭)
+function _csCategoryColor(cat){
+  return ({'자율':'var(--memo-life)','진로':'var(--memo-parent)','동아리':'var(--memo-observation)','봉사':'var(--text-secondary)'})[cat] || 'var(--text-secondary)';
+}
+
+// 날짜 포맷: 'YYYY-MM-DD' → 'YYYY.M.D.'
+function _csFormatDate(ymd){
+  if(!ymd) return '';
+  var p = ymd.split('-');
+  if(p.length !== 3) return ymd;
+  return p[0] + '.' + parseInt(p[1]) + '.' + parseInt(p[2]) + '.';
+}
+
+// target 자유 문자열에서 학년 배열 파싱
+// "1학년" → [1], "1,2학년" → [1,2], "전교" → [1,2,3,4,5,6]
+function _csParseTargetGrades(target){
+  if(!target) return [];
+  var t = String(target);
+  if(t.indexOf('전교') >= 0 || t.indexOf('전체') >= 0 || /전\s*학년/.test(t)) return [1,2,3,4,5,6];
+  var grades = [];
+  var matches = t.match(/\d+/g) || [];
+  matches.forEach(function(n){
+    var g = parseInt(n);
+    if(g >= 1 && g <= 6 && grades.indexOf(g) < 0) grades.push(g);
+  });
+  return grades;
+}
+
+// 학생이 해당 활동 대상인지 (학년 기준)
+// target 비어있으면 전체 적용으로 간주
+function _csIsTargetForStudent(item, student, classData){
+  var stuGrade = classData ? parseInt(classData.grade) : null;
+  if(stuGrade == null || isNaN(stuGrade)) return false;
+  var grades = _csParseTargetGrades(item.target);
+  if(grades.length === 0) return true;
+  return grades.indexOf(stuGrade) >= 0;
+}
+
+// 학생이 해당 활동에 결시했는지 (periods 중 하나라도 결시 → 미참여)
+function _csIsStudentMissingActivity(student, item){
+  if(!Array.isArray(item.periods) || item.periods.length === 0) return false;
+  for(var i=0; i<item.periods.length; i++){
+    if(_isStudentMissingSlot(student.num, item.date, item.periods[i])) return true;
+  }
+  return false;
+}
+
+// classSchedule 항목 ID 생성
+function _csNewId(){
+  return 'cs_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+}
+
 /* ──────────────────────────────────────────
    반 시간표 — 메인 뷰 렌더
 ────────────────────────────────────────── */
@@ -20139,7 +20200,7 @@ function renderClassScheduleView(){
   items.forEach(function(it){
     var dt = new Date(it.date+'T00:00:00');
     var dayName = ['일','월','화','수','목','금','토'][dt.getDay()];
-    var dateLabel = (dt.getMonth()+1)+'/'+dt.getDate();
+    var dateLabel = _csFormatDate(it.date).replace(/\d{4}\./, '');
     var pStr = _formatPeriodsLabel(it.periods);
     var meta = [];
     if(it.target) meta.push('<b>대상</b> '+escapeHtml(it.target));
@@ -20150,7 +20211,7 @@ function renderClassScheduleView(){
       '<div class="cs-item-date">'+dateLabel+'<small>'+dayName+'요일</small></div>'+
       '<div class="cs-item-period">'+pStr+'</div>'+
       '<div class="cs-item-body">'+
-        (it.category ? '<span class="cs-item-cat">'+escapeHtml(it.category)+'</span>' : '')+
+        (it.category ? '<span class="cs-item-cat" style="color:'+_csCategoryColor(it.category)+'">'+_csCategoryLabel(it.category)+'</span>' : '')+
         '<span class="cs-item-activity">'+escapeHtml(it.activity||'(이름 없음)')+'</span>'+
         (meta.length ? '<div class="cs-item-meta">'+meta.join('<span style=\"color:var(--border)\">·</span>')+'</div>' : '')+
       '</div>'+
@@ -20256,7 +20317,7 @@ function saveClassScheduleEdit(){
     showToast('수정됨');
   } else {
     classSchedule.push({
-      id: 'cs_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      id: _csNewId(),
       date: date, periods: periods, category: category,
       activity: activity, originalText: originalText,
       target: target, note: note,
@@ -20467,7 +20528,7 @@ function confirmClassScheduleImport(){
   if(!confirm(_csAiReviewed.length+'건을 반 시간표에 추가할까요?')) return;
   _csAiReviewed.forEach(function(it){
     classSchedule.push({
-      id: 'cs_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      id: _csNewId(),
       date: it.date,
       periods: it.periods,
       category: it.category,
