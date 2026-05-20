@@ -4105,6 +4105,58 @@ details > summary::-webkit-details-marker { display:none; }
   background:var(--accent-dim);color:var(--accent);font-weight:600;
 }
 .sg-divider{height:1px;background:var(--border);margin:18px 0;}
+/* 창체 이수 내역 미리보기 */
+.sg-creative-box{
+  margin-top:14px;padding:14px 16px;
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:10px;
+}
+.sg-creative-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+}
+.sg-creative-title{
+  font-size:11px;font-weight:600;color:var(--text-tertiary);
+  letter-spacing:0.07em;text-transform:uppercase;
+}
+.sg-creative-count{
+  font-size:11px;font-weight:600;color:var(--accent);
+  background:var(--accent-dim);padding:2px 8px;border-radius:10px;
+  letter-spacing:-0.01em;
+}
+.sg-creative-count.zero{
+  color:var(--text-tertiary);background:var(--bg-surface);
+}
+.sg-creative-list{
+  display:flex;flex-direction:column;gap:6px;
+}
+.sg-creative-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px;background:var(--bg-surface);
+  border:0.5px solid var(--border);border-radius:6px;
+  font-size:12.5px;
+}
+.sg-creative-item .sg-cv-date{
+  flex-shrink:0;font-size:11px;color:var(--text-tertiary);
+  font-variant-numeric:tabular-nums;letter-spacing:-0.01em;
+  min-width:62px;
+}
+.sg-creative-item .sg-cv-name{
+  flex:1;color:var(--text);font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.sg-creative-item .sg-cv-note{
+  flex-shrink:0;font-size:11px;color:var(--text-secondary);
+  max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.sg-creative-empty{
+  padding:10px;text-align:center;font-size:12px;color:var(--text-tertiary);
+  background:var(--bg-surface);border:0.5px dashed var(--border);
+  border-radius:6px;
+}
+.sg-creative-hint{
+  margin-top:8px;font-size:11px;color:var(--text-tertiary);
+  line-height:1.5;
+}
 .sg-record-list{
   border:1px solid var(--border);border-radius:8px;overflow:hidden;
   max-height:240px;overflow-y:auto;background:var(--bg-elevated);
@@ -7725,6 +7777,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <button class="sg-area-chip" data-area="동아리" data-types="observation" data-maxlen="500자" onclick="selectSgArea(this)">창체 — 동아리</button>
         <button class="sg-area-chip" data-area="세특" data-types="observation" data-maxlen="500자" onclick="selectSgArea(this)">교과 세특</button>
       </div>
+
+      <!-- 창체 이수 내역 미리보기 (창체자율/창체진로/동아리 선택 시에만 표시) -->
+      <div id="sg-creative-preview" style="display:none;"></div>
 
       <div class="sg-divider"></div>
 
@@ -13911,6 +13966,7 @@ function openSaengibu(){
   refreshSgGenerateBtn();
 
   renderSgRecords();
+  renderSgCreativePreview();
   document.getElementById('saengibu-overlay').classList.add('show');
 }
 
@@ -13927,6 +13983,56 @@ function selectSgArea(btn){
   sgState.selectedRecIds = [];
   renderSgRecords();
   onSgAreaChangeForSubject(sgState.area);
+  renderSgCreativePreview();
+}
+
+/* ──────────────────────────────────────────
+   창체 이수 내역 미리보기 — 영역 선택 chips 아래에 표시
+   대상 영역: 창체자율 / 창체진로 / 동아리
+────────────────────────────────────────── */
+function renderSgCreativePreview(){
+  var box = document.getElementById('sg-creative-preview');
+  if(!box) return;
+  var area = sgState.area;
+  var CREATIVE_AREAS = ['창체자율','창체진로','동아리'];
+  if(CREATIVE_AREAS.indexOf(area) < 0){
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
+  }
+  var s = students.find(function(x){ return x.num === sgState.studentNum; });
+  if(!s){ box.style.display = 'none'; return; }
+
+  var activities = getAllCreativeForStudent(area, s, currentClassKey);
+  var labelMap = { '창체자율':'자율·자치활동', '창체진로':'진로활동', '동아리':'동아리활동' };
+  var areaLabel = labelMap[area] || '창체활동';
+
+  var html = '<div class="sg-creative-box">';
+  html += '<div class="sg-creative-head">';
+  html += '<span class="sg-creative-title">학생이 이수한 ' + areaLabel + '</span>';
+  html += '<span class="sg-creative-count'+(activities.length===0?' zero':'')+'">' + activities.length + '건</span>';
+  html += '</div>';
+
+  if(activities.length === 0){
+    html += '<div class="sg-creative-empty">매칭된 ' + areaLabel + '이 없어요. 수업관리 시간표에 창체를 추가하면 자동으로 잡혀요.</div>';
+  } else {
+    html += '<div class="sg-creative-list">';
+    activities.forEach(function(a){
+      var dateStr = (typeof _formatCreativeDate === 'function')
+        ? _formatCreativeDate(a.date)
+        : (a.date || '').replace(/-/g,'.');
+      html += '<div class="sg-creative-item">';
+      html += '<span class="sg-cv-date">'+escapeHtml(dateStr)+'</span>';
+      html += '<span class="sg-cv-name">'+escapeHtml(a.name||'')+'</span>';
+      if(a.note) html += '<span class="sg-cv-note">'+escapeHtml(a.note)+'</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="sg-creative-hint">프롬프트 생성 시 위 항목이 자동으로 포함돼요. 출결에서 결시 처리된 활동은 제외됩니다.</div>';
+  }
+  html += '</div>';
+  box.innerHTML = html;
+  box.style.display = 'block';
 }
 
 /* ──────────────────────────────────────────
