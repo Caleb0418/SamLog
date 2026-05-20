@@ -2132,6 +2132,167 @@ body{
   background:var(--bg-surface);color:var(--text);font-weight:600;
 }
 
+/* 수업 관리 - 반 시간표 뷰 */
+.cs-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;gap:10px;flex-wrap:wrap;
+}
+.cs-header-info{
+  font-size:12px;color:var(--text-tertiary);line-height:1.5;
+}
+.cs-header-actions{display:flex;gap:8px;}
+.cs-list{
+  display:flex;flex-direction:column;gap:8px;
+}
+.cs-item{
+  display:grid;grid-template-columns:88px 80px 1fr auto;gap:14px;align-items:center;
+  padding:12px 14px;background:var(--bg-surface);
+  border:1px solid var(--border);border-radius:10px;
+  cursor:pointer;transition:all 0.12s;
+}
+.cs-item:hover{border-color:var(--border-accent);background:var(--bg-elevated);}
+.cs-item-date{
+  font-size:12.5px;font-weight:600;color:var(--text);
+  font-variant-numeric:tabular-nums;letter-spacing:-0.01em;
+}
+.cs-item-date small{display:block;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-top:2px;}
+.cs-item-period{
+  font-size:11.5px;font-weight:600;color:var(--accent);
+  background:var(--accent-dim);padding:3px 8px;border-radius:6px;
+  text-align:center;letter-spacing:-0.01em;
+}
+.cs-item-body{min-width:0;}
+.cs-item-cat{
+  display:inline-block;
+  font-size:10px;font-weight:600;color:var(--text-secondary);
+  background:var(--bg-elevated);border:0.5px solid var(--border);
+  padding:1px 7px;border-radius:4px;letter-spacing:-0.01em;margin-right:6px;
+}
+.cs-item-activity{
+  font-size:13.5px;font-weight:600;color:var(--text);
+  display:inline;
+}
+.cs-item-meta{
+  font-size:11px;color:var(--text-tertiary);margin-top:4px;
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+.cs-item-meta b{color:var(--text-secondary);font-weight:500;}
+.cs-item-edit{
+  font-size:11px;color:var(--text-tertiary);
+  border:0.5px solid var(--border);background:transparent;
+  padding:4px 9px;border-radius:5px;cursor:pointer;font-family:inherit;
+}
+.cs-item-edit:hover{color:var(--accent);border-color:var(--accent);}
+.cs-empty{
+  padding:42px 18px;text-align:center;
+  background:var(--bg-surface);border:1px dashed var(--border);
+  border-radius:12px;color:var(--text-tertiary);font-size:13px;
+}
+.cs-empty .cs-empty-title{font-size:14px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;}
+.cs-empty .cs-empty-actions{margin-top:14px;display:flex;gap:8px;justify-content:center;}
+
+/* AI 가져오기 모달 */
+.cs-ai-steps{display:flex;flex-direction:column;gap:18px;}
+.cs-ai-step{
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:10px;padding:14px;
+}
+.cs-ai-step-head{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;
+}
+.cs-ai-step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:11px;font-weight:700;
+}
+.cs-ai-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end;}
+.cs-ai-prompt-box{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;
+  font-family:Consolas,Menlo,monospace;font-size:11.5px;
+  white-space:pre-wrap;word-break:break-word;
+  max-height:240px;overflow-y:auto;color:var(--text-secondary);
+}
+.cs-ai-hint{
+  font-size:11px;color:var(--text-tertiary);margin-top:8px;line-height:1.5;
+}
+.cs-ai-review-item{
+  display:grid;grid-template-columns:78px 70px 1fr;gap:10px;align-items:center;
+  padding:8px 10px;background:var(--bg-surface);
+  border:0.5px solid var(--border);border-radius:6px;margin-bottom:6px;
+  font-size:12px;
+}
+.cs-ai-review-item.bad{
+  border-color:var(--danger);background:rgba(239,68,68,0.05);
+}
+.cs-ai-review-item.bad .cs-ai-review-err{
+  color:var(--danger);font-size:11px;margin-top:3px;
+}
+.cs-ai-review-summary{
+  display:flex;gap:14px;font-size:12px;color:var(--text-secondary);
+  margin-bottom:10px;padding:8px 12px;background:var(--bg-surface);border-radius:6px;
+}
+.cs-ai-review-summary b{color:var(--text);}
+
+/* 홈 - 반 시간표 카드 */
+.home-cs-card{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:14px;padding:16px 18px;margin-bottom:14px;
+}
+.home-cs-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;gap:10px;
+}
+.home-cs-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:700;color:var(--text);
+}
+.home-cs-title .home-cs-icon{
+  width:26px;height:26px;border-radius:7px;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.home-cs-link{
+  font-size:11.5px;color:var(--accent);background:transparent;
+  border:none;cursor:pointer;font-family:inherit;font-weight:500;
+}
+.home-cs-link:hover{text-decoration:underline;}
+.home-cs-list{display:flex;flex-direction:column;gap:6px;}
+.home-cs-row{
+  display:grid;grid-template-columns:56px 64px 1fr auto;gap:10px;align-items:center;
+  padding:8px 10px;background:var(--bg-elevated);
+  border:0.5px solid var(--border);border-radius:8px;font-size:12.5px;
+}
+.home-cs-row.today{
+  background:var(--accent-dim);border-color:var(--border-accent);
+}
+.home-cs-row-date{
+  font-size:11.5px;font-weight:600;color:var(--text);
+  font-variant-numeric:tabular-nums;letter-spacing:-0.01em;
+}
+.home-cs-row.today .home-cs-row-date{color:var(--accent);}
+.home-cs-row-period{
+  font-size:11px;font-weight:600;color:var(--accent);
+  background:var(--bg-surface);padding:2px 6px;border-radius:4px;
+  text-align:center;letter-spacing:-0.01em;
+}
+.home-cs-row-body{min-width:0;}
+.home-cs-row-activity{
+  font-weight:600;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.home-cs-row-meta{
+  font-size:10.5px;color:var(--text-tertiary);margin-top:2px;
+}
+.home-cs-row-badge{
+  font-size:10px;font-weight:700;color:#fff;
+  background:var(--accent);padding:2px 7px;border-radius:8px;letter-spacing:-0.01em;
+}
+.home-cs-empty{
+  font-size:12px;color:var(--text-tertiary);padding:10px 4px;
+}
+
 /* 수업 관리 - 기록 뷰 */
 .class-records-empty{
   padding:48px 24px;text-align:center;
@@ -6237,6 +6398,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- 알림·공지 영역 -->
     <div class="home-alerts" id="home-alerts" style="display:none;"></div>
 
+    <!-- 반 시간표(창체) 카드 — 담임반일 때만 표시 -->
+    <div id="home-class-schedule" style="display:none;"></div>
+
     <!-- 제출 추적 위젯 -->
     <div id="home-submit-widget" style="display:none;margin-bottom:12px;"></div>
 
@@ -6256,6 +6420,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="class-view-toggle">
           <button class="class-view-btn active" data-view="today" onclick="switchClassView('today')">오늘</button>
           <button class="class-view-btn" data-view="week" onclick="switchClassView('week')">주간</button>
+          <button class="class-view-btn" data-view="schedule" id="class-view-btn-schedule" onclick="switchClassView('schedule')" style="display:none;">반 시간표</button>
           <button class="class-view-btn" data-view="records" onclick="switchClassView('records')">기록</button>
         </div>
       </div>
@@ -6271,7 +6436,12 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div id="class-week-grid"></div>
     </div>
 
-    <!-- ④ 기록 뷰 (반 선택 → 그 반의 정규+임시 수업 메모 모음) -->
+    <!-- ④ 반 시간표 뷰 (담임반 전용 창체/특별 일정) -->
+    <div id="class-view-schedule" style="display:none;">
+      <div id="class-schedule-container"></div>
+    </div>
+
+    <!-- ⑤ 기록 뷰 (반 선택 → 그 반의 정규+임시 수업 메모 모음) -->
     <div id="class-view-records" style="display:none;">
       <div id="class-records-filter"></div>
       <div id="class-records-list"></div>
@@ -7377,6 +7547,115 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <div class="modal-actions">
       <button class="btn-small secondary" onclick="closeAddAdhoc()">취소</button>
       <button class="btn-small primary" onclick="saveAddAdhoc()"><span id="adhoc-save-label">추가하기</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- 반 시간표: 수동 등록/수정 모달 -->
+<div class="modal-overlay" id="cs-edit-modal" onclick="if(event.target===this)closeClassScheduleEdit()">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-title" id="cs-edit-title">반 시간표 항목 추가</div>
+    <div class="modal-desc">담임반 창체·특별 일정. 같은 활동이 여러 교시에 걸치면 한 건으로 등록하세요.</div>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <label class="form-label" style="display:block;">날짜</label>
+        <input type="date" id="cs-date" class="form-input-text">
+      </div>
+      <div style="flex:1;">
+        <label class="form-label" style="display:block;">교시 (쉼표 또는 ~)</label>
+        <input type="text" id="cs-periods" class="form-input-text" placeholder="예) 5,6 또는 3~4" maxlength="20">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <label class="form-label" style="display:block;">카테고리</label>
+        <select id="cs-category" class="form-select" style="width:100%;">
+          <option value="자율·자치">자율·자치</option>
+          <option value="진로">진로</option>
+          <option value="동아리">동아리</option>
+          <option value="봉사">봉사</option>
+          <option value="안전">안전</option>
+          <option value="행사">행사</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div style="flex:1;">
+        <label class="form-label" style="display:block;">대상 (선택)</label>
+        <input type="text" id="cs-target" class="form-input-text" placeholder="예) 1학년 / 전학년" maxlength="20">
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label class="form-label" style="display:block;">활동명</label>
+      <input type="text" id="cs-activity" class="form-input-text" placeholder="예) 학교폭력예방교육" maxlength="60">
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label class="form-label" style="display:block;">NEIS 누가기록 원문 (선택)</label>
+      <textarea id="cs-original" class="textarea-large" rows="2" placeholder="비우면 활동명이 그대로 사용돼요" maxlength="200" style="width:100%;"></textarea>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label class="form-label" style="display:block;">메모 (선택)</label>
+      <input type="text" id="cs-note" class="form-input-text" placeholder="예) 강당, 학년 합동" maxlength="100">
+    </div>
+
+    <div class="modal-actions" style="display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn-small secondary" id="cs-delete-btn" onclick="deleteClassScheduleItem()" style="display:none;color:var(--danger);border-color:var(--danger);">삭제</button>
+      <div style="display:flex;gap:8px;margin-left:auto;">
+        <button class="btn-small secondary" onclick="closeClassScheduleEdit()">취소</button>
+        <button class="btn-small primary" onclick="saveClassScheduleEdit()"><span id="cs-save-label">추가하기</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 반 시간표: AI 변환 (붙여넣기 → 프롬프트 생성 → JSON 검수 → 일괄 import) -->
+<div class="modal-overlay" id="cs-ai-modal" onclick="if(event.target===this)closeClassScheduleAi()">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-title">반 시간표 AI 가져오기</div>
+    <div class="modal-desc">학교에서 받은 창체 운영 계획을 붙여넣어 AI 프롬프트를 만든 뒤, 외부 AI(ChatGPT 등)에서 변환한 JSON을 다시 붙여넣으세요.</div>
+
+    <div class="cs-ai-steps">
+      <!-- STEP 1 -->
+      <div class="cs-ai-step">
+        <div class="cs-ai-step-head"><span class="cs-ai-step-num">1</span>창체 운영 계획 텍스트 붙여넣기</div>
+        <textarea id="cs-ai-input" class="textarea-large" rows="5" placeholder="예) 3/2 1교시 학교폭력예방교육 (강당, 전학년)&#10;3/5 5~6교시 진로 적성검사 (1학년)&#10;..." style="width:100%;"></textarea>
+        <div class="cs-ai-actions">
+          <button class="btn-small primary" onclick="buildClassSchedulePrompt()">AI용 프롬프트 만들기</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="cs-ai-step" id="cs-ai-step2" style="display:none;">
+        <div class="cs-ai-step-head"><span class="cs-ai-step-num">2</span>생성된 프롬프트를 AI에 붙여넣고 JSON 받기</div>
+        <div class="cs-ai-prompt-box" id="cs-ai-prompt-output"></div>
+        <div class="cs-ai-actions">
+          <button class="btn-small secondary" onclick="copyClassSchedulePrompt()">프롬프트 복사</button>
+        </div>
+        <div class="cs-ai-hint">위 프롬프트를 ChatGPT, Claude 등에 그대로 붙여넣어 결과 JSON을 받아오세요. JSON만 그대로 복사해 아래 3번 칸에 붙여넣어요.</div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="cs-ai-step" id="cs-ai-step3" style="display:none;">
+        <div class="cs-ai-step-head"><span class="cs-ai-step-num">3</span>AI가 준 JSON 붙여넣고 검수</div>
+        <textarea id="cs-ai-json" class="textarea-large" rows="5" placeholder='[{"date":"2026-03-02","periods":[1],"category":"안전","activity":"학교폭력예방교육","originalText":"","target":"전학년","note":""}]' style="width:100%;font-family:Consolas,monospace;font-size:12px;"></textarea>
+        <div class="cs-ai-actions">
+          <button class="btn-small primary" onclick="parseClassScheduleJson()">검수 시작</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: review/preview -->
+      <div class="cs-ai-step" id="cs-ai-step4" style="display:none;">
+        <div class="cs-ai-step-head"><span class="cs-ai-step-num">4</span>검수: 등록 전 미리보기</div>
+        <div id="cs-ai-review"></div>
+        <div class="cs-ai-actions">
+          <button class="btn-small secondary" onclick="closeClassScheduleAi()">취소</button>
+          <button class="btn-small primary" onclick="confirmClassScheduleImport()"><span id="cs-ai-confirm-label">일괄 등록</span></button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -8499,6 +8778,11 @@ var ttSyncState = { synced: false, lastSync: null, totalRows: 0 };
 // 임시 슬롯(보강/창체) — 특정 날짜에만 적용되는 1회성 수업
 // 구조: { id, date:'YYYY-MM-DD', period, subject, grade, cls, kind:'보강'|'창체'|'기타', note, memos:[] }
 var adhocSlots = [];
+/* ──────────────────────────────────────────
+   반 시간표 (담임반 전용 창체/특별 일정 시간표)
+   각 항목: { id, date, periods:[5,6], category, activity, originalText, target, note }
+────────────────────────────────────────── */
+var classSchedule = [];
 
 // 창의적 체험활동 (생기부 작성용 별도 등록)
 var creativeActivities = [];
@@ -8730,6 +9014,7 @@ function saveAll(){
     localStorage.setItem('ht2_tt_sync_state_' + yr, JSON.stringify(ttSyncState));
     localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
     localStorage.setItem('ht2_creative_activities_' + yr, JSON.stringify(creativeActivities));
+    localStorage.setItem('ht2_class_schedule_' + yr, JSON.stringify(classSchedule));
     localStorage.setItem('ht2_attendance_' + yr, JSON.stringify(attendanceRecords));
     localStorage.setItem('ht2_school_schedule_' + yr, JSON.stringify(schoolSchedule));
     localStorage.setItem('ht2_class_view_settings', JSON.stringify(classViewSettings));
@@ -9178,6 +9463,10 @@ function loadAll(){
       var caRaw = _getYearLS('ht2_creative_activities');
       creativeActivities = caRaw ? JSON.parse(caRaw) : [];
     }catch(e){ creativeActivities = []; }
+    try{
+      var csRaw = _getYearLS('ht2_class_schedule');
+      classSchedule = csRaw ? JSON.parse(csRaw) : [];
+    }catch(e){ classSchedule = []; }
     try{
       var attRaw = localStorage.getItem('ht2_attendance_' + getActiveYear());
       if(attRaw) attendanceRecords = JSON.parse(attRaw);
@@ -14469,6 +14758,14 @@ function _adhocKindsForArea(builderArea){
   if(builderArea === '동아리')   return ['동아리'];
   return [];
 }
+// builderArea → classSchedule.category 매핑
+// (자율·자치 영역에는 학교 차원 일정성 활동도 포함: 안전·행사·봉사)
+function _classScheduleCatsForArea(builderArea){
+  if(builderArea === '창체자율') return ['자율·자치','안전','행사','봉사','기타'];
+  if(builderArea === '창체진로') return ['진로'];
+  if(builderArea === '동아리')   return ['동아리'];
+  return [];
+}
 function _isStudentMissingDate(studentNum, date){
   if(!attendanceRecords || !attendanceRecords[date]) return false;
   var recs = attendanceRecords[date][studentNum] || [];
@@ -14529,19 +14826,62 @@ function getAdhocCreativeForStudent(builderArea, student, classData){
   });
   return unique;
 }
-// 설정탭 + 임시슬롯 통합 (날짜순)
+// 반 시간표(classSchedule)에서 매칭 → {date, name, note} 통일 형식
+// 같은 날짜+활동명은 1건으로 합침. 결시 판정은 periods 단위.
+function getClassScheduleCreativeForStudent(builderArea, student, classData){
+  var cats = _classScheduleCatsForArea(builderArea);
+  if(cats.length === 0) return [];
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
+  // 반 시간표는 담임반 전용 — 활성 반이 담임반이 아니면 적용하지 않음
+  if(!classData || !classData.isPrimary) return [];
+  var stuGrade = classData ? parseInt(classData.grade) : null;
+
+  var attended = classSchedule.filter(function(it){
+    if(!it) return false;
+    if(cats.indexOf(it.category) < 0) return false;
+    // target 학년 필터 ("1학년" / "전학년" / 미지정 모두 허용)
+    if(it.target){
+      var t = String(it.target);
+      if(!/전\s*학년|모든\s*학년|전체/.test(t)){
+        var m = t.match(/(\d+)/);
+        if(m && stuGrade != null && parseInt(m[1]) !== stuGrade) return false;
+      }
+    }
+    // 결시 판정: periods 중 하나라도 결시면 제외
+    if(_isStudentMissingAnyPeriod(student.num, it.date, it.periods)) return false;
+    return true;
+  });
+
+  var dedupMap = {};
+  attended.forEach(function(it){
+    var name = it.originalText || it.activity || '창체활동';
+    var key = it.date + '|' + name;
+    if(!dedupMap[key]){
+      dedupMap[key] = { date: it.date, name: name, note: it.note || '' };
+    } else if(!dedupMap[key].note && it.note){
+      dedupMap[key].note = it.note;
+    }
+  });
+  return Object.keys(dedupMap).map(function(k){ return dedupMap[k]; });
+}
+
+// 설정탭 + 임시슬롯 + 반 시간표 통합 (날짜순)
 function getAllCreativeForStudent(builderArea, student, classKey){
   var classData = classes[classKey] || getActiveClass();
-  // 설정탭
+  // ① 반 시간표 (담임반 전용, 최우선)
+  var fromClassSchedule = getClassScheduleCreativeForStudent(builderArea, student, classData);
+  // ② 설정탭(creativeActivities)
   var fromSettings = getCreativeActivitiesForStudent(builderArea, student, classKey)
     .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
-  // 임시슬롯
+  // ③ 임시슬롯(adhocSlots)
   var fromAdhoc = getAdhocCreativeForStudent(builderArea, student, classData);
-  // 중복 제거 (같은 날짜+이름): 설정탭 우선
+  // 중복 제거 (같은 날짜+이름): 반시간표 > 설정탭 > 임시슬롯 우선순위
   var seen = {};
+  fromClassSchedule.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
+  fromSettings = fromSettings.filter(function(c){ return !seen[c.date+'|'+c.name]; });
   fromSettings.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
   fromAdhoc = fromAdhoc.filter(function(c){ return !seen[c.date+'|'+c.name]; });
-  var all = fromSettings.concat(fromAdhoc);
+  var all = fromClassSchedule.concat(fromSettings).concat(fromAdhoc);
   all.sort(function(a,b){
     return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
   });
@@ -16396,6 +16736,9 @@ function renderHome(){
   // 알림·공지
   renderHomeAlerts();
 
+  // 반 시간표(창체) 카드
+  renderHomeClassSchedule();
+
   // 제출 추적 위젯
   renderSubmitTrackersWidget();
 
@@ -16414,6 +16757,97 @@ function renderHome(){
       document.getElementById('qm-submit-label').classList.toggle('on', _submitTrackEnabled);
     };
   }
+}
+
+/* ═══════════════════════════════════════════
+   홈 - 반 시간표(창체) 카드
+   - 담임반 활성 시에만 표시
+   - 오늘 + 다가오는 7일 이내 일정
+═══════════════════════════════════════════ */
+function renderHomeClassSchedule(){
+  var card = document.getElementById('home-class-schedule');
+  if(!card) return;
+
+  if(!isHomeroomActive()){
+    card.style.display = 'none';
+    card.innerHTML = '';
+    return;
+  }
+  var c = getActiveClass();
+  var grade = parseInt(c.grade);
+  var all = getClassScheduleForGrade(grade);
+  if(all.length === 0){
+    // 담임반이지만 데이터 없음 — 살짝 안내
+    card.innerHTML = '<div class="home-cs-card">'+
+      '<div class="home-cs-head">'+
+        '<div class="home-cs-title">'+
+          '<span class="home-cs-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>'+
+          '반 시간표 (창체)'+
+        '</div>'+
+        '<button class="home-cs-link" onclick="goToClassScheduleView()">시간표 등록 →</button>'+
+      '</div>'+
+      '<div class="home-cs-empty">아직 등록된 일정이 없어요. 수업 관리 → 반 시간표에서 추가해보세요.</div>'+
+    '</div>';
+    card.style.display = 'block';
+    return;
+  }
+
+  var today = new Date();
+  var todayStr = formatDateForInput(today);
+  var endDate = new Date(today); endDate.setDate(endDate.getDate() + 7);
+  var endStr = formatDateForInput(endDate);
+
+  // 오늘 ~ 7일 이내 일정
+  var upcoming = all.filter(function(it){
+    return it.date >= todayStr && it.date <= endStr;
+  }).slice(0, 5);
+
+  var rowsHtml = '';
+  if(upcoming.length === 0){
+    rowsHtml = '<div class="home-cs-empty">다가오는 7일 이내 일정이 없어요. 전체 일정은 반 시간표에서 확인하세요.</div>';
+  } else {
+    rowsHtml = '<div class="home-cs-list">';
+    upcoming.forEach(function(it){
+      var dt = new Date(it.date+'T00:00:00');
+      var dayName = ['일','월','화','수','목','금','토'][dt.getDay()];
+      var dateLabel = (dt.getMonth()+1)+'/'+dt.getDate()+'('+dayName+')';
+      var isToday = it.date === todayStr;
+      var pStr = _formatPeriodsLabel(it.periods);
+      var metaParts = [];
+      if(it.category) metaParts.push(it.category);
+      if(it.target) metaParts.push(it.target);
+      if(it.note) metaParts.push(it.note);
+
+      rowsHtml += '<div class="home-cs-row'+(isToday?' today':'')+'" onclick="goToClassScheduleView()">'+
+        '<div class="home-cs-row-date">'+dateLabel+'</div>'+
+        '<div class="home-cs-row-period">'+pStr+'</div>'+
+        '<div class="home-cs-row-body">'+
+          '<div class="home-cs-row-activity">'+escapeHtml(it.activity||'')+'</div>'+
+          (metaParts.length ? '<div class="home-cs-row-meta">'+escapeHtml(metaParts.join(' · '))+'</div>' : '')+
+        '</div>'+
+        (isToday ? '<div class="home-cs-row-badge">오늘</div>' : '<div></div>')+
+      '</div>';
+    });
+    rowsHtml += '</div>';
+  }
+
+  card.innerHTML = '<div class="home-cs-card">'+
+    '<div class="home-cs-head">'+
+      '<div class="home-cs-title">'+
+        '<span class="home-cs-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>'+
+        '반 시간표 (창체) <span style="font-size:11px;font-weight:500;color:var(--text-tertiary);margin-left:4px;">다가오는 7일</span>'+
+      '</div>'+
+      '<button class="home-cs-link" onclick="goToClassScheduleView()">전체 보기 →</button>'+
+    '</div>'+
+    rowsHtml +
+  '</div>';
+  card.style.display = 'block';
+}
+
+// 홈에서 "반 시간표" 뷰로 점프
+function goToClassScheduleView(){
+  if(typeof switchTab === 'function') switchTab('class');
+  setTimeout(function(){ switchClassView('schedule'); }, 30);
 }
 
 /* ═══════════════════════════════════════════
@@ -19582,22 +20016,477 @@ function saveAttSettingsFromModal(){
 }
 
 function renderClassTab(){
+  updateClassScheduleBtnVisibility();
   if(currentClassView === 'today') renderClassToday();
   else if(currentClassView === 'week') renderClassWeek();
+  else if(currentClassView === 'schedule') renderClassScheduleView();
   else if(currentClassView === 'records') renderClassRecords();
   renderClassMasterList();
   updateTimetableBanner();
 }
 
 function switchClassView(view){
+  // 비담임이 'schedule'로 진입 시도하면 'today'로 보정
+  if(view === 'schedule' && !isHomeroomActive()) view = 'today';
   currentClassView = view;
   document.querySelectorAll('.class-view-btn').forEach(function(b){
     b.classList.toggle('active', b.dataset.view === view);
   });
-  document.getElementById('class-view-today').style.display = view === 'today' ? 'block' : 'none';
-  document.getElementById('class-view-week').style.display = view === 'week' ? 'block' : 'none';
-  document.getElementById('class-view-records').style.display = view === 'records' ? 'block' : 'none';
+  document.getElementById('class-view-today').style.display    = view === 'today'    ? 'block' : 'none';
+  document.getElementById('class-view-week').style.display     = view === 'week'     ? 'block' : 'none';
+  document.getElementById('class-view-schedule').style.display = view === 'schedule' ? 'block' : 'none';
+  document.getElementById('class-view-records').style.display  = view === 'records'  ? 'block' : 'none';
   renderClassTab();
+}
+
+/* ──────────────────────────────────────────
+   반 시간표 헬퍼
+────────────────────────────────────────── */
+// 현재 활성 반이 담임반인지
+function isHomeroomActive(){
+  var c = getActiveClass();
+  return !!(c && c.isPrimary);
+}
+// 담임반의 학년 (반 시간표 매칭용). 없으면 null.
+function getHomeroomGrade(){
+  var c = getActiveClass();
+  if(!c || !c.isPrimary) return null;
+  return parseInt(c.grade);
+}
+// 반 시간표 뷰 버튼 가시성 갱신 (담임반에서만 노출)
+function updateClassScheduleBtnVisibility(){
+  var btn = document.getElementById('class-view-btn-schedule');
+  if(!btn) return;
+  btn.style.display = isHomeroomActive() ? '' : 'none';
+  // 담임반이 아닌데 현재 schedule 뷰면 today로 자동 전환
+  if(!isHomeroomActive() && currentClassView === 'schedule'){
+    switchClassView('today');
+  }
+}
+// classSchedule에서 특정 학년에 해당하는 항목만 필터 + 날짜순 정렬
+function getClassScheduleForGrade(grade){
+  if(!Array.isArray(classSchedule)) return [];
+  var g = grade == null ? null : parseInt(grade);
+  var filtered = classSchedule.filter(function(it){
+    if(!it) return false;
+    if(g == null) return true;
+    // target 미지정이면 모든 학년에 적용 (담임반 시간표는 보통 학년 무관 가능)
+    if(!it.target) return true;
+    // "1학년", "1", "전학년", "모든 학년" 등 텍스트 매칭
+    var t = String(it.target);
+    if(/전\s*학년|모든\s*학년|전체/.test(t)) return true;
+    var m = t.match(/(\d+)/);
+    if(!m) return true;
+    return parseInt(m[1]) === g;
+  });
+  filtered.sort(function(a,b){
+    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+    var ap = (a.periods && a.periods[0]) || 0;
+    var bp = (b.periods && b.periods[0]) || 0;
+    return ap - bp;
+  });
+  return filtered;
+}
+// 학생의 결시 판정: periods 중 하나라도 결시면 미참여
+function _isStudentMissingAnyPeriod(studentNum, date, periods){
+  if(!Array.isArray(periods) || periods.length === 0) return false;
+  for(var i=0; i<periods.length; i++){
+    if(_isStudentMissingSlot(studentNum, date, periods[i])) return true;
+  }
+  return false;
+}
+
+/* ──────────────────────────────────────────
+   반 시간표 — 메인 뷰 렌더
+────────────────────────────────────────── */
+function renderClassScheduleView(){
+  var box = document.getElementById('class-schedule-container');
+  if(!box) return;
+
+  if(!isHomeroomActive()){
+    box.innerHTML = '<div class="cs-empty"><div class="cs-empty-title">담임반에서만 사용할 수 있어요</div>'+
+      '<div>현재 활성 반이 담임반이 아닙니다. 헤더에서 담임반으로 전환해주세요.</div></div>';
+    return;
+  }
+
+  var c = getActiveClass();
+  var grade = parseInt(c.grade);
+  var items = getClassScheduleForGrade(grade);
+
+  var headHtml = '<div class="cs-header">'+
+    '<div class="cs-header-info">'+
+      '<b>'+c.grade+'학년 '+c.classNum+'반</b> 담임반 시간표 — 창체·특별 일정을 등록하면 '+
+      '생기부 자동 작성·홈 일정 카드·NEIS 누가기록에 활용돼요.'+
+    '</div>'+
+    '<div class="cs-header-actions">'+
+      '<button class="btn-small secondary" onclick="openClassScheduleAi()">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'+
+        'AI로 가져오기'+
+      '</button>'+
+      '<button class="btn-small primary" onclick="openClassScheduleEdit()">+ 항목 추가</button>'+
+    '</div>'+
+  '</div>';
+
+  if(items.length === 0){
+    box.innerHTML = headHtml +
+      '<div class="cs-empty"><div class="cs-empty-title">아직 등록된 반 시간표가 없어요</div>'+
+      '<div>학교에서 받은 창체 운영 계획을 AI로 한 번에 가져오거나, 한 건씩 직접 추가할 수 있어요.</div>'+
+      '<div class="cs-empty-actions">'+
+        '<button class="btn-small secondary" onclick="openClassScheduleAi()">AI로 가져오기</button>'+
+        '<button class="btn-small primary" onclick="openClassScheduleEdit()">+ 직접 추가</button>'+
+      '</div></div>';
+    return;
+  }
+
+  var listHtml = '<div class="cs-list">';
+  items.forEach(function(it){
+    var dt = new Date(it.date+'T00:00:00');
+    var dayName = ['일','월','화','수','목','금','토'][dt.getDay()];
+    var dateLabel = (dt.getMonth()+1)+'/'+dt.getDate();
+    var pStr = _formatPeriodsLabel(it.periods);
+    var meta = [];
+    if(it.target) meta.push('<b>대상</b> '+escapeHtml(it.target));
+    if(it.originalText && it.originalText !== it.activity) meta.push('<b>NEIS</b> '+escapeHtml(it.originalText));
+    if(it.note) meta.push('<b>메모</b> '+escapeHtml(it.note));
+
+    listHtml += '<div class="cs-item" onclick="openClassScheduleEdit(\''+it.id+'\')">'+
+      '<div class="cs-item-date">'+dateLabel+'<small>'+dayName+'요일</small></div>'+
+      '<div class="cs-item-period">'+pStr+'</div>'+
+      '<div class="cs-item-body">'+
+        (it.category ? '<span class="cs-item-cat">'+escapeHtml(it.category)+'</span>' : '')+
+        '<span class="cs-item-activity">'+escapeHtml(it.activity||'(이름 없음)')+'</span>'+
+        (meta.length ? '<div class="cs-item-meta">'+meta.join('<span style=\"color:var(--border)\">·</span>')+'</div>' : '')+
+      '</div>'+
+      '<button class="cs-item-edit" onclick="event.stopPropagation();openClassScheduleEdit(\''+it.id+'\')">편집</button>'+
+    '</div>';
+  });
+  listHtml += '</div>';
+
+  box.innerHTML = headHtml + listHtml;
+}
+
+// "5,6" → "5·6교시", "3~4" → "3~4교시"
+function _formatPeriodsLabel(periods){
+  if(!Array.isArray(periods) || periods.length === 0) return '-';
+  var sorted = periods.slice().sort(function(a,b){return a-b;});
+  // 연속 여부 확인
+  var consec = true;
+  for(var i=1; i<sorted.length; i++){
+    if(sorted[i] !== sorted[i-1]+1){ consec = false; break; }
+  }
+  if(sorted.length === 1) return sorted[0]+'교시';
+  if(consec) return sorted[0]+'~'+sorted[sorted.length-1]+'교시';
+  return sorted.join('·')+'교시';
+}
+
+// "5,6" / "5~6" / "5 6" 등 다양한 입력 → [5,6]
+function _parsePeriodsInput(str){
+  if(!str) return [];
+  var s = String(str).trim();
+  // 범위 표기 "3~4" 또는 "3-4"
+  var m = s.match(/^(\d+)\s*[~\-]\s*(\d+)$/);
+  if(m){
+    var a = parseInt(m[1]), b = parseInt(m[2]);
+    if(isNaN(a) || isNaN(b)) return [];
+    if(a > b){ var t = a; a = b; b = t; }
+    var out = [];
+    for(var i=a; i<=b; i++) out.push(i);
+    return out;
+  }
+  // 쉼표·공백·· 구분 다중
+  var parts = s.split(/[\s,·]+/).filter(Boolean);
+  var arr = [];
+  parts.forEach(function(p){
+    var n = parseInt(p);
+    if(!isNaN(n) && n > 0 && n < 20 && arr.indexOf(n) < 0) arr.push(n);
+  });
+  arr.sort(function(a,b){return a-b;});
+  return arr;
+}
+
+/* ──────────────────────────────────────────
+   반 시간표 — 수동 등록/수정 모달
+────────────────────────────────────────── */
+var _editingClassScheduleId = null;
+
+function openClassScheduleEdit(id){
+  if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
+  _editingClassScheduleId = id || null;
+  var editing = id ? classSchedule.find(function(x){return x.id === id;}) : null;
+
+  document.getElementById('cs-edit-title').textContent = editing ? '반 시간표 항목 수정' : '반 시간표 항목 추가';
+  document.getElementById('cs-save-label').textContent = editing ? '저장' : '추가하기';
+  document.getElementById('cs-delete-btn').style.display = editing ? '' : 'none';
+
+  document.getElementById('cs-date').value      = editing ? (editing.date || '') : formatDateForInput(new Date());
+  document.getElementById('cs-periods').value   = editing ? (editing.periods || []).join(',') : '';
+  document.getElementById('cs-category').value  = editing ? (editing.category || '자율·자치') : '자율·자치';
+  document.getElementById('cs-target').value    = editing ? (editing.target || '') : '';
+  document.getElementById('cs-activity').value  = editing ? (editing.activity || '') : '';
+  document.getElementById('cs-original').value  = editing ? (editing.originalText || '') : '';
+  document.getElementById('cs-note').value      = editing ? (editing.note || '') : '';
+
+  document.getElementById('cs-edit-modal').classList.add('show');
+}
+
+function closeClassScheduleEdit(){
+  document.getElementById('cs-edit-modal').classList.remove('show');
+  _editingClassScheduleId = null;
+}
+
+function saveClassScheduleEdit(){
+  var date = document.getElementById('cs-date').value.trim();
+  var periodsStr = document.getElementById('cs-periods').value.trim();
+  var category = document.getElementById('cs-category').value;
+  var target = document.getElementById('cs-target').value.trim();
+  var activity = document.getElementById('cs-activity').value.trim();
+  var originalText = document.getElementById('cs-original').value.trim();
+  var note = document.getElementById('cs-note').value.trim();
+
+  if(!date){ showToast('날짜를 입력해주세요'); return; }
+  var periods = _parsePeriodsInput(periodsStr);
+  if(periods.length === 0){ showToast('교시를 1개 이상 입력해주세요 (예: 5,6 또는 3~4)'); return; }
+  if(!activity){ showToast('활동명을 입력해주세요'); return; }
+
+  if(_editingClassScheduleId){
+    var it = classSchedule.find(function(x){return x.id === _editingClassScheduleId;});
+    if(it){
+      it.date = date; it.periods = periods; it.category = category;
+      it.activity = activity; it.originalText = originalText;
+      it.target = target; it.note = note;
+      it.updatedAt = new Date().toISOString();
+    }
+    showToast('수정됨');
+  } else {
+    classSchedule.push({
+      id: 'cs_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      date: date, periods: periods, category: category,
+      activity: activity, originalText: originalText,
+      target: target, note: note,
+      createdAt: new Date().toISOString()
+    });
+    showToast('"'+activity+'" 등록됨');
+  }
+  saveAll();
+  closeClassScheduleEdit();
+  renderClassScheduleView();
+  if(typeof renderHome === 'function') try { renderHome(); } catch(e){}
+}
+
+function deleteClassScheduleItem(){
+  if(!_editingClassScheduleId) return;
+  var it = classSchedule.find(function(x){return x.id === _editingClassScheduleId;});
+  if(!it) return;
+  if(!confirm('"'+(it.activity||'')+'" ('+it.date+') 항목을 삭제할까요?')) return;
+  classSchedule = classSchedule.filter(function(x){return x.id !== _editingClassScheduleId;});
+  saveAll();
+  closeClassScheduleEdit();
+  renderClassScheduleView();
+  if(typeof renderHome === 'function') try { renderHome(); } catch(e){}
+  showToast('삭제됨');
+}
+
+/* ──────────────────────────────────────────
+   반 시간표 — AI 변환 워크플로우
+────────────────────────────────────────── */
+var _csAiReviewed = []; // 검수 완료된 유효 항목 (등록 대기)
+
+function openClassScheduleAi(){
+  if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
+  document.getElementById('cs-ai-input').value = '';
+  document.getElementById('cs-ai-json').value = '';
+  document.getElementById('cs-ai-prompt-output').textContent = '';
+  document.getElementById('cs-ai-review').innerHTML = '';
+  document.getElementById('cs-ai-step2').style.display = 'none';
+  document.getElementById('cs-ai-step3').style.display = 'none';
+  document.getElementById('cs-ai-step4').style.display = 'none';
+  _csAiReviewed = [];
+  document.getElementById('cs-ai-modal').classList.add('show');
+}
+
+function closeClassScheduleAi(){
+  document.getElementById('cs-ai-modal').classList.remove('show');
+}
+
+function buildClassSchedulePrompt(){
+  var raw = document.getElementById('cs-ai-input').value.trim();
+  if(!raw){ showToast('창체 운영 계획 텍스트를 붙여넣어주세요'); return; }
+  var c = getActiveClass();
+  var yr = (typeof getActiveYear === 'function') ? getActiveYear() : (new Date().getFullYear());
+  var gradeLabel = c ? (c.grade+'학년') : '';
+
+  var prompt = ''+
+'다음은 ' + yr + '학년도 ' + gradeLabel + ' 담임반의 연간/월간 창체·특별 일정 원문이야.\n'+
+'이를 JSON 배열로 변환해줘. 형식과 규칙은 아래와 같아.\n\n'+
+'[출력 JSON 형식]\n'+
+'[\n'+
+'  {\n'+
+'    "date": "YYYY-MM-DD",          // 필수, ISO 형식\n'+
+'    "periods": [1,2,3],            // 필수, 정수 배열. "5~6교시" → [5,6], "5,6교시" → [5,6]\n'+
+'    "category": "자율·자치|진로|동아리|봉사|안전|행사|기타",\n'+
+'    "activity": "활동명(간결한 표기)",  // 필수\n'+
+'    "originalText": "원문 표기 그대로",  // NEIS 누가기록용. 없으면 빈 문자열\n'+
+'    "target": "1학년 / 전학년 / ...",  // 학년 한정이면 적고, 모두 적용이면 \"전학년\"\n'+
+'    "note": "장소·인솔자·비고 등"     // 없으면 빈 문자열\n'+
+'  }\n'+
+']\n\n'+
+'[규칙]\n'+
+'1. 출력은 반드시 JSON 배열만, 다른 문장·주석·코드블록 마크다운 금지.\n'+
+'2. date는 항상 YYYY-MM-DD. 연도 누락 시 ' + yr + '으로 보정.\n'+
+'3. periods는 정수 배열 (예: "5~6교시" → [5,6], "1교시" → [1]).\n'+
+'4. 같은 활동이 여러 교시에 걸치면 periods 배열로 한 줄에 합침. 다른 활동이면 별도 항목.\n'+
+'5. category는 위 7개 중 하나로 정규화. 애매하면 "기타".\n'+
+'6. originalText는 입력 원문을 가능한 한 그대로 유지 (NEIS 누가기록에 그대로 들어감).\n'+
+'7. activity는 NEIS 양식에 맞게 5~30자 내외로 간결하게.\n'+
+'8. 의미가 모호한 줄(요일만 적힌 줄, 메모, 페이지 번호 등)은 결과에서 제외.\n\n'+
+'[원문]\n'+
+raw + '\n\n'+
+'위 원문을 분석해 JSON 배열로만 응답해.';
+
+  document.getElementById('cs-ai-prompt-output').textContent = prompt;
+  document.getElementById('cs-ai-step2').style.display = 'block';
+  document.getElementById('cs-ai-step3').style.display = 'block';
+  // 자동 스크롤
+  setTimeout(function(){
+    var el = document.getElementById('cs-ai-step2');
+    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 60);
+}
+
+function copyClassSchedulePrompt(){
+  var text = document.getElementById('cs-ai-prompt-output').textContent || '';
+  if(!text){ showToast('먼저 프롬프트를 만들어주세요'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('프롬프트 복사됨 — 외부 AI에 붙여넣으세요');
+    }, function(){
+      _fallbackCopy(text);
+    });
+  } else {
+    _fallbackCopy(text);
+  }
+}
+function _fallbackCopy(text){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('복사됨');
+  }catch(e){ showToast('복사 실패 — 직접 선택해 복사하세요'); }
+}
+
+// JSON 검증 & 검수 미리보기
+function parseClassScheduleJson(){
+  var raw = document.getElementById('cs-ai-json').value.trim();
+  if(!raw){ showToast('AI가 준 JSON을 붙여넣어주세요'); return; }
+  // 코드블록·``` 제거
+  raw = raw.replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
+  var data;
+  try{ data = JSON.parse(raw); }
+  catch(e){
+    showToast('JSON 형식 오류: ' + (e.message || e));
+    document.getElementById('cs-ai-review').innerHTML =
+      '<div class="cs-ai-review-item bad"><div style="grid-column:1/-1;color:var(--danger);">JSON 파싱 실패 — '+escapeHtml(e.message||'')+'</div></div>';
+    document.getElementById('cs-ai-step4').style.display = 'block';
+    return;
+  }
+  if(!Array.isArray(data)){
+    showToast('JSON은 배열이어야 해요');
+    return;
+  }
+
+  var reviewed = [];
+  var dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  var validCats = ['자율·자치','진로','동아리','봉사','안전','행사','기타'];
+
+  data.forEach(function(it, idx){
+    var errs = [];
+    var date = (it && it.date) ? String(it.date).trim() : '';
+    var periods = (it && Array.isArray(it.periods)) ? it.periods.filter(function(p){return typeof p==='number' && p>0;}) : [];
+    var category = (it && it.category) ? String(it.category).trim() : '기타';
+    var activity = (it && it.activity) ? String(it.activity).trim() : '';
+    var originalText = (it && it.originalText) ? String(it.originalText).trim() : '';
+    var target = (it && it.target) ? String(it.target).trim() : '';
+    var note = (it && it.note) ? String(it.note).trim() : '';
+
+    if(!dateRe.test(date)) errs.push('date 형식 오류');
+    if(periods.length === 0) errs.push('periods 비어있음');
+    if(!activity) errs.push('activity 누락');
+    if(validCats.indexOf(category) < 0) category = '기타';
+
+    reviewed.push({
+      idx: idx+1,
+      ok: errs.length === 0,
+      errs: errs,
+      item: {
+        date: date, periods: periods.sort(function(a,b){return a-b;}),
+        category: category, activity: activity,
+        originalText: originalText, target: target, note: note
+      }
+    });
+  });
+
+  _csAiReviewed = reviewed.filter(function(r){return r.ok;}).map(function(r){return r.item;});
+
+  var okCount = reviewed.filter(function(r){return r.ok;}).length;
+  var badCount = reviewed.length - okCount;
+  var html = '<div class="cs-ai-review-summary">'+
+    '<span>전체 <b>'+reviewed.length+'</b>건</span>'+
+    '<span style="color:var(--success);">유효 <b>'+okCount+'</b>건</span>'+
+    '<span style="color:var(--danger);">오류 <b>'+badCount+'</b>건</span>'+
+  '</div>';
+
+  reviewed.forEach(function(r){
+    var it = r.item;
+    var pStr = _formatPeriodsLabel(it.periods);
+    html += '<div class="cs-ai-review-item'+(r.ok?'':' bad')+'">'+
+      '<div style="font-size:11px;font-weight:600;color:var(--text-tertiary);">#'+r.idx+'<br>'+escapeHtml(it.date||'?')+'</div>'+
+      '<div style="font-size:11.5px;font-weight:600;color:var(--accent);">'+escapeHtml(pStr)+'</div>'+
+      '<div>'+
+        '<span class="cs-item-cat">'+escapeHtml(it.category||'')+'</span>'+
+        '<b>'+escapeHtml(it.activity||'(없음)')+'</b>'+
+        (it.target?' <span style="color:var(--text-tertiary);font-size:11px;">· '+escapeHtml(it.target)+'</span>':'')+
+        (it.note?'<div style="color:var(--text-tertiary);font-size:11px;margin-top:2px;">'+escapeHtml(it.note)+'</div>':'')+
+        (r.errs.length?'<div class="cs-ai-review-err">⚠ '+r.errs.join(', ')+'</div>':'')+
+      '</div>'+
+    '</div>';
+  });
+
+  document.getElementById('cs-ai-review').innerHTML = html;
+  document.getElementById('cs-ai-confirm-label').textContent = '유효 '+okCount+'건 등록';
+  document.getElementById('cs-ai-step4').style.display = 'block';
+
+  setTimeout(function(){
+    var el = document.getElementById('cs-ai-step4');
+    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 60);
+}
+
+function confirmClassScheduleImport(){
+  if(_csAiReviewed.length === 0){
+    showToast('등록할 유효 항목이 없어요');
+    return;
+  }
+  if(!confirm(_csAiReviewed.length+'건을 반 시간표에 추가할까요?')) return;
+  _csAiReviewed.forEach(function(it){
+    classSchedule.push({
+      id: 'cs_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      date: it.date,
+      periods: it.periods,
+      category: it.category,
+      activity: it.activity,
+      originalText: it.originalText,
+      target: it.target,
+      note: it.note,
+      createdAt: new Date().toISOString()
+    });
+  });
+  saveAll();
+  showToast(_csAiReviewed.length+'건 등록됨');
+  _csAiReviewed = [];
+  closeClassScheduleAi();
+  renderClassScheduleView();
+  if(typeof renderHome === 'function') try { renderHome(); } catch(e){}
 }
 
 // 오늘 날짜에 어떤 entry의 어느 slot이 있는지 [{entry, slot}] 펼침
