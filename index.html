@@ -6925,7 +6925,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <span class="att-step-num">4</span>
           <span class="att-step-label">메모 <span style="color:var(--text-tertiary);font-weight:400;">선택</span></span>
         </div>
-        <input type="text" id="att-memo" class="att-memo-input" placeholder="예) 어머님 전화 확인, 오전 몸살" maxlength="200" />
+        <div id="att-memo-fields"></div>
       </div>
 
     </div>
@@ -17815,16 +17815,12 @@ function renderStudentMonthlyView(){
   html += '<div class="smv-unauth'+(hasUnauth?'':' empty')+'">';
   html += '<svg class="smv-unauth-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   html += '<span class="smv-unauth-label">미인정</span>';
-  html += '<span class="smv-unauth-hint" title="일반 규칙: 미인정 지각/조퇴/결과 3회 = 결석 1일 환산.&#10;&#10;학교마다 규정이 다를 수 있으니 본인 학교 출결 규정 확인을 권장합니다." tabindex="0">?</span>';
   if(hasUnauth){
     html += '<span class="smv-unauth-items">';
     if(u.absent > 0)      html += '<span class="smv-unauth-item key"><strong>'+u.absent+'</strong> 결석</span>';
     if(u.late > 0)        html += '<span class="smv-unauth-item"><strong>'+u.late+'</strong> 지각</span>';
     if(u.early_leave > 0) html += '<span class="smv-unauth-item"><strong>'+u.early_leave+'</strong> 조퇴</span>';
     if(u.partial > 0)     html += '<span class="smv-unauth-item"><strong>'+u.partial+'</strong> 결과</span>';
-    if(u.convertedAbsent > 0){
-      html += '<span class="smv-unauth-converted" title="일반 환산 규칙 기준: 미인정 지각/조퇴/결과 '+u.partialSum+'회 = 결석 '+u.convertedAbsent+'일.&#10;본인 학교 규정과 다를 수 있으니 확인해주세요.">→ 결석 <strong>'+u.convertedAbsent+'일</strong> 환산</span>';
-    }
     html += '</span>';
   } else {
     html += '<span class="smv-unauth-empty">없음</span>';
@@ -17864,7 +17860,7 @@ function renderStudentMonthlyView(){
   html += '</div>';
   if(monthRecs.length > 0){
     html += '<div class="smv-recent">';
-    html += '<div class="smv-recent-label">사례 상세 ('+smvState.month+'월)</div>';
+    html += '<div class="smv-recent-label">출결 내역 ('+smvState.month+'월)</div>';
     monthRecs.sort(function(a,b){ return b.date.localeCompare(a.date); });
     monthRecs.forEach(function(item){
       var r=item.rec;
@@ -18031,10 +18027,10 @@ function renderClassMonthlyView(){
         if(topStatus){
           cellCls.push(topStatus);
           cellText=({absent:'결',late:'지',early_leave:'조',partial:'과'})[topStatus]||'';
-          if(topStatus==='absent') rowCounts.absent++;
-          else if(topStatus==='late') rowCounts.late++;
-          else if(topStatus==='early_leave') rowCounts.early_leave++;
-          else if(topStatus==='partial') rowCounts.partial++;
+          // 셀 표시는 topStatus 하나, 카운팅은 모든 상태 각각
+          recs.forEach(function(r){
+            if(rowCounts[r.status] !== undefined) rowCounts[r.status]++;
+          });
         }
       }
       var onclick='';
@@ -18112,10 +18108,10 @@ function exportCmmCsv(){
         var cell='';
         if(topStatus){
           cell=getReasonLabel(topReason)+' '+getStatusLabel(topStatus);
-          if(topStatus==='absent') rowCounts.absent++;
-          else if(topStatus==='late') rowCounts.late++;
-          else if(topStatus==='early_leave') rowCounts.early_leave++;
-          else if(topStatus==='partial') rowCounts.partial++;
+          // 셀 표시는 topStatus 하나, 카운팅은 모든 상태 각각
+          recs.forEach(function(r){
+            if(rowCounts[r.status] !== undefined) rowCounts[r.status]++;
+          });
         }
         row.push(cell);
       }
@@ -18338,10 +18334,10 @@ function onRowMenuDelete(){
 var attModalState = {
   mode: 'add', studentNum: null, recordId: null, reason: null,
   selections: {
-    absent:      { active: false, periods: {} },
-    late:        { active: false, periods: {} },
-    early_leave: { active: false, periods: {} },
-    partial:     { active: false, periods: {} }
+    absent:      { active: false, periods: {}, memo: '' },
+    late:        { active: false, periods: {}, memo: '' },
+    early_leave: { active: false, periods: {}, memo: '' },
+    partial:     { active: false, periods: {}, memo: '' }
   },
   memo: ''
 };
@@ -18351,7 +18347,7 @@ function openAttendanceAdd(studentNum){
   var stu = c && c.students.find(function(s){ return s.num === studentNum; });
   if(!stu){ showToast('학생을 찾을 수 없어요'); return; }
   attModalState = { mode:'add', studentNum:studentNum, recordId:null, reason:null,
-    selections:{ absent:{active:false,periods:{}}, late:{active:false,periods:{}}, early_leave:{active:false,periods:{}}, partial:{active:false,periods:{}} },
+    selections:{ absent:{active:false,periods:{},memo:''}, late:{active:false,periods:{},memo:''}, early_leave:{active:false,periods:{},memo:''}, partial:{active:false,periods:{},memo:''} },
     memo:'' };
   setupAttModalForStudent(stu);
   _showAttMultiHint();
@@ -18367,7 +18363,7 @@ function openAttendanceEdit(studentNum, recordId){
   if(!rec){ showToast('기록을 찾을 수 없어요'); return; }
   attModalState = {
     mode: 'edit', studentNum:studentNum, recordId:recordId, reason:rec.reason,
-    selections:{ absent:{active:false,periods:{}}, late:{active:false,periods:{}}, early_leave:{active:false,periods:{}}, partial:{active:false,periods:{}} },
+    selections:{ absent:{active:false,periods:{},memo:''}, late:{active:false,periods:{},memo:''}, early_leave:{active:false,periods:{},memo:''}, partial:{active:false,periods:{},memo:''} },
     memo: rec.memo || ''
   };
   // 해당 레코드의 status만 active로 복원
@@ -18376,7 +18372,8 @@ function openAttendanceEdit(studentNum, recordId){
   setupAttModalForStudent(stu);
   selectAttReason(rec.reason, true);
   applyEditSelectionUI();
-  document.getElementById('att-memo').value = rec.memo || '';
+  attModalState.selections[rec.status].memo = rec.memo || '';
+  renderAttMemoFields();
   document.getElementById('att-step-status').classList.remove('att-step-disabled');
   document.getElementById('att-step-memo').classList.remove('att-step-disabled');
   updateAttSaveButton();
@@ -18417,7 +18414,8 @@ function setupAttModalForStudent(stu){
   document.getElementById('att-step-periods').style.display = 'none';
   document.getElementById('att-step-periods').classList.add('att-step-disabled');
   document.getElementById('att-step-memo').classList.add('att-step-disabled');
-  document.getElementById('att-memo').value = '';
+  var _memoFields = document.getElementById('att-memo-fields');
+  if(_memoFields) _memoFields.innerHTML = '';
   var _pSec = document.getElementById('att-period-sections');
   if(_pSec) _pSec.innerHTML = '';
   document.getElementById('att-save-btn').disabled = true;
@@ -18460,6 +18458,7 @@ function selectAttStatus(status){
   });
   refreshPeriodSections();
   document.getElementById('att-step-memo').classList.remove('att-step-disabled');
+  renderAttMemoFields();
   updateAttSaveButton();
 }
 
@@ -18610,6 +18609,40 @@ function updateAttSaveButton(){
   btn.disabled = !allValid;
 }
 
+function renderAttMemoFields() {
+  var sel = attModalState.selections;
+  var active = ['absent','late','early_leave','partial'].filter(function(k){ return sel[k].active; });
+  var container = document.getElementById('att-memo-fields');
+  if (!container) return;
+  var step = document.getElementById('att-step-memo');
+  if (active.length === 0) {
+    if(step) step.classList.add('att-step-disabled');
+    container.innerHTML = '';
+    return;
+  }
+  if(step) step.classList.remove('att-step-disabled');
+  var labels = { absent: '결석', late: '지각', early_leave: '조퇴', partial: '결과' };
+  if (active.length === 1) {
+    var st = active[0];
+    container.innerHTML =
+      '<input type="text" class="att-memo-input" id="att-memo-single"' +
+      ' placeholder="예) 어머님 전화 확인, 오전 몸살" maxlength="200"' +
+      ' oninput="attModalState.selections[\'' + st + '\'].memo=this.value"' +
+      ' value="' + escapeHtml(sel[st].memo || '') + '">';
+  } else {
+    container.innerHTML = active.map(function(st) {
+      return '<div style="margin-bottom:8px;">' +
+        '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">' +
+          labels[st] + ' 메모</div>' +
+        '<input type="text" class="att-memo-input"' +
+        ' placeholder="예) 어머님 전화 확인" maxlength="200"' +
+        ' oninput="attModalState.selections[\'' + st + '\'].memo=this.value"' +
+        ' value="' + escapeHtml(sel[st].memo || '') + '">' +
+        '</div>';
+    }).join('');
+  }
+}
+
 function saveAttendanceRecord(){
   if(!attModalState.reason){ showToast('사유를 선택해주세요'); return; }
   var sel = attModalState.selections;
@@ -18620,7 +18653,11 @@ function saveAttendanceRecord(){
     return !Object.keys(sel[st].periods).some(function(k){ return sel[st].periods[k] === true; });
   });
   if(invalidSt){ showToast(getStatusLabel(invalidSt)+' 교시를 선택해주세요'); return; }
-  attModalState.memo = document.getElementById('att-memo').value.trim();
+  var singleEl = document.getElementById('att-memo-single');
+  if (singleEl) {
+    var st0 = active[0];
+    attModalState.selections[st0].memo = singleEl.value.trim();
+  }
   var date = attendanceCurrentDate;
   var num  = attModalState.studentNum;
   if(!attendanceRecords[date]) attendanceRecords[date] = {};
@@ -18633,7 +18670,7 @@ function saveAttendanceRecord(){
       recs[idx].reason  = attModalState.reason;
       recs[idx].status  = firstSt;
       recs[idx].periods = Object.assign({}, sel[firstSt].periods);
-      recs[idx].memo    = attModalState.memo;
+      recs[idx].memo    = sel[firstSt].memo || '';
       recs[idx].updatedAt = new Date().toISOString();
       syncAttendanceToTimeline(date, num, recs[idx]);
     }
@@ -18646,7 +18683,7 @@ function saveAttendanceRecord(){
         status: st,
         reason: attModalState.reason,
         periods: Object.assign({}, sel[st].periods),
-        memo: attModalState.memo,
+        memo: attModalState.selections[st].memo || '',
         notifiedParent: false,
         createdAt: new Date().toISOString()
       };
