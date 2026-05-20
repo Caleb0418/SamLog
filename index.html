@@ -4657,6 +4657,7 @@ details > summary::-webkit-details-marker { display:none; }
 /* 주간 그리드 */
 .week-grid{
   display:grid;grid-template-columns:40px repeat(5,1fr);gap:6px;
+  align-items:stretch;
   background:var(--bg-elevated);padding:10px;
   border-radius:var(--radius-lg);border:1px solid var(--border);
 }
@@ -4812,6 +4813,7 @@ details > summary::-webkit-details-marker { display:none; }
 /* 한 칸에 정규+임시가 함께 있을 때: 정규 위, 임시 아래로 스택 */
 .class-week-cell-stack{
   display:flex;flex-direction:column;gap:3px;min-height:48px;
+  align-self:stretch;
 }
 .class-week-cell-stack > .class-week-cell,
 .class-week-cell-stack > .class-week-cell-adhoc-mini{
@@ -20257,9 +20259,12 @@ function renderClassWeek(){
         }
 
         if(hasAdhoc){
+          // adhoc가 여러 개면 스택 래퍼로 묶어 grid child를 1개로 유지
+          var multiAdhoc = !needsStack && adhocCells.length > 1;
+          if(multiAdhoc){ html += '<div class="class-week-cell-stack">'; }
           adhocCells.forEach(function(a0){
             var hasA = (a0.memos && a0.memos.length > 0);
-            if(needsStack){
+            if(needsStack || multiAdhoc){
               html += '<div class="class-week-cell-adhoc-mini'+(hasA?' has-memo':'')+'" onclick="openAdhocMemo(\''+a0.id+'\')">'+
                 '<div class="wcam-title">'+escapeHtml(a0.kind||'보강')+'·'+escapeHtml(a0.subject||'')+'</div>'+
                 (a0.grade ? '<div class="wcam-class">'+escapeHtml(a0.grade)+'-'+escapeHtml(a0.cls||'')+'</div>' : '')+
@@ -20271,6 +20276,7 @@ function renderClassWeek(){
               '</div>';
             }
           });
+          if(multiAdhoc){ html += '</div>'; }
         }
 
         if(needsStack){ html += '</div>'; }
