@@ -20430,10 +20430,9 @@ function renderClassSchedule(){
       '</select>' +
       '<select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="_csFilter.grade=this.value;renderClassSchedule()">' +
         '<option value=""' + (_csFilter.grade===''?' selected':'') + '>전체 학년</option>' +
-        '<option value="1"' + (_csFilter.grade==='1'?' selected':'') + '>1학년</option>' +
-        '<option value="2"' + (_csFilter.grade==='2'?' selected':'') + '>2학년</option>' +
-        '<option value="3"' + (_csFilter.grade==='3'?' selected':'') + '>3학년</option>' +
-        '<option value="mine"' + (_csFilter.grade==='mine'?' selected':'') + '>내 담임반(' + activeClass.grade + '학년)</option>' +
+        '<option value="1"' + (_csFilter.grade==='1'?' selected':'') + '>1학년' + (String(activeClass.grade)==='1' ? ' (내 담임반)' : '') + '</option>' +
+        '<option value="2"' + (_csFilter.grade==='2'?' selected':'') + '>2학년' + (String(activeClass.grade)==='2' ? ' (내 담임반)' : '') + '</option>' +
+        '<option value="3"' + (_csFilter.grade==='3'?' selected':'') + '>3학년' + (String(activeClass.grade)==='3' ? ' (내 담임반)' : '') + '</option>' +
       '</select>' +
       '<select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="_csFilter.sort=this.value;renderClassSchedule()">' +
         '<option value="date_desc"' + (_csFilter.sort==='date_desc'?' selected':'') + '>최신순</option>' +
@@ -20445,16 +20444,10 @@ function renderClassSchedule(){
   var list = classSchedule.slice();
   if(_csFilter.category) list = list.filter(function(c){ return c.category === _csFilter.category; });
   if(_csFilter.grade){
-    if(_csFilter.grade === 'mine'){
-      list = list.filter(function(c){
-        return _csParseTargetGrades(c.target).indexOf(parseInt(activeClass.grade)) >= 0;
-      });
-    } else {
-      var g = parseInt(_csFilter.grade);
-      list = list.filter(function(c){
-        return _csParseTargetGrades(c.target).indexOf(g) >= 0;
-      });
-    }
+    var g = parseInt(_csFilter.grade);
+    list = list.filter(function(c){
+      return _csParseTargetGrades(c.target).indexOf(g) >= 0;
+    });
   }
   list.sort(function(a,b){
     if(_csFilter.sort === 'date_asc') return a.date < b.date ? -1 : 1;
