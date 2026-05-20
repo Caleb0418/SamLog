@@ -14389,6 +14389,7 @@ function getCreativeActivitiesForStudent(builderArea, student, classKey){
   return attended;
 }
 // 수업관리 임시슬롯(adhocSlots)에서 매칭 → {date, name, note} 통일 형식 반환
+// 같은 날짜+활동명은 1건으로 합침 (여러 교시에 걸친 같은 활동은 중복 제거)
 function getAdhocCreativeForStudent(builderArea, student, classData){
   var kinds = _adhocKindsForArea(builderArea);
   if(kinds.length === 0) return [];
@@ -14405,14 +14406,22 @@ function getAdhocCreativeForStudent(builderArea, student, classData){
     if(_isStudentMissingSlot(student.num, a.date, a.period)) return false;
     return true;
   });
-  attended.sort(function(a,b){
-    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
-    return (a.period||0) - (b.period||0);
+  // 같은 날짜+활동명 중복 제거 (메모는 첫 번째 것 사용, 비어있으면 다음 값으로 보강)
+  var dedupMap = {};
+  attended.forEach(function(a){
+    var name = a.subject || '창체활동';
+    var key = a.date + '|' + name;
+    if(!dedupMap[key]){
+      dedupMap[key] = { date: a.date, name: name, note: a.note || '' };
+    } else if(!dedupMap[key].note && a.note){
+      dedupMap[key].note = a.note;
+    }
   });
-  // 통일 형식으로 변환
-  return attended.map(function(a){
-    return { date: a.date, name: a.subject || '창체활동', note: a.note || '' };
+  var unique = Object.keys(dedupMap).map(function(k){ return dedupMap[k]; });
+  unique.sort(function(a,b){
+    return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
   });
+  return unique;
 }
 // 설정탭 + 임시슬롯 통합 (날짜순)
 function getAllCreativeForStudent(builderArea, student, classKey){
@@ -14422,23 +14431,6 @@ function getAllCreativeForStudent(builderArea, student, classKey){
     .map(function(c){ return { date: c.date, name: c.name, note: c.note || '' }; });
   // 임시슬롯
   var fromAdhoc = getAdhocCreativeForStudent(builderArea, student, classData);
-  // 디버그 로그 (브라우저 콘솔에서 확인)
-  try {
-    console.log('[생기부 창체 매칭]', {
-      builderArea: builderArea,
-      studentNum: student && student.num,
-      classKey: classKey,
-      classData_grade: classData && classData.grade,
-      classData_classNum: classData && classData.classNum,
-      adhocSlots_total: (adhocSlots||[]).length,
-      adhocSlots_sample: (adhocSlots||[]).slice(0,5).map(function(a){
-        return { kind:a.kind, subject:a.subject, date:a.date, period:a.period, grade:a.grade, cls:a.cls };
-      }),
-      fromSettings_count: fromSettings.length,
-      fromAdhoc_count: fromAdhoc.length,
-      fromAdhoc: fromAdhoc
-    });
-  } catch(e){}
   // 중복 제거 (같은 날짜+이름): 설정탭 우선
   var seen = {};
   fromSettings.forEach(function(c){ seen[c.date+'|'+c.name] = true; });
@@ -14519,7 +14511,6 @@ function buildBehaviorPrompt(ctx) {
 }
 
 function buildJayulPrompt(ctx) {
-  try { console.log('[buildJayulPrompt 진입]', { studentNum: ctx && ctx.student && ctx.student.num, currentClassKey: currentClassKey }); } catch(e){}
   var lines = buildPromptHeader(ctx);
   var meta = ctx.areaMeta;
   lines.push('[영역 특성]');
@@ -14641,7 +14632,6 @@ var AREA_BUILDER_MAP = {
    generateSaengibuPrompt — 영역별 빌더 라우팅
 ═══════════════════════════════════════════ */
 function generateSaengibuPrompt(){
-  try { console.log('[generateSaengibuPrompt 진입]', { area: sgState.area, studentNum: sgState.studentNum, selectedRecs: sgState.selectedRecIds.length, adhocSlotsLen: (adhocSlots||[]).length }); } catch(e){}
   if(sgState.selectedRecIds.length === 0) return;
 
   // ─── 세특 과목 필수 검증 ───
