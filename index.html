@@ -10617,10 +10617,17 @@ function categorizeScheduleEvent(eventName){
 
 // 특정 날짜가 휴업일인지 판별
 var NON_SCHOOL_KEYWORDS = /방학|휴업|휴일|공휴일|개교기념|재량휴|대체휴/;
+
+// dayType이 휴업으로 간주되어야 하는 값인지 판단
+// NEIS는 "휴업일", "공휴일" 두 가지를 반환할 수 있음 (학교 설정마다 다름)
+function isHolidayDayType(dt){
+  if(!dt) return false;
+  return dt === '휴업일' || dt === '공휴일';
+}
 function isNonSchoolDay(dateStr, grade){
   var events = getScheduleForDate(dateStr, grade);
   if(events.length === 0) return false;
-  if(events.some(function(ev){ return ev.dayType === '휴업일'; })) return true;
+  if(events.some(function(ev){ return isHolidayDayType(ev.dayType); })) return true;
   // fallback: dayType 없는 구 데이터 — 키워드 기반
   return events.some(function(ev){
     if(ev.dayType) return false;
@@ -10636,8 +10643,8 @@ function getWeekDayScheduleInfo(dateStr, grade){
 
   var sorted = events.slice().sort(function(a, b){
     // 1) 휴업일 dayType 우선
-    var aH = a.dayType === '휴업일' ? -1 : 0;
-    var bH = b.dayType === '휴업일' ? -1 : 0;
+    var aH = isHolidayDayType(a.dayType) ? -1 : 0;
+    var bH = isHolidayDayType(b.dayType) ? -1 : 0;
     if(aH !== bH) return aH - bH;
     // 2) 카테고리 순서
     var aCat = _SCAT_ORDER[a.category||'general'];
@@ -10654,7 +10661,7 @@ function getWeekDayScheduleInfo(dateStr, grade){
 
   // 대표 카테고리 결정
   var primaryCategory = sorted.length > 0 ? (sorted[0].category || 'general') : 'none';
-  if(sorted.some(function(ev){ return ev.dayType === '휴업일'; })) primaryCategory = 'holiday';
+  if(sorted.some(function(ev){ return isHolidayDayType(ev.dayType); })) primaryCategory = 'holiday';
 
   return {
     events: sorted,
@@ -10729,7 +10736,7 @@ function buildRegularTimetableFromRows(rows){
     // 특수일 판정: 학사일정 dayType 또는 과목명 키워드
     var isSpecialDay = false;
     var schedEvents = (schoolSchedule && schoolSchedule[ds]) || [];
-    if(schedEvents.some(function(ev){ return ev.dayType === '휴업일'; })){
+    if(schedEvents.some(function(ev){ return isHolidayDayType(ev.dayType); })){
       isSpecialDay = true;
     }
     if(!isSpecialDay && _NEIS_SPECIAL_RE.test(subj)){
@@ -17770,7 +17777,7 @@ function renderStudentMonthlyView(){
     if(ddow >= 1 && ddow <= 5){
       var ddate = smvState.year+'-'+String(smvState.month).padStart(2,'0')+'-'+String(di).padStart(2,'0');
       var schedEv = schoolSchedule[ddate] || [];
-      var isHolidayDay = schedEv.some(function(ev){ return ev.dayType === '휴업일'; });
+      var isHolidayDay = schedEv.some(function(ev){ return isHolidayDayType(ev.dayType); });
       if(!isHolidayDay) weekdayCount++;
     }
   }
@@ -19564,7 +19571,7 @@ function renderClassWeek(){
       visEvts.forEach(function(ev){
         var evCls = 'week-day-event';
         var evCat = ev.category || 'general';
-        if(ev.dayType === '휴업일' || evCat === 'holiday') evCls += ' cat-holiday';
+        if(isHolidayDayType(ev.dayType) || evCat === 'holiday') evCls += ' cat-holiday';
         else if(evCat === 'exam')      evCls += ' cat-exam';
         else if(evCat === 'listening') evCls += ' cat-listening';
         else if(evCat === 'activity')  evCls += ' cat-activity';
@@ -19656,7 +19663,7 @@ function openWeekDayEvents(dateStr){
   if(events.length === 0) return;
   var lines = events.map(function(ev){
     var label = ev.event;
-    if(ev.dayType === '휴업일') label += ' (휴업일)';
+    if(isHolidayDayType(ev.dayType)) label += ' (휴업일)';
     else if(ev.dayType === '수업일') label += ' (수업일)';
     if(ev.detail) label += '\n  ' + ev.detail;
     return label;
