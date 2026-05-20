@@ -6426,6 +6426,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div class="settings-tabs">
         <button class="settings-tab active" data-tab="year" onclick="switchSettingsTab('year')">학년도 관리</button>
         <button class="settings-tab" data-tab="alarm" onclick="switchSettingsTab('alarm')">알람 설정</button>
+        <button class="settings-tab" data-tab="creative" onclick="switchSettingsTab('creative')">창의적 체험활동</button>
         <button class="settings-tab" data-tab="backup" onclick="switchSettingsTab('backup')">데이터 백업</button>
         <button class="settings-tab settings-tab-danger" data-tab="reset" onclick="switchSettingsTab('reset')">전체 초기화</button>
       </div>
@@ -6472,7 +6473,69 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </div>
 
-        <!-- ③ 데이터 백업 패널 -->
+        <!-- ③ 창의적 체험활동 패널 -->
+        <div class="settings-panel" data-tab="creative">
+          <div class="class-master-title" style="margin-bottom:4px;">창의적 체험활동 등록</div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:14px;line-height:1.5;">
+            학교에서 받은 창체 운영 계획을 보고 한 번에 등록해두면, 학생 생기부 작성 시 자동으로 매칭돼요.<br>
+            출결을 확인해 결시한 활동은 자동으로 제외됩니다.
+          </div>
+          <!-- 입력 폼 -->
+          <div style="background:var(--bg-elevated);border-radius:8px;padding:14px;margin-bottom:14px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+              <div>
+                <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">날짜</label>
+                <input type="date" id="ca-form-date" class="form-input-text">
+              </div>
+              <div>
+                <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">영역</label>
+                <select id="ca-form-area" class="form-select">
+                  <option value="자율">자율·자치</option>
+                  <option value="진로">진로활동</option>
+                  <option value="동아리">동아리활동</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">적용 학년 <span style="color:var(--text-tertiary);font-weight:400;">(다중 선택)</span></label>
+              <div id="ca-form-grades" style="display:flex;gap:6px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="1" class="ca-grade-chk">1학년</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="2" class="ca-grade-chk">2학년</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="3" class="ca-grade-chk">3학년</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="4" class="ca-grade-chk">4학년</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="5" class="ca-grade-chk">5학년</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="6" class="ca-grade-chk">6학년</label>
+              </div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">활동명</label>
+              <input type="text" id="ca-form-name" class="form-input-text" placeholder="예) 생활안전교육, 학교폭력예방교육" maxlength="50">
+            </div>
+            <div style="margin-bottom:10px;">
+              <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">특기사항 메모 <span style="color:var(--text-tertiary);font-weight:400;">(선택)</span></label>
+              <textarea id="ca-form-note" class="form-input-text" rows="2" placeholder="예) 학생들과 함께 화재 예방 영상을 시청하고 자신의 학급에 적용할 수 있는 방안을 발표함." maxlength="300" style="resize:vertical;"></textarea>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:6px;">
+              <button class="btn-small secondary" onclick="resetCreativeForm()">취소</button>
+              <button class="btn-small primary" id="ca-save-btn" onclick="saveCreativeActivity()">추가</button>
+            </div>
+          </div>
+          <!-- 등록된 활동 목록 -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">등록된 활동 <span id="ca-list-count" style="color:var(--text-tertiary);font-weight:400;"></span></div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="ca-filter-area" class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="renderCreativeList()">
+                <option value="">전체 영역</option>
+                <option value="자율">자율·자치</option>
+                <option value="진로">진로활동</option>
+                <option value="동아리">동아리활동</option>
+              </select>
+            </div>
+          </div>
+          <div id="ca-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
+        </div>
+
+        <!-- ④ 데이터 백업 패널 -->
         <div class="settings-panel" data-tab="backup">
           <div class="class-master-title" style="margin-bottom:4px;">데이터 백업</div>
           <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px;">현재 학년도 데이터를 내 컴퓨터에 저장해두세요. 브라우저를 초기화하거나 다른 기기로 옮길 때 복원할 수 있어요.</div>
@@ -8353,6 +8416,9 @@ var ttSyncState = { synced: false, lastSync: null, totalRows: 0 };
 // 구조: { id, date:'YYYY-MM-DD', period, subject, grade, cls, kind:'보강'|'창체'|'기타', note, memos:[] }
 var adhocSlots = [];
 
+// 창의적 체험활동 (생기부 작성용 별도 등록)
+var creativeActivities = [];
+
 // ── 출결 ──────────────────────────────────────────────────────────────────
 // 출결 기록: { 'YYYY-MM-DD': { '학번': [레코드, ...] } }
 // 레코드 구조: { id, status, reason, periods, memo, notifiedParent, createdAt, updatedAt }
@@ -8464,7 +8530,7 @@ function getActiveTab(){
    학년도 관리
 ═══════════════════════════════════════════ */
 var MAX_YEARS = 3;
-var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_school_schedule'];
+var YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_tag_pool','ht2_school_schedule'];
 
 function getActiveYear(){
   return localStorage.getItem('ht2_active_year') || String(new Date().getFullYear());
@@ -8522,6 +8588,7 @@ function startNewYear(){
   localStorage.setItem('ht2_timetable_history_' + year, JSON.stringify([]));
   localStorage.setItem('ht2_tt_sync_state_' + year, JSON.stringify({}));
   localStorage.setItem('ht2_adhoc_slots_' + year, JSON.stringify([]));
+  localStorage.setItem('ht2_creative_activities_' + year, JSON.stringify([]));
   _addYearToList(year);
   showToast(year + '학년도를 시작해요!');
   setTimeout(function(){ location.reload(); }, 1200);
@@ -8578,6 +8645,7 @@ function saveAll(){
     localStorage.setItem('ht2_timetable_history_' + yr, JSON.stringify(timetableChangeHistory));
     localStorage.setItem('ht2_tt_sync_state_' + yr, JSON.stringify(ttSyncState));
     localStorage.setItem('ht2_adhoc_slots_' + yr, JSON.stringify(adhocSlots));
+    localStorage.setItem('ht2_creative_activities_' + yr, JSON.stringify(creativeActivities));
     localStorage.setItem('ht2_attendance_' + yr, JSON.stringify(attendanceRecords));
     localStorage.setItem('ht2_school_schedule_' + yr, JSON.stringify(schoolSchedule));
     localStorage.setItem('ht2_class_view_settings', JSON.stringify(classViewSettings));
@@ -8585,7 +8653,128 @@ function saveAll(){
   }catch(e){ console.warn('저장 실패', e); }
 }
 
-var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
+/* ═══════════════════════════════════════════
+   창의적 체험활동 — 등록·수정·삭제·목록
+═══════════════════════════════════════════ */
+var _editingCreativeId = null;
+function _getCheckedCreativeGrades(){
+  var chks = document.querySelectorAll('.ca-grade-chk:checked');
+  var arr = [];
+  chks.forEach(function(c){ arr.push(parseInt(c.value)); });
+  return arr;
+}
+function _setCheckedCreativeGrades(grades){
+  document.querySelectorAll('.ca-grade-chk').forEach(function(c){
+    c.checked = (grades || []).indexOf(parseInt(c.value)) >= 0;
+  });
+}
+function resetCreativeForm(){
+  _editingCreativeId = null;
+  var d = document.getElementById('ca-form-date'); if(d) d.value = '';
+  var a = document.getElementById('ca-form-area'); if(a) a.value = '자율';
+  var n = document.getElementById('ca-form-name'); if(n) n.value = '';
+  var nt = document.getElementById('ca-form-note'); if(nt) nt.value = '';
+  _setCheckedCreativeGrades([]);
+  var btn = document.getElementById('ca-save-btn');
+  if(btn) btn.textContent = '추가';
+}
+function saveCreativeActivity(){
+  var date = document.getElementById('ca-form-date').value;
+  var area = document.getElementById('ca-form-area').value;
+  var name = document.getElementById('ca-form-name').value.trim();
+  var note = document.getElementById('ca-form-note').value.trim();
+  var grades = _getCheckedCreativeGrades();
+  if(!date){ showToast('날짜를 선택해주세요'); return; }
+  if(!name){ showToast('활동명을 입력해주세요'); return; }
+  if(grades.length === 0){ showToast('적용 학년을 하나 이상 선택해주세요'); return; }
+  if(['자율','진로','동아리'].indexOf(area) < 0){ showToast('영역이 올바르지 않아요'); return; }
+  if(_editingCreativeId){
+    var item = creativeActivities.find(function(c){ return c.id === _editingCreativeId; });
+    if(item){
+      item.date = date; item.area = area; item.name = name; item.note = note; item.grades = grades;
+      showToast('수정됨');
+    }
+  } else {
+    creativeActivities.push({
+      id: 'ca_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      date: date, area: area, name: name, note: note, grades: grades
+    });
+    showToast('추가됨');
+  }
+  saveAll();
+  resetCreativeForm();
+  renderCreativeList();
+}
+function editCreativeActivity(id){
+  var item = creativeActivities.find(function(c){ return c.id === id; });
+  if(!item) return;
+  _editingCreativeId = id;
+  document.getElementById('ca-form-date').value = item.date;
+  document.getElementById('ca-form-area').value = item.area;
+  document.getElementById('ca-form-name').value = item.name || '';
+  document.getElementById('ca-form-note').value = item.note || '';
+  _setCheckedCreativeGrades(item.grades || []);
+  var btn = document.getElementById('ca-save-btn');
+  if(btn) btn.textContent = '수정 저장';
+  var dateEl = document.getElementById('ca-form-date');
+  if(dateEl) dateEl.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function deleteCreativeActivity(id){
+  var item = creativeActivities.find(function(c){ return c.id === id; });
+  if(!item) return;
+  if(!confirm('"' + item.name + '" 활동을 삭제할까요?')) return;
+  creativeActivities = creativeActivities.filter(function(c){ return c.id !== id; });
+  saveAll();
+  if(_editingCreativeId === id) resetCreativeForm();
+  renderCreativeList();
+  showToast('삭제됨');
+}
+function _creativeAreaLabel(area){
+  return ({'자율':'자율·자치', '진로':'진로활동', '동아리':'동아리활동'})[area] || area;
+}
+function _creativeAreaColor(area){
+  return ({'자율':'var(--memo-life)', '진로':'var(--memo-parent)', '동아리':'var(--memo-observation)'})[area] || 'var(--text-secondary)';
+}
+function _formatCreativeDate(ymd){
+  if(!ymd) return '';
+  var p = ymd.split('-');
+  if(p.length !== 3) return ymd;
+  return p[0] + '.' + parseInt(p[1]) + '.' + parseInt(p[2]) + '.';
+}
+function renderCreativeList(){
+  var container = document.getElementById('ca-list');
+  if(!container) return;
+  var filterArea = (document.getElementById('ca-filter-area') || {}).value || '';
+  var list = creativeActivities.slice();
+  if(filterArea) list = list.filter(function(c){ return c.area === filterArea; });
+  list.sort(function(a,b){ return (a.date < b.date) ? 1 : -1; });
+  document.getElementById('ca-list-count').textContent = '· 총 ' + creativeActivities.length + '건';
+  if(list.length === 0){
+    container.innerHTML = '<div style="padding:24px;text-align:center;font-size:12px;color:var(--text-tertiary);">등록된 활동이 없어요.</div>';
+    return;
+  }
+  container.innerHTML = list.map(function(item){
+    var gradesText = (item.grades || []).slice().sort().map(function(g){return g+'학년';}).join('·');
+    var noteHtml = item.note ? '<div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;line-height:1.5;">' + escapeHtml(item.note) + '</div>' : '';
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid var(--border);">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">' +
+          '<span style="font-size:10px;font-weight:600;color:' + _creativeAreaColor(item.area) + ';padding:1px 6px;border-radius:3px;background:var(--bg-elevated);">' + _creativeAreaLabel(item.area) + '</span>' +
+          '<span style="font-size:11px;color:var(--text-secondary);">' + _formatCreativeDate(item.date) + '</span>' +
+          '<span style="font-size:11px;color:var(--text-tertiary);">' + escapeHtml(gradesText) + '</span>' +
+        '</div>' +
+        '<div style="font-size:13px;color:var(--text);font-weight:500;">' + escapeHtml(item.name) + '</div>' +
+        noteHtml +
+      '</div>' +
+      '<div style="display:flex;gap:4px;flex-shrink:0;">' +
+        '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;" onclick="editCreativeActivity(\'' + item.id + '\')">수정</button>' +
+        '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;color:var(--danger);" onclick="deleteCreativeActivity(\'' + item.id + '\')">삭제</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
 var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings','ht2_neis_key'];
 
 /* ─── 백업 폴더 핸들 (IndexedDB) ─── */
@@ -8901,6 +9090,10 @@ function loadAll(){
     if(tts) ttSyncState = JSON.parse(tts);
     var as = _getYearLS('ht2_adhoc_slots');
     if(as) adhocSlots = JSON.parse(as);
+    try{
+      var caRaw = _getYearLS('ht2_creative_activities');
+      creativeActivities = caRaw ? JSON.parse(caRaw) : [];
+    }catch(e){ creativeActivities = []; }
     try{
       var attRaw = localStorage.getItem('ht2_attendance_' + getActiveYear());
       if(attRaw) attendanceRecords = JSON.parse(attRaw);
@@ -14124,59 +14317,70 @@ function _isStudentMissingSlot(studentNum, date, period){
   }
   return false;
 }
-function _matchAreaKinds(area){
-  if(area === '창체자율')  return ['창체','자율'];
-  if(area === '창체진로')  return ['창체','진로','자율'];
-  if(area === '동아리')    return ['동아리','창체'];
-  return [];
+function _areaForCreative(area){
+  if(area === '창체자율') return '자율';
+  if(area === '창체진로') return '진로';
+  if(area === '동아리')   return '동아리';
+  return null;
 }
-function getAttendedCreativeSlotsForStudent(area, student, classKey){
-  var kinds = _matchAreaKinds(area);
-  if(kinds.length === 0) return [];
-  if(!Array.isArray(adhocSlots) || adhocSlots.length === 0) return [];
+function _isStudentMissingDate(studentNum, date){
+  if(!attendanceRecords || !attendanceRecords[date]) return false;
+  var recs = attendanceRecords[date][studentNum] || [];
+  return recs.length > 0;
+}
+function getCreativeActivitiesForStudent(builderArea, student, classKey){
+  var area = _areaForCreative(builderArea);
+  if(!area) return [];
+  if(!Array.isArray(creativeActivities) || creativeActivities.length === 0) return [];
   var classData = classes[classKey] || getActiveClass();
-  var stuGrade = classData ? String(classData.grade) : '';
-  var stuCls   = classData ? String(classData.classNum) : '';
-  var attended = adhocSlots.filter(function(a){
-    if(!a || !a.kind) return false;
-    if(kinds.indexOf(a.kind) < 0) return false;
-    if(a.grade && stuGrade && String(a.grade) !== stuGrade) return false;
-    if(a.cls   && stuCls   && String(a.cls)   !== stuCls)   return false;
-    if(_isStudentMissingSlot(student.num, a.date, a.period)) return false;
+  var stuGrade = classData ? parseInt(classData.grade) : null;
+  if(stuGrade == null) return [];
+  var attended = creativeActivities.filter(function(c){
+    if(!c || c.area !== area) return false;
+    if(!Array.isArray(c.grades) || c.grades.indexOf(stuGrade) < 0) return false;
+    if(_isStudentMissingDate(student.num, c.date)) return false;
     return true;
   });
   attended.sort(function(a,b){
     if(a.date !== b.date) return a.date < b.date ? -1 : 1;
-    return (a.period||0) - (b.period||0);
+    return 0;
   });
   return attended;
 }
-function _slotMemoSummary(slot){
-  var memos = slot.memos || [];
-  if(memos.length === 0) return '';
-  var first = memos[0];
-  var txt = '';
-  if(first.progress) txt += first.progress;
-  if(first.content){ if(txt) txt += ' / '; txt += first.content; }
-  if(txt.length > 80) txt = txt.slice(0, 80) + '…';
-  return txt;
-}
-function formatCreativeSlotsForPrompt(slots){
-  if(!slots || slots.length === 0) return [];
+function formatCreativeNameDateForPrompt(activities, areaLabel){
+  if(!activities || activities.length === 0) return [];
   var lines = [];
   lines.push('');
-  lines.push('[학생이 실제 이수한 창의적 체험활동 수업 — ' + slots.length + '건]');
-  lines.push('· 아래는 교사가 [수업 관리]에서 직접 등록한 창체·자율·동아리 임시 수업 중,');
-  lines.push('  학생의 출결을 확인했을 때 실제로 참석한 것으로 확인된 수업이야.');
-  lines.push('· 활동명과 날짜는 정확히 반영하고, 메모의 진도/특이사항이 있다면');
-  lines.push('  학생이 보고·확인·발표한 구체적 내용으로 한두 줄에 녹여 써.');
-  lines.push('· 표기 예) "소방안전교육(2026.05.20.)에서 화재 예방 방법을 확인하고');
-  lines.push('   우리 학교에 적용할 수 있는 방안을 발표함."');
-  slots.forEach(function(s){
-    var line = '· ' + s.date + ' ' + (s.period||'?') + '교시 [' + (s.kind||'창체') + '] ' + (s.subject||'(활동명 미지정)');
-    var memo = _slotMemoSummary(s);
-    if(memo) line += ' — ' + memo;
-    else if(s.note) line += ' — ' + s.note;
+  lines.push('[학생이 실제 이수한 ' + areaLabel + ' — ' + activities.length + '건]');
+  lines.push('· 아래는 교사가 학교 창체 운영 계획을 보고 [설정 → 창의적 체험활동]에 등록한 활동 중,');
+  lines.push('  학생의 출결을 확인했을 때 실제로 참석한 것으로 확인된 활동이야.');
+  lines.push('· 반드시 "활동명(YYYY.MM.DD.)" 표기 형식을 활용해 한 문단의 줄글로 자연스럽게 녹여 써.');
+  lines.push('· 활동명과 날짜는 정확히 반영하고, 메모(특기사항)가 있다면 학생이 보고·확인·발표한');
+  lines.push('  구체적 내용으로 풀어 써. 메모가 없으면 활동명만으로 자연스러운 문장을 구성해.');
+  lines.push('· 예) "학교폭력예방교육(2022.03.02.)을 통해 타인의 인권을 존중하고 배려하는 자세의 중요성에 대해 깨달음."');
+  lines.push('');
+  lines.push('[참여 활동 목록]');
+  activities.forEach(function(a){
+    var dateStr = _formatCreativeDate(a.date);
+    var line = '· ' + a.name + '(' + dateStr + ')';
+    if(a.note) line += ' — ' + a.note;
+    lines.push(line);
+  });
+  return lines;
+}
+function formatCreativeDongariForPrompt(activities){
+  if(!activities || activities.length === 0) return [];
+  var lines = [];
+  lines.push('');
+  lines.push('[학생이 참여한 동아리 활동 — ' + activities.length + '건]');
+  lines.push('· 동아리 영역은 활동명과 날짜를 본문에 적지 마. 대신 활동들을 바탕으로');
+  lines.push('  학생의 동아리 활동 특기사항을 줄글로만 자연스럽게 서술해.');
+  lines.push('· 동일 동아리에 여러 회차가 있으면 합쳐서 종합적으로 서술.');
+  lines.push('');
+  lines.push('[참고 정보 — 본문에 그대로 옮기지 말 것]');
+  activities.forEach(function(a){
+    var line = '· ' + a.name;
+    if(a.note) line += ' — ' + a.note;
     lines.push(line);
   });
   return lines;
@@ -14231,8 +14435,8 @@ function buildJayulPrompt(ctx) {
   lines.push('· 활동 사실의 단순 나열 금지 — 학생만의 역할·기여·변화 중심');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var jayulSlots = getAttendedCreativeSlotsForStudent('창체자율', ctx.student, currentClassKey);
-  lines.push.apply(lines, formatCreativeSlotsForPrompt(jayulSlots));
+  var jayulActs = getCreativeActivitiesForStudent('창체자율', ctx.student, currentClassKey);
+  lines.push.apply(lines, formatCreativeNameDateForPrompt(jayulActs, '자율·자치활동'));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
   return lines.join('\n');
@@ -14259,8 +14463,8 @@ function buildJinroPrompt(ctx) {
   lines.push('· 학생의 흥미·적성과 활동이 일관되게 보이도록 구성');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var jinroSlots = getAttendedCreativeSlotsForStudent('창체진로', ctx.student, currentClassKey);
-  lines.push.apply(lines, formatCreativeSlotsForPrompt(jinroSlots));
+  var jinroActs = getCreativeActivitiesForStudent('창체진로', ctx.student, currentClassKey);
+  lines.push.apply(lines, formatCreativeNameDateForPrompt(jinroActs, '진로활동'));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
   return lines.join('\n');
@@ -14285,8 +14489,8 @@ function buildDongariPrompt(ctx) {
   lines.push('· "최우수" 같은 등급 표현 대신 구체적 활동·역할로 서술');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var dongariSlots = getAttendedCreativeSlotsForStudent('동아리', ctx.student, currentClassKey);
-  lines.push.apply(lines, formatCreativeSlotsForPrompt(dongariSlots));
+  var dongariActs = getCreativeActivitiesForStudent('동아리', ctx.student, currentClassKey);
+  lines.push.apply(lines, formatCreativeDongariForPrompt(dongariActs));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
   return lines.join('\n');
@@ -21562,6 +21766,7 @@ function switchSettingsTab(id){
   document.querySelectorAll('#settings-modal .settings-panel').forEach(function(p){
     p.classList.toggle('active', p.dataset.tab === id);
   });
+  if(id === 'creative') renderCreativeList();
 }
 function openAlertSettings(){ openSettings(); }
 function closeAlertSettings(){ closeSettings(); }
