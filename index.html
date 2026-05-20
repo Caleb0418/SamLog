@@ -20976,9 +20976,9 @@ function saveClassMemo(){
 function maybeAutoSyncNeis(){
   if(!neisSettings.apiKey || !neisSettings.atptCode || !neisSettings.schulCode) return;
   if(!classes || Object.keys(classes).length === 0) return;
-  var TWELVE_HOURS = 12 * 60 * 60 * 1000;
+  var SIX_HOURS = 6 * 60 * 60 * 1000;
   var lastSync = neisSettings.lastSyncedAt ? new Date(neisSettings.lastSyncedAt).getTime() : 0;
-  if(Date.now() - lastSync < TWELVE_HOURS) return;
+  if(Date.now() - lastSync < SIX_HOURS) return;
   var btn = document.getElementById('neis-sync-btn');
   if(btn && !btn.disabled){ onNeisSyncClick(); }
 }
