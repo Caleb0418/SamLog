@@ -4457,6 +4457,79 @@ details > summary::-webkit-details-marker { display:none; }
 .sgt-history-restore:hover{ color:var(--accent);border-color:var(--accent); }
 
 /* ═══════════════════════════════════════════
+   생기부 탭 — 학생 테이블
+═══════════════════════════════════════════ */
+.sgt-student-list-wrap{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin-bottom:16px;
+}
+.sgt-student-list-head{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  background:var(--bg-elevated);
+  display:flex;flex-direction:column;gap:8px;
+}
+.sgt-student-list-head-row{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sgt-student-list-label{
+  font-size:11px;font-weight:600;color:var(--text-secondary);
+  letter-spacing:0.05em;text-transform:uppercase;
+}
+.sgt-sort-toggle{
+  font-size:11px;font-weight:500;color:var(--text-tertiary);
+  background:none;border:1px solid var(--border);border-radius:5px;
+  padding:2px 7px;cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.sgt-sort-toggle:hover{ color:var(--text-secondary);border-color:var(--border-strong); }
+.sgt-student-search-wrap{ position:relative; }
+.sgt-student-search-wrap svg{
+  position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  color:var(--text-tertiary);pointer-events:none;
+}
+.sgt-student-search-input{
+  width:100%;padding:7px 10px 7px 28px;font-size:12px;font-family:inherit;
+  border:1px solid var(--border);border-radius:7px;
+  background:var(--bg-surface);color:var(--text);outline:none;box-sizing:border-box;
+}
+.sgt-student-list-body{ max-height:480px;overflow-y:auto; }
+.sgt-student-list-body .student-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;cursor:pointer;
+  border-bottom:1px solid var(--border);
+  transition:background 0.12s;
+}
+.sgt-student-list-body .student-item:last-child{ border-bottom:none; }
+.sgt-student-list-body .student-item:hover{ background:var(--bg-elevated); }
+.sgt-student-list-body .student-item .si-num{
+  font-size:11px;color:var(--text-tertiary);width:24px;text-align:right;flex-shrink:0;
+  font-variant-numeric:tabular-nums;
+}
+.sgt-student-list-body .student-item .si-name{
+  font-size:13px;font-weight:500;color:var(--text);flex:1;
+}
+.sgt-student-list-body .student-item .si-gender{
+  font-size:11px;font-weight:600;padding:1px 5px;border-radius:4px;
+}
+.sgt-student-list-body .student-item .si-gender.male{
+  background:var(--accent-dim);color:var(--accent);
+}
+.sgt-student-list-body .student-item .si-gender.female{
+  background:#FEF0F7;color:#C0478B;border:1px solid #F5C6E3;
+}
+.sgt-student-list-body .student-item .si-rec-count{
+  font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;
+}
+.sgt-student-list-body .student-item .si-areas{
+  display:flex;gap:2px;flex-shrink:0;
+}
+.sgt-student-list-body .student-item .si-area-dot{
+  width:6px;height:6px;border-radius:50%;background:#22c55e;
+}
+.sgt-student-list-body .student-item .si-area-dot.empty{
+  background:transparent;border:1px dashed var(--border-strong);
+}
+
+/* ═══════════════════════════════════════════
    생기부 매트릭스 뷰
 ═══════════════════════════════════════════ */
 .sgt-matrix-controls{
@@ -8554,6 +8627,26 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             익명화 프롬프트 복사
           </button>
+        </div>
+        <!-- 생기부 결과 붙여넣기·저장 영역 (단계 12 추가) -->
+        <div class="next-step-divider"><span>AI 답변 받아오기</span></div>
+        <div class="result-box" style="padding:14px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase;">
+              AI 답변 (받은 결과를 여기에 붙여넣기)
+            </div>
+            <span class="sgt-charcount" id="sgt-modal-charcount" style="font-size:11px;color:var(--text-tertiary);">0자</span>
+          </div>
+          <textarea
+            id="sgt-modal-response"
+            style="width:100%;min-height:180px;font-family:inherit;font-size:13px;line-height:1.6;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);color:var(--text);resize:vertical;box-sizing:border-box;"
+            placeholder="외부 AI에서 받은 답변을 여기에 붙여넣으세요."
+            oninput="updateSgtModalCharCount()"></textarea>
+          <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;">
+            <button class="btn-small secondary" onclick="clearSgtModalResponse()">지우기</button>
+            <button class="btn-small primary" onclick="saveSgtFromModal()">생기부 저장</button>
+          </div>
+          <div id="sgt-modal-existing" style="display:none;font-size:11px;color:var(--success);margin-top:6px;"></div>
         </div>
       </div>
     </div>
@@ -14759,6 +14852,11 @@ var sgtState = {
   generatedPrompt: '',
   aiResponse: ''
 };
+// 학생 목록 정렬·검색 상태
+var sgtListState = {
+  sort: 'num',   // 'num' (번호순) | 'rec' (미작성순)
+  search: ''
+};
 
 function openSaengibu(){
   if(!currentStudent){ alert('학생을 먼저 선택해주세요'); return; }
@@ -14791,6 +14889,13 @@ function openSaengibu(){
 
   renderSgRecords();
   renderSgCreativePreview();
+  // 단계 12: AI 답변 영역 초기화
+  var ta = document.getElementById('sgt-modal-response');
+  if(ta) ta.value = '';
+  setTimeout(function(){
+    updateSgtModalExistingHint();
+    updateSgtModalCharCount();
+  }, 50);
   document.getElementById('saengibu-overlay').classList.add('show');
 }
 
@@ -14808,6 +14913,8 @@ function selectSgArea(btn){
   renderSgRecords();
   onSgAreaChangeForSubject(sgState.area);
   renderSgCreativePreview();
+  updateSgtModalExistingHint();
+  updateSgtModalCharCount();
 }
 
 /* ──────────────────────────────────────────
@@ -16056,95 +16163,82 @@ function switchSaenggibuView(view){
 function renderSaenggibuWriteView(){
   var container = document.getElementById('sgt-view-write');
   if(!container) return;
-  var studentGridHtml = students.slice().sort(function(a,b){
-    return parseInt(a.num) - parseInt(b.num);
-  }).map(function(s){
-    var isSelected = sgtState.studentNum === s.num;
-    var doneAreas = _sgtGetDoneAreasForStudent(s.num);
-    var doneDotsHtml = doneAreas.length > 0
-      ? '<div class="ssc-done">' + doneAreas.slice(0,7).map(function(){ return '<span class="ssc-done-dot"></span>'; }).join('') + '</div>'
-      : '';
-    return '<div class="sgt-student-chip' + (isSelected ? ' selected' : '') + '" onclick="selectSgtStudent(\'' + s.num + '\')">' +
-      '<div class="ssc-num">' + parseInt(s.num) + '</div>' +
-      '<div class="ssc-name">' + escapeHtml(getDisplayName(s)) + '</div>' +
-      doneDotsHtml +
+  // 학생 명단이 없으면
+  if(students.length === 0){
+    container.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-tertiary);">' +
+      '<div style="font-size:14px;margin-bottom:8px;">학생 명단이 비어있어요</div>' +
+      '<div style="font-size:12px;">학생 관리 탭에서 명단을 먼저 등록해주세요.</div>' +
     '</div>';
-  }).join('');
-  var pickerHtml =
-    '<div class="sgt-student-picker">' +
-      '<div class="sgt-student-picker-label">학생 선택 (' + students.length + '명) · 초록 점은 작성된 영역 수</div>' +
-      '<div class="sgt-student-grid">' + studentGridHtml + '</div>' +
-    '</div>';
-  if(!sgtState.studentNum){
-    container.innerHTML = pickerHtml +
-      '<div style="padding:40px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;">' +
-        '학생을 선택하면 영역별 작성을 시작할 수 있어요.' +
-      '</div>';
     return;
   }
-  var student = students.find(function(s){ return s.num === sgtState.studentNum; });
-  if(!student){ container.innerHTML = pickerHtml; return; }
-  var areaCode = sgtState.areaCode;
-  var areaMeta = SAENGGIBU_AREA_CODES[areaCode];
-  var areaChipsHtml = Object.keys(SAENGGIBU_AREA_CODES).map(function(code){
-    var meta = SAENGGIBU_AREA_CODES[code];
-    var isSel = code === areaCode;
-    var existing = getLatestSaenggibu(sgtState.studentNum, code);
-    var doneIcon = existing ? ' <span style="font-size:9px;">✓</span>' : '';
-    return '<button class="sg-area-chip' + (isSel ? ' selected' : '') + '" onclick="selectSgtArea(\'' + code + '\')">' +
-      meta.label + doneIcon +
-    '</button>';
-  }).join('');
-  var subjectFieldHtml = (areaCode === 'gwagase') ?
-    '<div style="margin-top:14px;">' +
-      '<div class="sgt-result-label">과목 <span style="color:var(--danger);">*</span></div>' +
-      '<input type="text" class="form-input-text" id="sgt-subject-input" value="' + escapeHtml(sgtState.subject) + '" placeholder="예) 국어, 수학" oninput="sgtState.subject=this.value" style="font-size:13px;">' +
-    '</div>' : '';
-  var existingRecord = getLatestSaenggibu(sgtState.studentNum, areaCode);
-  var existingPreviewHtml = existingRecord ?
-    '<div style="background:var(--success-dim);border:1px solid var(--success-border);border-radius:6px;padding:10px 12px;margin-top:12px;">' +
-      '<div style="font-size:11px;font-weight:600;color:var(--success);margin-bottom:4px;">✓ 이미 작성된 기록이 있어요 (' + existingRecord.date + ' · ' + existingRecord.charCount + '자)</div>' +
-      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;max-height:80px;overflow:auto;">' + escapeHtml(existingRecord.content) + '</div>' +
-      '<button class="btn-small secondary" style="margin-top:8px;font-size:10px;padding:3px 8px;" onclick="restoreSgtFromExisting()">이 내용 불러와 수정</button>' +
-    '</div>' : '';
-  var areaSelectHtml =
-    '<div class="sgt-result-box">' +
-      '<div class="sgt-result-label">선택된 학생: <strong>' + parseInt(student.num) + '번 ' + escapeHtml(getDisplayName(student)) + '</strong></div>' +
-      '<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 6px;">작성 영역</div>' +
-      '<div class="sg-area-chips" style="margin-bottom:0;">' + areaChipsHtml + '</div>' +
-      subjectFieldHtml +
-      existingPreviewHtml +
+  // 헤더
+  var sortLabel = sgtListState.sort === 'num' ? '번호순' : '미작성순';
+  var sortTitle = sgtListState.sort === 'num' ? '생기부 적게 작성한 학생 먼저 보기' : '번호순으로 정렬';
+  var headerHtml =
+    '<div class="sgt-student-list-head">' +
+      '<div class="sgt-student-list-head-row">' +
+        '<div class="sgt-student-list-label">우리 반 학생 (' + students.length + '명)</div>' +
+        '<button class="sgt-sort-toggle" onclick="toggleSgtSort()" title="' + sortTitle + '">' + sortLabel + '</button>' +
+      '</div>' +
+      '<div class="sgt-student-search-wrap">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+        '<input class="sgt-student-search-input" type="text" placeholder="이름으로 검색" value="' + escapeHtml(sgtListState.search) + '" oninput="filterSgtStudents(this.value)">' +
+      '</div>' +
     '</div>';
-  var actionHtml =
-    '<div style="display:flex;gap:8px;margin-top:14px;align-items:center;">' +
-      '<button class="btn-small primary" onclick="generateSgtPrompt()" style="padding:8px 16px;font-size:13px;">' +
-        '프롬프트 생성하기' +
-      '</button>' +
-      '<span style="font-size:11px;color:var(--text-tertiary);">기록을 자동 결합해 AI 프롬프트를 만들어요</span>' +
+  // 정렬 + 필터
+  var sortedStudents = students.slice();
+  if(sgtListState.sort === 'rec'){
+    sortedStudents.sort(function(a, b){
+      var ad = _sgtGetDoneAreasForStudent(a.num).length;
+      var bd = _sgtGetDoneAreasForStudent(b.num).length;
+      if(ad !== bd) return ad - bd;
+      return parseInt(a.num) - parseInt(b.num);
+    });
+  } else {
+    sortedStudents.sort(function(a, b){ return parseInt(a.num) - parseInt(b.num); });
+  }
+  if(sgtListState.search){
+    var q = sgtListState.search.toLowerCase();
+    sortedStudents = sortedStudents.filter(function(s){
+      return (getDisplayName(s) || '').toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  // 학생 rows
+  var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
+  var rowsHtml;
+  if(sortedStudents.length === 0){
+    rowsHtml = '<div style="padding:24px;text-align:center;font-size:12px;color:var(--text-tertiary);">' +
+      '"' + escapeHtml(sgtListState.search) + '"와 일치하는 학생이 없어요' +
     '</div>';
-  var promptOutputHtml = sgtState.generatedPrompt ?
-    '<div class="sgt-result-box">' +
-      '<div class="sgt-result-label">' +
-        '<span>생성된 프롬프트</span>' +
-        '<button class="btn-small primary" onclick="copySgtPrompt()" style="font-size:10px;padding:3px 8px;">📋 복사</button>' +
-      '</div>' +
-      '<textarea class="sgt-result-textarea" readonly style="font-family:monospace;font-size:11px;min-height:120px;max-height:240px;">' + escapeHtml(sgtState.generatedPrompt) + '</textarea>' +
-      '<div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">위 프롬프트를 복사해 ChatGPT/Claude/Gemini에 붙여넣고, 받은 답변을 아래에 붙여넣어 저장하세요.</div>' +
-    '</div>' +
-    '<div class="sgt-result-box">' +
-      '<div class="sgt-result-label">' +
-        '<span>AI 답변 (받은 결과를 여기에 붙여넣기)</span>' +
-        '<span class="sgt-charcount" id="sgt-charcount">0 / ' + areaMeta.limit + '자</span>' +
-      '</div>' +
-      '<textarea class="sgt-result-textarea" id="sgt-ai-response" placeholder="외부 AI에서 받은 답변을 여기에 붙여넣으세요." oninput="updateSgtCharCount()">' + escapeHtml(sgtState.aiResponse) + '</textarea>' +
-      '<div class="sgt-result-actions">' +
-        '<button class="btn-small secondary" onclick="clearSgtResponse()">지우기</button>' +
-        '<button class="btn-small primary" onclick="saveSgtSaenggibu()">생기부 저장</button>' +
-      '</div>' +
-    '</div>' : '';
-  var historyHtml = _sgtRenderHistory(sgtState.studentNum, areaCode);
-  container.innerHTML = pickerHtml + areaSelectHtml + actionHtml + promptOutputHtml + historyHtml;
-  setTimeout(function(){ updateSgtCharCount(); }, 0);
+  } else {
+    rowsHtml = sortedStudents.map(function(s){
+      var doneAreas = _sgtGetDoneAreasForStudent(s.num);
+      var sgbRecs = (records[s.num] || []).filter(function(r){ return r.type === 'saenggibu'; }).length;
+      var dotsHtml = areaCodes.map(function(code){
+        var isDone = doneAreas.indexOf(code) >= 0;
+        return '<span class="si-area-dot' + (isDone ? '' : ' empty') + '" title="' + SAENGGIBU_AREA_CODES[code].label + (isDone ? ' 작성됨' : ' 미작성') + '"></span>';
+      }).join('');
+      var genderClass = (s.gender === '여' || s.gender === 'F' || s.gender === 'female') ? 'female' : 'male';
+      var genderLabel = (s.gender === '여' || s.gender === 'F' || s.gender === 'female') ? '여' : '남';
+      return '<div class="student-item" onclick="openSgtSaengibuForStudent(\'' + s.num + '\')">' +
+        '<div class="si-num">' + parseInt(s.num) + '</div>' +
+        '<div class="si-name">' + escapeHtml(getDisplayName(s)) + '</div>' +
+        '<div class="si-gender ' + genderClass + '">' + genderLabel + '</div>' +
+        '<div class="si-areas">' + dotsHtml + '</div>' +
+        '<div class="si-rec-count">' + sgbRecs + '/' + areaCodes.length + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  var listHtml =
+    '<div class="sgt-student-list-wrap">' +
+      headerHtml +
+      '<div class="sgt-student-list-body">' + rowsHtml + '</div>' +
+    '</div>';
+  var hintHtml =
+    '<div style="padding:16px 20px;text-align:center;color:var(--text-tertiary);font-size:12px;">' +
+      '학생을 클릭하면 생기부 작성 창이 열려요. 영역별로 작성·저장하면 한눈에 보기에서 현황을 확인할 수 있어요.' +
+    '</div>';
+  container.innerHTML = listHtml + hintHtml;
 }
 function _sgtRenderHistory(studentNum, areaCode){
   var all = (records[studentNum] || [])
@@ -16243,13 +16337,31 @@ function _sgtInvalidateDupCache(){
 /* ═══════════════════════════════════════════
    작성 모드 액션
 ═══════════════════════════════════════════ */
+// 학생 클릭 시 — 기존 openSaengibu 모달 활용
+function openSgtSaengibuForStudent(num){
+  currentStudent = num;
+  openSaengibu();
+}
+// 호환성 유지 (기존 코드 참조 방어)
 function selectSgtStudent(num){
-  sgtState.studentNum = num;
-  sgtState.selectedRecIds = [];
-  sgtState.generatedPrompt = '';
-  sgtState.aiResponse = '';
-  sgtState.comment = '';
+  openSgtSaengibuForStudent(num);
+}
+// 정렬 토글
+function toggleSgtSort(){
+  sgtListState.sort = sgtListState.sort === 'num' ? 'rec' : 'num';
   renderSaenggibuWriteView();
+}
+// 검색
+function filterSgtStudents(value){
+  sgtListState.search = value || '';
+  renderSaenggibuWriteView();
+  setTimeout(function(){
+    var input = document.querySelector('.sgt-student-search-input');
+    if(input){
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }, 0);
 }
 function selectSgtArea(code){
   sgtState.areaCode = code;
@@ -16539,6 +16651,97 @@ function copySaengibuPrompt(){
     try{ document.execCommand('copy'); showToast('복사 완료'); }catch(e){ showToast('복사 실패'); }
     document.body.removeChild(ta);
   });
+}
+
+/* ═══════════════════════════════════════════
+   기존 모달에서 AI 답변 받아 저장 (단계 12)
+═══════════════════════════════════════════ */
+function updateSgtModalCharCount(){
+  var ta = document.getElementById('sgt-modal-response');
+  var label = document.getElementById('sgt-modal-charcount');
+  if(!ta || !label) return;
+  var text = ta.value || '';
+  var len = text.replace(/\s/g,'').length;
+  var areaCode = BUILDER_TO_AREA_CODE[sgState.area];
+  var meta = areaCode ? SAENGGIBU_AREA_CODES[areaCode] : null;
+  var limit = meta ? meta.limit : 500;
+  label.textContent = len + ' / ' + limit + '자';
+  label.classList.toggle('over', len > limit);
+}
+function clearSgtModalResponse(){
+  var ta = document.getElementById('sgt-modal-response');
+  if(ta) ta.value = '';
+  updateSgtModalCharCount();
+}
+function saveSgtFromModal(){
+  var ta = document.getElementById('sgt-modal-response');
+  if(!ta) return;
+  var content = (ta.value || '').trim();
+  if(!content){ showToast('AI 답변을 붙여넣어 주세요'); return; }
+  if(!sgState.studentNum){ showToast('학생이 선택되지 않았어요'); return; }
+  var areaCode = BUILDER_TO_AREA_CODE[sgState.area];
+  if(!areaCode){
+    showToast('이 영역(' + sgState.area + ')은 저장을 지원하지 않아요');
+    return;
+  }
+  var areaMeta = SAENGGIBU_AREA_CODES[areaCode];
+  var charCount = content.replace(/\s/g,'').length;
+  if(charCount > areaMeta.limit){
+    if(!confirm('글자수 제한(' + areaMeta.limit + '자)을 초과했어요(' + charCount + '자). 그래도 저장할까요?')) return;
+  }
+  // 중복 검사
+  var dups = [];
+  students.forEach(function(s){
+    if(s.num === sgState.studentNum) return;
+    var other = getLatestSaenggibu(s.num, areaCode);
+    if(!other) return;
+    var sim = _sgtTextSimilarity(content, other.content);
+    if(sim >= 0.5) dups.push({ num: s.num, name: getDisplayName(s), similarity: sim });
+  });
+  if(dups.length > 0){
+    var msg = '⚠ 다른 학생과 내용이 유사해요:\n\n';
+    dups.slice(0,3).forEach(function(d){
+      msg += '· ' + parseInt(d.num) + '번 ' + d.name + ' (' + Math.round(d.similarity * 100) + '% 유사)\n';
+    });
+    msg += '\n그래도 저장할까요?';
+    if(!confirm(msg)) return;
+  }
+  var rec = {
+    id: 'sgb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    type: 'saenggibu',
+    date: formatDateForInput(new Date()),
+    area: areaCode,
+    areaLabel: areaMeta.label,
+    content: content,
+    charCount: charCount,
+    charLimit: areaMeta.limit,
+    promptSnapshot: sgState.promptAnon || sgState.promptReal || '',
+    edited: false,
+    subject: sgState.subject || '',
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  if(!records[sgState.studentNum]) records[sgState.studentNum] = [];
+  records[sgState.studentNum].push(rec);
+  _sgtInvalidateDupCache();
+  saveAll();
+  showToast('저장됐어요. 학생 타임라인에도 누적되었습니다.');
+  ta.value = '';
+  updateSgtModalCharCount();
+  updateSgtModalExistingHint();
+}
+function updateSgtModalExistingHint(){
+  var hintEl = document.getElementById('sgt-modal-existing');
+  if(!hintEl) return;
+  var areaCode = BUILDER_TO_AREA_CODE[sgState.area];
+  if(!areaCode || !sgState.studentNum){ hintEl.style.display = 'none'; return; }
+  var existing = getLatestSaenggibu(sgState.studentNum, areaCode);
+  if(existing){
+    hintEl.style.display = 'block';
+    hintEl.innerHTML = '✓ 이미 작성된 기록이 있어요 (' + existing.date + ' · ' + existing.charCount + '자). 새로 저장하면 히스토리에 누적됩니다.';
+  } else {
+    hintEl.style.display = 'none';
+  }
 }
 
 /* ═══════════════════════════════════════════
