@@ -21248,8 +21248,9 @@ function expandTodaySlots(){
   var todayStr = formatDateForInput(now);
   var result = [];
 
-  // 정규 수업 (classMaster.slots)
+  // 정규 수업 (classMaster.slots) — 반 시간표 자동등록 항목은 제외
   classMaster.forEach(function(c){
+    if(c._fromPrimary) return;
     (c.slots || []).forEach(function(s){
       if(s.day === today){
         result.push({entry:c, slot:s, kind:'regular'});
@@ -21932,8 +21933,9 @@ function renderClassWeek(opts){
       }
     }
   } else {
-    // 기본 모드: classMaster 기반
+    // 기본 모드: classMaster 기반 — 반 시간표 자동등록 항목(_fromPrimary)은 제외
     classMaster.forEach(function(c){
+      if(c._fromPrimary) return;
       (c.slots || []).forEach(function(s){
         var key = s.day+'-'+s.period;
         if(!grid[key]) grid[key] = [];
@@ -23004,18 +23006,19 @@ function openClassMemo(classId, dateStr, opts){
         }
       }
       if(foundSubj){
-        // classMaster에 자동 등록
+        // classMaster에 자동 등록 (단, 담임반 전용 — 오늘/주간(self)에는 노출 안 함)
         var newId = 'cm'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
         var newSlots = findSlotsFromTimetable(vg, vc, foundSubj);
         classMaster.push({
           id: newId,
           grade: vg, cls: vc, subject: foundSubj,
           slots: newSlots, memos: [],
-          sessionResets: [], sessionOverrides: {}
+          sessionResets: [], sessionOverrides: {},
+          _fromPrimary: true  // 반 시간표에서 자동 등록된 항목 — 본인 수업 시간표에는 표시 안 함
         });
         saveAll();
         classId = newId;
-        if(typeof showToast === 'function') showToast(vg+'-'+vc+' '+foundSubj+' 자동 등록됨');
+        if(typeof showToast === 'function') showToast(vg+'-'+vc+' '+foundSubj+' 메모 등록 준비됨');
       }
     }
   }
