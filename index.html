@@ -7633,6 +7633,35 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   </div>
 </div>
 
+<!-- 창체 미등록 안내 팝업 (3 옵션) -->
+<div class="modal-overlay" id="cs-empty-prompt-modal" onclick="if(event.target===this)closeCsEmptyPrompt()">
+  <div class="modal" style="max-width:380px;">
+    <div class="memo-modal-head">
+      <div class="memo-modal-head-text">
+        <div class="memo-modal-eyebrow">창체</div>
+        <div class="memo-modal-title">등록된 창체 일정이 없습니다</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;line-height:1.5;">어떤 방식으로 등록하시겠어요?</div>
+      </div>
+      <button class="memo-modal-close" onclick="closeCsEmptyPrompt()" aria-label="닫기">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px;">
+      <button class="btn-small primary" style="padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="closeCsEmptyPrompt();openCsImportModal();">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        일괄 등록하기
+      </button>
+      <button class="btn-small secondary" style="padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="closeCsEmptyPrompt();openCsFormModal(null);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        수동 입력하기
+      </button>
+      <button class="btn-small secondary" style="padding:10px 14px;font-size:13px;color:var(--text-tertiary);" onclick="closeCsEmptyPrompt()">
+        다음에 등록하기
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- 반 시간표 수동 등록/수정 모달 -->
 <div class="modal-overlay" id="cs-form-modal" onclick="if(event.target===this)closeCsFormModal()">
   <div class="modal" style="max-width:480px;">
@@ -20977,13 +21006,19 @@ function _csDeleteSelected(){
 // 창체 보기 토글 상태 — 오늘/주간 시간표 셀에 그 반의 그 시간 창체 표시
 var _csShowOnSchedule = false;
 
+function openCsEmptyPrompt(){
+  var m = document.getElementById('cs-empty-prompt-modal');
+  if(m) m.classList.add('show');
+}
+function closeCsEmptyPrompt(){
+  var m = document.getElementById('cs-empty-prompt-modal');
+  if(m) m.classList.remove('show');
+}
+
 function toggleCsOnSchedule(){
-  // 창체 일정이 하나도 없으면, 토글 대신 일괄 등록 모달을 바로 열어 안내
+  // 창체 일정이 하나도 없으면, 토글 대신 선택지 팝업 표시
   if(!Array.isArray(classSchedule) || classSchedule.length === 0){
-    showToast('등록된 창체 일정이 없어요. 먼저 등록해 주세요.');
-    if(typeof openCsImportModal === 'function'){
-      openCsImportModal();
-    }
+    openCsEmptyPrompt();
     return;
   }
   _csShowOnSchedule = !_csShowOnSchedule;
