@@ -20586,7 +20586,28 @@ function renderClassScheduleCreativeTab(activeClass){
         '</div>' +
       '</div>';
   } else {
-    body = '<div style="display:flex;flex-direction:column;gap:6px;">' +
+    // 선택 상태 정리: 현재 목록에 없는 id는 제거
+    var visibleIds = {};
+    list.forEach(function(it){ visibleIds[it.id] = true; });
+    Object.keys(_csSelectedIds).forEach(function(id){
+      if(!visibleIds[id]) delete _csSelectedIds[id];
+    });
+    var selCount = Object.keys(_csSelectedIds).length;
+    var allSelected = list.length > 0 && list.every(function(it){ return _csSelectedIds[it.id]; });
+
+    var selBar =
+      '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:8px;background:var(--bg-elevated);border-radius:6px;flex-wrap:wrap;">' +
+        '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);cursor:pointer;">' +
+          '<input type="checkbox" id="cs-select-all-chk" ' + (allSelected ? 'checked' : '') + ' onchange="_csToggleSelectAll(this.checked)">' +
+          '전체 선택' +
+        '</label>' +
+        '<span style="font-size:11px;color:var(--text-tertiary);">' + selCount + '건 선택됨</span>' +
+        '<button class="btn-small secondary" style="margin-left:auto;font-size:11px;padding:4px 10px;color:var(--danger);' + (selCount === 0 ? 'opacity:0.4;cursor:not-allowed;' : '') + '" ' +
+          (selCount === 0 ? 'disabled' : 'onclick="_csDeleteSelected()"') +
+          '>선택 삭제' + (selCount > 0 ? ' (' + selCount + ')' : '') + '</button>' +
+      '</div>';
+
+    body = selBar + '<div style="display:flex;flex-direction:column;gap:6px;">' +
       list.map(_csRenderRow).join('') +
     '</div>';
   }
@@ -20624,13 +20645,18 @@ function renderClassScheduleView(){ renderClassSchedule(); }
 // 행 하나 렌더
 function _csRenderRow(item){
   var periodsStr = (item.periods || []).join('·') + '교시';
-  var hasNote = item.note && item.note.indexOf('확인 필요') >= 0;
-  var noteHtml = item.note ?
-    '<div style="font-size:11px;color:' + (hasNote ? 'var(--danger)' : 'var(--text-tertiary)') + ';margin-top:3px;line-height:1.5;">' +
-      (hasNote ? '⚠ ' : '') + escapeHtml(item.note) +
+  // 메인 목록에서는 "확인 필요" 강조 없이 일반 메모처럼 표시 (강조는 일괄 등록 모달에서만)
+  var displayNote = item.note ? item.note.replace(/⚠\s*/g, '').replace(/확인 필요[:：]?\s*/g, '').trim() : '';
+  var noteHtml = displayNote ?
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;line-height:1.5;">' +
+      escapeHtml(displayNote) +
     '</div>' : '';
+  var isSelected = (typeof _csSelectedIds !== 'undefined' && _csSelectedIds && _csSelectedIds[item.id]) ? true : false;
+  var rowBorder = isSelected ? '1px solid var(--accent)' : '0.5px solid var(--border)';
+  var rowBg = isSelected ? 'background:var(--bg-elevated);' : '';
 
-  return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg-surface);border:0.5px solid var(--border);border-radius:8px;">' +
+  return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg-surface);border:' + rowBorder + ';border-radius:8px;' + rowBg + '">' +
+    '<input type="checkbox" class="cs-row-chk" data-id="' + item.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="_csToggleSelectItem(\'' + item.id + '\', this.checked)" style="margin-top:3px;flex-shrink:0;">' +
     '<div style="flex:1;min-width:0;">' +
       '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">' +
         '<span style="font-size:10px;font-weight:600;color:' + _csCategoryColor(item.category) + ';padding:1px 6px;border-radius:3px;background:var(--bg-elevated);">' + _csCategoryLabel(item.category) + '</span>' +
@@ -20857,6 +20883,43 @@ var _csImportParsed = []; // 검증 통과한 항목 임시 저장
 
 // 반 시간표 서브 탭: 'class' (담임반 수업 시간표) | 'creative' (창체 시간표)
 var _csSubTab = 'class';
+
+// 창체 목록 다중 선택 상태 (id → true)
+var _csSelectedIds = {};
+
+function _csToggleSelectItem(id, checked){
+  if(checked) _csSelectedIds[id] = true;
+  else delete _csSelectedIds[id];
+  renderClassSchedule();
+}
+
+function _csToggleSelectAll(checked){
+  // 현재 화면에 표시된 항목 기준
+  var list = classSchedule.slice();
+  if(_csFilter.category) list = list.filter(function(c){ return c.category === _csFilter.category; });
+  if(_csFilter.grade){
+    var g = parseInt(_csFilter.grade);
+    list = list.filter(function(c){ return _csParseTargetGrades(c.target).indexOf(g) >= 0; });
+  }
+  if(checked){
+    list.forEach(function(it){ _csSelectedIds[it.id] = true; });
+  } else {
+    _csSelectedIds = {};
+  }
+  renderClassSchedule();
+}
+
+function _csDeleteSelected(){
+  var ids = Object.keys(_csSelectedIds);
+  if(ids.length === 0) return;
+  if(!confirm(ids.length + '건의 창체 일정을 삭제할까요? 되돌릴 수 없어요.')) return;
+  classSchedule = classSchedule.filter(function(c){ return !_csSelectedIds[c.id]; });
+  _csSelectedIds = {};
+  saveAll();
+  renderClassSchedule();
+  if(typeof renderHome === 'function') try { renderHome(); } catch(e){}
+  showToast(ids.length + '건 삭제됨');
+}
 
 // 창체 보기 토글 상태 — 오늘/주간 시간표 셀에 그 반의 그 시간 창체 표시
 var _csShowOnSchedule = false;
