@@ -4457,6 +4457,156 @@ details > summary::-webkit-details-marker { display:none; }
 .sgt-history-restore:hover{ color:var(--accent);border-color:var(--accent); }
 
 /* ═══════════════════════════════════════════
+   생기부 매트릭스 뷰
+═══════════════════════════════════════════ */
+.sgt-matrix-controls{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;margin-bottom:12px;flex-wrap:wrap;
+}
+.sgt-matrix-legend{
+  display:flex;gap:12px;font-size:11px;color:var(--text-tertiary);
+}
+.sgt-legend-item{ display:flex;align-items:center;gap:4px; }
+.sgt-legend-dot{
+  width:10px;height:10px;border-radius:3px;
+}
+.sgt-legend-dot.done{ background:#22c55e; }
+.sgt-legend-dot.dup{ background:#f59e0b; }
+.sgt-legend-dot.empty{ background:transparent;border:1px dashed var(--border); }
+.sgt-matrix-wrapper{
+  border:1px solid var(--border);border-radius:8px;
+  overflow:auto;max-height:600px;background:var(--bg-surface);
+}
+.sgt-matrix-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  font-size:12px;
+}
+.sgt-matrix-table thead th{
+  position:sticky;top:0;z-index:2;
+  background:var(--bg-elevated);
+  padding:10px 8px;
+  font-size:11px;font-weight:600;color:var(--text-secondary);
+  border-bottom:1px solid var(--border);
+  text-align:center;white-space:nowrap;
+  cursor:pointer;transition:background 0.12s;
+}
+.sgt-matrix-table thead th:hover{ background:var(--bg-tertiary,var(--bg-elevated)); }
+.sgt-matrix-table thead th.student-col{
+  text-align:left;padding-left:12px;
+  position:sticky;left:0;z-index:3;
+  min-width:130px;
+}
+.sgt-matrix-table tbody td{
+  padding:8px;border-bottom:0.5px solid var(--border);
+  text-align:center;white-space:nowrap;
+  cursor:pointer;transition:background 0.12s;
+}
+.sgt-matrix-table tbody td.student-col{
+  text-align:left;padding-left:12px;
+  position:sticky;left:0;z-index:1;
+  background:var(--bg-surface);
+  font-weight:500;
+}
+.sgt-matrix-table tbody tr:hover td{ background:rgba(99,102,241,0.04); }
+.sgt-matrix-table tbody tr:hover td.student-col{ background:var(--bg-elevated); }
+.sgt-cell-done{ color:#15803d;font-weight:600;font-variant-numeric:tabular-nums; }
+.sgt-cell-dup{ color:#b45309;font-weight:700; }
+.sgt-cell-empty{ color:var(--text-tertiary); }
+.sgt-cell-over{ color:var(--danger);font-weight:700; }
+.sgt-cell-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  display:none;align-items:center;justify-content:center;
+  z-index:1000;
+}
+.sgt-cell-modal-overlay.show{ display:flex; }
+.sgt-cell-modal{
+  background:var(--bg-surface);border-radius:12px;
+  max-width:720px;width:90vw;max-height:85vh;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sgt-cell-modal-head{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sgt-cell-modal-title{ font-size:15px;font-weight:600;color:var(--text); }
+.sgt-cell-modal-body{ padding:14px 18px;overflow-y:auto;flex:1; }
+.sgt-cell-modal-section{ margin-bottom:18px; }
+.sgt-cell-modal-section-title{
+  font-size:11px;font-weight:600;color:var(--text-secondary);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;
+}
+.sgt-cell-modal-content{
+  background:var(--bg-elevated);border:0.5px solid var(--border);
+  border-radius:6px;padding:12px 14px;
+  font-size:13px;line-height:1.7;color:var(--text);
+  white-space:pre-wrap;word-break:keep-all;
+}
+.sgt-others-list{ display:flex;flex-direction:column;gap:6px; }
+.sgt-others-item{
+  background:var(--bg-elevated);border:0.5px solid var(--border);
+  border-radius:6px;padding:8px 12px;
+}
+.sgt-others-item.dup{
+  border-color:rgba(245,158,11,0.4);
+  background:rgba(245,158,11,0.06);
+}
+.sgt-others-name{
+  font-size:12px;font-weight:600;color:var(--text);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sgt-others-sim{
+  font-size:10px;font-weight:600;color:#b45309;
+  background:rgba(245,158,11,0.15);
+  padding:1px 6px;border-radius:3px;
+}
+.sgt-others-content{
+  font-size:11px;color:var(--text-secondary);
+  margin-top:4px;line-height:1.55;
+}
+.sgt-progress-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:10px;margin-bottom:20px;
+}
+.sgt-progress-card{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+}
+.sgt-progress-area{ font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px; }
+.sgt-progress-percent{ font-size:22px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums; }
+.sgt-progress-detail{ font-size:11px;color:var(--text-tertiary);margin-top:2px; }
+.sgt-progress-bar{
+  height:5px;border-radius:3px;background:var(--bg-elevated);
+  margin-top:8px;overflow:hidden;
+}
+.sgt-progress-fill{
+  height:100%;background:linear-gradient(90deg,#22c55e,#15803d);
+  transition:width 0.3s;
+}
+.sgt-progress-warning{ font-size:10px;color:var(--danger);margin-top:4px; }
+.sgt-dup-section{ margin-top:20px; }
+.sgt-dup-card{
+  background:rgba(245,158,11,0.06);
+  border:1px solid rgba(245,158,11,0.3);
+  border-radius:8px;padding:12px 14px;margin-bottom:8px;
+}
+.sgt-dup-pair{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;color:var(--text);
+  margin-bottom:6px;flex-wrap:wrap;
+}
+.sgt-dup-sim{
+  font-size:10px;color:#b45309;
+  background:rgba(245,158,11,0.2);
+  padding:2px 6px;border-radius:3px;
+}
+.sgt-dup-area{ color:var(--text-tertiary);font-weight:400; }
+.sgt-dup-preview{
+  font-size:11px;color:var(--text-secondary);line-height:1.5;
+  border-left:2px solid rgba(245,158,11,0.4);
+  padding-left:8px;margin-top:4px;
+}
+
+/* ═══════════════════════════════════════════
    수업 관리 (시간표 매칭 + 다중 슬롯)
 ═══════════════════════════════════════════ */
 .tt-upload-banner{
@@ -15544,42 +15694,350 @@ function renderSaenggibuTab(){
     renderSaenggibuProgressView();
   }
 }
+/* ═══════════════════════════════════════════
+   매트릭스 뷰
+═══════════════════════════════════════════ */
 function renderSaenggibuMatrixView(){
   var container = document.getElementById('sgt-view-matrix');
   if(!container) return;
+
   var matrix = buildClassSaenggibuMatrix();
   var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
-  var headCols = areaCodes.map(function(c){ return '<th style="font-size:10px;padding:6px 4px;text-align:center;font-weight:600;color:var(--text-secondary);">' + SAENGGIBU_AREA_CODES[c].label + '</th>'; }).join('');
-  var rows = students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).map(function(s){
-    var cols = areaCodes.map(function(code){
-      var r = matrix[s.num][code];
-      return '<td style="text-align:center;padding:6px 4px;">' + (r ? '<span style="color:var(--success);font-size:14px;" title="' + r.date + ' · ' + r.charCount + '자">✓</span>' : '<span style="color:var(--border);font-size:14px;">–</span>') + '</td>';
-    }).join('');
-    return '<tr style="border-bottom:0.5px solid var(--border);"><td style="padding:6px 8px;font-size:12px;white-space:nowrap;"><span style="font-weight:700;color:var(--text);">' + parseInt(s.num) + '</span> <span style="color:var(--text-secondary);">' + escapeHtml(getDisplayName(s)) + '</span></td>' + cols + '</tr>';
+
+  // 영역별 중복 사전 계산
+  var dupsByArea = {};
+  areaCodes.forEach(function(code){
+    dupsByArea[code] = findSaenggibuDuplicates(code);
+  });
+  // 학생 × 영역 → 중복 상대 학생 목록
+  var dupMap = {};
+  areaCodes.forEach(function(code){
+    dupsByArea[code].forEach(function(d){
+      _addDupEntry(dupMap, d.a.num, code, d.b, d.similarity);
+      _addDupEntry(dupMap, d.b.num, code, d.a, d.similarity);
+    });
+  });
+
+  var controlsHtml =
+    '<div class="sgt-matrix-controls">' +
+      '<div class="sgt-matrix-legend">' +
+        '<span class="sgt-legend-item"><span class="sgt-legend-dot done"></span>작성됨</span>' +
+        '<span class="sgt-legend-item"><span class="sgt-legend-dot dup"></span>중복 의심</span>' +
+        '<span class="sgt-legend-item"><span class="sgt-legend-dot empty"></span>미작성</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary);">' +
+        '학생 ' + students.length + '명 · 영역 ' + areaCodes.length + '개 · 셀 클릭=상세, 헤더 클릭=영역 비교' +
+      '</div>' +
+    '</div>';
+
+  // 헤더
+  var headerCells = '<th class="student-col">학생</th>';
+  areaCodes.forEach(function(code){
+    var meta = SAENGGIBU_AREA_CODES[code];
+    var doneCount = students.filter(function(s){ return matrix[s.num][code]; }).length;
+    var dupCount = dupsByArea[code].length;
+    var dupBadge = dupCount > 0 ? ' <span style="color:#b45309;">⚠' + dupCount + '</span>' : '';
+    headerCells += '<th onclick="openSgtAreaCompare(\'' + code + '\')" title="' + meta.label + ' 비교 보기">' +
+      meta.label + '<br>' +
+      '<span style="font-size:10px;font-weight:400;color:var(--text-tertiary);">' +
+        doneCount + '/' + students.length + dupBadge +
+      '</span>' +
+    '</th>';
+  });
+
+  // 본문
+  var sortedStudents = students.slice().sort(function(a,b){ return parseInt(a.num) - parseInt(b.num); });
+  var rowsHtml = sortedStudents.map(function(s){
+    var rowCells = '<td class="student-col">' + parseInt(s.num) + '번 ' + escapeHtml(getDisplayName(s)) + '</td>';
+    areaCodes.forEach(function(code){
+      var rec = matrix[s.num][code];
+      var isDup = dupMap[s.num] && dupMap[s.num][code] && dupMap[s.num][code].length > 0;
+      var cellHtml;
+      if(!rec){
+        cellHtml = '<span class="sgt-cell-empty">-</span>';
+      } else {
+        var charCls = rec.charCount > rec.charLimit ? 'sgt-cell-over' :
+                      isDup ? 'sgt-cell-dup' : 'sgt-cell-done';
+        cellHtml = '<span class="' + charCls + '">' + (isDup ? '⚠' : '✓') + rec.charCount + '</span>';
+      }
+      rowCells += '<td onclick="openSgtCellDetail(\'' + s.num + '\', \'' + code + '\')">' + cellHtml + '</td>';
+    });
+    return '<tr>' + rowCells + '</tr>';
   }).join('');
-  container.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-tertiary);">학생</th>' + headCols + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+
+  container.innerHTML = controlsHtml +
+    '<div class="sgt-matrix-wrapper">' +
+      '<table class="sgt-matrix-table">' +
+        '<thead><tr>' + headerCells + '</tr></thead>' +
+        '<tbody>' + rowsHtml + '</tbody>' +
+      '</table>' +
+    '</div>';
 }
+
+function _addDupEntry(dupMap, studentNum, areaCode, other, similarity){
+  if(!dupMap[studentNum]) dupMap[studentNum] = {};
+  if(!dupMap[studentNum][areaCode]) dupMap[studentNum][areaCode] = [];
+  dupMap[studentNum][areaCode].push({ num: other.num, name: other.name, similarity: similarity });
+}
+
+/* ═══════════════════════════════════════════
+   매트릭스 — 모달 (셀 클릭 + 영역 헤더 클릭)
+═══════════════════════════════════════════ */
+function _ensureSgtModal(){
+  var existing = document.getElementById('sgt-cell-modal');
+  if(existing) return existing;
+  var html =
+    '<div class="sgt-cell-modal-overlay" id="sgt-cell-modal" onclick="if(event.target===this)closeSgtCellModal()">' +
+      '<div class="sgt-cell-modal">' +
+        '<div class="sgt-cell-modal-head">' +
+          '<div class="sgt-cell-modal-title" id="sgt-cell-modal-title"></div>' +
+          '<button class="modal-close" onclick="closeSgtCellModal()">×</button>' +
+        '</div>' +
+        '<div class="sgt-cell-modal-body" id="sgt-cell-modal-body"></div>' +
+      '</div>' +
+    '</div>';
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div.firstChild);
+  return document.getElementById('sgt-cell-modal');
+}
+
+function closeSgtCellModal(){
+  var m = document.getElementById('sgt-cell-modal');
+  if(m) m.classList.remove('show');
+}
+
+function openSgtCellDetail(studentNum, areaCode){
+  var modal = _ensureSgtModal();
+  var student = students.find(function(s){ return s.num === studentNum; });
+  var areaMeta = SAENGGIBU_AREA_CODES[areaCode];
+  if(!student || !areaMeta){ closeSgtCellModal(); return; }
+
+  var rec = getLatestSaenggibu(studentNum, areaCode);
+  var titleEl = document.getElementById('sgt-cell-modal-title');
+  if(titleEl) titleEl.textContent = parseInt(student.num) + '번 ' + getDisplayName(student) + ' · ' + areaMeta.label;
+
+  var body = document.getElementById('sgt-cell-modal-body');
+  if(!body) return;
+
+  if(!rec){
+    body.innerHTML =
+      '<div style="padding:40px 20px;text-align:center;color:var(--text-tertiary);">' +
+        '<div style="font-size:13px;margin-bottom:8px;">아직 작성된 내용이 없어요</div>' +
+        '<button class="btn-small primary" onclick="goToWriteThis(\'' + studentNum + '\', \'' + areaCode + '\')">바로 작성하러 가기</button>' +
+      '</div>';
+    modal.classList.add('show');
+    return;
+  }
+
+  var others = [];
+  students.forEach(function(s){
+    if(s.num === studentNum) return;
+    var otherRec = getLatestSaenggibu(s.num, areaCode);
+    if(!otherRec) return;
+    var sim = _sgtTextSimilarity(rec.content, otherRec.content);
+    others.push({ num: s.num, name: getDisplayName(s), content: otherRec.content, similarity: sim });
+  });
+  others.sort(function(a,b){ return b.similarity - a.similarity; });
+
+  var sectionsHtml =
+    '<div class="sgt-cell-modal-section">' +
+      '<div class="sgt-cell-modal-section-title">생기부 내용 · ' + rec.charCount + '/' + rec.charLimit + '자 · ' + rec.date + '</div>' +
+      '<div class="sgt-cell-modal-content">' + escapeHtml(rec.content) + '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;">' +
+        '<button class="btn-small secondary" onclick="_sgtCopyContent(\'' + rec.id + '\')">복사</button>' +
+        '<button class="btn-small primary" onclick="goToWriteThis(\'' + studentNum + '\', \'' + areaCode + '\')">수정하러 가기</button>' +
+      '</div>' +
+    '</div>';
+
+  if(others.length > 0){
+    var othersHtml = others.slice(0, 10).map(function(o){
+      var isDup = o.similarity >= 0.5;
+      var simBadge = isDup
+        ? '<span class="sgt-others-sim">⚠ ' + Math.round(o.similarity * 100) + '% 유사</span>'
+        : '<span style="font-size:10px;color:var(--text-tertiary);">' + Math.round(o.similarity * 100) + '% 유사</span>';
+      var preview = o.content.length > 200 ? o.content.slice(0,200) + '…' : o.content;
+      return '<div class="sgt-others-item' + (isDup ? ' dup' : '') + '">' +
+        '<div class="sgt-others-name"><span>' + parseInt(o.num) + '번 ' + escapeHtml(o.name) + '</span>' + simBadge + '</div>' +
+        '<div class="sgt-others-content">' + escapeHtml(preview) + '</div>' +
+      '</div>';
+    }).join('');
+    sectionsHtml += '<div class="sgt-cell-modal-section">' +
+      '<div class="sgt-cell-modal-section-title">다른 학생 비교 (' + others.length + '명, 유사도 높은 순)</div>' +
+      '<div class="sgt-others-list">' + othersHtml + '</div>' +
+    '</div>';
+  }
+
+  body.innerHTML = sectionsHtml;
+  modal.classList.add('show');
+}
+
+function _sgtCopyContent(recId){
+  var rec = null;
+  for(var num in records){
+    var found = (records[num] || []).find(function(r){ return r.id === recId; });
+    if(found){ rec = found; break; }
+  }
+  if(!rec) return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(rec.content).then(function(){
+      showToast('복사됐어요');
+    }).catch(function(){ showToast('복사 실패'); });
+  }
+}
+
+function openSgtAreaCompare(areaCode){
+  var modal = _ensureSgtModal();
+  var areaMeta = SAENGGIBU_AREA_CODES[areaCode];
+  if(!areaMeta){ closeSgtCellModal(); return; }
+
+  var titleEl = document.getElementById('sgt-cell-modal-title');
+  if(titleEl) titleEl.textContent = areaMeta.label + ' 영역 — 반 전체 비교';
+
+  var entries = [];
+  students.forEach(function(s){
+    var rec = getLatestSaenggibu(s.num, areaCode);
+    entries.push({ num: s.num, name: getDisplayName(s), rec: rec });
+  });
+  entries.sort(function(a,b){ return parseInt(a.num) - parseInt(b.num); });
+
+  var dups = findSaenggibuDuplicates(areaCode);
+  var dupSet = {};
+  dups.forEach(function(d){ dupSet[d.a.num] = true; dupSet[d.b.num] = true; });
+
+  var body = document.getElementById('sgt-cell-modal-body');
+  if(!body) return;
+
+  var entriesHtml = entries.map(function(e){
+    var isDup = dupSet[e.num];
+    if(!e.rec){
+      return '<div class="sgt-others-item" style="opacity:0.5;">' +
+        '<div class="sgt-others-name"><span>' + parseInt(e.num) + '번 ' + escapeHtml(e.name) + '</span>' +
+          '<span style="font-size:10px;color:var(--text-tertiary);">미작성</span></div>' +
+      '</div>';
+    }
+    return '<div class="sgt-others-item' + (isDup ? ' dup' : '') + '">' +
+      '<div class="sgt-others-name"><span>' + parseInt(e.num) + '번 ' + escapeHtml(e.name) + '</span>' +
+        '<span style="font-size:10px;color:var(--text-tertiary);">' + e.rec.charCount + '자</span></div>' +
+      '<div class="sgt-others-content">' + escapeHtml(e.rec.content) + '</div>' +
+    '</div>';
+  }).join('');
+
+  var doneCount = entries.filter(function(e){ return e.rec; }).length;
+  var summaryHtml = '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">' +
+    '작성: ' + doneCount + '/' + entries.length + '명' +
+    (dups.length > 0 ? ' · ⚠ 중복 의심 ' + dups.length + '쌍' : '') +
+  '</div>';
+
+  body.innerHTML = summaryHtml + '<div class="sgt-others-list">' + entriesHtml + '</div>';
+  modal.classList.add('show');
+}
+
+function goToWriteThis(studentNum, areaCode){
+  closeSgtCellModal();
+  sgtState.studentNum = studentNum;
+  sgtState.areaCode = areaCode;
+  sgtState.generatedPrompt = '';
+  sgtState.aiResponse = '';
+  switchSaenggibuView('write');
+}
+
+/* ═══════════════════════════════════════════
+   진행률 대시보드
+═══════════════════════════════════════════ */
 function renderSaenggibuProgressView(){
   var container = document.getElementById('sgt-view-progress');
   if(!container) return;
+
+  var matrix = buildClassSaenggibuMatrix();
   var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
   var total = students.length;
-  if(total === 0){ container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-tertiary);">학생 없음</div>'; return; }
-  var rows = areaCodes.map(function(code){
+
+  var cardsHtml = areaCodes.map(function(code){
     var meta = SAENGGIBU_AREA_CODES[code];
-    var done = students.filter(function(s){ return !!getLatestSaenggibu(s.num, code); }).length;
-    var pct = Math.round(done / total * 100);
-    return '<div style="margin-bottom:12px;">' +
-      '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">' +
-        '<span style="font-size:13px;font-weight:600;color:var(--text);">' + meta.label + '</span>' +
-        '<span style="font-size:12px;color:var(--text-secondary);">' + done + ' / ' + total + '명 (' + pct + '%)</span>' +
+    var doneCount = students.filter(function(s){ return matrix[s.num][code]; }).length;
+    var pct = total > 0 ? Math.round(doneCount / total * 100) : 0;
+    var avgLen = 0;
+    var overCount = 0;
+    var lens = [];
+    students.forEach(function(s){
+      var r = matrix[s.num][code];
+      if(r){ lens.push(r.charCount); if(r.charCount > r.charLimit) overCount++; }
+    });
+    if(lens.length > 0){
+      avgLen = Math.round(lens.reduce(function(a,b){ return a+b; }, 0) / lens.length);
+    }
+    var dupCount = findSaenggibuDuplicates(code).length;
+    var warningsHtml = '';
+    if(overCount > 0) warningsHtml += '<div class="sgt-progress-warning">⚠ 글자수 초과 ' + overCount + '명</div>';
+    if(dupCount > 0) warningsHtml += '<div class="sgt-progress-warning">⚠ 중복 의심 ' + dupCount + '쌍</div>';
+    return '<div class="sgt-progress-card">' +
+      '<div class="sgt-progress-area">' + meta.label + '</div>' +
+      '<div class="sgt-progress-percent">' + pct + '%</div>' +
+      '<div class="sgt-progress-detail">' + doneCount + '/' + total + '명 작성' +
+        (avgLen > 0 ? ' · 평균 ' + avgLen + '자' : '') +
       '</div>' +
-      '<div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">' +
-        '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:4px;transition:width 0.3s;"></div>' +
-      '</div>' +
+      '<div class="sgt-progress-bar"><div class="sgt-progress-fill" style="width:' + pct + '%;"></div></div>' +
+      warningsHtml +
     '</div>';
   }).join('');
-  container.innerHTML = '<div style="padding:4px 0;">' + rows + '</div>';
+
+  var incomplete = [];
+  students.forEach(function(s){
+    var done = 0;
+    areaCodes.forEach(function(code){ if(matrix[s.num][code]) done++; });
+    if(done < areaCodes.length){
+      incomplete.push({ num: s.num, name: getDisplayName(s), done: done, total: areaCodes.length });
+    }
+  });
+  incomplete.sort(function(a,b){ return a.done - b.done; });
+
+  var incompleteHtml = incomplete.length > 0 ?
+    '<div style="margin-top:20px;">' +
+      '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">미완료 학생 (' + incomplete.length + '명)</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">' +
+        incomplete.slice(0, 30).map(function(s){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-elevated);border-radius:6px;cursor:pointer;font-size:12px;" onclick="goToWriteStudent(\'' + s.num + '\')">' +
+            '<span style="font-weight:600;">' + parseInt(s.num) + '번 ' + escapeHtml(s.name) + '</span>' +
+            '<span style="margin-left:auto;font-size:11px;color:var(--text-tertiary);">' + s.done + '/' + s.total + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' : '';
+
+  var allDups = [];
+  areaCodes.forEach(function(code){
+    findSaenggibuDuplicates(code).forEach(function(d){
+      allDups.push({ areaCode: code, areaLabel: SAENGGIBU_AREA_CODES[code].label, a: d.a, b: d.b, similarity: d.similarity });
+    });
+  });
+  allDups.sort(function(a,b){ return b.similarity - a.similarity; });
+
+  var dupHtml = allDups.length > 0 ?
+    '<div class="sgt-dup-section">' +
+      '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">⚠ 중복 의심 (' + allDups.length + '쌍)</div>' +
+      allDups.slice(0, 10).map(function(d){
+        return '<div class="sgt-dup-card">' +
+          '<div class="sgt-dup-pair">' +
+            '<span>' + parseInt(d.a.num) + '번 ' + escapeHtml(d.a.name) + ' ↔ ' + parseInt(d.b.num) + '번 ' + escapeHtml(d.b.name) + '</span>' +
+            '<span class="sgt-dup-area">— ' + d.areaLabel + '</span>' +
+            '<span class="sgt-dup-sim">' + Math.round(d.similarity * 100) + '%</span>' +
+            '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;margin-left:auto;" onclick="openSgtCellDetail(\'' + d.a.num + '\', \'' + d.areaCode + '\')">자세히</button>' +
+          '</div>' +
+          '<div class="sgt-dup-preview">' + escapeHtml(d.a.content.slice(0,120) + '…') + '</div>' +
+        '</div>';
+      }).join('') +
+      (allDups.length > 10 ? '<div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:6px;">외 ' + (allDups.length - 10) + '쌍</div>' : '') +
+    '</div>' : '';
+
+  container.innerHTML = '<div class="sgt-progress-grid">' + cardsHtml + '</div>' + incompleteHtml + dupHtml;
+}
+
+function goToWriteStudent(num){
+  sgtState.studentNum = num;
+  sgtState.generatedPrompt = '';
+  sgtState.aiResponse = '';
+  switchSaenggibuView('write');
 }
 function switchSaenggibuView(view){
   sgtState.view = view;
@@ -15750,7 +16208,13 @@ function _sgtTextSimilarity(a, b){
   var union = keysA.length + keysB.length - inter;
   return union > 0 ? (inter / union) : 0;
 }
+var _sgtDupCache = { ts: 0, data: {} };
+
 function findSaenggibuDuplicates(areaCode){
+  var now = Date.now();
+  if(now - _sgtDupCache.ts < 5000 && _sgtDupCache.data[areaCode]){
+    return _sgtDupCache.data[areaCode];
+  }
   var entries = [];
   students.forEach(function(s){
     var r = getLatestSaenggibu(s.num, areaCode);
@@ -15765,7 +16229,15 @@ function findSaenggibuDuplicates(areaCode){
       }
     }
   }
+  if(now - _sgtDupCache.ts >= 5000){
+    _sgtDupCache = { ts: now, data: {} };
+  }
+  _sgtDupCache.data[areaCode] = duplicates;
   return duplicates;
+}
+
+function _sgtInvalidateDupCache(){
+  _sgtDupCache = { ts: 0, data: {} };
 }
 
 /* ═══════════════════════════════════════════
@@ -15920,6 +16392,7 @@ function saveSgtSaenggibu(){
   };
   if(!records[sgtState.studentNum]) records[sgtState.studentNum] = [];
   records[sgtState.studentNum].push(rec);
+  _sgtInvalidateDupCache();
   saveAll();
   showToast('저장됐어요. 학생 타임라인에도 누적되었습니다.');
   sgtState.aiResponse = '';
