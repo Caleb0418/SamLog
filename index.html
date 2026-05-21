@@ -7804,7 +7804,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
 
       <!-- 진도 -->
-      <div class="memo-section">
+      <div class="memo-section" id="memo-progress-section">
         <div class="memo-section-label">오늘 진도</div>
         <input type="text" class="memo-input" id="memo-progress" placeholder="예) 2단원 3차시 — 비유적 표현 학습" autocomplete="off">
       </div>
@@ -20583,7 +20583,7 @@ function renderClassScheduleClassTab(activeClass){
       '<div>' +
         '<div style="font-size:14px;font-weight:600;color:var(--text);">우리 반 주간 시간표</div>' +
         '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">' +
-          activeClass.grade + '학년 ' + activeClass.classNum + '반 학생들이 받는 모든 수업이에요. 셀을 클릭하면 메모·차시를 기록할 수 있어요.' +
+          activeClass.grade + '학년 ' + activeClass.classNum + '반 학생들이 받는 모든 수업이에요. 셀을 클릭하면 특이사항·학생 멘션을 기록할 수 있어요.' +
         '</div>' +
       '</div>' +
     '</div>' +
@@ -21907,7 +21907,7 @@ function renderClassWeek(opts){
           var cellState   = getCellState(sessionInfo, cellDate);
 
           var sessionPill = '';
-          if(sessionInfo.sessionNum > 0){
+          if(mode !== 'primary' && sessionInfo.sessionNum > 0){
             if(classViewSettings.showSessionBadge){
               var semStart = getSemesterStartDate(cellDate);
               var _tip = '학기 시작 '+semStart.replace(/-/g,'.')+' 기준 '+sessionInfo.sessionNum+'차시';
@@ -21917,12 +21917,13 @@ function renderClassWeek(opts){
               else _tip += '\n메모 미작성';
               sessionPill = '<div class="week-cell-session state-'+cellState+'" title="'+_tip+'">'+sessionInfo.sessionNum+'차시</div>';
             }
-          } else if(cellState === 'future'){
-            // 미래 수업은 예측 차시 없이 빈 배지 표시 안 함
           }
 
           var cellCls = 'class-week-cell state-'+cellState;
-          html += '<div class="'+cellCls+'" onclick="openClassMemo(\''+c0.id+'\',\''+cellDate+'\')">'+
+          var openMemoCall = (mode === 'primary')
+            ? 'openClassMemo(\''+c0.id+'\',\''+cellDate+'\',{noProgress:true})'
+            : 'openClassMemo(\''+c0.id+'\',\''+cellDate+'\')';
+          html += '<div class="'+cellCls+'" onclick="'+openMemoCall+'">'+
             '<div class="week-cell-title">'+
               '<span class="wct-subject">'+escapeHtml(c0.subject)+'</span>'+
               (label ? ' <span class="wct-class">'+escapeHtml(label)+'</span>' : '')+
@@ -21931,7 +21932,7 @@ function renderClassWeek(opts){
                 : '')+
             '</div>'+
             sessionPill+
-            '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\',\''+cellDate+'\')" title="차시 관리"><span class="ssm-label">차시</span><span class="ssm-icon">⟳</span></button>'+
+            (mode !== 'primary' ? '<button class="week-cell-session-manage" onclick="event.stopPropagation();openSessionManageModal(\''+c0.id+'\',\''+cellDate+'\')" title="차시 관리"><span class="ssm-label">차시</span><span class="ssm-icon">⟳</span></button>' : '')+
             (_csShowOnSchedule ? _csMatchCell(c0.grade, c0.cls, weekDates[d2-1], p).map(function(cs){
               return '<div class="cs-overlay-badge" onclick="event.stopPropagation();showCsCellInfo(\''+cs.id+'\')" title="'+escapeHtml(cs.activity+' / '+cs.periods.join('·')+'교시 / '+(cs.target||''))+'">' +
                 '<span class="cs-overlay-dot"></span>'+escapeHtml(_csCategoryLabel(cs.category)+' · '+cs.activity)+
@@ -22255,10 +22256,30 @@ function setRecordsFilter(classKey){
   renderClassRecords();
 }
 var weekPickerMonth = null;  // 표시 중인 월 (Date — 1일)
+var _activeWeekPicker = null;
+function _getActiveWeekPicker(){
+  // 다중 마운트 환경에서 보이는 .week-picker만 골라냄
+  if(_activeWeekPicker && document.body.contains(_activeWeekPicker)) return _activeWeekPicker;
+  var all = document.querySelectorAll('.week-picker');
+  for(var i=0;i<all.length;i++){
+    var el = all[i];
+    // 보이는 조상이 있는지 (offsetParent로 가시성 판단)
+    var parentNav = el.closest && el.closest('.week-nav');
+    if(parentNav && parentNav.offsetParent !== null) return el;
+  }
+  return document.getElementById('week-picker');
+}
 function toggleWeekPicker(e){
   if(e) e.stopPropagation();
-  var pp = document.getElementById('week-picker');
+  // 클릭된 버튼의 형제 picker 우선 선택
+  var pp = null;
+  if(e && e.currentTarget && e.currentTarget.closest){
+    var nav = e.currentTarget.closest('.week-nav');
+    if(nav) pp = nav.querySelector('.week-picker');
+  }
+  if(!pp) pp = _getActiveWeekPicker();
   if(!pp) return;
+  _activeWeekPicker = pp;
   if(pp.style.display === 'none' || !pp.style.display){
     weekPickerMonth = new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth(), 1);
     renderWeekPicker();
@@ -22271,12 +22292,13 @@ function toggleWeekPicker(e){
   }
 }
 function closeWeekPicker(){
-  var pp = document.getElementById('week-picker');
+  var pp = _activeWeekPicker || document.getElementById('week-picker');
   if(pp) pp.style.display = 'none';
+  _activeWeekPicker = null;
   document.removeEventListener('click', closeWeekPickerOnOutside);
 }
 function closeWeekPickerOnOutside(e){
-  var pp = document.getElementById('week-picker');
+  var pp = _activeWeekPicker || document.getElementById('week-picker');
   if(!pp) return;
   // popover 자체나 그 안에서 일어난 클릭, 또는 popover를 여는 라벨 클릭은 무시
   // (innerHTML 재생성으로 e.target이 DOM에서 떨어졌을 수 있으므로 좌표 기반으로도 체크)
@@ -22298,7 +22320,7 @@ function shiftPickerMonth(deltaMonths, e){
   renderWeekPicker();
 }
 function renderWeekPicker(){
-  var pp = document.getElementById('week-picker');
+  var pp = _activeWeekPicker || document.getElementById('week-picker');
   if(!pp || !weekPickerMonth) return;
 
   var year = weekPickerMonth.getFullYear();
@@ -22799,7 +22821,12 @@ function fillSubjectFromChip(subj){
 /* ═══════════════════════════════════════════
    수업 메모 모달 (고도화)
 ═══════════════════════════════════════════ */
-function openClassMemo(classId, dateStr){
+function openClassMemo(classId, dateStr, opts){
+  opts = opts || {};
+  // 진도 섹션 표시/숨김 (반 시간표 모드에서는 숨김)
+  var progressSection = document.getElementById('memo-progress-section');
+  if(progressSection) progressSection.style.display = opts.noProgress ? 'none' : '';
+
   // 가상 entry(담임반 시간표에서 표시된 다른 선생님 수업)는 먼저 classMaster에 자동 등록
   if(classId && typeof classId === 'string' && classId.indexOf('virtual_') === 0){
     var vparts = classId.replace('virtual_','').split('_');
