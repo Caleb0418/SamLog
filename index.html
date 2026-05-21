@@ -7692,13 +7692,16 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
 <!-- 반 시간표 일괄 등록 (AI 변환 워크플로우) -->
 <div class="modal-overlay" id="cs-import-modal" onclick="if(event.target===this)closeCsImportModal()">
-  <div class="modal" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column;">
-    <div class="modal-head">
-      <div>
-        <div class="modal-title">창체 일정 일괄 등록</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;">AI를 사용해 학교 창체영역편성표를 한 번에 등록해요</div>
+  <div class="modal" style="max-width:760px;max-height:90vh;display:flex;flex-direction:column;">
+    <div class="memo-modal-head">
+      <div class="memo-modal-head-text">
+        <div class="memo-modal-eyebrow">창체</div>
+        <div class="memo-modal-title">창체 일정 일괄 등록</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">AI를 사용해 학교 창체영역편성표를 한 번에 등록해요</div>
       </div>
-      <button class="modal-close" onclick="closeCsImportModal()">×</button>
+      <button class="memo-modal-close" onclick="closeCsImportModal()" aria-label="닫기">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
 
     <div class="modal-body" style="padding:14px 16px;overflow-y:auto;flex:1;">
@@ -21009,18 +21012,34 @@ function _csRenderImportReviewTable(){
   var container = document.getElementById('cs-import-review-table');
   if(!container) return;
 
+  var inpBase = 'width:100%;box-sizing:border-box;font-size:11px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--text);font-family:inherit;';
+
   var rows = _csImportParsed.map(function(item, idx){
     var hasWarn = item.note && item.note.indexOf('확인 필요') >= 0;
     var rowBg = hasWarn ? 'background:var(--danger-dim,#fff5f5);' : '';
-    return '<tr style="' + rowBg + '">' +
-      '<td style="padding:6px 8px;text-align:center;"><input type="checkbox" class="cs-import-row-chk" data-idx="' + idx + '" checked onchange="_csImportParsed[' + idx + ']._checked=this.checked;_csUpdateImportSummary()"></td>' +
-      '<td style="padding:6px 8px;font-size:11px;white-space:nowrap;">' + _csFormatDate(item.date) + '</td>' +
-      '<td style="padding:6px 8px;font-size:11px;white-space:nowrap;">' + (item.periods.join('·')) + '교시</td>' +
-      '<td style="padding:6px 8px;font-size:11px;"><span style="color:' + _csCategoryColor(item.category) + ';font-weight:600;">' + _csCategoryLabel(item.category) + '</span></td>' +
-      '<td style="padding:6px 8px;font-size:11px;">' + escapeHtml(item.activity) + '</td>' +
-      '<td style="padding:6px 8px;font-size:10px;color:var(--text-tertiary);font-family:monospace;">' + escapeHtml(item.originalText) + '</td>' +
-      '<td style="padding:6px 8px;font-size:11px;color:var(--text-secondary);">' + escapeHtml(item.target || '') + '</td>' +
-      '<td style="padding:6px 8px;font-size:11px;color:' + (hasWarn ? 'var(--danger)' : 'var(--text-tertiary)') + ';">' + (hasWarn ? '⚠ ' : '') + escapeHtml(item.note || '') + '</td>' +
+    var periodsStr = (item.periods || []).join(',');
+    return '<tr data-idx="' + idx + '" style="' + rowBg + '">' +
+      '<td style="padding:6px 8px;text-align:center;vertical-align:middle;"><input type="checkbox" class="cs-import-row-chk" data-idx="' + idx + '" ' + (item._checked !== false ? 'checked' : '') + ' onchange="_csImportParsed[' + idx + ']._checked=this.checked;_csUpdateImportSummary()"></td>' +
+      // 날짜
+      '<td style="padding:6px 8px;vertical-align:middle;"><input type="date" value="' + escapeHtml(item.date) + '" style="' + inpBase + 'min-width:120px;" onchange="_csImportEditField(' + idx + ',\'date\',this.value)"></td>' +
+      // 교시 (콤마/점 구분)
+      '<td style="padding:6px 8px;vertical-align:middle;"><input type="text" value="' + escapeHtml(periodsStr) + '" placeholder="예: 5,6" style="' + inpBase + 'min-width:60px;text-align:center;" onchange="_csImportEditPeriods(' + idx + ',this.value)" title="콤마(,)로 구분: 예) 5,6"></td>' +
+      // 영역
+      '<td style="padding:6px 8px;vertical-align:middle;">' +
+        '<select style="' + inpBase + 'min-width:84px;color:' + _csCategoryColor(item.category) + ';font-weight:600;" onchange="_csImportEditField(' + idx + ',\'category\',this.value)">' +
+          ['자율','동아리','봉사','진로'].map(function(c){
+            return '<option value="' + c + '"' + (item.category === c ? ' selected' : '') + '>' + _csCategoryLabel(c) + '</option>';
+          }).join('') +
+        '</select>' +
+      '</td>' +
+      // 활동명
+      '<td style="padding:6px 8px;vertical-align:middle;"><input type="text" value="' + escapeHtml(item.activity || '') + '" style="' + inpBase + 'min-width:120px;" onchange="_csImportEditField(' + idx + ',\'activity\',this.value)"></td>' +
+      // NEIS 원문 (읽기 전용)
+      '<td style="padding:6px 8px;font-size:10px;color:var(--text-tertiary);font-family:monospace;vertical-align:middle;max-width:140px;word-break:break-all;">' + escapeHtml(item.originalText || '') + '</td>' +
+      // 대상
+      '<td style="padding:6px 8px;vertical-align:middle;"><input type="text" value="' + escapeHtml(item.target || '') + '" placeholder="예: 1학년" style="' + inpBase + 'min-width:80px;" onchange="_csImportEditField(' + idx + ',\'target\',this.value)"></td>' +
+      // 비고
+      '<td style="padding:6px 8px;vertical-align:middle;"><input type="text" value="' + escapeHtml(item.note || '') + '" placeholder="비고" style="' + inpBase + 'min-width:120px;color:' + (hasWarn ? 'var(--danger)' : 'var(--text)') + ';" onchange="_csImportEditField(' + idx + ',\'note\',this.value)" title="' + (hasWarn ? '⚠ 확인이 필요해요. 수정 후 비고를 지우면 경고가 사라집니다.' : '') + '"></td>' +
     '</tr>';
   }).join('');
 
@@ -21050,6 +21069,47 @@ function _csToggleAllImport(checked){
     _csImportParsed[parseInt(chk.dataset.idx)]._checked = checked;
   });
   _csUpdateImportSummary();
+}
+
+// 검수 테이블 인라인 편집
+function _csImportEditField(idx, field, val){
+  var item = _csImportParsed[idx];
+  if(!item) return;
+  item[field] = (typeof val === 'string') ? val.trim() : val;
+  // 비고에서 "확인 필요"가 사라졌으면 행 배경 즉시 갱신
+  if(field === 'note'){
+    var tr = document.querySelector('tr[data-idx="' + idx + '"]');
+    if(tr){
+      var hasWarn = item.note && item.note.indexOf('확인 필요') >= 0;
+      tr.style.background = hasWarn ? 'var(--danger-dim,#fff5f5)' : '';
+      // 비고 입력칸 색상도 갱신
+      var noteInput = tr.querySelector('td:last-child input');
+      if(noteInput) noteInput.style.color = hasWarn ? 'var(--danger)' : 'var(--text)';
+    }
+  }
+  _csUpdateImportSummary();
+}
+
+function _csImportEditPeriods(idx, raw){
+  var item = _csImportParsed[idx];
+  if(!item) return;
+  // "5,6" "5·6" "5 6" 등 다양한 구분자 허용
+  var parts = String(raw || '').split(/[^\d]+/).filter(Boolean);
+  var nums = parts.map(function(p){ return parseInt(p, 10); }).filter(function(n){ return !isNaN(n) && n >= 1 && n <= 8; });
+  // 중복 제거 + 정렬
+  nums = nums.filter(function(n, i){ return nums.indexOf(n) === i; }).sort(function(a,b){return a-b;});
+  item.periods = nums;
+  if(nums.length === 0){
+    // 잘못된 입력이면 자동으로 비고에 표시
+    if(!item.note || item.note.indexOf('교시 확인 필요') < 0){
+      item.note = (item.note ? item.note + ' · ' : '') + '⚠ 교시 확인 필요';
+    }
+  } else {
+    // 정상 입력 시 "교시 확인 필요" 비고만 정리
+    if(item.note) item.note = item.note.replace(/\s*·?\s*⚠?\s*교시 확인 필요/g, '').trim();
+  }
+  // 행 다시 그리기 위해 전체 테이블 재렌더
+  _csRenderImportReviewTable();
 }
 
 function _csUpdateImportSummary(){
