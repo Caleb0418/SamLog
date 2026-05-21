@@ -20422,11 +20422,26 @@ function _csTargetMatchesClass(target, grade, cls){
 function _csMatchCell(grade, cls, weekDate, period){
   if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
   var dateStr = typeof weekDate === 'string' ? weekDate : formatDateForInput(weekDate);
+  var pNum = parseInt(period, 10);
   return classSchedule.filter(function(c){
     if(c.date !== dateStr) return false;
-    if(!Array.isArray(c.periods) || c.periods.indexOf(period) < 0) return false;
+    if(!Array.isArray(c.periods)) return false;
+    // 교시는 문자열/숫자 혼재 가능 → 숫자 비교
+    var hasPeriod = c.periods.some(function(p){ return parseInt(p,10) === pNum; });
+    if(!hasPeriod) return false;
     return _csTargetMatchesClass(c.target, grade, cls);
   });
+}
+
+// 한 주의 매칭 건수를 세서 토글 버튼에 표시할 텍스트 만들기
+function _csCountMatchesForWeek(weekDates){
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0) return 0;
+  var dateStrs = (weekDates || []).map(function(d){
+    return typeof d === 'string' ? d : formatDateForInput(d);
+  });
+  return classSchedule.filter(function(c){
+    return dateStrs.indexOf(c.date) >= 0;
+  }).length;
 }
 
 // 학생이 해당 활동 대상인지 (학년 기준)
@@ -20857,12 +20872,25 @@ function toggleCsOnSchedule(){
   }
 }
 
-function _csToggleBtnHtml(){
-  return '<button class="cs-toggle-btn' + (_csShowOnSchedule ? ' active' : '') + '" onclick="toggleCsOnSchedule()" title="내 수업 시간에 그 반의 창체가 있는지 표시">' +
+// weekDates: 옵션 — 매칭 건수를 라벨에 표시
+function _csToggleBtnHtml(weekDates){
+  var countSuffix = '';
+  if(_csShowOnSchedule){
+    if(weekDates && weekDates.length){
+      var n = _csCountMatchesForWeek(weekDates);
+      countSuffix = ' · 이번 주 ' + n + '건';
+    } else {
+      // 오늘 모드: 오늘 날짜만 카운트
+      var todayStr = formatDateForInput(new Date());
+      var n2 = (Array.isArray(classSchedule) ? classSchedule.filter(function(c){return c.date === todayStr;}).length : 0);
+      countSuffix = ' · 오늘 ' + n2 + '건';
+    }
+  }
+  return '<button class="cs-toggle-btn' + (_csShowOnSchedule ? ' active' : '') + '" onclick="toggleCsOnSchedule()" title="이 시간표에 표시되는 날짜 중 등록된 창체가 있으면 셀에 배지가 떠요">' +
     '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
       '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>' +
     '</svg>' +
-    '창체 ' + (_csShowOnSchedule ? 'ON' : 'OFF') +
+    '창체 ' + (_csShowOnSchedule ? 'ON' : 'OFF') + countSuffix +
   '</button>';
 }
 
@@ -21992,7 +22020,7 @@ function renderClassWeek(opts){
   // 창체 보기 토글 버튼 (담임반에서만)
   var _csHasPrimary = activeClassObj && activeClassObj.isPrimary;
   var _csToggleHtml = _csHasPrimary ?
-    '<div style="display:flex;justify-content:flex-end;margin:8px 0;">' + _csToggleBtnHtml() + '</div>' : '';
+    '<div style="display:flex;justify-content:flex-end;margin:8px 0;">' + _csToggleBtnHtml(weekDates) + '</div>' : '';
 
   // 그리드 HTML
   var html = headerHtml + _csToggleHtml + legendHtml;
