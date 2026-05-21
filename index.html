@@ -4339,6 +4339,124 @@ details > summary::-webkit-details-marker { display:none; }
 .sg-toolbar-actions .sg-deselect-all{color:var(--text-tertiary);}
 
 /* ═══════════════════════════════════════════
+   생기부 탭
+═══════════════════════════════════════════ */
+.saenggibu-tab-container{
+  padding:20px 24px;max-width:1200px;margin:0 auto;
+}
+.sgt-header{
+  margin-bottom:20px;padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.sgt-title-row{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+}
+.sgt-title{
+  font-size:18px;font-weight:700;color:var(--text);margin:0;
+}
+.sgt-subtitle{
+  font-size:12px;color:var(--text-tertiary);margin-top:3px;
+}
+.sgt-tabs{
+  display:flex;gap:4px;
+}
+.sgt-tab{
+  font-family:inherit;font-size:13px;font-weight:500;
+  padding:8px 14px;border:1px solid var(--border);
+  background:var(--bg-surface);color:var(--text-secondary);
+  border-radius:8px;cursor:pointer;transition:all 0.12s;
+}
+.sgt-tab:hover{ color:var(--text);border-color:var(--border-strong); }
+.sgt-tab.active{
+  background:var(--accent-dim);color:var(--accent);
+  border-color:var(--accent);font-weight:600;
+}
+.sgt-view{ min-height:400px; }
+.sgt-student-picker{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;margin-bottom:16px;
+}
+.sgt-student-picker-label{
+  font-size:11px;font-weight:600;color:var(--text-secondary);
+  margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;
+}
+.sgt-student-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+  gap:6px;
+}
+.sgt-student-chip{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 4px;border:1px solid var(--border);border-radius:6px;
+  background:var(--bg-surface);cursor:pointer;
+  font-size:11px;color:var(--text-secondary);transition:all 0.12s;
+  text-align:center;line-height:1.3;
+}
+.sgt-student-chip:hover{
+  border-color:var(--accent);color:var(--accent);
+}
+.sgt-student-chip.selected{
+  background:var(--accent-dim);color:var(--accent);
+  border-color:var(--accent);font-weight:600;
+}
+.sgt-student-chip .ssc-num{ font-weight:700;font-size:13px; }
+.sgt-student-chip .ssc-name{ margin-top:2px; }
+.sgt-student-chip .ssc-done{
+  display:flex;gap:2px;margin-top:3px;
+}
+.sgt-student-chip .ssc-done-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--success);
+}
+.sgt-result-box{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;margin-top:14px;
+}
+.sgt-result-label{
+  font-size:11px;font-weight:600;color:var(--text-secondary);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sgt-result-textarea{
+  width:100%;min-height:180px;
+  font-family:inherit;font-size:13px;line-height:1.6;
+  padding:10px 12px;border:1px solid var(--border);
+  border-radius:6px;background:var(--bg-elevated);
+  color:var(--text);resize:vertical;box-sizing:border-box;
+}
+.sgt-charcount{
+  font-size:11px;color:var(--text-tertiary);
+  font-variant-numeric:tabular-nums;
+}
+.sgt-charcount.over{ color:var(--danger);font-weight:600; }
+.sgt-result-actions{
+  display:flex;gap:6px;margin-top:10px;justify-content:flex-end;
+}
+.sgt-history{
+  margin-top:10px;border-top:0.5px solid var(--border);padding-top:10px;
+}
+.sgt-history-title{
+  font-size:11px;font-weight:600;color:var(--text-tertiary);
+  margin-bottom:6px;
+}
+.sgt-history-item{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;
+  background:var(--bg-elevated);border-radius:6px;margin-bottom:4px;
+  font-size:11px;
+}
+.sgt-history-date{ color:var(--text-tertiary);min-width:80px; }
+.sgt-history-preview{
+  flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--text-secondary);
+}
+.sgt-history-restore{
+  font-size:10px;padding:3px 8px;
+  border:1px solid var(--border);background:var(--bg-surface);
+  border-radius:4px;cursor:pointer;color:var(--text-secondary);
+}
+.sgt-history-restore:hover{ color:var(--accent);border-color:var(--accent); }
+
+/* ═══════════════════════════════════════════
    수업 관리 (시간표 매칭 + 다중 슬롯)
 ═══════════════════════════════════════════ */
 .tt-upload-banner{
@@ -6412,6 +6530,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       학생 관리
     </button>
+    <button class="nav-item" data-tab="saenggibu" onclick="switchTab('saenggibu')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      생기부
+    </button>
     <button class="nav-item" data-tab="reply" onclick="switchTab('reply')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       학부모 대응
@@ -7019,6 +7141,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
               <button class="filter-chip" data-filter="parent" onclick="setFilter('parent')">학부모</button>
               <button class="filter-chip" data-filter="bulk" onclick="setFilter('bulk')">공지</button>
               <button class="filter-chip" data-filter="attendance" onclick="setFilter('attendance')">출결</button>
+              <button class="filter-chip" data-filter="saenggibu" onclick="setFilter('saenggibu')">생기부</button>
               <button class="filter-chip" data-filter="unsorted" onclick="setFilter('unsorted')">미분류</button>
             </div>
           </div>
@@ -7054,6 +7177,34 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       생기부 탭
+  ═══════════════════════════════════════════ -->
+  <div id="tab-saenggibu" style="display:none;">
+    <div class="saenggibu-tab-container">
+      <!-- 헤더 + 서브탭 -->
+      <div class="sgt-header">
+        <div class="sgt-title-row">
+          <div>
+            <h2 class="sgt-title">생기부 작성</h2>
+            <div class="sgt-subtitle" id="sgt-subtitle">학생을 선택하고 영역별 프롬프트를 생성하세요</div>
+          </div>
+          <div class="sgt-tabs">
+            <button class="sgt-tab active" data-view="write" onclick="switchSaenggibuView('write')">작성 모드</button>
+            <button class="sgt-tab" data-view="matrix" onclick="switchSaenggibuView('matrix')">한눈에 보기</button>
+            <button class="sgt-tab" data-view="progress" onclick="switchSaenggibuView('progress')">진행률</button>
+          </div>
+        </div>
+      </div>
+      <!-- 작성 모드 컨테이너 -->
+      <div id="sgt-view-write" class="sgt-view"></div>
+      <!-- 한눈에 보기 컨테이너 -->
+      <div id="sgt-view-matrix" class="sgt-view" style="display:none;"></div>
+      <!-- 진행률 컨테이너 -->
+      <div id="sgt-view-progress" class="sgt-view" style="display:none;"></div>
+    </div>
   </div>
 
   <!-- ═══════════════════════════════════════════
@@ -8292,6 +8443,27 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
    - 영역별 작성 규칙, 금지 내용, 글자수 제한
    - 학교급별(초·중·고) 분기 데이터
 ═══════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════
+   생기부 영역 정의 (저장·매트릭스용)
+═══════════════════════════════════════════ */
+var SAENGGIBU_AREA_CODES = {
+  'gwagase':  { label:'교과세특',   limit:1500, builder:'세특',     types:['observation'] },
+  'jayul':    { label:'자율·자치',  limit:500,  builder:'창체자율', types:['observation'] },
+  'dongari':  { label:'동아리',     limit:500,  builder:'동아리',   types:['observation'] },
+  'bongsa':   { label:'봉사',       limit:500,  builder:null,       types:['observation'] },
+  'jinro':    { label:'진로',       limit:700,  builder:'창체진로', types:['observation','consultation'] },
+  'haengsa':  { label:'행동특성',   limit:500,  builder:'행동특성', types:['observation','consultation','parent'] },
+  'chulgyeol':{ label:'출결특기',   limit:500,  builder:null,       types:['attendance'] }
+};
+// 빌더 영역 이름 → 코드 매핑
+var BUILDER_TO_AREA_CODE = {
+  '행동특성': 'haengsa',
+  '창체자율': 'jayul',
+  '창체진로': 'jinro',
+  '동아리':   'dongari',
+  '세특':     'gwagase'
+};
 
 // 학교급 상수 — 추후 학교급 셀렉터 추가 시 사용
 var SCHOOL_LEVELS = {
@@ -10864,12 +11036,14 @@ function switchTab(tab){
 
   document.getElementById('tab-home').style.display = tab === 'home' ? 'block' : 'none';
   document.getElementById('tab-students').style.display = tab === 'students' ? 'grid' : 'none';
+  document.getElementById('tab-saenggibu').style.display = tab === 'saenggibu' ? 'block' : 'none';
   document.getElementById('tab-class').style.display = tab === 'class' ? 'block' : 'none';
   document.getElementById('tab-reply').style.display = tab === 'reply' ? 'block' : 'none';
   document.getElementById('tab-attendance').style.display = tab === 'attendance' ? 'block' : 'none';
 
   if(tab === 'home') renderHome();
   if(tab === 'students') renderSidebar('');
+  if(tab === 'saenggibu') renderSaenggibuTab();
   if(tab === 'class'){
     renderClassTab();
     maybeAutoSyncNeis();
@@ -14422,6 +14596,20 @@ var sgState = {
   bypassForbidden: false
 };
 
+/* ═══════════════════════════════════════════
+   생기부 탭 상태 (별도 사이드 탭용)
+═══════════════════════════════════════════ */
+var sgtState = {
+  view: 'write',
+  studentNum: null,
+  areaCode: 'haengsa',
+  subject: '',
+  selectedRecIds: [],
+  comment: '',
+  generatedPrompt: '',
+  aiResponse: ''
+};
+
 function openSaengibu(){
   if(!currentStudent){ alert('학생을 먼저 선택해주세요'); return; }
   sgState.studentNum = currentStudent;
@@ -15333,6 +15521,432 @@ var AREA_BUILDER_MAP = {
   '동아리':   buildDongariPrompt,
   '세특':     buildSetukPrompt
 };
+
+/* ═══════════════════════════════════════════
+   생기부 사이드 탭 — 메인 렌더
+═══════════════════════════════════════════ */
+function renderSaenggibuTab(){
+  if(students.length === 0){
+    var container = document.getElementById('sgt-view-write');
+    if(container){
+      container.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-tertiary);">' +
+        '<div style="font-size:14px;margin-bottom:8px;">학생 명단이 비어있어요</div>' +
+        '<div style="font-size:12px;">학생 관리 탭에서 명단을 먼저 등록해주세요.</div>' +
+      '</div>';
+    }
+    return;
+  }
+  if(sgtState.view === 'write'){
+    renderSaenggibuWriteView();
+  } else if(sgtState.view === 'matrix'){
+    renderSaenggibuMatrixView();
+  } else if(sgtState.view === 'progress'){
+    renderSaenggibuProgressView();
+  }
+}
+function renderSaenggibuMatrixView(){
+  var container = document.getElementById('sgt-view-matrix');
+  if(!container) return;
+  var matrix = buildClassSaenggibuMatrix();
+  var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
+  var headCols = areaCodes.map(function(c){ return '<th style="font-size:10px;padding:6px 4px;text-align:center;font-weight:600;color:var(--text-secondary);">' + SAENGGIBU_AREA_CODES[c].label + '</th>'; }).join('');
+  var rows = students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); }).map(function(s){
+    var cols = areaCodes.map(function(code){
+      var r = matrix[s.num][code];
+      return '<td style="text-align:center;padding:6px 4px;">' + (r ? '<span style="color:var(--success);font-size:14px;" title="' + r.date + ' · ' + r.charCount + '자">✓</span>' : '<span style="color:var(--border);font-size:14px;">–</span>') + '</td>';
+    }).join('');
+    return '<tr style="border-bottom:0.5px solid var(--border);"><td style="padding:6px 8px;font-size:12px;white-space:nowrap;"><span style="font-weight:700;color:var(--text);">' + parseInt(s.num) + '</span> <span style="color:var(--text-secondary);">' + escapeHtml(getDisplayName(s)) + '</span></td>' + cols + '</tr>';
+  }).join('');
+  container.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-tertiary);">학생</th>' + headCols + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+function renderSaenggibuProgressView(){
+  var container = document.getElementById('sgt-view-progress');
+  if(!container) return;
+  var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
+  var total = students.length;
+  if(total === 0){ container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-tertiary);">학생 없음</div>'; return; }
+  var rows = areaCodes.map(function(code){
+    var meta = SAENGGIBU_AREA_CODES[code];
+    var done = students.filter(function(s){ return !!getLatestSaenggibu(s.num, code); }).length;
+    var pct = Math.round(done / total * 100);
+    return '<div style="margin-bottom:12px;">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">' +
+        '<span style="font-size:13px;font-weight:600;color:var(--text);">' + meta.label + '</span>' +
+        '<span style="font-size:12px;color:var(--text-secondary);">' + done + ' / ' + total + '명 (' + pct + '%)</span>' +
+      '</div>' +
+      '<div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:4px;transition:width 0.3s;"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  container.innerHTML = '<div style="padding:4px 0;">' + rows + '</div>';
+}
+function switchSaenggibuView(view){
+  sgtState.view = view;
+  document.getElementById('sgt-view-write').style.display = view === 'write' ? 'block' : 'none';
+  document.getElementById('sgt-view-matrix').style.display = view === 'matrix' ? 'block' : 'none';
+  document.getElementById('sgt-view-progress').style.display = view === 'progress' ? 'block' : 'none';
+  document.querySelectorAll('.sgt-tab').forEach(function(b){
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+  renderSaenggibuTab();
+}
+
+/* ═══════════════════════════════════════════
+   작성 모드 뷰
+═══════════════════════════════════════════ */
+function renderSaenggibuWriteView(){
+  var container = document.getElementById('sgt-view-write');
+  if(!container) return;
+  var studentGridHtml = students.slice().sort(function(a,b){
+    return parseInt(a.num) - parseInt(b.num);
+  }).map(function(s){
+    var isSelected = sgtState.studentNum === s.num;
+    var doneAreas = _sgtGetDoneAreasForStudent(s.num);
+    var doneDotsHtml = doneAreas.length > 0
+      ? '<div class="ssc-done">' + doneAreas.slice(0,7).map(function(){ return '<span class="ssc-done-dot"></span>'; }).join('') + '</div>'
+      : '';
+    return '<div class="sgt-student-chip' + (isSelected ? ' selected' : '') + '" onclick="selectSgtStudent(\'' + s.num + '\')">' +
+      '<div class="ssc-num">' + parseInt(s.num) + '</div>' +
+      '<div class="ssc-name">' + escapeHtml(getDisplayName(s)) + '</div>' +
+      doneDotsHtml +
+    '</div>';
+  }).join('');
+  var pickerHtml =
+    '<div class="sgt-student-picker">' +
+      '<div class="sgt-student-picker-label">학생 선택 (' + students.length + '명) · 초록 점은 작성된 영역 수</div>' +
+      '<div class="sgt-student-grid">' + studentGridHtml + '</div>' +
+    '</div>';
+  if(!sgtState.studentNum){
+    container.innerHTML = pickerHtml +
+      '<div style="padding:40px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;">' +
+        '학생을 선택하면 영역별 작성을 시작할 수 있어요.' +
+      '</div>';
+    return;
+  }
+  var student = students.find(function(s){ return s.num === sgtState.studentNum; });
+  if(!student){ container.innerHTML = pickerHtml; return; }
+  var areaCode = sgtState.areaCode;
+  var areaMeta = SAENGGIBU_AREA_CODES[areaCode];
+  var areaChipsHtml = Object.keys(SAENGGIBU_AREA_CODES).map(function(code){
+    var meta = SAENGGIBU_AREA_CODES[code];
+    var isSel = code === areaCode;
+    var existing = getLatestSaenggibu(sgtState.studentNum, code);
+    var doneIcon = existing ? ' <span style="font-size:9px;">✓</span>' : '';
+    return '<button class="sg-area-chip' + (isSel ? ' selected' : '') + '" onclick="selectSgtArea(\'' + code + '\')">' +
+      meta.label + doneIcon +
+    '</button>';
+  }).join('');
+  var subjectFieldHtml = (areaCode === 'gwagase') ?
+    '<div style="margin-top:14px;">' +
+      '<div class="sgt-result-label">과목 <span style="color:var(--danger);">*</span></div>' +
+      '<input type="text" class="form-input-text" id="sgt-subject-input" value="' + escapeHtml(sgtState.subject) + '" placeholder="예) 국어, 수학" oninput="sgtState.subject=this.value" style="font-size:13px;">' +
+    '</div>' : '';
+  var existingRecord = getLatestSaenggibu(sgtState.studentNum, areaCode);
+  var existingPreviewHtml = existingRecord ?
+    '<div style="background:var(--success-dim);border:1px solid var(--success-border);border-radius:6px;padding:10px 12px;margin-top:12px;">' +
+      '<div style="font-size:11px;font-weight:600;color:var(--success);margin-bottom:4px;">✓ 이미 작성된 기록이 있어요 (' + existingRecord.date + ' · ' + existingRecord.charCount + '자)</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;max-height:80px;overflow:auto;">' + escapeHtml(existingRecord.content) + '</div>' +
+      '<button class="btn-small secondary" style="margin-top:8px;font-size:10px;padding:3px 8px;" onclick="restoreSgtFromExisting()">이 내용 불러와 수정</button>' +
+    '</div>' : '';
+  var areaSelectHtml =
+    '<div class="sgt-result-box">' +
+      '<div class="sgt-result-label">선택된 학생: <strong>' + parseInt(student.num) + '번 ' + escapeHtml(getDisplayName(student)) + '</strong></div>' +
+      '<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 6px;">작성 영역</div>' +
+      '<div class="sg-area-chips" style="margin-bottom:0;">' + areaChipsHtml + '</div>' +
+      subjectFieldHtml +
+      existingPreviewHtml +
+    '</div>';
+  var actionHtml =
+    '<div style="display:flex;gap:8px;margin-top:14px;align-items:center;">' +
+      '<button class="btn-small primary" onclick="generateSgtPrompt()" style="padding:8px 16px;font-size:13px;">' +
+        '프롬프트 생성하기' +
+      '</button>' +
+      '<span style="font-size:11px;color:var(--text-tertiary);">기록을 자동 결합해 AI 프롬프트를 만들어요</span>' +
+    '</div>';
+  var promptOutputHtml = sgtState.generatedPrompt ?
+    '<div class="sgt-result-box">' +
+      '<div class="sgt-result-label">' +
+        '<span>생성된 프롬프트</span>' +
+        '<button class="btn-small primary" onclick="copySgtPrompt()" style="font-size:10px;padding:3px 8px;">📋 복사</button>' +
+      '</div>' +
+      '<textarea class="sgt-result-textarea" readonly style="font-family:monospace;font-size:11px;min-height:120px;max-height:240px;">' + escapeHtml(sgtState.generatedPrompt) + '</textarea>' +
+      '<div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">위 프롬프트를 복사해 ChatGPT/Claude/Gemini에 붙여넣고, 받은 답변을 아래에 붙여넣어 저장하세요.</div>' +
+    '</div>' +
+    '<div class="sgt-result-box">' +
+      '<div class="sgt-result-label">' +
+        '<span>AI 답변 (받은 결과를 여기에 붙여넣기)</span>' +
+        '<span class="sgt-charcount" id="sgt-charcount">0 / ' + areaMeta.limit + '자</span>' +
+      '</div>' +
+      '<textarea class="sgt-result-textarea" id="sgt-ai-response" placeholder="외부 AI에서 받은 답변을 여기에 붙여넣으세요." oninput="updateSgtCharCount()">' + escapeHtml(sgtState.aiResponse) + '</textarea>' +
+      '<div class="sgt-result-actions">' +
+        '<button class="btn-small secondary" onclick="clearSgtResponse()">지우기</button>' +
+        '<button class="btn-small primary" onclick="saveSgtSaenggibu()">생기부 저장</button>' +
+      '</div>' +
+    '</div>' : '';
+  var historyHtml = _sgtRenderHistory(sgtState.studentNum, areaCode);
+  container.innerHTML = pickerHtml + areaSelectHtml + actionHtml + promptOutputHtml + historyHtml;
+  setTimeout(function(){ updateSgtCharCount(); }, 0);
+}
+function _sgtRenderHistory(studentNum, areaCode){
+  var all = (records[studentNum] || [])
+    .filter(function(r){ return r.type === 'saenggibu' && r.area === areaCode; })
+    .sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+  if(all.length <= 1) return '';
+  var rowsHtml = all.slice(1).map(function(r){
+    var preview = r.content.length > 60 ? r.content.slice(0,60) + '…' : r.content;
+    return '<div class="sgt-history-item">' +
+      '<span class="sgt-history-date">' + r.date + ' · ' + r.charCount + '자</span>' +
+      '<span class="sgt-history-preview">' + escapeHtml(preview) + '</span>' +
+      '<button class="sgt-history-restore" onclick="restoreSgtFromHistory(\'' + r.id + '\')">불러오기</button>' +
+    '</div>';
+  }).join('');
+  return '<div class="sgt-result-box">' +
+    '<div class="sgt-history">' +
+      '<div class="sgt-history-title">이전 작성본 (' + (all.length - 1) + '건)</div>' +
+      rowsHtml +
+    '</div>' +
+  '</div>';
+}
+function _sgtGetDoneAreasForStudent(studentNum){
+  if(!records[studentNum]) return [];
+  var areas = {};
+  records[studentNum].forEach(function(r){
+    if(r.type === 'saenggibu') areas[r.area] = true;
+  });
+  return Object.keys(areas);
+}
+
+/* ═══════════════════════════════════════════
+   저장된 생기부 조회 헬퍼
+═══════════════════════════════════════════ */
+function getLatestSaenggibu(studentNum, areaCode){
+  var all = (records[studentNum] || [])
+    .filter(function(r){ return r.type === 'saenggibu' && r.area === areaCode; })
+    .sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+  return all[0] || null;
+}
+function buildClassSaenggibuMatrix(){
+  var matrix = {};
+  students.forEach(function(s){
+    matrix[s.num] = {};
+    Object.keys(SAENGGIBU_AREA_CODES).forEach(function(areaCode){
+      matrix[s.num][areaCode] = getLatestSaenggibu(s.num, areaCode);
+    });
+  });
+  return matrix;
+}
+function _sgtTextSimilarity(a, b){
+  if(!a || !b) return 0;
+  a = a.replace(/\s+/g,'').toLowerCase();
+  b = b.replace(/\s+/g,'').toLowerCase();
+  if(a.length < 3 || b.length < 3) return 0;
+  var trigA = {}, trigB = {};
+  for(var i=0; i<=a.length-3; i++){ trigA[a.substr(i,3)] = true; }
+  for(var j=0; j<=b.length-3; j++){ trigB[b.substr(j,3)] = true; }
+  var keysA = Object.keys(trigA), keysB = Object.keys(trigB);
+  var inter = 0;
+  keysA.forEach(function(k){ if(trigB[k]) inter++; });
+  var union = keysA.length + keysB.length - inter;
+  return union > 0 ? (inter / union) : 0;
+}
+function findSaenggibuDuplicates(areaCode){
+  var entries = [];
+  students.forEach(function(s){
+    var r = getLatestSaenggibu(s.num, areaCode);
+    if(r) entries.push({ num: s.num, name: getDisplayName(s), content: r.content });
+  });
+  var duplicates = [];
+  for(var i=0; i<entries.length; i++){
+    for(var j=i+1; j<entries.length; j++){
+      var sim = _sgtTextSimilarity(entries[i].content, entries[j].content);
+      if(sim >= 0.5){
+        duplicates.push({ a: entries[i], b: entries[j], similarity: sim });
+      }
+    }
+  }
+  return duplicates;
+}
+
+/* ═══════════════════════════════════════════
+   작성 모드 액션
+═══════════════════════════════════════════ */
+function selectSgtStudent(num){
+  sgtState.studentNum = num;
+  sgtState.selectedRecIds = [];
+  sgtState.generatedPrompt = '';
+  sgtState.aiResponse = '';
+  sgtState.comment = '';
+  renderSaenggibuWriteView();
+}
+function selectSgtArea(code){
+  sgtState.areaCode = code;
+  sgtState.selectedRecIds = [];
+  sgtState.generatedPrompt = '';
+  sgtState.aiResponse = '';
+  sgtState.subject = '';
+  renderSaenggibuWriteView();
+}
+function generateSgtPrompt(){
+  if(!sgtState.studentNum){ showToast('학생을 먼저 선택하세요'); return; }
+  var areaMeta = SAENGGIBU_AREA_CODES[sgtState.areaCode];
+  if(!areaMeta){ showToast('영역이 잘못됐어요'); return; }
+  if(sgtState.areaCode === 'gwagase' && !sgtState.subject){
+    showToast('세특은 과목을 입력해야 해요');
+    return;
+  }
+  var student = students.find(function(s){ return s.num === sgtState.studentNum; });
+  if(!student){ showToast('학생을 찾을 수 없어요'); return; }
+  var availableTypes = areaMeta.types;
+  var allRecs = records[sgtState.studentNum] || [];
+  var filteredRecs = allRecs.filter(function(r){
+    return availableTypes.indexOf(r.type) >= 0;
+  });
+  if(filteredRecs.length === 0){
+    if(!confirm('이 영역에 포함할 학생 기록이 없어요. 그래도 프롬프트를 만들까요?')) return;
+  }
+  var builderArea = areaMeta.builder;
+  var builderFn = AREA_BUILDER_MAP[builderArea];
+  if(!builderFn){
+    sgtState.generatedPrompt = _buildSimpleSaenggibuPrompt(student, areaMeta, filteredRecs);
+  } else {
+    var ctx = {
+      student: student,
+      area: builderArea,
+      areaMeta: AREA_META[builderArea],
+      contextRecords: filteredRecs,
+      comment: sgtState.comment,
+      level: CURRENT_SCHOOL_LEVEL,
+      subject: sgtState.subject || ''
+    };
+    sgtState.generatedPrompt = builderFn(ctx);
+  }
+  renderSaenggibuWriteView();
+}
+function _buildSimpleSaenggibuPrompt(student, areaMeta, recs){
+  var lv = CURRENT_SCHOOL_LEVEL;
+  var schoolName = lv === '초' ? '초등학교' : lv === '중' ? '중학교' : '고등학교';
+  var lines = [];
+  lines.push('너는 대한민국 ' + schoolName + ' 교사의 생활기록부 작성을 돕는 전문가야.');
+  lines.push('');
+  lines.push('[영역]: ' + areaMeta.label);
+  lines.push('[학생]: [학생] ([학년][반] · ' + parseInt(student.num) + '번 · ' + (student.gender||'') + ')');
+  lines.push('[글자수 제한]: ' + areaMeta.limit + '자 이내');
+  lines.push('');
+  if(recs.length > 0){
+    lines.push('[관련 기록]');
+    recs.forEach(function(r){
+      var typeKor = ({observation:'관찰',consultation:'상담',life:'생활',parent:'학부모',attendance:'출결',bulk:'학급공지'})[r.type] || '';
+      lines.push('· ' + r.date + ' ' + typeKor + ': ' + r.content);
+    });
+    lines.push('');
+  }
+  lines.push('[작성 원칙]');
+  lines.push('· 한 문단의 자연스러운 서술문으로 출력');
+  lines.push('· NEIS 문체 — 객관적·구체적·긍정적');
+  lines.push('· 학생을 "학생"으로 지칭');
+  lines.push('· 글자수 제한 절대 초과 금지');
+  lines.push('');
+  lines.push('⚠ AI 초안임을 인지하고 학생 실제 수행과 대조 후 NEIS 입력 전 수정 필수');
+  return lines.join('\n');
+}
+function copySgtPrompt(){
+  if(!sgtState.generatedPrompt) return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(sgtState.generatedPrompt).then(function(){
+      showToast('프롬프트가 복사됐어요. AI에 붙여넣고 답변을 받아오세요.');
+    }).catch(function(){ showToast('복사 실패'); });
+  }
+}
+function updateSgtCharCount(){
+  var ta = document.getElementById('sgt-ai-response');
+  var label = document.getElementById('sgt-charcount');
+  if(!ta || !label) return;
+  var text = ta.value || '';
+  var len = text.replace(/\s/g,'').length;
+  var meta = SAENGGIBU_AREA_CODES[sgtState.areaCode];
+  var limit = meta ? meta.limit : 500;
+  label.textContent = len + ' / ' + limit + '자';
+  label.classList.toggle('over', len > limit);
+  sgtState.aiResponse = text;
+}
+function clearSgtResponse(){
+  var ta = document.getElementById('sgt-ai-response');
+  if(ta) ta.value = '';
+  sgtState.aiResponse = '';
+  updateSgtCharCount();
+}
+function saveSgtSaenggibu(){
+  var content = (sgtState.aiResponse || '').trim();
+  if(!content){ showToast('AI 답변을 붙여넣어 주세요'); return; }
+  if(!sgtState.studentNum){ showToast('학생이 선택되지 않았어요'); return; }
+  var areaMeta = SAENGGIBU_AREA_CODES[sgtState.areaCode];
+  var charCount = content.replace(/\s/g,'').length;
+  if(charCount > areaMeta.limit){
+    if(!confirm('글자수 제한(' + areaMeta.limit + '자)을 초과했어요(' + charCount + '자). 그래도 저장할까요?')) return;
+  }
+  var dups = [];
+  students.forEach(function(s){
+    if(s.num === sgtState.studentNum) return;
+    var other = getLatestSaenggibu(s.num, sgtState.areaCode);
+    if(!other) return;
+    var sim = _sgtTextSimilarity(content, other.content);
+    if(sim >= 0.5){
+      dups.push({ num: s.num, name: getDisplayName(s), similarity: sim });
+    }
+  });
+  if(dups.length > 0){
+    var msg = '⚠ 다른 학생과 내용이 유사해요:\n\n';
+    dups.slice(0,3).forEach(function(d){
+      msg += '· ' + parseInt(d.num) + '번 ' + d.name + ' (' + Math.round(d.similarity * 100) + '% 유사)\n';
+    });
+    msg += '\n그래도 저장할까요?';
+    if(!confirm(msg)) return;
+  }
+  var rec = {
+    id: 'sgb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    type: 'saenggibu',
+    date: formatDateForInput(new Date()),
+    area: sgtState.areaCode,
+    areaLabel: areaMeta.label,
+    content: content,
+    charCount: charCount,
+    charLimit: areaMeta.limit,
+    promptSnapshot: sgtState.generatedPrompt || '',
+    edited: false,
+    subject: sgtState.subject || '',
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  if(!records[sgtState.studentNum]) records[sgtState.studentNum] = [];
+  records[sgtState.studentNum].push(rec);
+  saveAll();
+  showToast('저장됐어요. 학생 타임라인에도 누적되었습니다.');
+  sgtState.aiResponse = '';
+  renderSaenggibuWriteView();
+}
+function restoreSgtFromExisting(){
+  var existing = getLatestSaenggibu(sgtState.studentNum, sgtState.areaCode);
+  if(!existing) return;
+  sgtState.aiResponse = existing.content;
+  renderSaenggibuWriteView();
+  setTimeout(function(){
+    var ta = document.getElementById('sgt-ai-response');
+    if(ta){ ta.value = existing.content; ta.focus(); }
+    updateSgtCharCount();
+  }, 50);
+}
+function restoreSgtFromHistory(recId){
+  var rec = (records[sgtState.studentNum] || []).find(function(r){ return r.id === recId; });
+  if(!rec) return;
+  sgtState.aiResponse = rec.content;
+  renderSaenggibuWriteView();
+  setTimeout(function(){
+    var ta = document.getElementById('sgt-ai-response');
+    if(ta){ ta.value = rec.content; ta.focus(); }
+    updateSgtCharCount();
+  }, 50);
+}
 
 /* ═══════════════════════════════════════════
    generateSaengibuPrompt — 영역별 빌더 라우팅
