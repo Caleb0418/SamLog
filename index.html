@@ -5018,6 +5018,20 @@ details > summary::-webkit-details-marker { display:none; }
   font-variant-numeric:tabular-nums;letter-spacing:-0.2px;
 }
 .week-cell-session.zero{display:none;}
+/* 반 시간표 서브 탭 */
+.cs-subtab{
+  font-family:inherit;font-size:13px;font-weight:500;
+  padding:8px 14px;border:none;background:transparent;
+  color:var(--text-tertiary);cursor:pointer;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;transition:all 0.12s;
+}
+.cs-subtab:hover{ color:var(--text-secondary); }
+.cs-subtab.active{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
+  font-weight:600;
+}
 /* 창체 보기 — 토글 버튼 */
 .cs-toggle-btn{
   display:inline-flex;align-items:center;gap:4px;
@@ -20451,6 +20465,37 @@ function renderClassSchedule(){
     return;
   }
 
+  // 서브 탭 헤더
+  var tabsHtml =
+    '<div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);">' +
+      '<button class="cs-subtab' + (_csSubTab === 'class' ? ' active' : '') + '" onclick="switchCsSubTab(\'class\')">' +
+        activeClass.grade + '-' + activeClass.classNum + ' 수업 시간표' +
+      '</button>' +
+      '<button class="cs-subtab' + (_csSubTab === 'creative' ? ' active' : '') + '" onclick="switchCsSubTab(\'creative\')">' +
+        '창체 시간표' +
+      '</button>' +
+    '</div>' +
+    '<div id="cs-subtab-content"></div>';
+
+  container.innerHTML = tabsHtml;
+
+  // 활성 탭 내용 렌더
+  if(_csSubTab === 'class'){
+    renderClassScheduleClassTab(activeClass);
+  } else {
+    renderClassScheduleCreativeTab(activeClass);
+  }
+}
+
+function switchCsSubTab(tab){
+  _csSubTab = tab;
+  renderClassSchedule();
+}
+
+function renderClassScheduleCreativeTab(activeClass){
+  var container = document.getElementById('cs-subtab-content');
+  if(!container) return;
+
   var header =
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap;">' +
       '<div>' +
@@ -20526,6 +20571,28 @@ function renderClassSchedule(){
   container.innerHTML = header + toolbar + body;
   var countLabel = document.getElementById('cs-count-label');
   if(countLabel) countLabel.textContent = '총 ' + classSchedule.length + '건 · 표시 ' + list.length + '건';
+}
+
+function renderClassScheduleClassTab(activeClass){
+  var container = document.getElementById('cs-subtab-content');
+  if(!container) return;
+
+  // 헤더 + 안내
+  var header =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;">' +
+      '<div>' +
+        '<div style="font-size:14px;font-weight:600;color:var(--text);">우리 반 주간 시간표</div>' +
+        '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">' +
+          activeClass.grade + '학년 ' + activeClass.classNum + '반 학생들이 받는 모든 수업이에요. 셀을 클릭하면 메모·차시를 기록할 수 있어요.' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div id="cs-class-week-mount"></div>';
+
+  container.innerHTML = header;
+
+  // 기존 renderClassWeek를 'primary' 모드로 호출
+  renderClassWeek({ mode:'primary', mountId:'cs-class-week-mount', primaryClass:activeClass });
 }
 
 // 하위 호환 별칭
@@ -20765,6 +20832,9 @@ function deleteClassScheduleItem(){ /* no-op: deleteCsItem으로 대체됨 */ }
 
 var _csImportParsed = []; // 검증 통과한 항목 임시 저장
 
+// 반 시간표 서브 탭: 'class' (담임반 수업 시간표) | 'creative' (창체 시간표)
+var _csSubTab = 'class';
+
 // 창체 보기 토글 상태 — 오늘/주간 시간표 셀에 그 반의 그 시간 창체 표시
 var _csShowOnSchedule = false;
 
@@ -20774,6 +20844,8 @@ function toggleCsOnSchedule(){
     renderClassToday();
   } else if(currentClassView === 'week'){
     renderClassWeek();
+  } else if(currentClassView === 'schedule' && _csSubTab === 'class'){
+    renderClassSchedule();
   }
 }
 
@@ -21610,9 +21682,14 @@ function openAdhocMemo(id){
   }, 50);
 }
 
-function renderClassWeek(){
+function renderClassWeek(opts){
+  opts = opts || {};
+  var mode = opts.mode || 'self';                  // 'self' (기본, classMaster 기반) | 'primary' (담임반 시간표)
+  var mountId = opts.mountId || 'class-week-grid'; // 그리드를 렌더할 DOM id
+  var primaryClass = opts.primaryClass || null;    // 'primary' 모드에서 사용할 반 객체
   ensureCurrentWeek();
-  var container = document.getElementById('class-week-grid');
+  var container = document.getElementById(mountId);
+  if(!container) return;
 
   // 빈 상태 처리 (담당 수업이 전혀 없을 때만)
   if(classMaster.length === 0 && adhocSlots.length === 0){
@@ -21664,17 +21741,58 @@ function renderClassWeek(){
 
   // 정규 수업 매핑 (요일-교시 → entry 배열)
   var grid = {};
-  classMaster.forEach(function(c){
-    (c.slots || []).forEach(function(s){
-      var key = s.day+'-'+s.period;
-      if(!grid[key]) grid[key] = [];
-      grid[key].push(c);
+  if(mode === 'primary' && primaryClass){
+    // 담임반 시간표 모드: schoolTimetable 에서 모든 셀 채움
+    var pgrade = String(primaryClass.grade);
+    var pcls = String(primaryClass.classNum);
+    for(var dy=1; dy<=5; dy++){
+      for(var pr=1; pr<=7; pr++){
+        var ttKey = pgrade + '-' + pcls + '-' + dy + '-' + pr;
+        var subj = (typeof schoolTimetable !== 'undefined' && schoolTimetable) ? schoolTimetable[ttKey] : null;
+        if(subj){
+          // classMaster에서 같은 (grade,cls,subject) entry를 찾으면 그것 사용 (메모/차시 공유)
+          var existing = classMaster.find(function(c){
+            return String(c.grade) === pgrade && String(c.cls) === pcls && c.subject === subj;
+          });
+          var entry;
+          if(existing){
+            entry = existing;
+          } else {
+            // 가상 entry 생성 (id는 schoolTimetable 기반, 클릭 시 자동 등록 가능)
+            entry = {
+              id: 'virtual_' + pgrade + '_' + pcls + '_' + subj.replace(/[^가-힣a-zA-Z0-9]/g,''),
+              grade: pgrade, cls: pcls, subject: subj,
+              slots: [{day:dy, period:pr}],
+              memos: [],
+              _virtual: true
+            };
+          }
+          var key = dy + '-' + pr;
+          if(!grid[key]) grid[key] = [];
+          if(!grid[key].some(function(e){return e.id === entry.id;})){
+            grid[key].push(entry);
+          }
+        }
+      }
+    }
+  } else {
+    // 기본 모드: classMaster 기반
+    classMaster.forEach(function(c){
+      (c.slots || []).forEach(function(s){
+        var key = s.day+'-'+s.period;
+        if(!grid[key]) grid[key] = [];
+        grid[key].push(c);
+      });
     });
-  });
+  }
 
   // 이번 주의 임시 슬롯 (요일-교시 → adhoc 배열)
+  // primary 모드에서는 담임반과 일치하는 임시 슬롯만 표시
   var adhocGrid = {};
   adhocSlots.forEach(function(a){
+    if(mode === 'primary' && primaryClass){
+      if(String(a.grade) !== String(primaryClass.grade) || String(a.cls) !== String(primaryClass.classNum)) return;
+    }
     var d = new Date(a.date+'T00:00:00');
     var ds = formatDateForInput(d);
     var match = weekDates.find(function(wd){return formatDateForInput(wd) === ds;});
@@ -21782,7 +21900,7 @@ function renderClassWeek(){
         if(hasRegular){
           var c0 = cells[0];
           var cellDate = formatDateForInput(weekDates[d2-1]);
-          var label = c0.grade+'-'+c0.cls;
+          var label = (mode === 'primary') ? '' : (c0.grade+'-'+c0.cls);
 
           // 자동 차시 계산 + 셀 상태
           var sessionInfo = getAutoSessionNumber(c0, cellDate);
@@ -21806,8 +21924,8 @@ function renderClassWeek(){
           var cellCls = 'class-week-cell state-'+cellState;
           html += '<div class="'+cellCls+'" onclick="openClassMemo(\''+c0.id+'\',\''+cellDate+'\')">'+
             '<div class="week-cell-title">'+
-              '<span class="wct-subject">'+escapeHtml(c0.subject)+'</span> '+
-              '<span class="wct-class">'+escapeHtml(label)+'</span>'+
+              '<span class="wct-subject">'+escapeHtml(c0.subject)+'</span>'+
+              (label ? ' <span class="wct-class">'+escapeHtml(label)+'</span>' : '')+
               (cells.length>1
                 ? '<span class="wct-more" title="이 슬롯에 다른 반 수업도 있어요: '+escapeHtml(cells.slice(1).filter(function(x){return x&&x.entry;}).map(function(x){return x.entry.grade+'-'+x.entry.cls;}).join(', '))+'">+'+(cells.length-1)+'</span>'
                 : '')+
@@ -22682,6 +22800,42 @@ function fillSubjectFromChip(subj){
    수업 메모 모달 (고도화)
 ═══════════════════════════════════════════ */
 function openClassMemo(classId, dateStr){
+  // 가상 entry(담임반 시간표에서 표시된 다른 선생님 수업)는 먼저 classMaster에 자동 등록
+  if(classId && typeof classId === 'string' && classId.indexOf('virtual_') === 0){
+    var vparts = classId.replace('virtual_','').split('_');
+    if(vparts.length >= 3){
+      var vg = vparts[0], vc = vparts[1];
+      var vsubjSan = vparts.slice(2).join('_');
+      // 실제 과목명을 찾기 위해 schoolTimetable 역조회 (id 만드는 방식과 일치)
+      var foundSubj = '';
+      if(typeof schoolTimetable !== 'undefined' && schoolTimetable){
+        for(var k in schoolTimetable){
+          var ssubj = schoolTimetable[k];
+          if(!ssubj) continue;
+          var sanitized = ssubj.replace(/[^가-힣a-zA-Z0-9]/g,'');
+          if(sanitized === vsubjSan && k.indexOf(vg+'-'+vc+'-') === 0){
+            foundSubj = ssubj;
+            break;
+          }
+        }
+      }
+      if(foundSubj){
+        // classMaster에 자동 등록
+        var newId = 'cm'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+        var newSlots = findSlotsFromTimetable(vg, vc, foundSubj);
+        classMaster.push({
+          id: newId,
+          grade: vg, cls: vc, subject: foundSubj,
+          slots: newSlots, memos: [],
+          sessionResets: [], sessionOverrides: {}
+        });
+        saveAll();
+        classId = newId;
+        if(typeof showToast === 'function') showToast(vg+'-'+vc+' '+foundSubj+' 자동 등록됨');
+      }
+    }
+  }
+
   var c = classMaster.find(function(x){return x.id === classId;});
   if(!c) return;
   currentMemoClassId = classId;
