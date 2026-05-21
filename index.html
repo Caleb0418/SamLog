@@ -20978,6 +20978,14 @@ function _csDeleteSelected(){
 var _csShowOnSchedule = false;
 
 function toggleCsOnSchedule(){
+  // 창체 일정이 하나도 없으면, 토글 대신 일괄 등록 모달을 바로 열어 안내
+  if(!Array.isArray(classSchedule) || classSchedule.length === 0){
+    showToast('등록된 창체 일정이 없어요. 먼저 등록해 주세요.');
+    if(typeof openCsImportModal === 'function'){
+      openCsImportModal();
+    }
+    return;
+  }
   _csShowOnSchedule = !_csShowOnSchedule;
   if(currentClassView === 'today'){
     renderClassToday();
