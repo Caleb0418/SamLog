@@ -25185,8 +25185,24 @@ function renderClassWeek(opts){
   var container = document.getElementById(mountId);
   if(!container) return;
 
-  // 빈 상태 처리 (담당 수업이 전혀 없을 때만)
-  if(classMaster.length === 0 && adhocSlots.length === 0){
+  // 빈 상태 처리
+  var _isEmpty = false;
+  if(mode === 'primary' && primaryClass){
+    // primary(담임반) 모드: schoolTimetable에 해당 반 데이터가 있으면 빈 상태 아님
+    var _pg = String(primaryClass.grade);
+    var _pc = String(primaryClass.classNum);
+    var _hasTT = false;
+    if(typeof schoolTimetable !== 'undefined' && schoolTimetable){
+      for(var _k in schoolTimetable){
+        if(_k.indexOf(_pg + '-' + _pc + '-') === 0){ _hasTT = true; break; }
+      }
+    }
+    var _hasMaster = classMaster.some(function(c){ return String(c.grade)===_pg && String(c.cls)===_pc; });
+    _isEmpty = !_hasTT && !_hasMaster && adhocSlots.length === 0;
+  } else {
+    _isEmpty = classMaster.length === 0 && adhocSlots.length === 0;
+  }
+  if(_isEmpty){
     var hint = ttSyncState.synced
       ? 'NEIS 시간표가 연동되어 있어요.<br>수업을 직접 추가하거나 시간표를 확인해 보세요.'
       : 'NEIS 시간표를 연동하면 수업이 자동으로 채워져요.';
