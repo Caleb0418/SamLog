@@ -23404,8 +23404,19 @@ function _csImportStartEdit(idx, field){
     if(!tr) return;
     var inp = tr.querySelector('input,select');
     if(inp){
-      inp.focus();
+      // preventScroll: 브라우저 자동 스크롤 차단, 대신 아래에서 수동 처리
+      inp.focus({ preventScroll: true });
       if(inp.select) try { inp.select(); } catch(e){}
+      // 테이블 컨테이너 안에서 활성 행이 보이도록 수동 스크롤
+      var container = document.getElementById('cs-import-review-table');
+      if(container){
+        var trTop    = tr.offsetTop;
+        var trBot    = trTop + tr.offsetHeight;
+        var cTop     = container.scrollTop;
+        var cBot     = cTop + container.clientHeight;
+        if(trTop < cTop + 40)       container.scrollTop = trTop - 40;
+        else if(trBot > cBot - 8)   container.scrollTop = trBot - container.clientHeight + 8;
+      }
     }
   }, 0);
 }
@@ -23484,19 +23495,21 @@ function _csImportKbd(el, e){
     _csImportCommitAndNav(idx, field, val, 'next');
   } else if(e.key === 'ArrowDown'){
     e.preventDefault();
+    e.stopPropagation();
     _csImportCommitAndNav(idx, field, val, 'downRow');
   } else if(e.key === 'ArrowUp'){
     e.preventDefault();
+    e.stopPropagation();
     _csImportCommitAndNav(idx, field, val, 'upRow');
   } else if(e.key === 'ArrowRight'){
     // select는 항상, text input은 커서가 끝에 있을 때만 다음 칸으로
     var isSelect = el.tagName === 'SELECT';
     var atEnd = isSelect || (el.selectionStart !== undefined && el.selectionStart === el.value.length && el.selectionEnd === el.value.length);
-    if(atEnd){ e.preventDefault(); _csImportCommitAndNav(idx, field, val, 'next'); }
+    if(atEnd){ e.preventDefault(); e.stopPropagation(); _csImportCommitAndNav(idx, field, val, 'next'); }
   } else if(e.key === 'ArrowLeft'){
     var isSelect2 = el.tagName === 'SELECT';
     var atStart = isSelect2 || (el.selectionStart !== undefined && el.selectionStart === 0);
-    if(atStart){ e.preventDefault(); _csImportCommitAndNav(idx, field, val, 'prev'); }
+    if(atStart){ e.preventDefault(); e.stopPropagation(); _csImportCommitAndNav(idx, field, val, 'prev'); }
   }
 }
 
