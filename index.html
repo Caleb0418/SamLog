@@ -6281,6 +6281,45 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 }
 .tt-change-confirm-btn:hover{filter:brightness(1.08);}
 [data-theme="dark"] .tt-change-modal{box-shadow:0 8px 32px rgba(0,0,0,0.45);}
+
+/* ─── 시작 가이드 카드 ─── */
+.setup-guide-card{
+  background:var(--bg-surface);border:1px solid var(--border-accent);
+  border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.setup-guide-title{
+  font-size:13px;font-weight:700;color:var(--accent);
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
+.setup-guide-steps{display:flex;flex-direction:column;gap:8px;}
+.setup-guide-step{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--bg-elevated);cursor:pointer;transition:all 0.12s;
+  text-decoration:none;
+}
+.setup-guide-step:hover{border-color:var(--accent);background:var(--accent-dim);}
+.setup-guide-step.done{
+  border-color:var(--success-border,#bbf7d0);background:var(--success-dim,#f0fdf4);
+  cursor:default;opacity:0.7;
+}
+.setup-guide-step-num{
+  width:22px;height:22px;border-radius:50%;background:var(--accent);
+  color:#fff;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.setup-guide-step.done .setup-guide-step-num{background:#22c55e;}
+.setup-guide-step-text{flex:1;}
+.setup-guide-step-label{font-size:13px;font-weight:600;color:var(--text);}
+.setup-guide-step-sub{font-size:11px;color:var(--text-secondary);}
+.setup-guide-step.done .setup-guide-step-label{color:#15803d;}
+.setup-guide-dismiss{
+  width:100%;margin-top:10px;padding:6px;
+  font-size:11px;color:var(--text-tertiary);background:none;border:none;
+  cursor:pointer;font-family:inherit;
+}
+.setup-guide-dismiss:hover{color:var(--text-secondary);}
 </style>
 </head>
 <body>
@@ -6570,6 +6609,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="onboarding-actions">
         <span class="field-hint" id="ob-step1-hint">성함·학년·반을 입력하세요</span>
+        <button class="btn-text" onclick="skipOnboardingStep1()" style="font-size:12px;color:var(--text-tertiary);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 8px;">나중에 설정할게요</button>
         <button class="btn-primary" id="ob-next-1" disabled onclick="onboardingNext(2)">다음 →</button>
       </div>
     </div>
@@ -6844,6 +6884,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </button>
       </div>
     </div>
+
+    <!-- 시작 가이드 카드 -->
+    <div id="home-setup-guide"></div>
 
     <!-- 알림·공지 영역 -->
     <div class="home-alerts" id="home-alerts" style="display:none;"></div>
@@ -7125,6 +7168,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <button class="settings-tab active" data-tab="year" onclick="switchSettingsTab('year')">학년도 관리</button>
         <button class="settings-tab" data-tab="alarm" onclick="switchSettingsTab('alarm')">알람 설정</button>
         <button class="settings-tab" data-tab="creative" onclick="switchSettingsTab('creative')">창의적 체험활동</button>
+        <button class="settings-tab" data-tab="notify-sig" onclick="switchSettingsTab('notify-sig')">통지 서명</button>
         <button class="settings-tab" data-tab="backup" onclick="switchSettingsTab('backup')">데이터 백업</button>
         <button class="settings-tab settings-tab-danger" data-tab="reset" onclick="switchSettingsTab('reset')">전체 초기화</button>
       </div>
@@ -7231,6 +7275,19 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             </div>
           </div>
           <div id="ca-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
+        </div>
+
+        <!-- 통지 문자 서명 설정 -->
+        <div class="settings-panel" data-tab="notify-sig">
+          <div class="class-master-title" style="margin-bottom:4px;">학부모 통지 문자 서명</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
+            출결 통지 문자 하단에 자동으로 붙는 서명 문구입니다.
+          </div>
+          <textarea id="notify-sig-input" rows="3"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg-elevated);color:var(--text);resize:vertical;"
+            placeholder="예) ○○초등학교 4학년 2반 담임 김미래 드림"></textarea>
+          <button onclick="saveNotifySig()" style="margin-top:8px;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg-surface);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">저장</button>
+          <div id="notify-sig-saved" style="display:none;font-size:11px;color:#22c55e;margin-top:6px;">저장됐어요 ✓</div>
         </div>
 
         <!-- ④ 데이터 백업 패널 -->
@@ -9600,8 +9657,19 @@ function startNewYear(){
 }
 
 function resetAllData(){
-  if(!confirm('모든 학년도의 데이터가 완전히 삭제됩니다.\n이 작업은 되돌릴 수 없어요.\n계속하시겠어요?')) return;
-  if(!confirm('정말로 삭제할까요?\n백업을 먼저 해두시길 권장해요.')) return;
+  var lastBackup = localStorage.getItem('ht2_last_backup');
+  if(!lastBackup){
+    if(!confirm(
+      '⚠️ 백업 기록이 없습니다.\n\n' +
+      '초기화하면 모든 학생 기록, 메모, 출결, 생기부 데이터가\n' +
+      '영구적으로 삭제되며 복구할 수 없어요.\n\n' +
+      '먼저 설정 > 데이터 백업에서 백업을 해주세요.\n\n' +
+      '그래도 초기화를 진행할까요?'
+    )) return;
+  } else {
+    if(!confirm('모든 학년도의 데이터가 완전히 삭제됩니다.\n이 작업은 되돌릴 수 없어요.\n계속하시겠어요?')) return;
+  }
+  if(!confirm('정말로 삭제할까요?')) return;
   var keys = [];
   for(var i = 0; i < localStorage.length; i++){
     var k = localStorage.key(i);
@@ -12227,6 +12295,10 @@ function neisSyncAll(){
     if(!result) return result;
     neisSettings.lastSyncedAt = new Date().toISOString();
     saveAll(); saveSettings(); return result;
+  }).catch(function(err){
+    console.error('NEIS 동기화 오류:', err);
+    showToast('NEIS 연동에 실패했어요. 인터넷 연결과 인증키를 확인해주세요.');
+    return null;
   });
 }
 
@@ -15281,7 +15353,14 @@ function renderSgRecords(){
     .sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
 
   if(recs.length === 0){
-    list.innerHTML = '<div class="sg-record-empty">이 영역에 사용할 수 있는 기록이 없어요.</div>';
+    var emptyHtml =
+      '<div style="text-align:center;padding:40px 20px;color:var(--text-tertiary);">' +
+      '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px;opacity:0.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+      '<div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">아직 이 영역의 기록이 없어요</div>' +
+      '<div style="font-size:12px;margin-bottom:14px;">학생 탭에서 관찰·상담 메모를 남기면 여기에 활용됩니다</div>' +
+      '<button onclick="switchTab(\'students\')" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border-accent);background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">학생 탭에서 메모 남기기 →</button>' +
+      '</div>';
+    list.innerHTML = emptyHtml;
     updateSgCount();
     return;
   }
@@ -16947,6 +17026,14 @@ function markClassAsLater(classIdx){
   showToast('나중에 사이드바에서 추가할 수 있어요');
 }
 
+function skipOnboardingStep1(){
+  if(!confirm('기본 설정 없이 시작하면 일부 기능이 제한될 수 있어요.\n나중에 설정에서 다시 입력할 수 있습니다.\n계속할까요?')) return;
+  try{ localStorage.setItem('ht2_onboarded','1'); }catch(e){}
+  document.getElementById('onboarding-overlay').style.display = 'none';
+  updateHeaderClass();
+  switchTab('home');
+}
+
 function showOnboarding(){
   document.getElementById('onboarding-overlay').style.display = 'flex';
   document.getElementById('onboarding-step-1').style.display = 'block';
@@ -17483,7 +17570,14 @@ function completeOnboarding(){
   if(neisSettings.apiKey && neisSettings.atptCode && Object.keys(classes).length > 0){
     setTimeout(function(){
       neisSyncAll().then(function(result){
-        if(result && result.timetable && result.timetable.added > 0){
+        if(!result) return;
+        var hasError = (result.schedule && result.schedule.error) ||
+                       (result.timetable && result.timetable.errors && result.timetable.errors.length > 0);
+        if(hasError){
+          showToast('NEIS 연동 중 오류가 발생했어요. 수업 탭 > NEIS 설정을 확인해주세요.');
+          return;
+        }
+        if(result.timetable && result.timetable.added > 0){
           showToast('NEIS 시간표 ' + result.timetable.added + '건 자동 동기화 완료');
         }
       });
@@ -18322,6 +18416,84 @@ function renderSubmitModal(groupId, tab){
   document.getElementById('sm-list').innerHTML = html;
 }
 
+/* ─── 시작 가이드 카드 ─── */
+function getSetupSteps(){
+  var hasStudents = false;
+  var hasAnyClass = Object.keys(classes).length > 0;
+  if(hasAnyClass){
+    Object.keys(classes).forEach(function(k){
+      if((classes[k].students||[]).length > 0) hasStudents = true;
+    });
+  }
+  var hasMemo = false;
+  Object.keys(records).forEach(function(num){
+    if((records[num]||[]).length > 0) hasMemo = true;
+  });
+  var hasNeis = !!(neisSettings.atptCode && neisSettings.schulCode);
+  return [
+    {
+      id:'add_students',
+      label:'학생 명단 추가하기',
+      sub:'엑셀 업로드 또는 직접 입력',
+      done: hasStudents,
+      action:"openRosterReplace()"
+    },
+    {
+      id:'first_memo',
+      label:'첫 메모 남기기',
+      sub:'학생을 선택하고 관찰 메모를 작성해보세요',
+      done: hasMemo,
+      action:"switchTab('students')"
+    },
+    {
+      id:'neis_connect',
+      label:'NEIS 연동으로 시간표 자동화',
+      sub:'5분이면 시간표·학사일정이 자동으로 채워져요',
+      done: hasNeis,
+      action:"openNeisSetupModal()"
+    }
+  ];
+}
+function renderSetupGuideCard(){
+  var dismissed = localStorage.getItem('ht2_setup_guide_dismissed') === '1';
+  if(dismissed) return '';
+  var steps = getSetupSteps();
+  var allDone = steps.every(function(s){ return s.done; });
+  if(allDone){
+    localStorage.setItem('ht2_setup_guide_dismissed','1');
+    return '';
+  }
+  var stepsHtml = steps.map(function(s, i){
+    if(s.done){
+      return '<div class="setup-guide-step done">'+
+        '<div class="setup-guide-step-num">✓</div>'+
+        '<div class="setup-guide-step-text">'+
+          '<div class="setup-guide-step-label">'+s.label+'</div>'+
+        '</div>'+
+      '</div>';
+    }
+    return '<div class="setup-guide-step" onclick="'+s.action+'">'+
+      '<div class="setup-guide-step-num">'+(i+1)+'</div>'+
+      '<div class="setup-guide-step-text">'+
+        '<div class="setup-guide-step-label">'+s.label+' →</div>'+
+        '<div class="setup-guide-step-sub">'+s.sub+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  return '<div class="setup-guide-card">'+
+    '<div class="setup-guide-title">'+
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+
+      '시작 가이드 — 3단계로 쌤로그를 완성하세요'+
+    '</div>'+
+    '<div class="setup-guide-steps">'+stepsHtml+'</div>'+
+    '<button class="setup-guide-dismiss" onclick="dismissSetupGuide()">다음에 할게요 ×</button>'+
+  '</div>';
+}
+function dismissSetupGuide(){
+  try{ localStorage.setItem('ht2_setup_guide_dismissed','1'); }catch(e){}
+  renderHome();
+}
+
 function renderHome(){
   document.getElementById('home-teacher-name').textContent = TEACHER_NAME+'님';
 
@@ -18350,6 +18522,10 @@ function renderHome(){
       saveQuickMemo();
     }
   };
+
+  // 시작 가이드 카드 (신규 사용자)
+  var guideContainer = document.getElementById('home-setup-guide');
+  if(guideContainer) guideContainer.innerHTML = renderSetupGuideCard();
 
   // 알림·공지
   renderHomeAlerts();
@@ -18934,7 +19110,7 @@ function computeAlerts(){
         icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
         title:'생기부 마감 D-'+(daysLeft===0?'DAY':daysLeft),
         desc: ALERT_SETTINGS.sgDeadline,
-        cta:'설정 →', action:"openAlertSettings()",
+        cta:'생기부 보기 →', action:"switchTab('saenggibu')",
         priority: sgPriority
       });
     }
@@ -21417,7 +21593,12 @@ function saveAttendanceRecord(){
       syncAttendanceToTimeline(date, num, newRec);
       labels.push(getStatusLabel(st));
     });
-    showToast(labels.join('+') + ' 저장됨');
+    var savedStudentNum = num;
+    showToast(
+      labels.join('+') + ' 저장됨 — 학부모 통지 보내기',
+      function(){ openAttendanceNotify(savedStudentNum); },
+      '통지 →'
+    );
   }
   saveAll();
   closeAttendanceModal();
@@ -21458,9 +21639,12 @@ function openAttendanceNotify(studentNum){
   var parentName = s.parentName ? (s.parentRelation||'보호자')+' '+s.parentName+'님' : '학부모님';
   var meta = document.getElementById('att-notify-meta');
   if(meta) meta.textContent = sName+' · '+formatAttendanceDate(date);
-  var text = buildNotifyText(s, date, dayRecs);
+  var notifyText = buildNotifyText(s, date, dayRecs);
+  var sig = '';
+  try{ sig = localStorage.getItem('ht2_notify_sig') || ''; }catch(e){}
+  if(sig) notifyText = notifyText + '\n\n' + sig;
   var ta = document.getElementById('att-notify-textarea');
-  if(ta) ta.value = text;
+  if(ta) ta.value = notifyText;
   // 이미 모두 통지완료면 버튼 텍스트 변경
   var allNotified = dayRecs.every(function(r){ return r.notifiedParent; });
   var markBtn = document.getElementById('att-notify-mark-btn');
@@ -25305,8 +25489,21 @@ function closeClassSettings(){
 /* ═══════════════════════════════════════════
    알람 설정 모달
 ═══════════════════════════════════════════ */
+function saveNotifySig(){
+  var val = (document.getElementById('notify-sig-input')||{}).value || '';
+  try{ localStorage.setItem('ht2_notify_sig', val); }catch(e){}
+  var saved = document.getElementById('notify-sig-saved');
+  if(saved){ saved.style.display='block'; setTimeout(function(){ saved.style.display='none'; }, 2000); }
+}
+function loadNotifySig(){
+  var el = document.getElementById('notify-sig-input');
+  if(!el) return;
+  try{ el.value = localStorage.getItem('ht2_notify_sig') || ''; }catch(e){}
+}
+
 function openSettings(){
   loadAlertSettings();
+  loadNotifySig();
   var preVal = String(ALERT_SETTINGS.preClassMinutes);
   ['pre1','pre3','pre5','pre0'].forEach(function(id){
     var el = document.getElementById(id);
