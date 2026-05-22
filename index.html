@@ -22417,9 +22417,9 @@ function renderClassScheduleCreativeTab(activeClass){
           '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
           '일괄 등록' +
         '</button>' +
-        '<button class="btn-small primary" onclick="openCsFormModal(null)" style="display:flex;align-items:center;gap:4px;">' +
+        '<button class="btn-small primary" onclick="openCsInlineAdd()" style="display:flex;align-items:center;gap:4px;">' +
           '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-          '하나 추가' +
+          '수동 입력' +
         '</button>' +
       '</div>' +
     '</div>';
@@ -22497,7 +22497,7 @@ function renderClassScheduleCreativeTab(activeClass){
     '</div>';
   }
 
-  container.innerHTML = header + toolbar + body;
+  container.innerHTML = header + toolbar + body + _csRenderInlineAddRow();
   var countLabel = document.getElementById('cs-count-label');
   if(countLabel) countLabel.textContent = '총 ' + classSchedule.length + '건 · 표시 ' + list.length + '건';
 }
@@ -22701,6 +22701,116 @@ function _csSetTargetField(target){
     customInp.value = t;
     customInp.style.display = '';
   }
+}
+
+// ─── 수동 입력 (인라인 시트 방식) ───
+var _csInlineAdd = null;
+var _CS_INLINE_FIELDS = ['date','periods','category','activity','originalText','target','note'];
+
+function openCsInlineAdd(){
+  if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
+  var ac = getActiveClass ? getActiveClass() : null;
+  var today = typeof formatDateForInput === 'function' ? formatDateForInput(new Date()) : new Date().toISOString().slice(0,10);
+  _csInlineAdd = {
+    date: today, periods: [], category: '자율', activity: '',
+    originalText: '', target: (ac&&ac.grade) ? (ac.grade+'학년') : '전학년', note: ''
+  };
+  renderClassSchedule();
+  setTimeout(function(){
+    var el = document.getElementById('cs-inline-date');
+    if(el) el.focus();
+  }, 40);
+}
+
+function closeCsInlineAdd(){
+  _csInlineAdd = null;
+  renderClassSchedule();
+}
+
+function _csInlineSyncState(){
+  if(!_csInlineAdd) return;
+  var fld = function(id){ return document.getElementById(id); };
+  var d=fld('cs-inline-date'); if(d) _csInlineAdd.date=d.value;
+  var p=fld('cs-inline-periods');
+  if(p){
+    var nums = String(p.value||'').split(/[^\d]+/).filter(Boolean).map(function(x){return parseInt(x,10);}).filter(function(n){return !isNaN(n)&&n>=1&&n<=8;}).filter(function(n,i,a){return a.indexOf(n)===i;}).sort(function(a,b){return a-b;});
+    _csInlineAdd.periods = nums;
+  }
+  var c=fld('cs-inline-category'); if(c) _csInlineAdd.category=c.value;
+  var a=fld('cs-inline-activity'); if(a) _csInlineAdd.activity=a.value.trim();
+  var o=fld('cs-inline-original'); if(o) _csInlineAdd.originalText=o.value.trim();
+  var t=fld('cs-inline-target'); if(t) _csInlineAdd.target=t.value;
+  var n=fld('cs-inline-note'); if(n) _csInlineAdd.note=n.value.trim();
+}
+
+function _csInlineKbd(el, e, field){
+  if(e.key==='Escape'){ closeCsInlineAdd(); return; }
+  if(e.key==='Tab'){
+    e.preventDefault();
+    _csInlineSyncState();
+    var fi = _CS_INLINE_FIELDS.indexOf(field) + (e.shiftKey ? -1 : 1);
+    if(fi<0) fi=0;
+    if(fi>=_CS_INLINE_FIELDS.length) fi=_CS_INLINE_FIELDS.length-1;
+    var ids = {date:'cs-inline-date',periods:'cs-inline-periods',category:'cs-inline-category',activity:'cs-inline-activity',originalText:'cs-inline-original',target:'cs-inline-target',note:'cs-inline-note'};
+    var next = document.getElementById(ids[_CS_INLINE_FIELDS[fi]]);
+    if(next){ next.focus(); if(next.select) try{next.select();}catch(ex){} }
+  } else if(e.key==='Enter'){
+    e.preventDefault();
+    saveCsInlineAdd(true);
+  }
+}
+
+function saveCsInlineAdd(continueAdding){
+  _csInlineSyncState();
+  if(!_csInlineAdd) return;
+  if(!_csInlineAdd.date){ showToast('날짜를 입력해주세요'); return; }
+  if(!_csInlineAdd.periods||_csInlineAdd.periods.length===0){ showToast('교시를 입력해주세요 (예: 5,6)'); return; }
+  if(!_csInlineAdd.activity){ showToast('활동명을 입력해주세요'); return; }
+  classSchedule.push({
+    id: _csNewId(), date: _csInlineAdd.date, periods: _csInlineAdd.periods,
+    category: _csInlineAdd.category, activity: _csInlineAdd.activity,
+    originalText: _csInlineAdd.originalText || _csInlineAdd.activity,
+    target: _csInlineAdd.target||'', note: _csInlineAdd.note||'',
+    createdAt: new Date().toISOString()
+  });
+  saveAll();
+  if(typeof renderHome==='function') try{renderHome();}catch(ex){}
+  showToast('창체 일정 추가됨');
+  if(continueAdding){
+    _csInlineAdd.activity=''; _csInlineAdd.originalText=''; _csInlineAdd.note='';
+    renderClassSchedule();
+    setTimeout(function(){
+      var el=document.getElementById('cs-inline-activity');
+      if(el){el.focus();if(el.select)try{el.select();}catch(ex){}}
+    }, 40);
+  } else {
+    _csInlineAdd=null; renderClassSchedule();
+  }
+}
+
+function _csRenderInlineAddRow(){
+  if(!_csInlineAdd) return '';
+  var s = _csInlineAdd;
+  var inp = 'box-sizing:border-box;font-size:11px;padding:5px 7px;border:1px solid var(--border);border-radius:5px;background:var(--bg-surface);color:var(--text);font-family:inherit;width:100%;';
+  var TARGET_OPTS = ['전학년','1학년','2학년','3학년','4학년','5학년','6학년','1~2학년','3~4학년','5~6학년','1~3학년','4~6학년'];
+  var tgtOpts = TARGET_OPTS.map(function(o){return '<option value="'+o+'"'+(s.target===o?' selected':'')+'>'+o+'</option>';}).join('');
+  var catOpts = ['자율','동아리','봉사','진로'].map(function(c){return '<option value="'+c+'"'+(s.category===c?' selected':'')+'>'+_csCategoryLabel(c)+'</option>';}).join('');
+  return '<div style="margin-top:10px;padding:12px 14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:10px;">' +
+    '<div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px;">수동 입력 — Tab 이동 · Enter 저장 후 계속 · Esc 취소</div>' +
+    '<div style="display:grid;grid-template-columns:130px 64px 90px 1fr 1fr 90px 100px auto;gap:6px;align-items:end;">' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">날짜</div><input type="date" id="cs-inline-date" value="'+(s.date||'')+'" style="'+inp+'" onkeydown="_csInlineKbd(this,event,\'date\')"></div>' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">교시</div><input type="text" id="cs-inline-periods" value="'+((s.periods||[]).join(','))+'" placeholder="5,6" style="'+inp+'text-align:center;" onkeydown="_csInlineKbd(this,event,\'periods\')" title="콤마 구분: 5,6"></div>' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">영역</div><select id="cs-inline-category" style="'+inp+'" onkeydown="_csInlineKbd(this,event,\'category\')">'+catOpts+'</select></div>' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">활동명 <span style="color:var(--danger);">*</span></div><input type="text" id="cs-inline-activity" value="'+escapeHtml(s.activity||'')+'" placeholder="활동명 입력" style="'+inp+'" onkeydown="_csInlineKbd(this,event,\'activity\')"></div>' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">NEIS 원문</div><input type="text" id="cs-inline-original" value="'+escapeHtml(s.originalText||'')+'" placeholder="비워두면 활동명 사용" style="'+inp+'font-size:10px;font-family:monospace;" onkeydown="_csInlineKbd(this,event,\'originalText\')"></div>' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">대상</div><select id="cs-inline-target" style="'+inp+'" onkeydown="_csInlineKbd(this,event,\'target\')">'+tgtOpts+'</select></div>' +
+      '<div><div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;">비고</div><input type="text" id="cs-inline-note" value="'+escapeHtml(s.note||'')+'" placeholder="선택" style="'+inp+'" onkeydown="_csInlineKbd(this,event,\'note\')"></div>' +
+      '<div style="display:flex;gap:4px;padding-bottom:1px;">' +
+        '<button class="btn-small primary" onclick="saveCsInlineAdd(false)" style="white-space:nowrap;">추가</button>' +
+        '<button class="btn-small secondary" onclick="closeCsInlineAdd()" title="취소">✕</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 function openCsFormModal(itemId){
@@ -23086,33 +23196,34 @@ function _normalizeCsImportItem(item){
 // 현재 편집 중인 셀: { idx: number, field: string } or null
 var _csImportEditing = null;
 
+var _CS_IMPORT_FIELDS = ['date','periods','category','activity','originalText','target','note'];
+
 function _csBuildImportRow(item, idx){
   var hasWarn = item.note && item.note.indexOf('확인 필요') >= 0;
-  var rowBg = hasWarn ? 'background:var(--danger-dim,#fff5f5);' : '';
+  var rowBg = hasWarn ? 'background:rgba(192,58,43,0.05);' : '';
   var inpBase = 'width:100%;box-sizing:border-box;font-size:11px;padding:4px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--bg-surface);color:var(--text);font-family:inherit;outline:none;';
-  var cellBase = 'padding:6px 8px;vertical-align:middle;font-size:11px;cursor:pointer;border-radius:4px;';
+  var cellBase = 'padding:6px 8px;vertical-align:middle;font-size:11px;cursor:pointer;';
   var displayHover = 'transition:background 0.1s;';
   var editing = _csImportEditing && _csImportEditing.idx === idx ? _csImportEditing.field : null;
+  var kbdAttr = 'data-idx="' + idx + '" onkeydown="_csImportKbd(this,event)"';
 
   function cell(field, displayHtml, editHtml, extraStyle){
     var isEditing = (editing === field);
-    if(isEditing){
-      return '<td style="' + cellBase + (extraStyle||'') + '">' + editHtml + '</td>';
-    }
-    return '<td class="cs-import-cell" style="' + cellBase + displayHover + (extraStyle||'') + '" onclick="_csImportStartEdit(' + idx + ',\'' + field + '\')" title="클릭하여 수정">' + displayHtml + '</td>';
+    if(isEditing) return '<td style="' + cellBase + (extraStyle||'') + '">' + editHtml + '</td>';
+    return '<td class="cs-import-cell" style="' + cellBase + displayHover + (extraStyle||'') + '" onclick="_csImportStartEdit(' + idx + ',\'' + field + '\')" title="클릭·Tab·Enter로 수정">' + displayHtml + '</td>';
   }
 
   // 날짜
   var dateCell = cell('date',
     '<span>' + escapeHtml(_csFormatDate(item.date)) + '</span>',
-    '<input type="date" value="' + escapeHtml(item.date) + '" style="' + inpBase + 'min-width:120px;" autofocus onblur="_csImportCommitEdit(' + idx + ',\'date\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur();else if(event.key===\'Escape\')_csImportCancelEdit()">'
+    '<input type="date" data-field="date" ' + kbdAttr + ' value="' + escapeHtml(item.date) + '" style="' + inpBase + 'min-width:120px;" autofocus onblur="_csImportBlurCommit(this,' + idx + ',\'date\')">'
   );
 
   // 교시
   var periodsDisplay = (item.periods && item.periods.length) ? item.periods.join('·') : '-';
   var periodsCell = cell('periods',
     '<span>' + escapeHtml(periodsDisplay) + '</span>',
-    '<input type="text" value="' + escapeHtml((item.periods||[]).join(',')) + '" placeholder="예: 5,6" style="' + inpBase + 'min-width:60px;text-align:center;" autofocus onblur="_csImportCommitPeriods(' + idx + ',this.value)" onkeydown="if(event.key===\'Enter\')this.blur();else if(event.key===\'Escape\')_csImportCancelEdit()" title="콤마(,)로 구분: 예) 5,6">',
+    '<input type="text" data-field="periods" ' + kbdAttr + ' value="' + escapeHtml((item.periods||[]).join(',')) + '" placeholder="5,6" style="' + inpBase + 'min-width:60px;text-align:center;" autofocus onblur="_csImportBlurCommit(this,' + idx + ',\'periods\')" title="콤마 구분: 5,6">',
     'text-align:center;'
   );
 
@@ -23120,9 +23231,9 @@ function _csBuildImportRow(item, idx){
   var categoryDisplay = '<span style="color:' + _csCategoryColor(item.category) + ';font-weight:600;">' + _csCategoryLabel(item.category) + '</span>';
   var categoryCell = cell('category',
     categoryDisplay,
-    '<select style="' + inpBase + 'min-width:84px;color:' + _csCategoryColor(item.category) + ';font-weight:600;" autofocus onchange="_csImportCommitEdit(' + idx + ',\'category\',this.value)" onblur="_csImportCancelEdit()">' +
+    '<select data-field="category" ' + kbdAttr + ' style="' + inpBase + 'min-width:80px;font-weight:600;" autofocus onchange="_csImportParsed[' + idx + '].category=this.value;_csImportRerenderRow(' + idx + ');_csUpdateImportSummary();">' +
       ['자율','동아리','봉사','진로'].map(function(c){
-        return '<option value="' + c + '"' + (item.category === c ? ' selected' : '') + '>' + _csCategoryLabel(c) + '</option>';
+        return '<option value="' + c + '"' + (item.category===c?' selected':'') + '>' + _csCategoryLabel(c) + '</option>';
       }).join('') +
     '</select>'
   );
@@ -23130,32 +23241,35 @@ function _csBuildImportRow(item, idx){
   // 활동명
   var activityCell = cell('activity',
     '<span>' + escapeHtml(item.activity || '-') + '</span>',
-    '<input type="text" value="' + escapeHtml(item.activity || '') + '" style="' + inpBase + 'min-width:120px;" autofocus onblur="_csImportCommitEdit(' + idx + ',\'activity\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur();else if(event.key===\'Escape\')_csImportCancelEdit()">'
+    '<input type="text" data-field="activity" ' + kbdAttr + ' value="' + escapeHtml(item.activity||'') + '" style="' + inpBase + 'min-width:120px;" autofocus onblur="_csImportBlurCommit(this,' + idx + ',\'activity\')">'
   );
 
-  // 대상
+  // NEIS 원문 (편집 가능)
+  var originalCell = cell('originalText',
+    '<span style="font-size:10px;color:var(--text-tertiary);font-family:monospace;">' + escapeHtml(item.originalText||'-') + '</span>',
+    '<input type="text" data-field="originalText" ' + kbdAttr + ' value="' + escapeHtml(item.originalText||'') + '" placeholder="NEIS 원문" style="' + inpBase + 'min-width:100px;font-size:10px;font-family:monospace;" autofocus onblur="_csImportBlurCommit(this,' + idx + ',\'originalText\')">'
+  );
+
+  // 대상 (드롭다운)
+  var TARGET_OPTS = ['전학년','1학년','2학년','3학년','4학년','5학년','6학년','1~2학년','3~4학년','5~6학년','1~3학년','4~6학년'];
+  var tgtVal = item.target || '';
+  var targetOptHtml = TARGET_OPTS.map(function(o){ return '<option value="' + o + '"' + (tgtVal===o?' selected':'') + '>' + o + '</option>'; }).join('');
+  if(tgtVal && TARGET_OPTS.indexOf(tgtVal) < 0) targetOptHtml = '<option value="' + escapeHtml(tgtVal) + '" selected>' + escapeHtml(tgtVal) + '</option>' + targetOptHtml;
   var targetCell = cell('target',
-    '<span style="color:var(--text-secondary);">' + escapeHtml(item.target || '-') + '</span>',
-    '<input type="text" value="' + escapeHtml(item.target || '') + '" placeholder="예: 1학년" style="' + inpBase + 'min-width:80px;" autofocus onblur="_csImportCommitEdit(' + idx + ',\'target\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur();else if(event.key===\'Escape\')_csImportCancelEdit()">'
+    '<span style="color:var(--text-secondary);">' + escapeHtml(item.target||'-') + '</span>',
+    '<select data-field="target" ' + kbdAttr + ' style="' + inpBase + 'min-width:80px;" autofocus onchange="_csImportParsed[' + idx + '].target=this.value;_csImportRerenderRow(' + idx + ');_csUpdateImportSummary();">' + targetOptHtml + '</select>'
   );
 
   // 비고
-  var noteDisplayHtml = '<span style="color:' + (hasWarn ? 'var(--danger)' : 'var(--text-tertiary)') + ';">' + (hasWarn ? '⚠ ' : '') + escapeHtml(item.note || '-') + '</span>';
+  var noteDisplayHtml = '<span style="color:' + (hasWarn?'var(--danger)':'var(--text-tertiary)') + ';">' + (hasWarn?'⚠ ':'') + escapeHtml(item.note||'-') + '</span>';
   var noteCell = cell('note',
     noteDisplayHtml,
-    '<input type="text" value="' + escapeHtml(item.note || '') + '" placeholder="비고" style="' + inpBase + 'min-width:120px;color:' + (hasWarn ? 'var(--danger)' : 'var(--text)') + ';" autofocus onblur="_csImportCommitEdit(' + idx + ',\'note\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur();else if(event.key===\'Escape\')_csImportCancelEdit()">'
+    '<input type="text" data-field="note" ' + kbdAttr + ' value="' + escapeHtml(item.note||'') + '" placeholder="비고" style="' + inpBase + 'min-width:100px;" autofocus onblur="_csImportBlurCommit(this,' + idx + ',\'note\')">'
   );
 
   return '<tr data-idx="' + idx + '" style="' + rowBg + '">' +
-    '<td style="padding:6px 8px;text-align:center;vertical-align:middle;"><input type="checkbox" class="cs-import-row-chk" data-idx="' + idx + '" ' + (item._checked !== false ? 'checked' : '') + ' onchange="_csImportParsed[' + idx + ']._checked=this.checked;_csUpdateImportSummary()"></td>' +
-    dateCell +
-    periodsCell +
-    categoryCell +
-    activityCell +
-    // NEIS 원문 (읽기 전용)
-    '<td style="padding:6px 8px;font-size:10px;color:var(--text-tertiary);font-family:monospace;vertical-align:middle;max-width:140px;word-break:break-all;">' + escapeHtml(item.originalText || '') + '</td>' +
-    targetCell +
-    noteCell +
+    '<td style="padding:6px 8px;text-align:center;vertical-align:middle;"><input type="checkbox" class="cs-import-row-chk" data-idx="' + idx + '" ' + (item._checked!==false?'checked':'') + ' onchange="_csImportParsed[' + idx + ']._checked=this.checked;_csUpdateImportSummary()"></td>' +
+    dateCell + periodsCell + categoryCell + activityCell + originalCell + targetCell + noteCell +
   '</tr>';
 }
 
@@ -23176,13 +23290,17 @@ function _csRenderImportReviewTable(){
           '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">교시</th>' +
           '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">영역</th>' +
           '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">활동명</th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">NEIS 원문</th>' +
+          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">NEIS 원문 <span style="font-weight:400;font-size:9px;">(편집 가능)</span></th>' +
           '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">대상</th>' +
           '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">비고</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>' + rows + '</tbody>' +
-    '</table>';
+    '</table>' +
+    '<button onclick="_csImportAddRow()" style="width:100%;margin-top:4px;padding:6px 0;border:1px dashed var(--border);border-radius:6px;background:none;font-size:11px;color:var(--text-secondary);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">' +
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+      '행 추가하기' +
+    '</button>';
 
   _csUpdateImportSummary();
 }
@@ -23255,6 +23373,89 @@ function _csImportCancelEdit(){
   var idx = _csImportEditing.idx;
   _csImportEditing = null;
   _csImportRerenderRow(idx);
+}
+
+// blur 시 단순 커밋 (이동 없음)
+function _csImportBlurCommit(el, idx, field){
+  if(_csImportEditing && _csImportEditing.idx === idx && _csImportEditing.field === field){
+    var val = el.value;
+    if(field === 'periods') _csImportApplyPeriods(_csImportParsed[idx], val);
+    else if(_csImportParsed[idx]) _csImportParsed[idx][field] = val.trim();
+    _csImportEditing = null;
+    _csImportRerenderRow(idx);
+    _csUpdateImportSummary();
+  }
+}
+
+// 키보드 핸들러 — Tab/Enter 이동, Escape 취소
+function _csImportKbd(el, e){
+  var field = el.dataset.field;
+  var tr = el.parentNode;
+  while(tr && tr.tagName !== 'TR') tr = tr.parentNode;
+  var idx = tr ? parseInt(tr.dataset.idx) : (_csImportEditing ? _csImportEditing.idx : 0);
+  if(e.key === 'Escape'){ _csImportCancelEdit(); return; }
+  if(e.key === 'Tab'){
+    e.preventDefault();
+    _csImportCommitAndNav(idx, field, el.value, e.shiftKey ? 'prev' : 'next');
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    _csImportCommitAndNav(idx, field, el.value, 'nextRow');
+  }
+}
+
+// 커밋 후 이동
+function _csImportCommitAndNav(idx, field, val, dir){
+  var item = _csImportParsed[idx];
+  if(item){
+    if(field === 'periods') _csImportApplyPeriods(item, val);
+    else item[field] = (typeof val === 'string') ? val.trim() : val;
+  }
+  _csImportEditing = null;
+  var fi = _CS_IMPORT_FIELDS.indexOf(field);
+  var nextIdx = idx, nextField;
+  if(dir === 'next'){
+    fi++;
+    if(fi >= _CS_IMPORT_FIELDS.length){ fi = 0; nextIdx++; }
+    if(nextIdx >= _csImportParsed.length){
+      _csImportRerenderRow(idx); _csUpdateImportSummary();
+      _csImportAddRow(); return;
+    }
+    nextField = _CS_IMPORT_FIELDS[fi];
+  } else if(dir === 'prev'){
+    fi--;
+    if(fi < 0){ fi = _CS_IMPORT_FIELDS.length - 1; nextIdx--; }
+    if(nextIdx < 0){ nextIdx = 0; fi = 0; }
+    nextField = _CS_IMPORT_FIELDS[fi];
+  } else { // nextRow
+    nextIdx++;
+    if(nextIdx >= _csImportParsed.length){
+      _csImportRerenderRow(idx); _csUpdateImportSummary();
+      _csImportAddRow(); return;
+    }
+    nextField = _CS_IMPORT_FIELDS[0];
+  }
+  _csImportRerenderRow(idx); _csUpdateImportSummary();
+  _csImportStartEdit(nextIdx, nextField);
+}
+
+// 새 행 추가
+function _csImportAddRow(){
+  var last = _csImportParsed.length > 0 ? _csImportParsed[_csImportParsed.length-1] : null;
+  var today = typeof formatDateForInput === 'function' ? formatDateForInput(new Date()) : new Date().toISOString().slice(0,10);
+  _csImportParsed.push({
+    id: _csNewId(),
+    date: last ? last.date : today,
+    periods: last ? last.periods.slice() : [],
+    category: last ? last.category : '자율',
+    activity: '',
+    originalText: '',
+    target: last ? last.target : '',
+    note: '',
+    _checked: true
+  });
+  _csRenderImportReviewTable();
+  var newIdx = _csImportParsed.length - 1;
+  setTimeout(function(){ _csImportStartEdit(newIdx, _CS_IMPORT_FIELDS[0]); }, 30);
 }
 
 // 특정 행만 다시 그리기 (테이블 전체 깜빡임 방지)
