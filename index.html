@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>
+(function(){
+  try{
+    var theme = localStorage.getItem('ht2_theme') || 'light';
+    if(theme === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  }catch(e){}
+})();
+</script>
 <meta charset="UTF-8">
 <title>쌤로그</title>
 <meta property="og:title" content="쌤로그">
@@ -6320,6 +6328,137 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   cursor:pointer;font-family:inherit;
 }
 .setup-guide-dismiss:hover{color:var(--text-secondary);}
+/* ─── 홈 2컬럼 레이아웃 ─── */
+.home-split{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:0;
+  align-items:start;
+  position:relative;
+  margin-top:14px;
+}
+.home-split::before{
+  content:'';
+  position:absolute;
+  left:50%;top:0;bottom:0;
+  width:1px;
+  background:var(--border);
+  transform:translateX(-50%);
+  pointer-events:none;
+  z-index:1;
+}
+.home-split-col{
+  padding:0 14px;
+}
+.home-split-col:first-child{padding-left:0;}
+.home-split-col:last-child{padding-right:0;}
+.home-col-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;padding:0 2px;
+}
+.home-col-title{
+  display:flex;align-items:center;gap:7px;
+  font-size:12.5px;font-weight:700;
+  color:var(--text);letter-spacing:-0.01em;
+}
+.home-col-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+.home-col-dot.class{background:var(--accent);}
+.home-col-dot.alert{background:#BA7517;}
+.home-col-count{
+  font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:3px;
+}
+.home-col-link{
+  font-size:11px;color:var(--accent);cursor:pointer;font-weight:500;
+  display:flex;align-items:center;gap:2px;
+  background:none;border:none;font-family:inherit;padding:0;
+}
+.home-col-link:hover{text-decoration:underline;}
+.home-class-rows{display:flex;flex-direction:column;gap:4px;}
+.home-cr{
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr) 8px;
+  gap:9px;align-items:center;
+  padding:6px 11px;border-radius:8px;
+  background:var(--bg-surface);
+  border:0.5px solid var(--border);
+  cursor:pointer;transition:transform 0.12s,border-color 0.12s;
+}
+.home-cr:hover{border-color:var(--border-strong);transform:translateX(2px);}
+.home-cr.cr-done{border-color:#A7D9BE;background:#E8F5EE;}
+.home-cr.cr-miss{border-color:#F5B9B3;background:#FDECEA;}
+.home-cr.cr-soon{border-color:var(--border-accent);background:var(--accent-dim);}
+.home-cr-period{
+  font-size:12px;font-weight:700;text-align:center;
+  color:var(--text-tertiary);
+}
+.home-cr.cr-done .home-cr-period{color:#1B7F4F;}
+.home-cr.cr-miss .home-cr-period{color:#C03A2B;}
+.home-cr.cr-soon .home-cr-period{color:var(--accent);}
+.home-cr-name{
+  font-size:11.5px;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.home-cr.cr-done .home-cr-name{color:#1B7F4F;}
+.home-cr.cr-miss .home-cr-name{color:#C03A2B;}
+.home-cr.cr-soon .home-cr-name{color:var(--accent);}
+.home-cr-meta{
+  font-size:9.5px;margin-top:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  opacity:0.8;
+}
+.home-cr.cr-done .home-cr-meta{color:#1B7F4F;}
+.home-cr.cr-miss .home-cr-meta{color:#C03A2B;}
+.home-cr.cr-soon .home-cr-meta{color:var(--accent);}
+.home-cr-dot{
+  width:6px;height:6px;border-radius:50%;
+}
+.home-cr.cr-done .home-cr-dot{background:#1B7F4F;}
+.home-cr.cr-miss .home-cr-dot{background:#C03A2B;}
+.home-cr.cr-soon .home-cr-dot{background:var(--accent);}
+.home-alert-rows{display:flex;flex-direction:column;gap:4px;}
+.home-alert-compact{
+  display:grid;
+  grid-template-columns:26px minmax(0,1fr);
+  gap:9px;align-items:center;
+  padding:6px 11px;border-radius:8px;
+  background:var(--bg-surface);
+  border:0.5px solid var(--border);
+  cursor:pointer;transition:transform 0.12s,border-color 0.12s;
+}
+.home-alert-compact:hover{border-color:var(--border-strong);transform:translateX(2px);}
+.home-alert-compact.ac-danger{background:#FDECEA;border-color:#F5B9B3;}
+.home-alert-compact.ac-warn{background:#FEF3E2;border-color:#F8D49A;}
+.home-alert-compact.ac-info{background:var(--accent-dim);border-color:var(--border-accent);}
+.home-alert-compact.ac-neutral{background:var(--bg-elevated);border-color:var(--border);}
+.hac-ico{
+  width:26px;height:26px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;flex-shrink:0;
+}
+.ac-danger .hac-ico{background:#C03A2B;}
+.ac-warn .hac-ico{background:#A87211;}
+.ac-info .hac-ico{background:var(--accent);}
+.ac-neutral .hac-ico{background:var(--text-tertiary);}
+.hac-title{
+  font-size:11.5px;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.ac-danger .hac-title{color:#C03A2B;}
+.ac-warn .hac-title{color:#A87211;}
+.ac-info .hac-title{color:#26215C;}
+.ac-neutral .hac-title{color:var(--text);}
+.hac-meta{
+  font-size:9.5px;margin-top:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  opacity:0.8;
+}
+.ac-danger .hac-meta{color:#C03A2B;}
+.ac-warn .hac-meta{color:#A87211;}
+.ac-info .hac-meta{color:var(--accent);}
+.ac-neutral .hac-meta{color:var(--text-secondary);}
+/* P2-5: SVG stroke 통일 — skip to avoid breaking existing icons */
 </style>
 </head>
 <body>
@@ -6888,8 +7027,33 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- 시작 가이드 카드 -->
     <div id="home-setup-guide"></div>
 
-    <!-- 알림·공지 영역 -->
-    <div class="home-alerts" id="home-alerts" style="display:none;"></div>
+    <!-- 홈 2컬럼 — 오늘 수업(좌) + 알람(우) -->
+    <div class="home-split" id="home-split">
+      <div class="home-split-col" id="home-split-left">
+        <div class="home-col-head">
+          <span class="home-col-title">
+            <span class="home-col-dot class"></span>
+            오늘 수업
+            <span class="home-col-count" id="home-class-count"></span>
+          </span>
+          <button class="home-col-link" onclick="switchTab('class')">
+            수업 탭
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+        <div class="home-class-rows" id="home-class-rows"></div>
+      </div>
+      <div class="home-split-col" id="home-split-right">
+        <div class="home-col-head">
+          <span class="home-col-title">
+            <span class="home-col-dot alert"></span>
+            알람
+            <span class="home-col-count" id="home-alert-count"></span>
+          </span>
+        </div>
+        <div class="home-alert-rows" id="home-alerts"></div>
+      </div>
+    </div>
 
     <!-- 반 시간표(창체) 카드 — 담임반일 때만 표시 -->
     <div id="home-cs-today" class="home-card" style="display:none;margin-bottom:14px;padding:14px 16px;background:var(--bg-surface);border:0.5px solid var(--border);border-radius:12px;"></div>
@@ -7212,6 +7376,32 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
               <button class="btn-small secondary" id="notify-request-btn" onclick="requestBrowserNotify()">알림 권한 허용하기</button>
               <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">허용하면 탭이 백그라운드 상태일 때도 수업 시작 전 알람이 와요.</div>
             </div>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">홈 화면 알람 표시</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+                <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+                  <span>미기록 수업 알람</span>
+                  <input type="checkbox" id="alert-missed-class-toggle" onchange="saveAlertSettings()">
+                </label>
+                <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+                  <span>미분류 메모 알람</span>
+                  <input type="checkbox" id="alert-unsorted-memo-toggle" onchange="saveAlertSettings()">
+                </label>
+                <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+                  <span>7일 미기록 학생 알람</span>
+                  <input type="checkbox" id="alert-stale-student-toggle" onchange="saveAlertSettings()">
+                </label>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+                  <span>미기록 판단 기준</span>
+                  <select id="alert-missed-threshold" onchange="saveAlertSettings()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);">
+                    <option value="0">수업 직후</option>
+                    <option value="1">1시간 후</option>
+                    <option value="2">2시간 후</option>
+                    <option value="3">3시간 후</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -7292,6 +7482,13 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
         <!-- ④ 데이터 백업 패널 -->
         <div class="settings-panel" data-tab="backup">
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:10px;margin-bottom:16px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:3px;">데이터는 이 기기에만 저장돼요</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">쌤로그는 클라우드를 사용하지 않아요. 브라우저 데이터를 지우거나 다른 기기로 옮기면 데이터가 사라질 수 있어요. 정기적으로 JSON 백업을 해두세요.</div>
+            </div>
+          </div>
           <div class="class-master-title" style="margin-bottom:4px;">데이터 백업</div>
           <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px;">현재 학년도 데이터를 내 컴퓨터에 저장해두세요. 브라우저를 초기화하거나 다른 기기로 옮길 때 복원할 수 있어요.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
@@ -11358,6 +11555,13 @@ function toggleTheme(){
    탭 전환
 ═══════════════════════════════════════════ */
 function switchTab(tab){
+  // 퀵 메모 이탈 방지
+  var qmInput = document.getElementById('quick-memo-input');
+  if(qmInput && qmInput.value.trim().length > 0 && tab !== 'home'){
+    if(!confirm('퀵 메모에 작성 중인 내용이 있어요.\n이동하면 내용이 사라집니다. 계속할까요?')){
+      return;
+    }
+  }
   // 기존 상단 nav-tab (하위 호환)
   document.querySelectorAll('.nav-tab').forEach(function(b){
     b.classList.toggle('active', b.dataset.tab === tab);
@@ -18494,6 +18698,85 @@ function dismissSetupGuide(){
   renderHome();
 }
 
+function renderHomeTodayClasses(){
+  var rowsEl = document.getElementById('home-class-rows');
+  var countEl = document.getElementById('home-class-count');
+  if(!rowsEl) return;
+  var todayStr = formatDateForInput(new Date());
+  var todayDow = new Date().getDay();
+  var now = new Date();
+  var hour = now.getHours();
+  var todayEntries = [];
+  if(typeof classMaster !== 'undefined'){
+    classMaster.forEach(function(c){
+      (c.slots || []).forEach(function(s){
+        if(s.day === todayDow){
+          todayEntries.push({ entry:c, period:s.period });
+        }
+      });
+    });
+  }
+  todayEntries.sort(function(a,b){ return a.period - b.period; });
+  var hasPrimary = Object.keys(classes||{}).some(function(k){ return (classes[k]||{}).isPrimary; });
+  if(todayEntries.length === 0){
+    rowsEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-tertiary);">오늘 등록된 수업이 없어요</div>';
+    if(countEl) countEl.textContent = '';
+    return;
+  }
+  if(countEl) countEl.textContent = todayEntries.length + '교시';
+  var CHECK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var CLOCK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>';
+  var PERIOD_END = {1:9,2:10,3:11,4:13,5:14,6:15,7:16,8:17};
+  var PERIOD_START_TIME = {1:[8,40],2:[9,40],3:[10,40],4:[12,10],5:[13,10],6:[14,10],7:[15,10],8:[16,10]};
+  var html = '';
+  todayEntries.forEach(function(item){
+    var c = item.entry;
+    var period = item.period;
+    var endHour = (typeof PERIOD_END_HOUR !== 'undefined' && PERIOD_END_HOUR[period]) ? PERIOD_END_HOUR[period] : (PERIOD_END[period] || 17);
+    var startArr = (typeof PERIOD_START !== 'undefined' && PERIOD_START[period]) ? PERIOD_START[period] : (PERIOD_START_TIME[period] || null);
+    var hasMemo = typeof hasMemoToday === 'function' ? hasMemoToday(c) : false;
+    var sessionNum = 0;
+    if(typeof getAutoSessionNumber === 'function'){
+      var si = getAutoSessionNumber(c, todayStr);
+      sessionNum = si ? si.sessionNum : 0;
+    }
+    var stateClass, meta;
+    if(hasMemo){
+      stateClass = 'cr-done';
+      meta = '완료' + (sessionNum > 0 ? ' · ' + sessionNum + '차시' : '');
+    } else if(hour >= endHour){
+      var gapH = hour - endHour;
+      stateClass = 'cr-miss';
+      meta = gapH > 0 ? gapH + '시간 경과' : '미기록';
+    } else {
+      stateClass = 'cr-soon';
+      var timeStr = startArr ? (String(startArr[0]).padStart(2,'0') + ':' + String(startArr[1]).padStart(2,'0')) : '';
+      meta = timeStr ? timeStr + ' 예정' : '예정';
+    }
+    var label;
+    if(hasPrimary){
+      label = escapeHtml(c.subject || '수업');
+    } else {
+      label = escapeHtml((c.grade||'') + '-' + (c.cls||'') + '반 ' + (c.subject || '수업'));
+    }
+    var clickAction = '';
+    if(c.id && typeof switchClassKey === 'function'){
+      clickAction = 'onclick="switchClassKey(\'' + c.id + '\');switchTab(\'class\')"';
+    } else {
+      clickAction = 'onclick="switchTab(\'class\')"';
+    }
+    html += '<div class="home-cr ' + stateClass + '" ' + clickAction + '>' +
+      '<div class="home-cr-period">' + period + '</div>' +
+      '<div>' +
+        '<div class="home-cr-name">' + label + '</div>' +
+        '<div class="home-cr-meta">' + meta + '</div>' +
+      '</div>' +
+      '<div class="home-cr-dot"></div>' +
+    '</div>';
+  });
+  rowsEl.innerHTML = html;
+}
+
 function renderHome(){
   document.getElementById('home-teacher-name').textContent = TEACHER_NAME+'님';
 
@@ -18526,6 +18809,9 @@ function renderHome(){
   // 시작 가이드 카드 (신규 사용자)
   var guideContainer = document.getElementById('home-setup-guide');
   if(guideContainer) guideContainer.innerHTML = renderSetupGuideCard();
+
+  // 오늘 수업 컬럼
+  renderHomeTodayClasses();
 
   // 알림·공지
   renderHomeAlerts();
@@ -18762,15 +19048,22 @@ function renderHomeAlerts(){
   }
 
   var renderAlert = function(a){
-    var urgentBadge = a.urgent ? '<span class="home-alert-urgent-badge">지금</span>' : '';
-    var descHtml = a.desc ? '<div class="home-alert-desc">'+escapeHtml(a.desc)+'</div>' : '';
-    var alertHtml = '<div class="home-alert '+a.kind+(a.urgent?' home-alert-urgent':'')+(a.desc?'':' home-alert-compact')+'" onclick="'+a.action+'">'+
-      '<div class="home-alert-icon">'+a.icon+'</div>'+
-      '<div class="home-alert-body">'+
-        '<div class="home-alert-title">'+urgentBadge+escapeHtml(a.title)+'</div>'+
-        descHtml+
-      '</div>'+
-      '<span class="home-alert-action">'+a.cta+'</span>'+
+    var icoMap = {
+      danger: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+      warn:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      info:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+      neutral:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    };
+    var kindClass = 'ac-' + (a.kind === 'danger' ? 'danger' : a.kind === 'warn' ? 'warn' : a.kind === 'info' ? 'info' : 'neutral');
+    var icoSvg = (a.icon && a.icon.trim()) ? a.icon : (icoMap[a.kind] || icoMap.neutral);
+    var metaHtml = a.desc ? '<div class="hac-meta">' + escapeHtml(a.desc) + '</div>' : '';
+    var urgentAttr = a.urgent ? ' style="border-left:3px solid #C03A2B;"' : '';
+    var alertHtml = '<div class="home-alert-compact ' + kindClass + '"' + urgentAttr + ' onclick="' + a.action + '">' +
+      '<div class="hac-ico">' + icoSvg + '</div>' +
+      '<div>' +
+        '<div class="hac-title">' + escapeHtml(a.title) + '</div>' +
+        metaHtml +
+      '</div>' +
     '</div>';
 
     // 분류 대기 알람 바로 아래에 목록 인라인 삽입
@@ -18797,6 +19090,8 @@ function renderHomeAlerts(){
     }
   }
 
+  var countEl = document.getElementById('home-alert-count');
+  if(countEl) countEl.textContent = alerts.length > 0 ? alerts.length + '건' : '';
   container.innerHTML = html;
 }
 
@@ -18875,9 +19170,18 @@ var ALERT_SETTINGS = {
   preClassMinutes: 3,
   sgDeadline: '',
   consultAlarm: true,
-  browserNotify: false
+  browserNotify: false,
+  showMissedClass: true,
+  showUnsortedMemo: true,
+  showStaleStudent: true,
+  missedClassThresholdH: 1,
 };
 function saveAlertSettings(){
+  ALERT_SETTINGS.showMissedClass = !!(document.getElementById('alert-missed-class-toggle') && document.getElementById('alert-missed-class-toggle').checked);
+  ALERT_SETTINGS.showUnsortedMemo = !!(document.getElementById('alert-unsorted-memo-toggle') && document.getElementById('alert-unsorted-memo-toggle').checked);
+  ALERT_SETTINGS.showStaleStudent = !!(document.getElementById('alert-stale-student-toggle') && document.getElementById('alert-stale-student-toggle').checked);
+  var threshEl = document.getElementById('alert-missed-threshold');
+  ALERT_SETTINGS.missedClassThresholdH = threshEl ? parseInt(threshEl.value || '1') : 1;
   try{ localStorage.setItem('ht2_alert_settings', JSON.stringify(ALERT_SETTINGS)); }catch(e){}
 }
 function loadAlertSettings(){
@@ -18983,13 +19287,15 @@ function computeAlerts(){
   }
 
   /* ③ 미기록 수업 — classMaster는 글로벌, slot의 grade·cls 로 라벨링 */
+  if(ALERT_SETTINGS.showMissedClass !== false){
   var missed = [];
   var missedByClass = {};
   classMaster.forEach(function(c){
     (c.slots || []).forEach(function(s){
       if(s.day !== today) return;
       var endHour = PERIOD_END_HOUR[s.period] || 17;
-      if(hour < endHour) return;
+      var threshH = ALERT_SETTINGS.missedClassThresholdH || 0;
+      if(hour < endHour + threshH) return;
       var hasToday = (c.memos || []).some(function(m){return m.date === todayStr;});
       if(hasToday) return;
       missed.push({entry:c, period:s.period, endHour:endHour});
@@ -19017,8 +19323,10 @@ function computeAlerts(){
       priority: 3
     });
   }
+  }
 
   /* ④ 미분류 메모 — 모든 반 합산 */
+  if(ALERT_SETTINGS.showUnsortedMemo !== false){
   var totalUnsorted=0, oldestDays=0;
   var unsortedByClass = {};
   getAllStudentsAcrossClasses().forEach(function(item){
@@ -19051,8 +19359,10 @@ function computeAlerts(){
       priority: 4
     });
   }
+  }
 
   /* ⑤ 7일+ 기록 없는 학생 — 담임반이 있으면 담임반만, 없으면 전체 */
+  if(ALERT_SETTINGS.showStaleStudent !== false){
   var primaryKey = null;
   Object.keys(classes).forEach(function(k){
     if(classes[k].isPrimary) primaryKey = k;
@@ -19096,6 +19406,7 @@ function computeAlerts(){
       action: primaryKey ? "switchClassKey('"+primaryKey+"');switchTab('students')" : "switchTab('students')",
       priority: 6
     });
+  }
   }
 
   /* ⑥ 생기부 마감 D-day */
@@ -25511,6 +25822,14 @@ function openSettings(){
   });
   var dlEl = document.getElementById('sg-deadline-input');
   if(dlEl) dlEl.value = ALERT_SETTINGS.sgDeadline || '';
+  var el1 = document.getElementById('alert-missed-class-toggle');
+  if(el1) el1.checked = ALERT_SETTINGS.showMissedClass !== false;
+  var el2 = document.getElementById('alert-unsorted-memo-toggle');
+  if(el2) el2.checked = ALERT_SETTINGS.showUnsortedMemo !== false;
+  var el3 = document.getElementById('alert-stale-student-toggle');
+  if(el3) el3.checked = ALERT_SETTINGS.showStaleStudent !== false;
+  var threshEl = document.getElementById('alert-missed-threshold');
+  if(threshEl) threshEl.value = String(ALERT_SETTINGS.missedClassThresholdH || 1);
   var ckEl = document.getElementById('consult-alarm-chk');
   if(ckEl) ckEl.checked = !!ALERT_SETTINGS.consultAlarm;
   renderAlertSettingsUI();
