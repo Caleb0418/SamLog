@@ -2544,7 +2544,16 @@ body{
 }
 .att-date-sub{font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.3px;}
 .att-title{font-size:18px;font-weight:600;color:var(--text);margin:2px 0 0;}
-.att-header-actions{display:flex;gap:6px;}
+.att-header-actions{display:flex;gap:6px;align-items:center;}
+/* 날짜 이동 화살표 */
+.att-date-nav{display:flex;align-items:center;gap:2px;}
+.att-date-nav-btn{
+  width:30px;height:30px;border:1px solid var(--border);border-radius:6px;
+  background:var(--bg-surface);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all 0.12s;
+}
+.att-date-nav-btn:hover{background:var(--bg-elevated);border-color:var(--border-strong);}
 .att-btn-icon{
   padding:6px 10px;font-size:12px;
   background:var(--bg-surface);color:var(--text-secondary);
@@ -2552,6 +2561,38 @@ body{
   display:inline-flex;align-items:center;gap:4px;font-family:inherit;
 }
 .att-btn-icon:hover{background:var(--bg-elevated);border-color:var(--border-strong,var(--border));}
+/* 미입력 상태 셀 */
+.att-status-unrecorded{
+  font-size:12px;color:var(--text-tertiary);font-style:italic;
+}
+/* 일괄 출석 확정 배너 */
+.att-confirm-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;margin-top:16px;
+  background:var(--accent-dim);border:1.5px solid var(--border-accent);
+  border-radius:10px;
+}
+.att-confirm-bar-text{
+  font-size:13px;color:var(--text);line-height:1.4;
+}
+.att-confirm-bar-text strong{color:var(--accent);font-weight:700;}
+.att-confirm-btn{
+  flex-shrink:0;
+  padding:8px 16px;border-radius:8px;
+  background:var(--accent);color:#fff;border:none;cursor:pointer;
+  font-size:13px;font-weight:600;font-family:inherit;
+  transition:background 0.12s;white-space:nowrap;
+}
+.att-confirm-btn:hover{background:var(--accent-hover);}
+/* 출결 확정 완료 배너 */
+.att-confirmed-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  background:var(--success-dim);border:1px solid var(--success-border);
+  font-size:11.5px;font-weight:600;color:var(--success);
+  margin-top:6px;
+}
+
 /* 비등교일 배너 */
 .att-nonschool-banner{
   display:flex;align-items:center;gap:8px;
@@ -8112,6 +8153,15 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <h2 class="att-title" id="att-title">오늘 출결</h2>
     </div>
     <div class="att-header-actions">
+      <!-- 날짜 좌우 이동 -->
+      <div class="att-date-nav">
+        <button class="att-date-nav-btn" onclick="shiftAttendanceDate(-1)" title="이전 날짜">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="att-date-nav-btn" onclick="shiftAttendanceDate(1)" title="다음 날짜">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
       <div style="position:relative;">
         <button class="att-btn-icon" onclick="toggleAttDatePicker(event)" title="다른 날짜">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -8184,6 +8234,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </table>
     <div class="att-tbl-empty" id="att-tbl-empty" style="display:none;"></div>
   </div>
+
+  <!-- 일괄 출석 확정 배너 (미확정 날짜에만 표시) -->
+  <div id="att-confirm-bar" style="display:none;"></div>
 
   <!-- 행 액션 메뉴 -->
   <div class="att-row-menu" id="att-row-menu" style="display:none;">
@@ -16157,6 +16210,8 @@ function formatRecordsForPrompt(contextRecords) {
 function _isStudentMissingSlot(studentNum, date, period){
   if(!attendanceRecords || !attendanceRecords[date]) return false;
   var recs = attendanceRecords[date][studentNum] || [];
+  // 기록이 없고 날짜가 미확정이면 결시 아님 (창체 이수에서 제외하지 않음)
+  if(recs.length === 0) return false;
   for(var i=0; i<recs.length; i++){
     var r = recs[i];
     var pKey = String(period);
@@ -22086,6 +22141,35 @@ function updateTimetableBanner(){
 ═══════════════════════════════════════════ */
 var attendanceCurrentDate = null;
 
+/* ─── 날짜 이동 ─── */
+function shiftAttendanceDate(delta){
+  if(!attendanceCurrentDate) attendanceCurrentDate = getTodayDate();
+  var d = new Date(attendanceCurrentDate);
+  d.setDate(d.getDate() + delta);
+  attendanceCurrentDate = formatDateForInput(d);
+  renderAttendanceTab();
+}
+
+/* ─── 출결 확정 유틸 ─────────────────────────────
+   attendanceRecords[date].__confirmed = true  → 교사가 확정한 날
+   과거 날짜(오늘 이전)는 __confirmed 없어도 "확정된 것"으로 간주 (하위 호환)
+   오늘 이후 날짜는 명시적 확정 필요
+────────────────────────────────────────────── */
+function isAttDateConfirmed(dateStr){
+  var today = getTodayDate();
+  if(dateStr < today) return true;           // 과거 = 하위 호환 확정
+  var dayRecs = attendanceRecords[dateStr];
+  return !!(dayRecs && dayRecs.__confirmed);
+}
+
+function confirmAttendanceDate(dateStr){
+  if(!attendanceRecords[dateStr]) attendanceRecords[dateStr] = {};
+  attendanceRecords[dateStr].__confirmed = true;
+  saveAll();
+  renderAttendanceTab();
+  showToast('출결이 확정됐어요');
+}
+
 /* ═══ 출결 테이블 UI ═══ */
 var attTableState = { searchQuery: '', issueOnly: false };
 var attCurrentView = 'daily';
@@ -22126,6 +22210,59 @@ function renderAttendanceTab(){
 
   renderAttendanceStats(_isNonSchool);
   renderAttendanceTable(_isNonSchool);
+  renderAttConfirmBar(_isNonSchool);
+}
+
+function renderAttConfirmBar(isNonSchool){
+  var bar = document.getElementById('att-confirm-bar');
+  if(!bar) return;
+  var c = getActiveClass();
+  if(!c || !c.students || isNonSchool){
+    bar.style.display = 'none';
+    return;
+  }
+  var today = getTodayDate();
+  // 미래 날짜 또는 과거 날짜(자동 확정)는 배너 없음 — 오늘만 표시
+  if(attendanceCurrentDate !== today){
+    bar.style.display = 'none';
+    return;
+  }
+  var confirmed = isAttDateConfirmed(attendanceCurrentDate);
+  if(confirmed){
+    // 오늘만 "확정됨" 배지 표시, 과거는 조용히
+    if(attendanceCurrentDate === today){
+      var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+      var issueCount = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
+      var attendCount = c.students.length - issueCount;
+      bar.innerHTML =
+        '<div class="att-confirmed-badge">'
+        +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        +'출결 확정 완료 · 출석 '+attendCount+'명 / 이슈 '+issueCount+'명'
+        +'</div>';
+      bar.style.display = 'block';
+    } else {
+      bar.style.display = 'none';
+    }
+    return;
+  }
+  // 미확정 — 미입력 인원 수 계산
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var recorded = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
+  var unrecorded = c.students.length - recorded;
+  if(unrecorded <= 0){
+    // 전원 기록됨 → 자동 확정 안내
+    bar.innerHTML =
+      '<div class="att-confirm-bar-text">전원 출결이 입력됐어요</div>'
+      +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">출결 확정하기</button>';
+    bar.className = 'att-confirm-bar';
+    bar.style.display = 'flex';
+    return;
+  }
+  bar.innerHTML =
+    '<div class="att-confirm-bar-text"><strong>'+unrecorded+'명</strong> 미입력 · 이슈 없는 학생을 출석으로 확정해주세요</div>'
+    +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">미입력 '+unrecorded+'명 출석 처리</button>';
+  bar.className = 'att-confirm-bar';
+  bar.style.display = 'flex';
 }
 
 function switchAttView(view){
@@ -22555,10 +22692,12 @@ function renderAttendanceStats(isNonSchool){
   var total = (c.students || []).length;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
   var hasAnyRecord = Object.keys(dateRecs).some(function(num){
-    return (dateRecs[num]||[]).length > 0;
+    return num !== '__confirmed' && (dateRecs[num]||[]).length > 0;
   });
+  var _confirmedStat = isAttDateConfirmed(attendanceCurrentDate);
   var counts = {absent:0, late:0, early_leave:0, partial:0};
   Object.keys(dateRecs).forEach(function(num){
+    if(num === '__confirmed') return;
     var recs = dateRecs[num];
     if(!recs || recs.length === 0) return;
     var priorityList = ['absent','late','early_leave','partial'];
@@ -22570,17 +22709,19 @@ function renderAttendanceStats(isNonSchool){
   var issueTotal = counts.absent + counts.late + counts.early_leave + counts.partial;
   var attended = total - issueTotal;
 
-  // 비등교일이고 기록이 전혀 없으면 출석 수 대신 "–" 표시
-  var attendedDisplay = (isNonSchool && !hasAnyRecord) ? '–' : attended+'명';
-  var absentDisplay   = (isNonSchool && !hasAnyRecord) ? '–' : counts.absent+'명';
-  var lateDisplay     = (isNonSchool && !hasAnyRecord) ? '–' : counts.late+'명';
-  var etcDisplay      = (isNonSchool && !hasAnyRecord) ? '–' : (counts.early_leave+counts.partial)+'명';
+  // 비등교일 또는 미확정 날 → 출석 수 대신 표시 조정
+  var _noData = isNonSchool && !hasAnyRecord;
+  var _unconfirmed = !isNonSchool && !_confirmedStat;
+  var attendedDisplay = _noData ? '–' : _unconfirmed ? attended+'명*' : attended+'명';
+  var absentDisplay   = _noData ? '–' : counts.absent+'명';
+  var lateDisplay     = _noData ? '–' : counts.late+'명';
+  var etcDisplay      = _noData ? '–' : (counts.early_leave+counts.partial)+'명';
 
   var html = '';
   html += '<div class="att-stat-card"><div class="att-stat-label">전체</div><div class="att-stat-value">'+total+'명</div></div>';
-  html += '<div class="att-stat-card'+(isNonSchool&&!hasAnyRecord?'':' success')+'"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attendedDisplay+'</div></div>';
-  html += '<div class="att-stat-card'+(isNonSchool&&!hasAnyRecord?'':' danger')+'"><div class="att-stat-label">결석</div><div class="att-stat-value">'+absentDisplay+'</div></div>';
-  html += '<div class="att-stat-card'+(isNonSchool&&!hasAnyRecord?'':' warning')+'"><div class="att-stat-label">지각</div><div class="att-stat-value">'+lateDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':(_unconfirmed?'':' success'))+'"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attendedDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':' danger')+'"><div class="att-stat-label">결석</div><div class="att-stat-value">'+absentDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':' warning')+'"><div class="att-stat-label">지각</div><div class="att-stat-value">'+lateDisplay+'</div></div>';
   html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+etcDisplay+'</div></div>';
   document.getElementById('att-stats').innerHTML = html;
 }
@@ -22589,6 +22730,8 @@ function renderAttendanceTable(isNonSchool){
   var c = getActiveClass();
   if(!c) return;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  // 오늘·미래 날짜는 확정 여부에 따라 "출석" vs "미입력" 결정
+  var _confirmed = isAttDateConfirmed(attendanceCurrentDate);
   var allStudents = (c.students || []).slice();
 
   // 검색 필터
@@ -22641,11 +22784,15 @@ function renderAttendanceTable(isNonSchool){
     // 출결 상태
     html += '<td class="att-col-status" onclick="onAttRowClick(\''+s.num+'\')">';
     if(!hasIssue){
-      // 비등교일이고 기록 없음 → "–" 표시
       if(isNonSchool){
+        // 비등교일 기록 없음 → "–"
         html += '<span style="color:var(--text-tertiary);font-size:13px;">–</span>';
-      } else {
+      } else if(_confirmed){
+        // 확정됨 → 출석
         html += '<span class="att-status-default">출석</span>';
+      } else {
+        // 미확정 → 미입력
+        html += '<span class="att-status-unrecorded">미입력</span>';
       }
     } else {
       var seenStatuses = [];
