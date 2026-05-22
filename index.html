@@ -18676,7 +18676,8 @@ function renderHomeTodayClasses(){
           },
           period: a.period,
           isAdhoc: true,
-          adhocKind: a.kind || '보강'
+          adhocKind: a.kind || '보강',
+          adhocRef: a
         });
       }
     });
@@ -18699,7 +18700,8 @@ function renderHomeTodayClasses(){
     var period = item.period;
     var endHour = (typeof PERIOD_END_HOUR !== 'undefined' && PERIOD_END_HOUR[period]) ? PERIOD_END_HOUR[period] : (PERIOD_END[period] || 17);
     var startArr = (typeof PERIOD_START !== 'undefined' && PERIOD_START[period]) ? PERIOD_START[period] : (PERIOD_START_TIME[period] || null);
-    var hasMemo = typeof hasMemoToday === 'function' ? hasMemoToday(c) : false;
+    var memoTarget = (item.isAdhoc && item.adhocRef) ? item.adhocRef : c;
+    var hasMemo = typeof hasMemoToday === 'function' ? hasMemoToday(memoTarget) : false;
     var sessionNum = 0;
     if(typeof getAutoSessionNumber === 'function'){
       var si = getAutoSessionNumber(c, todayStr);
