@@ -13091,11 +13091,15 @@ function obSearchNeisSchool(){
     }
     var html = '';
     res.rows.forEach(function(row){
-      var kindLabel = ({els:'초등', mis:'중학', his:'고등'})[row._detectedKind] || '';
+      // 주소에서 시·구 2단어만 추출 (예: "인천광역시 서구 여우재로..." → "인천광역시 서구")
+      var addrParts = (row.ORG_RDNMA || '').split(' ');
+      var shortAddr = addrParts.slice(0, 2).join(' ');
+      var office = row.ATPT_OFCDC_SC_NM || '';
+      var meta = office + (shortAddr ? ' · ' + shortAddr : '');
       html += '<div class="neis-school-result" onclick="obSelectNeisSchool('+JSON.stringify(row).replace(/"/g,'&quot;')+')">' +
         '<div style="flex:1;min-width:0;">' +
           '<div class="neis-school-result-name">'+escapeHtml(row.SCHUL_NM||'')+'</div>' +
-          '<div class="neis-school-result-meta">'+escapeHtml(row.ATPT_OFCDC_SC_NM||'')+' · '+escapeHtml(kindLabel)+'</div>' +
+          '<div class="neis-school-result-meta">'+escapeHtml(meta)+'</div>' +
         '</div>' +
         '</div>';
     });
