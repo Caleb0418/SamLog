@@ -551,6 +551,7 @@ body{
 }
 .student-row:last-child{border-bottom:none;}
 .student-row:hover{background:var(--bg-elevated);}
+.student-row:focus{outline:none;background:var(--bg-elevated);box-shadow:inset 2px 0 0 var(--accent);}
 .student-row.active{background:var(--accent-dim);}
 .student-row.active::before{
   content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
@@ -7017,7 +7018,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </label>
         <button class="btn-primary" id="quick-memo-save-btn" disabled onclick="saveQuickMemo()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          미분류 메모로 저장
+          보관함에 저장
         </button>
       </div>
     </div>
@@ -10632,11 +10633,39 @@ function renderSidebar(filter){
   container.innerHTML = html;
 
   // 이벤트
-  container.querySelectorAll('.student-row').forEach(function(row){
+  var allRows = Array.from(container.querySelectorAll('.student-row'));
+  allRows.forEach(function(row){
     row.addEventListener('click', function(){
       selectStudent(row.dataset.num);
     });
+    row.addEventListener('keydown', function(e){
+      var rows = Array.from(container.querySelectorAll('.student-row'));
+      var i = rows.indexOf(row);
+      if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        if(i < rows.length - 1){ rows[i+1].focus(); selectStudent(rows[i+1].dataset.num); }
+      } else if(e.key === 'ArrowUp'){
+        e.preventDefault();
+        if(i > 0){ rows[i-1].focus(); selectStudent(rows[i-1].dataset.num); }
+        else { var si = document.getElementById('search-input'); if(si) si.focus(); }
+      } else if(e.key === 'Enter'){
+        e.preventDefault();
+        selectStudent(row.dataset.num);
+      }
+    });
   });
+
+  // 검색창 ↓ → 첫 번째 학생으로 이동
+  var searchInput = document.getElementById('search-input');
+  if(searchInput){
+    searchInput.onkeydown = function(e){
+      if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        var firstRow = container.querySelector('.student-row');
+        if(firstRow){ firstRow.focus(); selectStudent(firstRow.dataset.num); }
+      }
+    };
+  }
 }
 
 function studentRowHTML(s, isUnsorted){
@@ -10657,7 +10686,7 @@ function studentRowHTML(s, isUnsorted){
       rightContent = '<span class="last-recorded-meta '+cls+'">'+txt+'</span>';
     }
   }
-  return '<div class="student-row'+activeCls+'" data-num="'+s.num+'">'+
+  return '<div class="student-row'+activeCls+'" data-num="'+s.num+'" tabindex="-1">'+
     '<div class="student-avatar">'+firstChar+'</div>'+
     '<div class="student-info">'+
       '<span class="student-num">'+s.num+'</span>'+
@@ -20040,8 +20069,8 @@ function saveQuickMemo(){
     var toastMsg = allMentionStudents.length > 0 && matches.matched.length === 0
       ? mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
       : allMentionStudents.length > 0
-        ? savedNames.slice(0, matches.matched.length).join(', ')+'에 미분류 메모, '+mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
-        : savedNames.join(', ')+'에 미분류 메모로 저장됐어요';
+        ? savedNames.slice(0, matches.matched.length).join(', ')+'에 보관함 저장, '+mentionedClassKeys.map(function(ck){ var c=classes[ck]; return c.grade+'학년 '+c.classNum+'반 전체'; }).join(', ')+'에 공지로 저장됐어요'
+        : savedNames.join(', ')+'에 보관함으로 저장됐어요';
 
     if(mentionedClassKeys.length >= 2 && allMentionStudents.length > 0){
       // 다중 반 bulk 저장 — undo 토스트 제공
