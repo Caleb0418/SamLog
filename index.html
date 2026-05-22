@@ -2552,6 +2552,15 @@ body{
   display:inline-flex;align-items:center;gap:4px;font-family:inherit;
 }
 .att-btn-icon:hover{background:var(--bg-elevated);border-color:var(--border-strong,var(--border));}
+/* 비등교일 배너 */
+.att-nonschool-banner{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;margin-bottom:14px;
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:10px;font-size:13px;color:var(--text-secondary);
+}
+.att-nonschool-banner svg{flex-shrink:0;color:var(--text-tertiary);}
+
 /* 통계 카드 */
 .att-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
 .att-stat-card{background:var(--bg-surface);border-radius:8px;padding:10px 14px;}
@@ -8133,6 +8142,12 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   </div>
 
   <div id="att-view-daily">
+
+  <!-- 비등교일 안내 배너 (주말/공휴일/방학) -->
+  <div id="att-nonschool-banner" class="att-nonschool-banner" style="display:none;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="att-nonschool-banner-text">비등교일이에요 · 출결 집계에서 제외됩니다</span>
+  </div>
 
   <!-- 통계 카드 -->
 
@@ -22088,8 +22103,28 @@ function renderAttendanceTab(){
   document.getElementById('att-title').textContent =
     attendanceCurrentDate === getTodayDate() ? '오늘 출결' :
     formatAttendanceDate(attendanceCurrentDate) + ' 출결';
-  renderAttendanceStats();
-  renderAttendanceTable();
+
+  // 비등교일(주말/공휴일/방학) 감지
+  var _dateObj = new Date(attendanceCurrentDate);
+  var _dow = _dateObj.getDay();
+  var _isWeekend = _dow === 0 || _dow === 6;
+  var _isHoliday = typeof isNonSchoolDay === 'function' && isNonSchoolDay(attendanceCurrentDate, c.grade);
+  var _isNonSchool = _isWeekend || _isHoliday;
+
+  var banner = document.getElementById('att-nonschool-banner');
+  var bannerText = document.getElementById('att-nonschool-banner-text');
+  if(banner){
+    if(_isNonSchool){
+      var _label = _isWeekend ? (['일','월','화','수','목','금','토'][_dow]+'요일')  : '공휴일·휴업일';
+      bannerText.textContent = _label+' · 비등교일이에요. 출결 기록이 필요한 경우에만 입력해주세요.';
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  renderAttendanceStats(_isNonSchool);
+  renderAttendanceTable(_isNonSchool);
 }
 
 function switchAttView(view){
@@ -22507,10 +22542,13 @@ function exportCmmCsv(){
   showToast('CSV 파일이 다운로드됐어요');
 }
 
-function renderAttendanceStats(){
+function renderAttendanceStats(isNonSchool){
   var c = getActiveClass();
   var total = (c.students || []).length;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var hasAnyRecord = Object.keys(dateRecs).some(function(num){
+    return (dateRecs[num]||[]).length > 0;
+  });
   var counts = {absent:0, late:0, early_leave:0, partial:0};
   Object.keys(dateRecs).forEach(function(num){
     var recs = dateRecs[num];
@@ -22523,16 +22561,23 @@ function renderAttendanceStats(){
   });
   var issueTotal = counts.absent + counts.late + counts.early_leave + counts.partial;
   var attended = total - issueTotal;
+
+  // 비등교일이고 기록이 전혀 없으면 출석 수 대신 "–" 표시
+  var attendedDisplay = (isNonSchool && !hasAnyRecord) ? '–' : attended+'명';
+  var absentDisplay   = (isNonSchool && !hasAnyRecord) ? '–' : counts.absent+'명';
+  var lateDisplay     = (isNonSchool && !hasAnyRecord) ? '–' : counts.late+'명';
+  var etcDisplay      = (isNonSchool && !hasAnyRecord) ? '–' : (counts.early_leave+counts.partial)+'명';
+
   var html = '';
   html += '<div class="att-stat-card"><div class="att-stat-label">전체</div><div class="att-stat-value">'+total+'명</div></div>';
-  html += '<div class="att-stat-card success"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attended+'명</div></div>';
-  html += '<div class="att-stat-card danger"><div class="att-stat-label">결석</div><div class="att-stat-value">'+counts.absent+'명</div></div>';
-  html += '<div class="att-stat-card warning"><div class="att-stat-label">지각</div><div class="att-stat-value">'+counts.late+'명</div></div>';
-  html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+(counts.early_leave+counts.partial)+'명</div></div>';
+  html += '<div class="att-stat-card'+(isNonSchool&&!hasAnyRecord?'':' success')+'"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attendedDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(isNonSchool&&!hasAnyRecord?'':' danger')+'"><div class="att-stat-label">결석</div><div class="att-stat-value">'+absentDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(isNonSchool&&!hasAnyRecord?'':' warning')+'"><div class="att-stat-label">지각</div><div class="att-stat-value">'+lateDisplay+'</div></div>';
+  html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+etcDisplay+'</div></div>';
   document.getElementById('att-stats').innerHTML = html;
 }
 
-function renderAttendanceTable(){
+function renderAttendanceTable(isNonSchool){
   var c = getActiveClass();
   if(!c) return;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
@@ -22588,7 +22633,12 @@ function renderAttendanceTable(){
     // 출결 상태
     html += '<td class="att-col-status" onclick="onAttRowClick(\''+s.num+'\')">';
     if(!hasIssue){
-      html += '<span class="att-status-default">출석</span>';
+      // 비등교일이고 기록 없음 → "–" 표시
+      if(isNonSchool){
+        html += '<span style="color:var(--text-tertiary);font-size:13px;">–</span>';
+      } else {
+        html += '<span class="att-status-default">출석</span>';
+      }
     } else {
       var seenStatuses = [];
       recs.forEach(function(r){ if(seenStatuses.indexOf(r.status)<0) seenStatuses.push(r.status); });
