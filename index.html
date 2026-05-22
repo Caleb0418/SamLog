@@ -4541,6 +4541,21 @@ details > summary::-webkit-details-marker { display:none; }
 .sgt-student-list-body .student-item .si-area-dot.empty{
   background:transparent;border:1px dashed var(--border-strong);
 }
+/* 생기부 탭 — 반 선택 칩 */
+.sgt-class-chip{
+  font-family:inherit;font-size:12px;font-weight:500;
+  padding:6px 12px;border-radius:20px;
+  border:1px solid var(--border);
+  background:var(--bg-surface);color:var(--text-secondary);
+  cursor:pointer;transition:all 0.12s;white-space:nowrap;
+}
+.sgt-class-chip:hover{
+  border-color:var(--border-strong);color:var(--text);
+}
+.sgt-class-chip.active{
+  background:var(--accent-dim);color:var(--accent);
+  border-color:var(--accent);font-weight:600;
+}
 
 /* ═══════════════════════════════════════════
    생기부 매트릭스 뷰
@@ -15162,8 +15177,9 @@ var sgtState = {
 };
 // 학생 목록 정렬·검색 상태
 var sgtListState = {
-  sort: 'num',   // 'num' (번호순) | 'rec' (미작성순)
-  search: ''
+  sort: 'num',      // 'num' (번호순) | 'rec' (미작성순)
+  search: '',
+  classKey: null    // null이면 currentClassKey 사용. 다른 반 선택 시 그 classKey
 };
 
 function openSaengibu(){
@@ -15209,6 +15225,20 @@ function openSaengibu(){
 
 function closeSaengibu(){
   document.getElementById('saengibu-overlay').classList.remove('show');
+
+  // 다른 반으로 임시 전환했다면 원래 반으로 복원
+  if(_sgOriginalClassKey && _sgOriginalClassKey !== currentClassKey){
+    currentClassKey = _sgOriginalClassKey;
+    syncActiveClass();
+    currentStudent = _sgOriginalStudent;
+    // 생기부 탭이 열려있으면 다시 렌더링 (점 업데이트 등)
+    if(document.getElementById('tab-saenggibu') &&
+       document.getElementById('tab-saenggibu').style.display !== 'none'){
+      renderSaenggibuWriteView();
+    }
+  }
+  _sgOriginalClassKey = null;
+  _sgOriginalStudent  = null;
 }
 
 function selectSgArea(btn){
@@ -16157,26 +16187,47 @@ function renderSaenggibuMatrixView(){
     '</div>';
 
   // 헤더
+  var matrixAllKeys = Object.keys(matrix);
+  var totalStudentCount = matrixAllKeys.length;
   var headerCells = '<th class="student-col">학생</th>';
   areaCodes.forEach(function(code){
     var meta = SAENGGIBU_AREA_CODES[code];
-    var doneCount = students.filter(function(s){ return matrix[s.num][code]; }).length;
+    var doneCount = matrixAllKeys.filter(function(k){ return matrix[k][code]; }).length;
     var dupCount = dupsByArea[code].length;
     var dupBadge = dupCount > 0 ? ' <span style="color:#b45309;">⚠' + dupCount + '</span>' : '';
     headerCells += '<th onclick="openSgtAreaCompare(\'' + code + '\')" title="' + meta.label + ' 비교 보기">' +
       meta.label + '<br>' +
       '<span style="font-size:10px;font-weight:400;color:var(--text-tertiary);">' +
-        doneCount + '/' + students.length + dupBadge +
+        doneCount + '/' + totalStudentCount + dupBadge +
       '</span>' +
     '</th>';
   });
 
-  // 본문
-  var sortedStudents = students.slice().sort(function(a,b){ return parseInt(a.num) - parseInt(b.num); });
-  var rowsHtml = sortedStudents.map(function(s){
-    var rowCells = '<td class="student-col">' + parseInt(s.num) + '번 ' + escapeHtml(getDisplayName(s)) + '</td>';
+  // 전체 반 × 학생 목록 (학년→반→번호 순)
+  var matrixKeys = Object.keys(matrix).sort(function(a, b){
+    var mA = matrix[a], mB = matrix[b];
+    var gA = parseInt((classes[mA._classKey] || {}).grade || 0);
+    var gB = parseInt((classes[mB._classKey] || {}).grade || 0);
+    var cA = parseInt((classes[mA._classKey] || {}).classNum || 0);
+    var cB = parseInt((classes[mB._classKey] || {}).classNum || 0);
+    var nA = parseInt(mA._student.num || 0);
+    var nB = parseInt(mB._student.num || 0);
+    if(gA !== gB) return gA - gB;
+    if(cA !== cB) return cA - cB;
+    return nA - nB;
+  });
+
+  var rowsHtml = matrixKeys.map(function(key){
+    var entry = matrix[key];
+    var s = entry._student;
+    var classLabel = entry._classLabel;
+    var rowCells =
+      '<td class="student-col">' +
+        '<span style="font-size:10px;color:var(--text-tertiary);margin-right:4px;">' + classLabel + '</span>' +
+        parseInt(s.num) + '번 ' + escapeHtml(getDisplayName(s)) +
+      '</td>';
     areaCodes.forEach(function(code){
-      var rec = matrix[s.num][code];
+      var rec = matrix[key][code];
       var isDup = dupMap[s.num] && dupMap[s.num][code] && dupMap[s.num][code].length > 0;
       var cellHtml;
       if(!rec){
@@ -16186,7 +16237,7 @@ function renderSaenggibuMatrixView(){
                       isDup ? 'sgt-cell-dup' : 'sgt-cell-done';
         cellHtml = '<span class="' + charCls + '">' + (isDup ? '⚠' : '✓') + rec.charCount + '</span>';
       }
-      rowCells += '<td onclick="openSgtCellDetail(\'' + s.num + '\', \'' + code + '\')">' + cellHtml + '</td>';
+      rowCells += '<td onclick="openSgtCellDetailByKey(\'' + key + '\', \'' + code + '\')">' + cellHtml + '</td>';
     });
     return '<tr>' + rowCells + '</tr>';
   }).join('');
@@ -16298,6 +16349,91 @@ function openSgtCellDetail(studentNum, areaCode){
   modal.classList.add('show');
 }
 
+// 매트릭스 셀 클릭 — classKey_studentNum 형태의 key로 호출
+function openSgtCellDetailByKey(matrixKey, areaCode){
+  var parts = matrixKey.match(/^(.+)_(\d+)$/);
+  if(!parts) return;
+  var classKey   = parts[1];
+  var studentNum = parts[2];
+  openSgtCellDetailWithClass(studentNum, areaCode, classKey);
+}
+
+function openSgtCellDetailWithClass(studentNum, areaCode, classKey){
+  var modal = _ensureSgtModal();
+  var classData = classes[classKey];
+  var student = classData && (classData.students || []).find(function(s){ return s.num === studentNum; });
+  var areaMeta = SAENGGIBU_AREA_CODES[areaCode];
+  if(!student || !areaMeta){ closeSgtCellModal(); return; }
+
+  var classLabel = classData.grade + '학년 ' + classData.classNum + '반';
+  var rec = getLatestSaenggibu(studentNum, areaCode, classKey);
+  var titleEl = document.getElementById('sgt-cell-modal-title');
+  if(titleEl) titleEl.textContent = classLabel + ' ' + parseInt(student.num) + '번 ' + getDisplayName(student) + ' · ' + areaMeta.label;
+
+  var body = document.getElementById('sgt-cell-modal-body');
+  if(!body) return;
+
+  if(!rec){
+    body.innerHTML =
+      '<div style="padding:40px 20px;text-align:center;color:var(--text-tertiary);">' +
+        '<div style="font-size:13px;margin-bottom:8px;">아직 작성된 내용이 없어요</div>' +
+        '<button class="btn-small primary" onclick="goToWriteThisWithClass(\'' + studentNum + '\', \'' + areaCode + '\', \'' + classKey + '\')">바로 작성하러 가기</button>' +
+      '</div>';
+    modal.classList.add('show');
+    return;
+  }
+
+  var others = [];
+  (classData.students || []).forEach(function(s){
+    if(s.num === studentNum) return;
+    var otherRec = getLatestSaenggibu(s.num, areaCode, classKey);
+    if(!otherRec) return;
+    var sim = _sgtTextSimilarity(rec.content, otherRec.content);
+    others.push({ num: s.num, name: getDisplayName(s), content: otherRec.content, similarity: sim });
+  });
+  others.sort(function(a,b){ return b.similarity - a.similarity; });
+
+  var sectionsHtml =
+    '<div class="sgt-cell-modal-section">' +
+      '<div class="sgt-cell-modal-section-title">' + classLabel + ' · 생기부 내용 · ' + rec.charCount + '/' + rec.charLimit + '자 · ' + rec.date + '</div>' +
+      '<div class="sgt-cell-modal-content">' + escapeHtml(rec.content) + '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;">' +
+        '<button class="btn-small secondary" onclick="_sgtCopyContent(\'' + rec.id + '\')">복사</button>' +
+        '<button class="btn-small primary" onclick="goToWriteThisWithClass(\'' + studentNum + '\', \'' + areaCode + '\', \'' + classKey + '\')">수정하러 가기</button>' +
+      '</div>' +
+    '</div>';
+
+  if(others.length > 0){
+    var othersHtml = others.slice(0, 10).map(function(o){
+      var isDup = o.similarity >= 0.5;
+      var simBadge = isDup
+        ? '<span class="sgt-others-sim">⚠ ' + Math.round(o.similarity * 100) + '% 유사</span>'
+        : '<span style="font-size:10px;color:var(--text-tertiary);">' + Math.round(o.similarity * 100) + '% 유사</span>';
+      var preview = o.content.length > 200 ? o.content.slice(0,200) + '…' : o.content;
+      return '<div class="sgt-others-item' + (isDup ? ' dup' : '') + '">' +
+        '<div class="sgt-others-name"><span>' + parseInt(o.num) + '번 ' + escapeHtml(o.name) + '</span>' + simBadge + '</div>' +
+        '<div class="sgt-others-content">' + escapeHtml(preview) + '</div>' +
+      '</div>';
+    }).join('');
+    sectionsHtml += '<div class="sgt-cell-modal-section">' +
+      '<div class="sgt-cell-modal-section-title">같은 반 다른 학생 비교 (' + others.length + '명, 유사도 높은 순)</div>' +
+      '<div class="sgt-others-list">' + othersHtml + '</div>' +
+    '</div>';
+  }
+
+  body.innerHTML = sectionsHtml;
+  modal.classList.add('show');
+}
+
+function goToWriteThisWithClass(studentNum, areaCode, classKey){
+  closeSgtCellModal();
+  sgtListState.classKey = classKey;
+  switchSaenggibuView('write');
+  setTimeout(function(){
+    openSgtSaengibuForStudent(studentNum);
+  }, 100);
+}
+
 function _sgtCopyContent(recId){
   var rec = null;
   for(var num in records){
@@ -16361,11 +16497,10 @@ function openSgtAreaCompare(areaCode){
 
 function goToWriteThis(studentNum, areaCode){
   closeSgtCellModal();
-  sgtState.studentNum = studentNum;
-  sgtState.areaCode = areaCode;
-  sgtState.generatedPrompt = '';
-  sgtState.aiResponse = '';
   switchSaenggibuView('write');
+  setTimeout(function(){
+    openSgtSaengibuForStudent(studentNum);
+  }, 100);
 }
 
 /* ═══════════════════════════════════════════
@@ -16445,7 +16580,11 @@ function renderSaenggibuProgressView(){
       allDups.slice(0, 10).map(function(d){
         return '<div class="sgt-dup-card">' +
           '<div class="sgt-dup-pair">' +
-            '<span>' + parseInt(d.a.num) + '번 ' + escapeHtml(d.a.name) + ' ↔ ' + parseInt(d.b.num) + '번 ' + escapeHtml(d.b.name) + '</span>' +
+            '<span>' +
+              (d.a.classLabel ? d.a.classLabel + ' ' : '') + parseInt(d.a.num) + '번 ' + escapeHtml(d.a.name) +
+              ' ↔ ' +
+              (d.b.classLabel ? d.b.classLabel + ' ' : '') + parseInt(d.b.num) + '번 ' + escapeHtml(d.b.name) +
+            '</span>' +
             '<span class="sgt-dup-area">— ' + d.areaLabel + '</span>' +
             '<span class="sgt-dup-sim">' + Math.round(d.similarity * 100) + '%</span>' +
             '<button class="btn-small secondary" style="font-size:10px;padding:3px 8px;margin-left:auto;" onclick="openSgtCellDetail(\'' + d.a.num + '\', \'' + d.areaCode + '\')">자세히</button>' +
@@ -16482,8 +16621,14 @@ function switchSaenggibuView(view){
 function renderSaenggibuWriteView(){
   var container = document.getElementById('sgt-view-write');
   if(!container) return;
+  // 선택된 반의 학생 목록 결정
+  var sgtClassKey = sgtListState.classKey || currentClassKey;
+  if(!classes[sgtClassKey]) sgtClassKey = currentClassKey;
+  var sgtClassData = classes[sgtClassKey];
+  var sgtStudents = sgtClassData ? (sgtClassData.students || []) : [];
+  var sgtRecords  = sgtClassData ? (sgtClassData.records  || {}) : {};
   // 학생 명단이 없으면
-  if(students.length === 0){
+  if(sgtStudents.length === 0){
     container.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-tertiary);">' +
       '<div style="font-size:14px;margin-bottom:8px;">학생 명단이 비어있어요</div>' +
       '<div style="font-size:12px;">학생 관리 탭에서 명단을 먼저 등록해주세요.</div>' +
@@ -16496,7 +16641,7 @@ function renderSaenggibuWriteView(){
   var headerHtml =
     '<div class="sgt-student-list-head">' +
       '<div class="sgt-student-list-head-row">' +
-        '<div class="sgt-student-list-label">우리 반 학생 (' + students.length + '명)</div>' +
+        '<div class="sgt-student-list-label">' + sgtClassData.grade + '학년 ' + sgtClassData.classNum + '반 학생 (' + sgtStudents.length + '명)</div>' +
         '<button class="sgt-sort-toggle" onclick="toggleSgtSort()" title="' + sortTitle + '">' + sortLabel + '</button>' +
       '</div>' +
       '<div class="sgt-student-search-wrap">' +
@@ -16505,11 +16650,11 @@ function renderSaenggibuWriteView(){
       '</div>' +
     '</div>';
   // 정렬 + 필터
-  var sortedStudents = students.slice();
+  var sortedStudents = sgtStudents.slice();
   if(sgtListState.sort === 'rec'){
     sortedStudents.sort(function(a, b){
-      var ad = _sgtGetDoneAreasForStudent(a.num).length;
-      var bd = _sgtGetDoneAreasForStudent(b.num).length;
+      var ad = _sgtGetDoneAreasForStudent(a.num, sgtClassKey).length;
+      var bd = _sgtGetDoneAreasForStudent(b.num, sgtClassKey).length;
       if(ad !== bd) return ad - bd;
       return parseInt(a.num) - parseInt(b.num);
     });
@@ -16531,8 +16676,8 @@ function renderSaenggibuWriteView(){
     '</div>';
   } else {
     rowsHtml = sortedStudents.map(function(s){
-      var doneAreas = _sgtGetDoneAreasForStudent(s.num);
-      var sgbRecs = (records[s.num] || []).filter(function(r){ return r.type === 'saenggibu'; }).length;
+      var doneAreas = _sgtGetDoneAreasForStudent(s.num, sgtClassKey);
+      var sgbRecs = (sgtRecords[s.num] || []).filter(function(r){ return r.type === 'saenggibu'; }).length;
       var dotsHtml = areaCodes.map(function(code){
         var isDone = doneAreas.indexOf(code) >= 0;
         return '<span class="si-area-dot' + (isDone ? '' : ' empty') + '" title="' + SAENGGIBU_AREA_CODES[code].label + (isDone ? ' 작성됨' : ' 미작성') + '"></span>';
@@ -16558,7 +16703,30 @@ function renderSaenggibuWriteView(){
     '<div style="padding:16px 20px;text-align:center;color:var(--text-tertiary);font-size:12px;">' +
       '학생을 클릭하면 생기부 작성 창이 열려요. 영역별로 작성·저장하면 한눈에 보기에서 현황을 확인할 수 있어요.' +
     '</div>';
-  container.innerHTML = listHtml + hintHtml;
+  // 반 선택 드롭다운 (전체 반 목록)
+  var classKeys = Object.keys(classes).sort(function(a,b){
+    var ga = parseInt(classes[a].grade||0), gb = parseInt(classes[b].grade||0);
+    var ca = parseInt(classes[a].classNum||0), cb = parseInt(classes[b].classNum||0);
+    return ga !== gb ? ga - gb : ca - cb;
+  });
+  var classSelectorHtml =
+    '<div style="margin-bottom:12px;">' +
+      '<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase;">반 선택</div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+        classKeys.map(function(key){
+          var c = classes[key];
+          var isActive = key === sgtClassKey;
+          var isPrimary = c.isPrimary;
+          return '<button class="sgt-class-chip' + (isActive ? ' active' : '') + '" onclick="selectSgtClass(\'' + key + '\')" ' +
+            'title="' + (isPrimary ? '담임반' : '교과 담당') + '">' +
+            c.grade + '학년 ' + c.classNum + '반' +
+            (isPrimary ? ' <span style="font-size:9px;opacity:0.7;">(담임)</span>' : '') +
+          '</button>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+
+  container.innerHTML = classSelectorHtml + listHtml + hintHtml;
 }
 function _sgtRenderHistory(studentNum, areaCode){
   var all = (records[studentNum] || [])
@@ -16580,10 +16748,12 @@ function _sgtRenderHistory(studentNum, areaCode){
     '</div>' +
   '</div>';
 }
-function _sgtGetDoneAreasForStudent(studentNum){
-  if(!records[studentNum]) return [];
+function _sgtGetDoneAreasForStudent(studentNum, classKeyOpt){
+  var ck = classKeyOpt || sgtListState.classKey || currentClassKey;
+  var classData = classes[ck];
+  var recs = (classData && classData.records && classData.records[studentNum]) || [];
   var areas = {};
-  records[studentNum].forEach(function(r){
+  recs.forEach(function(r){
     if(r.type === 'saenggibu') areas[r.area] = true;
   });
   return Object.keys(areas);
@@ -16592,18 +16762,32 @@ function _sgtGetDoneAreasForStudent(studentNum){
 /* ═══════════════════════════════════════════
    저장된 생기부 조회 헬퍼
 ═══════════════════════════════════════════ */
-function getLatestSaenggibu(studentNum, areaCode){
-  var all = (records[studentNum] || [])
+// classKeyOpt: 특정 반 지정. 없으면 현재 활성 반(records 글로벌) 사용
+function getLatestSaenggibu(studentNum, areaCode, classKeyOpt){
+  var recs;
+  if(classKeyOpt && classes[classKeyOpt]){
+    recs = (classes[classKeyOpt].records[studentNum] || []);
+  } else {
+    recs = (records[studentNum] || []);
+  }
+  var all = recs
     .filter(function(r){ return r.type === 'saenggibu' && r.area === areaCode; })
     .sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
   return all[0] || null;
 }
+// 전체 반의 모든 학생 × 영역 매트릭스 빌드
 function buildClassSaenggibuMatrix(){
   var matrix = {};
-  students.forEach(function(s){
-    matrix[s.num] = {};
-    Object.keys(SAENGGIBU_AREA_CODES).forEach(function(areaCode){
-      matrix[s.num][areaCode] = getLatestSaenggibu(s.num, areaCode);
+  Object.keys(classes).forEach(function(classKey){
+    var c = classes[classKey];
+    var classLabel = c.grade + '학년 ' + c.classNum + '반';
+    (c.students || []).forEach(function(s){
+      if(!s || !s.num) return;
+      var key = classKey + '_' + s.num;
+      matrix[key] = { _student: s, _classKey: classKey, _classLabel: classLabel };
+      Object.keys(SAENGGIBU_AREA_CODES).forEach(function(areaCode){
+        matrix[key][areaCode] = getLatestSaenggibu(s.num, areaCode, classKey);
+      });
     });
   });
   return matrix;
@@ -16630,9 +16814,19 @@ function findSaenggibuDuplicates(areaCode){
     return _sgtDupCache.data[areaCode];
   }
   var entries = [];
-  students.forEach(function(s){
-    var r = getLatestSaenggibu(s.num, areaCode);
-    if(r) entries.push({ num: s.num, name: getDisplayName(s), content: r.content });
+  Object.keys(classes).forEach(function(classKey){
+    var c = classes[classKey];
+    (c.students || []).forEach(function(s){
+      if(!s || !s.num) return;
+      var r = getLatestSaenggibu(s.num, areaCode, classKey);
+      if(r) entries.push({
+        num: s.num,
+        name: getDisplayName(s),
+        classKey: classKey,
+        classLabel: c.grade + '학년 ' + c.classNum + '반',
+        content: r.content
+      });
+    });
   });
   var duplicates = [];
   for(var i=0; i<entries.length; i++){
@@ -16659,12 +16853,40 @@ function _sgtInvalidateDupCache(){
 ═══════════════════════════════════════════ */
 // 학생 클릭 시 — 기존 openSaengibu 모달 활용
 function openSgtSaengibuForStudent(num){
+  // 현재 생기부 탭에서 선택된 반 (다른 반일 수 있음)
+  var targetClassKey = sgtListState.classKey || currentClassKey;
+
+  // 원래 반을 기억해두기
+  var prevClassKey = currentClassKey;
+  var prevStudent  = currentStudent;
+
+  // 타겟 반으로 임시 전환 (openSaengibu가 students/records 글로벌을 참조하므로)
+  if(targetClassKey !== currentClassKey){
+    currentClassKey = targetClassKey;
+    syncActiveClass();
+  }
+
   currentStudent = num;
+
+  // 모달 닫힐 때 원래 반으로 복원하는 훅 등록
+  _sgOriginalClassKey = prevClassKey;
+  _sgOriginalStudent  = prevStudent;
+
   openSaengibu();
 }
+
+// 원래 반 복원용 전역
+var _sgOriginalClassKey = null;
+var _sgOriginalStudent  = null;
 // 호환성 유지 (기존 코드 참조 방어)
 function selectSgtStudent(num){
   openSgtSaengibuForStudent(num);
+}
+// 생기부 탭에서 반 선택
+function selectSgtClass(classKey){
+  sgtListState.classKey = classKey;
+  sgtListState.search = '';
+  renderSaenggibuWriteView();
 }
 // 정렬 토글
 function toggleSgtSort(){
