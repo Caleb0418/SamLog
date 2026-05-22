@@ -1500,12 +1500,16 @@ body{
   margin:0 auto 16px;
 }
 .onboarding-feature-list{
-  display:flex;flex-direction:column;gap:10px;
+  display:flex;flex-direction:column;gap:12px;
   margin-bottom:18px;padding:16px;
   background:var(--bg-elevated);border-radius:var(--radius-md);
 }
 .onboarding-feature{
-  display:flex;gap:12px;align-items:flex-start;
+  display:flex;gap:12px;align-items:center;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.onboarding-feature:last-child{
+  padding-bottom:0;border-bottom:none;
 }
 .onboarding-feature-icon{
   font-size:18px;line-height:1;flex-shrink:0;width:24px;text-align:center;
