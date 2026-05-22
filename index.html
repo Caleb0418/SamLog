@@ -1897,6 +1897,15 @@ body{
   font-family:inherit;outline:none;
 }
 .tm-textarea:focus{box-shadow:0 0 0 3px rgba(47,111,235,0.1);}
+.tm-toolbar{display:flex;gap:5px;margin-bottom:6px;}
+.tm-tb-btn{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:11px;padding:3px 9px;border-radius:5px;
+  border:1px solid var(--border);background:var(--bg-elevated);
+  color:var(--text-secondary);cursor:pointer;font-family:inherit;
+  transition:border-color .12s,color .12s;
+}
+.tm-tb-btn:hover{border-color:var(--accent);color:var(--accent);}
 .tm-hint{
   font-size:10px;color:var(--text-tertiary);margin-top:5px;
   display:flex;gap:8px;flex-wrap:wrap;
@@ -7142,7 +7151,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <div class="quick-memo-title">퀵 메모</div>
           <div class="quick-memo-sub">@이름을 적으면 자동으로 학생에 연결돼요</div>
         </div>
-        <span class="quick-memo-tip">⌘+Enter로 저장</span>
+        <span class="quick-memo-tip">Ctrl+Enter로 저장</span>
       </div>
       <textarea class="quick-memo-input" id="quick-memo-input" rows="3" placeholder="@이름 학생 멘션  ·  @all 또는 @전체 입력하면 반 전체 누가 가능"></textarea>
 
@@ -19557,9 +19566,25 @@ function _tmParseLine(line){
     return { type:'bullet', text: line.replace(/^\s*-\s+/, '') };
   if(/^\s*\[x\]\s+/i.test(line))
     return { type:'checkbox', checked:true,  text: line.replace(/^\s*\[x\]\s+/i, '') };
-  if(/^\s*\[\]\s+/.test(line))
-    return { type:'checkbox', checked:false, text: line.replace(/^\s*\[\]\s+/, '') };
+  if(/^\s*\[\]\s*/.test(line))
+    return { type:'checkbox', checked:false, text: line.replace(/^\s*\[\]\s*/, '') };
   return { type:'plain', text: line };
+}
+
+// 툴바 버튼 — 현재 줄 앞에 서식 삽입
+function tmInsert(str){
+  var ta = document.getElementById('tm-textarea');
+  if(!ta) return;
+  var start = ta.selectionStart;
+  var val = ta.value;
+  var lineStart = val.lastIndexOf('\n', start - 1) + 1;
+  var currentLine = val.slice(lineStart, start);
+  var prefix = (currentLine.trim() && start > lineStart) ? '\n' : '';
+  var insert = prefix + str;
+  ta.value = val.slice(0, start) + insert + val.slice(start);
+  ta.selectionStart = ta.selectionEnd = start + insert.length;
+  ta.focus();
+  tmOnInput(ta);
 }
 
 // 체크박스 토글 — 줄 번호로 raw text 직접 수정
@@ -19640,6 +19665,10 @@ function renderTeacherMemoCard(){
   var bodyHtml;
   if(_tmEditMode){
     bodyHtml =
+      '<div class="tm-toolbar">' +
+        '<button type="button" class="tm-tb-btn" onmousedown="event.preventDefault();tmInsert(\'- \')">• 글머리</button>' +
+        '<button type="button" class="tm-tb-btn" onmousedown="event.preventDefault();tmInsert(\'[] \')">☐ 체크박스</button>' +
+      '</div>' +
       '<textarea id="tm-textarea" class="tm-textarea"' +
         ' oninput="tmOnInput(this)"' +
         ' onblur="tmEndEdit()"' +
@@ -19647,9 +19676,6 @@ function renderTeacherMemoCard(){
         ' placeholder="오늘 할 일이나 개인 메모를 적어두세요."' +
       '>' + escapeHtml(text) + '</textarea>' +
       '<div class="tm-hint">' +
-        '<span><span class="tm-hint-chip">- 내용</span> 글머리</span>' +
-        '<span><span class="tm-hint-chip">[] 내용</span> 체크박스</span>' +
-        '<span><span class="tm-hint-chip">[x] 내용</span> 완료 체크</span>' +
         '<span><span class="tm-hint-chip">Ctrl+Enter</span> 저장</span>' +
       '</div>';
   } else {
