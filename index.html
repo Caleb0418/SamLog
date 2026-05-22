@@ -1831,6 +1831,82 @@ body{
 }
 .qm-toggle-label.on{color:var(--accent);font-weight:500;}
 
+/* ── 오늘 업무 메모 카드 ── */
+.tm-card{
+  background:var(--bg-surface);border-radius:12px;
+  padding:14px 16px;margin-bottom:16px;
+  border:1px solid var(--border);
+}
+.tm-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.tm-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.tm-badge{
+  font-size:10px;color:var(--text-tertiary);
+  background:var(--bg-elevated);border-radius:4px;padding:2px 6px;
+  border:1px solid var(--border);
+}
+.tm-edit-btn{
+  font-family:inherit;font-size:11px;color:var(--text-secondary);
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:3px 8px;cursor:pointer;transition:all .12s;
+}
+.tm-edit-btn:hover{border-color:var(--border-strong);color:var(--text);}
+.tm-body{min-height:32px;}
+.tm-empty{
+  font-size:12px;color:var(--text-tertiary);cursor:pointer;
+  padding:6px 0;
+}
+.tm-item{
+  display:flex;align-items:flex-start;gap:7px;
+  padding:3px 0;font-size:13px;line-height:1.55;color:var(--text);
+}
+.tm-bullet{
+  color:var(--accent);font-size:15px;line-height:1.4;
+  flex-shrink:0;user-select:none;
+}
+.tm-check{
+  width:15px;height:15px;border:1.5px solid var(--border);border-radius:3px;
+  flex-shrink:0;margin-top:2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.tm-check:hover{border-color:var(--accent);}
+.tm-check.done{background:var(--accent);border-color:var(--accent);}
+.tm-check.done::after{
+  content:'';display:block;
+  width:8px;height:5px;
+  border-left:2px solid #fff;border-bottom:2px solid #fff;
+  transform:rotate(-45deg) translateY(-1px);
+}
+.tm-text{flex:1;min-width:0;word-break:break-word;}
+.tm-item.done .tm-text{
+  text-decoration:line-through;opacity:0.45;
+}
+.tm-plain{
+  padding:3px 0;font-size:13px;line-height:1.55;color:var(--text);
+}
+.tm-textarea{
+  width:100%;box-sizing:border-box;
+  min-height:90px;resize:vertical;
+  font-size:13px;line-height:1.6;
+  padding:8px 10px;
+  border:1px solid var(--border-accent);border-radius:8px;
+  background:var(--bg-surface);color:var(--text);
+  font-family:inherit;outline:none;
+}
+.tm-textarea:focus{box-shadow:0 0 0 3px rgba(47,111,235,0.1);}
+.tm-hint{
+  font-size:10px;color:var(--text-tertiary);margin-top:5px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.tm-hint-chip{
+  background:var(--bg-elevated);border-radius:4px;
+  padding:1px 5px;border:1px solid var(--border);
+  font-family:monospace;font-size:10px;
+}
+
 /* 홈 제출 추적 위젯 */
 .home-widget-card{
   background:var(--bg-overlay);
@@ -7037,6 +7113,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </button>
       </div>
     </div>
+
+    <!-- 오늘 업무 메모 -->
+    <div class="tm-card" id="teacher-memo-card"></div>
 
     <!-- 시작 가이드 카드 -->
     <div id="home-setup-guide"></div>
@@ -19030,6 +19109,150 @@ function renderHomeTodayClasses(){
   rowsEl.innerHTML = html;
 }
 
+/* ═══════════════════════════════════════════
+   오늘 업무 메모 (교사 개인용)
+═══════════════════════════════════════════ */
+var teacherMemos = {};          // { 'YYYY-MM-DD': 'raw text' }
+var _tmEditMode  = false;       // 현재 편집 모드 여부
+var _tmSaveTimer = null;        // 자동 저장 타이머
+
+function _tmToday(){
+  return typeof formatDateForInput === 'function'
+    ? formatDateForInput(new Date())
+    : new Date().toISOString().slice(0, 10);
+}
+
+function loadTeacherMemos(){
+  try{
+    var raw = localStorage.getItem('ht2_teacher_memos');
+    teacherMemos = raw ? JSON.parse(raw) : {};
+  }catch(e){ teacherMemos = {}; }
+}
+
+function saveTeacherMemos(){
+  try{ localStorage.setItem('ht2_teacher_memos', JSON.stringify(teacherMemos)); }catch(e){}
+}
+
+function _tmGetToday(){ return teacherMemos[_tmToday()] || ''; }
+
+function _tmSetToday(text){
+  teacherMemos[_tmToday()] = text;
+  saveTeacherMemos();
+}
+
+// 줄 파싱: bullet / checkbox / plain
+function _tmParseLine(line){
+  if(/^\s*-\s+/.test(line))
+    return { type:'bullet', text: line.replace(/^\s*-\s+/, '') };
+  if(/^\s*\[x\]\s+/i.test(line))
+    return { type:'checkbox', checked:true,  text: line.replace(/^\s*\[x\]\s+/i, '') };
+  if(/^\s*\[\]\s+/.test(line))
+    return { type:'checkbox', checked:false, text: line.replace(/^\s*\[\]\s+/, '') };
+  return { type:'plain', text: line };
+}
+
+// 체크박스 토글 — 줄 번호로 raw text 직접 수정
+function tmToggleCheck(lineIdx){
+  var lines = _tmGetToday().split('\n');
+  if(lineIdx < 0 || lineIdx >= lines.length) return;
+  var l = lines[lineIdx];
+  if(/^\s*\[x\]\s+/i.test(l))
+    lines[lineIdx] = l.replace(/^\s*\[x\]\s+/i, '[] ');
+  else if(/^\s*\[\]\s+/.test(l))
+    lines[lineIdx] = l.replace(/^\s*\[\]\s+/, '[x] ');
+  _tmSetToday(lines.join('\n'));
+  renderTeacherMemoCard();
+}
+
+// 편집 모드 진입
+function tmStartEdit(){
+  _tmEditMode = true;
+  renderTeacherMemoCard();
+  setTimeout(function(){
+    var ta = document.getElementById('tm-textarea');
+    if(ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }, 0);
+}
+
+// 편집 모드 종료 (blur 또는 완료 버튼)
+function tmEndEdit(){
+  var ta = document.getElementById('tm-textarea');
+  if(ta) _tmSetToday(ta.value);
+  _tmEditMode = false;
+  renderTeacherMemoCard();
+}
+
+// textarea 자동 저장 (500ms debounce)
+function tmOnInput(ta){
+  clearTimeout(_tmSaveTimer);
+  _tmSaveTimer = setTimeout(function(){ _tmSetToday(ta.value); }, 500);
+}
+
+// 렌더링
+function renderTeacherMemoCard(){
+  var card = document.getElementById('teacher-memo-card');
+  if(!card) return;
+
+  var text  = _tmGetToday();
+  var today = _tmToday();
+  var dateLabel = (function(){
+    var d = new Date(today + 'T00:00:00');
+    return (d.getMonth()+1) + '/' + d.getDate() + ' (' + ['일','월','화','수','목','금','토'][d.getDay()] + ')';
+  })();
+
+  var headHtml =
+    '<div class="tm-head">' +
+      '<span class="tm-title">오늘 업무</span>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<span class="tm-badge">학생 기록에 남지 않음</span>' +
+        (!_tmEditMode
+          ? '<button class="tm-edit-btn" onclick="tmStartEdit()">편집</button>'
+          : '<button class="tm-edit-btn" onclick="tmEndEdit()" style="border-color:var(--accent);color:var(--accent);">완료</button>') +
+      '</div>' +
+    '</div>';
+
+  var bodyHtml;
+  if(_tmEditMode){
+    bodyHtml =
+      '<textarea id="tm-textarea" class="tm-textarea"' +
+        ' oninput="tmOnInput(this)"' +
+        ' onblur="tmEndEdit()"' +
+        ' placeholder="오늘 할 일이나 개인 메모를 적어두세요."' +
+      '>' + escapeHtml(text) + '</textarea>' +
+      '<div class="tm-hint">' +
+        '<span><span class="tm-hint-chip">- 내용</span> 글머리</span>' +
+        '<span><span class="tm-hint-chip">[] 내용</span> 체크박스</span>' +
+        '<span><span class="tm-hint-chip">[x] 내용</span> 완료 체크</span>' +
+      '</div>';
+  } else {
+    if(!text.trim()){
+      bodyHtml = '<div class="tm-empty" onclick="tmStartEdit()">+ 오늘 할 일이나 메모를 추가하세요</div>';
+    } else {
+      var lines = text.split('\n');
+      bodyHtml = lines.map(function(line, i){
+        if(!line.trim()) return '<div style="height:4px;"></div>';
+        var p = _tmParseLine(line);
+        if(p.type === 'bullet'){
+          return '<div class="tm-item">' +
+            '<span class="tm-bullet">•</span>' +
+            '<span class="tm-text">' + escapeHtml(p.text) + '</span>' +
+          '</div>';
+        }
+        if(p.type === 'checkbox'){
+          var doneCls = p.checked ? ' done' : '';
+          return '<div class="tm-item' + doneCls + '" style="cursor:pointer;" onclick="tmToggleCheck(' + i + ')">' +
+            '<div class="tm-check' + (p.checked ? ' done' : '') + '"></div>' +
+            '<span class="tm-text">' + escapeHtml(p.text) + '</span>' +
+          '</div>';
+        }
+        return '<div class="tm-plain">' + escapeHtml(p.text) + '</div>';
+      }).join('');
+    }
+  }
+
+  card.innerHTML = headHtml + '<div class="tm-body">' + bodyHtml + '</div>';
+}
+
 function renderHome(){
   document.getElementById('home-teacher-name').textContent = TEACHER_NAME+'님';
 
@@ -19058,6 +19281,10 @@ function renderHome(){
       saveQuickMemo();
     }
   };
+
+  // 오늘 업무 메모
+  _tmEditMode = false;
+  renderTeacherMemoCard();
 
   // 시작 가이드 카드 (신규 사용자)
   var guideContainer = document.getElementById('home-setup-guide');
@@ -26526,6 +26753,7 @@ function init(){
   loadAlertSettings();
   loadPeriodTimes();
   loadTagPool();
+  loadTeacherMemos();
   loadAll();
   maybeRunAttendanceMigration();
   checkAutoBackup();
