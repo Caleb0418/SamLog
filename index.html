@@ -3139,7 +3139,8 @@ body{
 .smv-cal-cell.empty{
   background:transparent;cursor:default;
 }
-.smv-cal-cell.weekend{background:var(--bg-elevated);}
+.smv-cal-cell.weekend,.smv-cal-cell.holiday{background:var(--bg-elevated);}
+.smv-cal-cell.holiday .smv-cal-day{color:var(--text-tertiary);}
 .smv-cal-cell:not(.empty):hover{
   background:var(--bg-elevated);
 }
@@ -22233,6 +22234,9 @@ function renderStudentMonthlyView(){
     var cls = ['smv-cal-cell'];
     if(dow===0) cls.push('sun');
     if(dow===0||dow===6) cls.push('weekend');
+    // 평일 NEIS 휴업일 — 주말처럼 비활성화 표시
+    var _isWdHoliday = dow>=1 && dow<=5 && typeof isNonSchoolDay==='function' && isNonSchoolDay(date, c.grade);
+    if(_isWdHoliday) cls.push('holiday');
     if(date===today) cls.push('today');
     var recs = (attendanceRecords[date]||{})[smvState.studentNum]||[];
     if(recs.length>0) cls.push('has-record');
@@ -22403,6 +22407,8 @@ function renderClassMonthlyView(){
     var thCls='';
     if(dow===0||dow===6) thCls+=' weekend';
     if(dow===0) thCls+=' sun';
+    var _dStr=cmmState.year+'-'+String(cmmState.month).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    if(dow>=1&&dow<=5 && typeof isNonSchoolDay==='function' && isNonSchoolDay(_dStr, c.grade)) thCls+=' weekend';
     html+='<th class="'+thCls.trim()+'" style="width:24px;">'+d+'</th>';
   }
   html+='<th class="cmm-col-sum">결</th><th class="cmm-col-sum">지</th><th class="cmm-col-sum">조</th><th class="cmm-col-sum">과</th>';
@@ -22416,10 +22422,12 @@ function renderClassMonthlyView(){
       var date=monthPrefix+'-'+String(d).padStart(2,'0');
       var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
       var isWeekend=dow===0||dow===6;
+      var _isWdHol=!isWeekend && typeof isNonSchoolDay==='function' && isNonSchoolDay(date, c.grade);
+      var isNonSchoolCell=isWeekend||_isWdHol;
       var recs=(attendanceRecords[date]||{})[stu.num]||[];
       var cellCls=['day'];
       var cellText='';
-      if(isWeekend){
+      if(isNonSchoolCell){
         cellCls.push('weekend');
       } else if(recs.length>0){
         var priorityList=['absent','late','early_leave','partial'];
@@ -22440,7 +22448,7 @@ function renderClassMonthlyView(){
         }
       }
       var onclick='';
-      if(!isWeekend){
+      if(!isNonSchoolCell){
         if(cellText){
           // 특이사항 있는 셀 → 해당 학생 월간으로
           onclick=' onclick="onCmmCellStudentClick(\''+stu.num+'\')" style="cursor:pointer;"';
