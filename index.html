@@ -4504,8 +4504,12 @@ details > summary::-webkit-details-marker { display:none; }
   font-size:11px;color:var(--text-tertiary);width:24px;text-align:right;flex-shrink:0;
   font-variant-numeric:tabular-nums;
 }
+.sgt-student-list-body .student-item .si-name-group{
+  flex:1;display:flex;align-items:center;gap:5px;min-width:0;
+}
 .sgt-student-list-body .student-item .si-name{
-  font-size:13px;font-weight:500;color:var(--text);flex:1;
+  font-size:13px;font-weight:500;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .sgt-student-list-body .student-item .si-gender{
   font-size:11px;font-weight:600;padding:1px 5px;border-radius:4px;
@@ -16230,8 +16234,10 @@ function renderSaenggibuWriteView(){
       var genderLabel = (s.gender === '여' || s.gender === 'F' || s.gender === 'female') ? '여' : '남';
       return '<div class="student-item" onclick="openSgtSaengibuForStudent(\'' + s.num + '\')">' +
         '<div class="si-num">' + parseInt(s.num) + '</div>' +
-        '<div class="si-name">' + escapeHtml(getDisplayName(s)) + '</div>' +
-        '<div class="si-gender ' + genderClass + '">' + genderLabel + '</div>' +
+        '<div class="si-name-group">' +
+          '<span class="si-name">' + escapeHtml(getDisplayName(s)) + '</span>' +
+          '<span class="si-gender ' + genderClass + '">' + genderLabel + '</span>' +
+        '</div>' +
         '<div class="si-areas">' + dotsHtml + '</div>' +
         '<div class="si-rec-count">' + sgbRecs + '/' + areaCodes.length + '</div>' +
       '</div>';
