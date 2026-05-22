@@ -7315,6 +7315,19 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   <!-- ═══════════════════════════════════════════
        알람 설정 모달
   ═══════════════════════════════════════════ -->
+  <!-- 교시별 수업 시간 모달 -->
+  <div class="modal-overlay" id="period-times-modal" onclick="if(event.target===this)closePeriodTimesModal()">
+    <div class="modal" style="max-width:360px;">
+      <div class="memo-modal-head">
+        <div class="memo-modal-head-text">교시별 수업 시간 설정</div>
+        <button class="memo-modal-close" onclick="closePeriodTimesModal()">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:14px;">각 교시 시작 시간을 지정하면 알람 및 홈 화면 수업 표시에 반영돼요.</div>
+      <div id="period-times-modal-list"></div>
+      <button onclick="resetPeriodTimesToDefaultModal()" style="margin-top:10px;width:100%;padding:9px 0;border-radius:8px;border:1px solid var(--border);background:var(--bg-elevated);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--text);">기본값으로 되돌리기</button>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════════════════
        통합 설정 모달
   ═══════════════════════════════════════════ -->
@@ -7365,6 +7378,14 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
                 <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="preClass" value="0" id="pre0" onchange="onPreClassChange(this)"> 끄기</label>
               </div>
               <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">수업 시작 X분 전에 홈 화면에 알람이 표시돼요. 지난 교시 미기록 수업도 함께 보여줘요.</div>
+              <!-- 교시별 수업 시간 설정 버튼 -->
+              <div onclick="openPeriodTimesModal()" style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--bg-elevated);transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--border-strong)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">교시별 수업 시간 설정</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">각 교시 시작 시간을 지정해요</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
             </div>
             <div>
               <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">생기부 마감일</div>
@@ -7401,13 +7422,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
                   </select>
                 </div>
               </div>
-            </div>
-            <!-- 교시별 수업 시간 설정 -->
-            <div>
-              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">교시별 수업 시간 설정</div>
-              <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">각 교시 시작 시간을 지정하면 알람 및 홈 화면 수업 표시에 반영돼요.</div>
-              <div id="period-times-settings"></div>
-              <button onclick="resetPeriodTimesToDefault()" style="margin-top:6px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg-surface);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text);">기본값으로 되돌리기</button>
             </div>
           </div>
         </div>
@@ -25731,8 +25745,15 @@ function renderPeriodTimesList(){
   var html = rows.join('');
   var c1 = document.getElementById('period-times-list');
   if(c1) c1.innerHTML = html;
-  var c2 = document.getElementById('period-times-settings');
+  var c2 = document.getElementById('period-times-modal-list');
   if(c2) c2.innerHTML = html;
+}
+function openPeriodTimesModal(){
+  renderPeriodTimesList();
+  document.getElementById('period-times-modal').classList.add('show');
+}
+function closePeriodTimesModal(){
+  document.getElementById('period-times-modal').classList.remove('show');
 }
 function onPeriodTimeChange(input){
   var p = parseInt(input.getAttribute('data-period'));
@@ -25746,6 +25767,13 @@ function onPeriodTimeChange(input){
   savePeriodTimes();
 }
 function resetPeriodTimesToDefault(){
+  if(!confirm('교시별 시작 시간을 기본값으로 되돌릴까요?')) return;
+  PERIOD_START = JSON.parse(JSON.stringify(PERIOD_START_DEFAULT));
+  savePeriodTimes();
+  renderPeriodTimesList();
+  showToast('기본값으로 되돌렸어요');
+}
+function resetPeriodTimesToDefaultModal(){
   if(!confirm('교시별 시작 시간을 기본값으로 되돌릴까요?')) return;
   PERIOD_START = JSON.parse(JSON.stringify(PERIOD_START_DEFAULT));
   savePeriodTimes();
