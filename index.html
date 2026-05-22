@@ -23243,6 +23243,7 @@ function _normalizeCsImportItem(item){
 
 // 현재 편집 중인 셀: { idx: number, field: string } or null
 var _csImportEditing = null;
+var _csImportSort = { col: null, dir: 1 };
 
 var _CS_IMPORT_FIELDS = ['date','periods','category','activity','originalText','target','note'];
 
@@ -23329,18 +23330,25 @@ function _csRenderImportReviewTable(){
     return _csBuildImportRow(item, idx);
   }).join('');
 
+  function _sth(label, col, extraStyle){
+    var sorted = _csImportSort.col === col;
+    var arrow = sorted ? (_csImportSort.dir > 0 ? ' <span style="font-size:9px;">▲</span>' : ' <span style="font-size:9px;">▼</span>') : ' <span style="font-size:9px;opacity:0.25;">⇅</span>';
+    var color = sorted ? 'color:var(--accent);' : 'color:var(--text-secondary);';
+    return '<th style="padding:6px 8px;text-align:left;font-weight:600;' + color + 'cursor:pointer;user-select:none;white-space:nowrap;' + (extraStyle||'') + '" onclick="_csImportSortBy(\'' + col + '\')" title="클릭하여 정렬">' + label + arrow + '</th>';
+  }
+
   container.innerHTML =
     '<table style="width:100%;border-collapse:collapse;font-size:11px;">' +
       '<thead style="background:var(--bg-elevated);position:sticky;top:0;">' +
         '<tr>' +
           '<th style="padding:6px 8px;text-align:center;width:32px;"><input type="checkbox" id="cs-import-all-chk" checked onchange="_csToggleAllImport(this.checked)"></th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">날짜</th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">교시</th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">영역</th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">활동명</th>' +
+          _sth('날짜','date') +
+          _sth('교시','periods','text-align:center;') +
+          _sth('영역','category') +
+          _sth('활동명','activity') +
           '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">NEIS 원문 <span style="font-weight:400;font-size:9px;">(편집 가능)</span></th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">대상</th>' +
-          '<th style="padding:6px 8px;text-align:left;font-weight:600;color:var(--text-secondary);">비고</th>' +
+          _sth('대상','target') +
+          _sth('비고','note') +
         '</tr>' +
       '</thead>' +
       '<tbody>' + rows + '</tbody>' +
@@ -23351,6 +23359,31 @@ function _csRenderImportReviewTable(){
     '</button>';
 
   _csUpdateImportSummary();
+}
+
+function _csImportSortBy(col){
+  if(_csImportSort.col === col){
+    _csImportSort.dir *= -1;
+  } else {
+    _csImportSort.col = col;
+    _csImportSort.dir = 1;
+  }
+  var d = _csImportSort.dir;
+  _csImportParsed.sort(function(a, b){
+    var av, bv;
+    if(col === 'periods'){
+      av = (a.periods && a.periods.length) ? a.periods[0] : 99;
+      bv = (b.periods && b.periods.length) ? b.periods[0] : 99;
+      return (av - bv) * d;
+    }
+    av = String(a[col] || '').toLowerCase();
+    bv = String(b[col] || '').toLowerCase();
+    if(av < bv) return -d;
+    if(av > bv) return d;
+    return 0;
+  });
+  _csImportEditing = null;
+  _csRenderImportReviewTable();
 }
 
 function _csToggleAllImport(checked){
@@ -23435,19 +23468,35 @@ function _csImportBlurCommit(el, idx, field){
   }
 }
 
-// 키보드 핸들러 — Tab/Enter 이동, Escape 취소
+// 키보드 핸들러 — Tab/Enter/방향키 이동, Escape 취소
 function _csImportKbd(el, e){
   var field = el.dataset.field;
   var tr = el.parentNode;
   while(tr && tr.tagName !== 'TR') tr = tr.parentNode;
   var idx = tr ? parseInt(tr.dataset.idx) : (_csImportEditing ? _csImportEditing.idx : 0);
-  if(e.key === 'Escape'){ _csImportCancelEdit(); return; }
+  var val = el.value;
+  if(e.key === 'Escape'){ e.preventDefault(); _csImportCancelEdit(); return; }
   if(e.key === 'Tab'){
     e.preventDefault();
-    _csImportCommitAndNav(idx, field, el.value, e.shiftKey ? 'prev' : 'next');
+    _csImportCommitAndNav(idx, field, val, e.shiftKey ? 'prev' : 'next');
   } else if(e.key === 'Enter'){
     e.preventDefault();
-    _csImportCommitAndNav(idx, field, el.value, 'nextRow');
+    _csImportCommitAndNav(idx, field, val, 'next');
+  } else if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    _csImportCommitAndNav(idx, field, val, 'downRow');
+  } else if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    _csImportCommitAndNav(idx, field, val, 'upRow');
+  } else if(e.key === 'ArrowRight'){
+    // select는 항상, text input은 커서가 끝에 있을 때만 다음 칸으로
+    var isSelect = el.tagName === 'SELECT';
+    var atEnd = isSelect || (el.selectionStart !== undefined && el.selectionStart === el.value.length && el.selectionEnd === el.value.length);
+    if(atEnd){ e.preventDefault(); _csImportCommitAndNav(idx, field, val, 'next'); }
+  } else if(e.key === 'ArrowLeft'){
+    var isSelect2 = el.tagName === 'SELECT';
+    var atStart = isSelect2 || (el.selectionStart !== undefined && el.selectionStart === 0);
+    if(atStart){ e.preventDefault(); _csImportCommitAndNav(idx, field, val, 'prev'); }
   }
 }
 
@@ -23474,7 +23523,17 @@ function _csImportCommitAndNav(idx, field, val, dir){
     if(fi < 0){ fi = _CS_IMPORT_FIELDS.length - 1; nextIdx--; }
     if(nextIdx < 0){ nextIdx = 0; fi = 0; }
     nextField = _CS_IMPORT_FIELDS[fi];
-  } else { // nextRow
+  } else if(dir === 'downRow'){
+    nextIdx++;
+    if(nextIdx >= _csImportParsed.length){
+      _csImportRerenderRow(idx); _csUpdateImportSummary();
+      _csImportAddRow(); return;
+    }
+    nextField = field;
+  } else if(dir === 'upRow'){
+    nextIdx = Math.max(0, nextIdx - 1);
+    nextField = field;
+  } else { // nextRow (legacy — Tab 오버플로우 등)
     nextIdx++;
     if(nextIdx >= _csImportParsed.length){
       _csImportRerenderRow(idx); _csUpdateImportSummary();
