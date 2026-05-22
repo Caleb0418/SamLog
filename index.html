@@ -6420,6 +6420,145 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   cursor:pointer;font-family:inherit;
 }
 .setup-guide-dismiss:hover{color:var(--text-secondary);}
+
+/* ─── 시작 가이드 카드 하단 헬프 링크 ─── */
+.setup-guide-help-link{
+  margin-top:6px;text-align:center;font-size:11px;color:var(--text-tertiary);
+}
+.setup-guide-help-link button{
+  background:none;border:none;color:var(--accent);
+  font-size:11px;font-family:inherit;cursor:pointer;padding:0;font-weight:500;
+}
+.setup-guide-help-link button:hover{text-decoration:underline;}
+
+/* ─── 둘러보기 모달 오버레이 ─── */
+.intro-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.45);
+  display:none;align-items:center;justify-content:center;
+  z-index:1000;padding:20px;
+}
+.intro-modal-overlay.show{display:flex;animation:introFadeIn 0.2s ease;}
+@keyframes introFadeIn{from{opacity:0;}to{opacity:1;}}
+
+.intro-modal{
+  background:var(--bg-surface);border-radius:14px;
+  width:100%;max-width:720px;max-height:85vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+  animation:introSlideUp 0.25s ease;
+}
+@keyframes introSlideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+.intro-modal-head{
+  padding:22px 26px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+}
+.intro-modal-head-text{flex:1;min-width:0;}
+.intro-modal-eyebrow{
+  font-size:11px;color:var(--accent);font-weight:700;
+  letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px;
+}
+.intro-modal-title{
+  font-size:20px;font-weight:700;color:var(--text);
+  letter-spacing:-0.02em;margin-bottom:4px;
+}
+.intro-modal-sub{
+  font-size:13px;color:var(--text-secondary);line-height:1.5;
+}
+.intro-modal-close{
+  width:30px;height:30px;border:none;background:none;cursor:pointer;
+  color:var(--text-tertiary);border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  font-family:inherit;
+}
+.intro-modal-close:hover{background:var(--bg-elevated);color:var(--text);}
+
+.intro-modal-body{
+  padding:18px 26px;overflow-y:auto;flex:1;
+}
+
+.intro-highlights{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-bottom:22px;
+}
+@media(max-width:600px){.intro-highlights{grid-template-columns:1fr;}}
+.intro-hl-card{
+  border:1.5px solid var(--border-accent);border-radius:10px;
+  padding:14px;background:var(--accent-dim);
+  cursor:pointer;transition:all 0.15s;
+  display:flex;flex-direction:column;gap:6px;
+}
+.intro-hl-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(127,119,221,0.15);
+  border-color:var(--accent);
+}
+.intro-hl-badge{
+  font-size:10px;color:var(--accent);font-weight:700;
+  letter-spacing:0.04em;text-transform:uppercase;
+}
+.intro-hl-title{font-size:13px;font-weight:600;color:var(--text);}
+.intro-hl-desc{font-size:11px;color:var(--text-secondary);line-height:1.45;}
+.intro-hl-cta{
+  margin-top:4px;font-size:11px;color:var(--accent);font-weight:600;
+  display:flex;align-items:center;gap:3px;
+}
+
+.intro-cat{margin-bottom:18px;}
+.intro-cat-title{
+  font-size:12px;font-weight:700;color:var(--text);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+  letter-spacing:-0.01em;
+}
+.intro-cat-icon{font-size:14px;}
+.intro-cat-items{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+@media(max-width:600px){.intro-cat-items{grid-template-columns:1fr;}}
+.intro-item{
+  border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;background:var(--bg-surface);
+  cursor:pointer;transition:all 0.12s;
+  display:flex;flex-direction:column;gap:3px;
+}
+.intro-item:hover{
+  border-color:var(--border-accent);background:var(--bg-elevated);
+}
+.intro-item-name{
+  font-size:12px;font-weight:600;color:var(--text);
+  display:flex;align-items:center;gap:4px;
+}
+.intro-item-desc{font-size:11px;color:var(--text-tertiary);line-height:1.4;}
+
+.intro-footer-note{
+  padding:12px 14px;background:var(--bg-elevated);
+  border-radius:8px;margin-top:8px;
+  font-size:11px;color:var(--text-secondary);line-height:1.55;
+}
+.intro-footer-note strong{color:var(--text);font-weight:600;}
+
+.intro-modal-foot{
+  padding:14px 26px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.intro-foot-hint{
+  font-size:11px;color:var(--text-tertiary);
+}
+.intro-foot-btns{display:flex;gap:8px;}
+.intro-btn-primary{
+  padding:8px 18px;border-radius:7px;border:none;cursor:pointer;
+  background:var(--accent);color:#fff;
+  font-size:13px;font-weight:600;font-family:inherit;
+}
+.intro-btn-primary:hover{background:var(--accent-hover);}
+.intro-btn-secondary{
+  padding:8px 14px;border-radius:7px;
+  border:1px solid var(--border);background:var(--bg-surface);
+  color:var(--text-secondary);
+  font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;
+}
+.intro-btn-secondary:hover{background:var(--bg-elevated);}
+
 /* ─── 홈 2컬럼 레이아웃 ─── */
 .home-split{
   display:grid;
@@ -7439,6 +7578,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <button class="settings-tab" data-tab="alarm" onclick="switchSettingsTab('alarm')">알람 설정</button>
         <button class="settings-tab" data-tab="notify-sig" onclick="switchSettingsTab('notify-sig')">통지 서명</button>
         <button class="settings-tab" data-tab="backup" onclick="switchSettingsTab('backup')">데이터 백업</button>
+        <button class="settings-tab" data-tab="help" onclick="switchSettingsTab('help')">도움말</button>
         <button class="settings-tab settings-tab-danger" data-tab="reset" onclick="switchSettingsTab('reset')">전체 초기화</button>
       </div>
 
@@ -7577,7 +7717,54 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </div>
 
-        <!-- ④ 전체 초기화 패널 -->
+        <!-- ④ 도움말 패널 -->
+        <div class="settings-panel" data-tab="help">
+          <div class="class-master-title" style="margin-bottom:14px;">도움말</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+
+            <div style="border:1px solid var(--border-accent);border-radius:10px;padding:14px 16px;background:var(--accent-dim);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <div style="min-width:0;flex:1;">
+                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">쌤로그 둘러보기</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">쌤로그가 어떤 기능을 가지고 있는지 한 번에 훑어보세요.</div>
+                </div>
+                <button class="btn-small primary" onclick="closeSettings(); setTimeout(openIntroModal, 200);" style="flex-shrink:0;">열기</button>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <div style="min-width:0;flex:1;">
+                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">시작 가이드 다시 보기</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">홈 화면의 3단계 시작 가이드 카드를 다시 표시해요.</div>
+                </div>
+                <button class="btn-small secondary" onclick="restoreSetupGuide()" style="flex-shrink:0;">다시 표시</button>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <div style="min-width:0;flex:1;">
+                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">샘플 데이터로 체험</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">가짜 학생·시간표·메모로 모든 기능을 둘러볼 수 있어요.</div>
+                </div>
+                <button class="btn-small secondary" onclick="closeSettings(); setTimeout(function(){ openClassSettings(); }, 200);" style="flex-shrink:0;">수업 설정에서</button>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <div style="min-width:0;flex:1;">
+                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">문의 · 피드백</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">막히는 곳이나 개선 아이디어를 보내주세요.</div>
+                </div>
+                <a href="mailto:help@담임보조.app" class="btn-small secondary" style="flex-shrink:0;text-decoration:none;display:inline-flex;align-items:center;">이메일</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑤ 전체 초기화 패널 -->
         <div class="settings-panel" data-tab="reset">
           <div class="class-master-title" style="margin-bottom:4px;color:#e53e3e;">전체 초기화</div>
           <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:14px;">모든 학년도의 데이터를 완전히 지우고 처음 상태로 되돌려요. 되돌릴 수 없으니 백업 먼저 해두세요.</div>
@@ -7587,6 +7774,136 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </button>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       둘러보기 모달 (Intro Modal)
+  ═══════════════════════════════════════════ -->
+  <div class="intro-modal-overlay" id="intro-modal" onclick="if(event.target===this)closeIntroModal()">
+    <div class="intro-modal">
+      <div class="intro-modal-head">
+        <div class="intro-modal-head-text">
+          <div class="intro-modal-eyebrow">쌤로그 둘러보기</div>
+          <div class="intro-modal-title">쌤로그로 할 수 있는 것들</div>
+          <div class="intro-modal-sub">한 번만 훑어보세요. 다음부터는 설정에서 다시 열 수 있어요.</div>
+        </div>
+        <button class="intro-modal-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
+      </div>
+
+      <div class="intro-modal-body">
+
+        <!-- 지금 해보기 — 핵심 3개 -->
+        <div class="intro-highlights">
+          <div class="intro-hl-card" onclick="introTry('quick-memo')">
+            <div class="intro-hl-badge">지금 해보기</div>
+            <div class="intro-hl-title">퀵 메모 + @멘션</div>
+            <div class="intro-hl-desc">홈에서 한 줄. @이름이나 @전체를 적으면 학생에 자동 연결돼요.</div>
+            <div class="intro-hl-cta">지금 써보기 →</div>
+          </div>
+          <div class="intro-hl-card" onclick="introTry('saenggibu-matrix')">
+            <div class="intro-hl-badge">지금 해보기</div>
+            <div class="intro-hl-title">생기부 한눈에 보기</div>
+            <div class="intro-hl-desc">반 전체 × 영역별 진행률이 매트릭스로. 학기말 핵심 뷰.</div>
+            <div class="intro-hl-cta">매트릭스 열기 →</div>
+          </div>
+          <div class="intro-hl-card" onclick="introTry('neis-connect')">
+            <div class="intro-hl-badge">지금 해보기</div>
+            <div class="intro-hl-title">NEIS 자동 연동</div>
+            <div class="intro-hl-desc">인증키 한 번이면 시간표·학사일정·급식이 자동으로 채워져요.</div>
+            <div class="intro-hl-cta">5분이면 끝 →</div>
+          </div>
+        </div>
+
+        <!-- 매일 쓰는 기능 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">📝</span> 매일 쓰는 기능</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('home')">
+              <div class="intro-item-name">퀵 메모 + @멘션</div>
+              <div class="intro-item-desc">홈에서 한 줄. ⌘+Enter로 저장</div>
+            </div>
+            <div class="intro-item" onclick="introGo('class')">
+              <div class="intro-item-name">수업 후 빠른 메모</div>
+              <div class="intro-item-desc">오늘 수업 카드에서 종소리 직후</div>
+            </div>
+            <div class="intro-item" onclick="introGo('attendance')">
+              <div class="intro-item-name">출결 체크</div>
+              <div class="intro-item-desc">일일·학생별 월간·반 전체 월간</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 학생 한 명 깊이 보기 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">👥</span> 학생 한 명 깊이 보기</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('students')">
+              <div class="intro-item-name">학생 타임라인</div>
+              <div class="intro-item-desc">관찰·상담·생활·학부모·출결·생기부 누적</div>
+            </div>
+            <div class="intro-item" onclick="introGo('students')">
+              <div class="intro-item-name">5색 메모 분류</div>
+              <div class="intro-item-desc">관찰/상담/생활/학부모/미분류 필터</div>
+            </div>
+            <div class="intro-item" onclick="introGo('students')">
+              <div class="intro-item-name">태그로 빠르게 찾기</div>
+              <div class="intro-item-desc">자주 쓰는 태그 미리 등록</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 학기말 생기부 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">📄</span> 학기말 생기부</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('saenggibu-write')">
+              <div class="intro-item-name">작성 모드</div>
+              <div class="intro-item-desc">영역별 프롬프트 + 학생 메모 자동 결합</div>
+            </div>
+            <div class="intro-item" onclick="introGo('saenggibu-matrix')">
+              <div class="intro-item-name">한눈에 보기</div>
+              <div class="intro-item-desc">반 전체 × 영역 매트릭스</div>
+            </div>
+            <div class="intro-item" onclick="introGo('saenggibu-progress')">
+              <div class="intro-item-name">진행률 뷰</div>
+              <div class="intro-item-desc">어디까지 썼는지 추적</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 학부모 + 자동화 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">📞</span> 학부모 응대 + 자동화</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('reply-answer')">
+              <div class="intro-item-name">받은 메시지 답장</div>
+              <div class="intro-item-desc">6단계로 익명화 프롬프트 자동 완성</div>
+            </div>
+            <div class="intro-item" onclick="introGo('reply-prepare')">
+              <div class="intro-item-name">전화·상담 전 준비</div>
+              <div class="intro-item-desc">누적된 정보로 통화 전 브리핑</div>
+            </div>
+            <div class="intro-item" onclick="introGo('neis')">
+              <div class="intro-item-name">NEIS 자동 연동</div>
+              <div class="intro-item-desc">시간표·학사일정·급식 평생 자동</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="intro-footer-note">
+          <strong>🔒 모든 데이터는 이 컴퓨터에만 저장돼요.</strong> 학생 정보는 학부모 응대 시 자동으로 익명화되어 외부 AI에 전달됩니다.
+          설정에서 <strong>데이터 백업</strong>·<strong>다크모드</strong>·<strong>샘플로 체험</strong>을 켤 수 있어요.
+        </div>
+      </div>
+
+      <div class="intro-modal-foot">
+        <span class="intro-foot-hint">언제든 설정 → 도움말에서 다시 볼 수 있어요</span>
+        <div class="intro-foot-btns">
+          <button class="intro-btn-secondary" onclick="closeIntroModal()">건너뛰기</button>
+          <button class="intro-btn-primary" onclick="closeIntroModal()">시작하기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -18967,12 +19284,16 @@ function getSetupSteps(){
   ];
 }
 function renderSetupGuideCard(){
-  var dismissed = localStorage.getItem('ht2_setup_guide_dismissed') === '1';
-  if(dismissed) return '';
+  // 1주일 후 자동 부활: 영구 dismiss 키 대신 타임스탬프
+  var dismissedAt = parseInt(localStorage.getItem('ht2_setup_guide_dismissed_at')||'0', 10);
+  var ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+  if(dismissedAt && (Date.now() - dismissedAt) < ONE_WEEK){
+    return '';
+  }
   var steps = getSetupSteps();
   var allDone = steps.every(function(s){ return s.done; });
   if(allDone){
-    localStorage.setItem('ht2_setup_guide_dismissed','1');
+    localStorage.setItem('ht2_setup_guide_dismissed_at', String(Date.now()));
     return '';
   }
   var stepsHtml = steps.map(function(s, i){
@@ -18999,11 +19320,139 @@ function renderSetupGuideCard(){
     '</div>'+
     '<div class="setup-guide-steps">'+stepsHtml+'</div>'+
     '<button class="setup-guide-dismiss" onclick="dismissSetupGuide()">다음에 할게요 ×</button>'+
+    '<div class="setup-guide-help-link">'+
+      '쌤로그가 뭘 할 수 있는지 궁금하다면 '+
+      '<button onclick="openIntroModal()">전체 기능 둘러보기 →</button>'+
+    '</div>'+
   '</div>';
 }
 function dismissSetupGuide(){
-  try{ localStorage.setItem('ht2_setup_guide_dismissed','1'); }catch(e){}
+  try{
+    localStorage.setItem('ht2_setup_guide_dismissed_at', String(Date.now()));
+    localStorage.removeItem('ht2_setup_guide_dismissed');
+  }catch(e){}
   renderHome();
+}
+
+/* ─── 둘러보기 모달 핸들러 ─── */
+function openIntroModal(){
+  var modal = document.getElementById('intro-modal');
+  if(modal){
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeIntroModal(){
+  var modal = document.getElementById('intro-modal');
+  if(modal){
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  try{ localStorage.setItem('ht2_intro_modal_seen', '1'); }catch(e){}
+}
+
+function introTry(action){
+  closeIntroModal();
+  setTimeout(function(){
+    if(action === 'quick-memo'){
+      switchTab('home');
+      setTimeout(function(){
+        var input = document.getElementById('quick-memo-input');
+        if(input){
+          input.focus();
+          var card = input.closest ? input.closest('.quick-memo-card') : null;
+          if(card){
+            card.style.transition = 'box-shadow 0.3s';
+            card.style.boxShadow = '0 0 0 3px var(--accent-dim), 0 4px 12px rgba(127,119,221,0.2)';
+            setTimeout(function(){ card.style.boxShadow = ''; }, 2500);
+          }
+        }
+      }, 250);
+    } else if(action === 'saenggibu-matrix'){
+      switchTab('saenggibu');
+      setTimeout(function(){
+        if(typeof switchSaenggibuView === 'function') switchSaenggibuView('matrix');
+      }, 250);
+    } else if(action === 'neis-connect'){
+      if(typeof openNeisSetupModal === 'function') openNeisSetupModal();
+      else switchTab('class');
+    }
+  }, 150);
+}
+
+function introGo(target){
+  closeIntroModal();
+  setTimeout(function(){
+    switch(target){
+      case 'home':
+        switchTab('home');
+        setTimeout(function(){
+          var input = document.getElementById('quick-memo-input');
+          if(input) input.focus();
+        }, 200);
+        break;
+      case 'class':      switchTab('class'); break;
+      case 'attendance': switchTab('attendance'); break;
+      case 'students':   switchTab('students'); break;
+      case 'saenggibu-write':
+        switchTab('saenggibu');
+        setTimeout(function(){
+          if(typeof switchSaenggibuView === 'function') switchSaenggibuView('write');
+        }, 250);
+        break;
+      case 'saenggibu-matrix':
+        switchTab('saenggibu');
+        setTimeout(function(){
+          if(typeof switchSaenggibuView === 'function') switchSaenggibuView('matrix');
+        }, 250);
+        break;
+      case 'saenggibu-progress':
+        switchTab('saenggibu');
+        setTimeout(function(){
+          if(typeof switchSaenggibuView === 'function') switchSaenggibuView('progress');
+        }, 250);
+        break;
+      case 'reply-answer':
+        switchTab('reply');
+        setTimeout(function(){
+          if(typeof switchReplySub === 'function') switchReplySub('answer');
+        }, 250);
+        break;
+      case 'reply-prepare':
+        switchTab('reply');
+        setTimeout(function(){
+          if(typeof switchReplySub === 'function') switchReplySub('prepare');
+        }, 250);
+        break;
+      case 'neis':
+        if(typeof openNeisSetupModal === 'function') openNeisSetupModal();
+        else switchTab('class');
+        break;
+    }
+  }, 150);
+}
+
+function restoreSetupGuide(){
+  try{
+    localStorage.removeItem('ht2_setup_guide_dismissed_at');
+    localStorage.removeItem('ht2_setup_guide_dismissed');
+  }catch(e){}
+  if(typeof closeSettings === 'function') closeSettings();
+  setTimeout(function(){
+    if(typeof switchTab === 'function') switchTab('home');
+    if(typeof showToast === 'function') showToast('시작 가이드를 다시 표시했어요.');
+  }, 200);
+}
+
+function maybeShowIntroModalOnce(){
+  try{
+    var seen = localStorage.getItem('ht2_intro_modal_seen') === '1';
+    if(seen) return;
+    var hasAnyClass = (typeof classes === 'object' && classes && Object.keys(classes).length > 0);
+    if(!hasAnyClass) return;
+    setTimeout(function(){ openIntroModal(); }, 600);
+  }catch(e){}
 }
 
 function renderHomeTodayClasses(){
@@ -19289,6 +19738,9 @@ function renderHome(){
   // 시작 가이드 카드 (신규 사용자)
   var guideContainer = document.getElementById('home-setup-guide');
   if(guideContainer) guideContainer.innerHTML = renderSetupGuideCard();
+
+  // 첫 방문 시 둘러보기 모달 자동 노출 (1회)
+  maybeShowIntroModalOnce();
 
   // 오늘 수업 컬럼
   renderHomeTodayClasses();
