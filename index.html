@@ -21386,7 +21386,7 @@ function renderAttendanceTable(){
   var q = attTableState.searchQuery.trim();
   if(q){
     allStudents = allStudents.filter(function(s){
-      return s.name.indexOf(q) >= 0 || s.num.indexOf(q) >= 0 || parseInt(s.num) === parseInt(q);
+      return s.name.indexOf(q) >= 0 || getDisplayName(s).indexOf(q) >= 0 || s.num.indexOf(q) >= 0 || parseInt(s.num) === parseInt(q);
     });
   }
   // 이슈만 보기
@@ -21427,7 +21427,7 @@ function renderAttendanceTable(){
     html += '<td class="att-col-num">'+parseInt(s.num)+'</td>';
 
     // 이름
-    html += '<td class="att-col-name" onclick="onAttRowClick(\''+s.num+'\')">'+escapeHtml(s.name)+'</td>';
+    html += '<td class="att-col-name" onclick="onAttRowClick(\''+s.num+'\')">'+escapeHtml(getDisplayName(s))+'</td>';
 
     // 출결 상태
     html += '<td class="att-col-status" onclick="onAttRowClick(\''+s.num+'\')">';
@@ -21948,7 +21948,7 @@ function openAttendanceNotify(studentNum){
   notifyState.date = date;
   notifyState.records = dayRecs;
   var s = students.find(function(st){ return st.num === studentNum; }) || {};
-  var sName = s.name || String(studentNum);
+  var sName = (s && typeof getDisplayName === 'function') ? getDisplayName(s) : (s.name || String(studentNum));
   var parentName = s.parentName ? (s.parentRelation||'보호자')+' '+s.parentName+'님' : '학부모님';
   var meta = document.getElementById('att-notify-meta');
   if(meta) meta.textContent = sName+' · '+formatAttendanceDate(date);
