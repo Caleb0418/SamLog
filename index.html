@@ -12836,6 +12836,12 @@ function neisSyncAll(){
   }).then(function(result){
     if(!result) return result;
     neisSettings.lastSyncedAt = new Date().toISOString();
+    // 시간표 데이터가 하나라도 있으면 synced 플래그 설정
+    if(result.timetable && result.timetable.added > 0){
+      ttSyncState.synced = true;
+      ttSyncState.lastSync = new Date().toISOString();
+      ttSyncState.totalRows = (ttSyncState.totalRows || 0) + result.timetable.added;
+    }
     saveAll(); saveSettings(); return result;
   }).catch(function(err){
     console.error('NEIS 동기화 오류:', err);
