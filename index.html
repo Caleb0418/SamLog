@@ -13091,9 +13091,12 @@ function obSearchNeisSchool(){
     }
     var html = '';
     res.rows.forEach(function(row){
-      html += '<div class="neis-school-row" onclick="obSelectNeisSchool('+JSON.stringify(row).replace(/"/g,'&quot;')+')">' +
-        '<span class="neis-school-name">'+escapeHtml(row.SCHUL_NM)+'</span>' +
-        '<span class="neis-school-addr">'+escapeHtml(row.ORG_RDNMA||'')+'</span>' +
+      var kindLabel = ({els:'초등', mis:'중학', his:'고등'})[row._detectedKind] || '';
+      html += '<div class="neis-school-result" onclick="obSelectNeisSchool('+JSON.stringify(row).replace(/"/g,'&quot;')+')">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="neis-school-result-name">'+escapeHtml(row.SCHUL_NM||'')+'</div>' +
+          '<div class="neis-school-result-meta">'+escapeHtml(row.ATPT_OFCDC_SC_NM||'')+' · '+escapeHtml(kindLabel)+'</div>' +
+        '</div>' +
         '</div>';
     });
     resultsEl.innerHTML = html;
