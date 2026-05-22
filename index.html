@@ -5327,6 +5327,9 @@ details > summary::-webkit-details-marker { display:none; }
   transition:opacity 0.12s;
 }
 .week-nav-today:hover{opacity:0.88;}
+.class-today-nav{
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
 
 /* 주간 그리드 */
 .week-grid{
@@ -21082,6 +21085,7 @@ var currentRecordsClass = null;  // 기록 뷰 필터: null=전체 반, 또는 "
 
 /* ─── 주간 뷰 — 현재 표시 중인 주의 월요일 ─── */
 var currentWeekStart = null;  // Date 객체. null이면 이번 주로 초기화
+var currentTodayDate = null;  // 오늘 탭에서 보는 날짜. null이면 오늘
 
 function getMondayOf(date){
   // 해당 날짜가 속한 주의 월요일 반환
@@ -21104,6 +21108,18 @@ function isSameDay(a, b){
 }
 function ensureCurrentWeek(){
   if(!currentWeekStart) currentWeekStart = getMondayOf(new Date());
+}
+function ensureTodayDate(){
+  if(!currentTodayDate) currentTodayDate = new Date();
+}
+function shiftTodayDate(delta){
+  ensureTodayDate();
+  currentTodayDate = addDays(currentTodayDate, delta);
+  renderClassToday();
+}
+function goToTodayDate(){
+  currentTodayDate = new Date();
+  renderClassToday();
 }
 function shiftWeek(deltaWeeks){
   ensureCurrentWeek();
@@ -23147,6 +23163,7 @@ function renderClassTab(){
 function switchClassView(view){
   // 비담임이 'schedule'로 진입 시도하면 'today'로 보정
   if(view === 'schedule' && !isHomeroomActive()) view = 'today';
+  if(view === 'today') currentTodayDate = new Date();
   currentClassView = view;
   document.querySelectorAll('.class-view-btn').forEach(function(b){
     b.classList.toggle('active', b.dataset.view === view);
@@ -24583,8 +24600,8 @@ function saveCsImport(){
 function confirmClassScheduleImport(){ saveCsImport(); }
 
 // 오늘 날짜에 어떤 entry의 어느 slot이 있는지 [{entry, slot}] 펼침
-function expandTodaySlots(){
-  var now = new Date();
+function expandTodaySlots(dateObj){
+  var now = dateObj || new Date();
   var today = now.getDay(); // 0=일..6=토
   var todayStr = formatDateForInput(now);
   var result = [];
@@ -24611,8 +24628,8 @@ function expandTodaySlots(){
 }
 
 /* 오늘 한 교시에 정규+임시 모두 모은 풀 그리드 데이터 (1~7교시) */
-function getTodayFullGrid(){
-  var slots = expandTodaySlots();
+function getTodayFullGrid(dateObj){
+  var slots = expandTodaySlots(dateObj);
   var byPeriod = {};
   slots.forEach(function(it){
     if(!byPeriod[it.slot.period]) byPeriod[it.slot.period] = [];
@@ -24795,30 +24812,62 @@ function hasMemoToday(entry){
 }
 
 function renderClassToday(){
-  var grid = getTodayFullGrid();
-  var todayDow = new Date().getDay();
-  var todayStr = formatDateForInput(new Date());
+  var viewDate = currentTodayDate || new Date();
+  var isActualToday = isSameDay(viewDate, new Date());
+  var isWeekend = viewDate.getDay() === 0 || viewDate.getDay() === 6;
+  var viewDow = viewDate.getDay();
+  var viewDateStr = formatDateForInput(viewDate);
 
   var container = document.getElementById('class-today-list');
 
+  // 날짜 네비게이션 헤더 (항상 표시)
+  var dayLabel = WEEKDAYS[viewDow]+'요일 · '+(viewDate.getMonth()+1)+'/'+viewDate.getDate();
+  if(isWeekend) dayLabel += ' (주말)';
+  var navHtml =
+    '<div class="class-today-nav">'+
+      '<button class="week-nav-btn" onclick="shiftTodayDate(-1)" title="이전 날">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'+
+      '</button>'+
+      '<span style="font-size:13px;font-weight:600;color:var(--text);">'+dayLabel+'</span>'+
+      '<button class="week-nav-btn" onclick="shiftTodayDate(1)" title="다음 날">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'+
+      '</button>'+
+      (isActualToday ? '' : '<button class="week-nav-today" onclick="goToTodayDate()">오늘로</button>')+
+    '</div>';
+
+  // 주말 처리 — 비활성화 스타일로 표시
+  if(isWeekend){
+    container.innerHTML = navHtml +
+      '<div style="opacity:0.45;pointer-events:none;">'+
+        '<div class="class-day-card">'+
+          '<div class="class-day-head" style="color:var(--text-tertiary);">'+
+            WEEKDAYS[viewDow]+'요일 · 정규 수업 없음'+
+          '</div>'+
+          [1,2,3,4,5,6,7].map(function(p){
+            return '<div class="class-period-item is-empty">'+
+              '<div class="class-period-num">'+p+'</div>'+
+              '<div style="flex:1;"></div>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+      '</div>';
+    return;
+  }
+
+  var grid = getTodayFullGrid(viewDate);
+
   // 등록된 수업이 하나도 없고 시간표도 없으면 빈 상태
-  var anyClass = classMaster.length > 0 || adhocSlots.some(function(a){return a.date===todayStr;});
+  var anyClass = classMaster.length > 0 || adhocSlots.some(function(a){return a.date===viewDateStr;});
   if(!anyClass){
     var hint = ttSyncState.synced
       ? 'NEIS 시간표가 연동되어 있어요.<br>수업을 직접 추가하거나 시간표를 확인해 보세요.'
       : 'NEIS 시간표를 연동하면 수업이 자동으로 채워져요.';
-    container.innerHTML = '<div class="class-empty-state">'+
+    container.innerHTML = navHtml + '<div class="class-empty-state">'+
       '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);margin-bottom:10px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+
-      '<div style="font-weight:600;margin-bottom:6px;">오늘 등록된 수업이 없어요</div>'+
+      '<div style="font-weight:600;margin-bottom:6px;">등록된 수업이 없어요</div>'+
       '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">'+hint+'</div>'+
       '<button class="btn-small primary" onclick="openClassSettings()">수업 추가하기</button>'+
     '</div>';
-    return;
-  }
-
-  // 등교일이 주말이면 알림만
-  if(todayDow === 0 || todayDow === 6){
-    container.innerHTML = '<div class="class-empty-state">오늘은 '+WEEKDAYS[todayDow]+'요일이에요. 주말엔 정규 수업이 없습니다.</div>';
     return;
   }
 
@@ -24828,10 +24877,9 @@ function renderClassToday(){
   var _csToggleHtml = _hasPrimary ?
     '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' + _csToggleBtnHtml() + '</div>' : '';
 
-  var nowD = new Date();
   var html = '<div class="class-day-card">';
   html += '<div class="class-day-head">'+
-    '<span>'+WEEKDAYS[todayDow]+'요일 · '+(nowD.getMonth()+1)+'/'+nowD.getDate()+'</span>'+
+    '<span>'+WEEKDAYS[viewDow]+'요일 · '+(viewDate.getMonth()+1)+'/'+viewDate.getDate()+'</span>'+
   '</div>';
 
   grid.forEach(function(row){
@@ -24878,10 +24926,10 @@ function renderClassToday(){
         // 정규 수업
         var c = it.entry;
         var hasMemo = hasMemoToday(c);
-        var todayStr = formatDateForInput(new Date());
+        var viewDateStrLocal = formatDateForInput(viewDate);
 
         // 학기 누적 차시 (주간뷰와 동일한 함수)
-        var sessionInfo = getAutoSessionNumber(c, todayStr);
+        var sessionInfo = getAutoSessionNumber(c, viewDateStrLocal);
         var displayNum = sessionInfo.sessionNum;
 
         // 차시 표시: 메모 작성 여부에 따라 라벨 변경
@@ -24899,7 +24947,7 @@ function renderClassToday(){
           periodNumHtml+
           '<div class="class-period-info">'+
             '<div class="class-period-subject">'+escapeHtml(c.subject)+classLabel+sessionPill+
-              (_csShowOnSchedule ? _csMatchCell(c.grade, c.cls, new Date(), row.period).map(function(cs){
+              (_csShowOnSchedule ? _csMatchCell(c.grade, c.cls, viewDate, row.period).map(function(cs){
                 return '<span class="cs-overlay-today" onclick="event.stopPropagation();showCsCellInfo(\''+cs.id+'\')">' +
                   '<span class="cs-overlay-dot"></span>' + escapeHtml(_csCategoryLabel(cs.category)) +
                 '</span>';
@@ -24916,7 +24964,7 @@ function renderClassToday(){
     });
   });
   html += '</div>';
-  container.innerHTML = _csToggleHtml + html;
+  container.innerHTML = _csToggleHtml + navHtml + html;
 }
 
 /* ═══════════════════════════════════════════
@@ -25204,7 +25252,9 @@ function renderClassWeek(opts){
     var _hasMaster = classMaster.some(function(c){ return String(c.grade)===_pg && String(c.cls)===_pc; });
     _isEmpty = !_hasTT && !_hasMaster && adhocSlots.length === 0;
   } else {
-    _isEmpty = classMaster.length === 0 && adhocSlots.length === 0;
+    // _fromPrimary(반 시간표 자동등록) 항목 제외 — 직접 등록한 수업만 카운트
+    var _realMaster = classMaster.filter(function(c){ return !c._fromPrimary; });
+    _isEmpty = _realMaster.length === 0 && adhocSlots.length === 0;
   }
   if(_isEmpty){
     var emptyHtml;
