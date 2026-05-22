@@ -7726,11 +7726,11 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             <div class="intro-hl-desc">반 전체 × 영역별 진행률이 매트릭스로. 학기말 핵심 뷰.</div>
             <div class="intro-hl-cta">매트릭스 열기 →</div>
           </div>
-          <div class="intro-hl-card" onclick="introTry('neis-connect')">
+          <div class="intro-hl-card" onclick="introTry('class-add')">
             <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">NEIS 자동 연동</div>
-            <div class="intro-hl-desc">인증키 한 번이면 시간표·학사일정·급식이 자동으로 채워져요.</div>
-            <div class="intro-hl-cta">5분이면 끝 →</div>
+            <div class="intro-hl-title">수업 등록하기</div>
+            <div class="intro-hl-desc">담당 반·과목을 등록하면 출결·메모·생기부가 한 곳에 모여요.</div>
+            <div class="intro-hl-cta">수업 추가하기 →</div>
           </div>
         </div>
 
@@ -19278,9 +19278,11 @@ function introTry(action){
       setTimeout(function(){
         if(typeof switchSaenggibuView === 'function') switchSaenggibuView('matrix');
       }, 250);
-    } else if(action === 'neis-connect'){
-      if(typeof openNeisSetupModal === 'function') openNeisSetupModal();
-      else switchTab('class');
+    } else if(action === 'class-add'){
+      switchTab('class');
+      setTimeout(function(){
+        if(typeof openAddClass === 'function') openAddClass();
+      }, 250);
     }
   }, 150);
 }
