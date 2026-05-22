@@ -13008,14 +13008,23 @@ function saveNeisSetup(){
   saveSettings();
   refreshNeisBanner();
   closeNeisSetupModal();
-  showToast('NEIS 연동 완료');
+  showToast('NEIS 연동 완료 — 시간표·학사일정 불러오는 중...');
 
   if(onboardingData && onboardingData._neisOnboardingFlow){
     onboardingData._neisOnboardingFlow = false;
     onboardingData._neisSkipped = false;
     refreshOnboardingNeisState();
-    autoSyncOnboardingSchedule();
   }
+
+  // 저장 즉시 시간표·학사일정 자동 fetch
+  neisSyncAll().then(function(result){
+    if(result){
+      var tt = result.timetable || {};
+      showToast('시간표 동기화 완료' + (tt.added ? ' · ' + tt.added + '건' : ''));
+      if(typeof renderClassWeek === 'function') renderClassWeek();
+      if(typeof renderClassToday === 'function') renderClassToday();
+    }
+  }).catch(function(){ showToast('시간표 불러오기 실패 — 나중에 다시 시도해주세요'); });
 }
 
 function autoSyncOnboardingSchedule(){
@@ -25277,7 +25286,7 @@ function renderClassWeek(opts){
           '<div style="font-weight:600;margin-bottom:6px;">시간표를 아직 불러오지 않았어요</div>'+
           '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;"><strong>'+escapeHtml(_schoolName)+'</strong> 학교 설정은 완료됐어요.</div>'+
           '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">설정에서 NEIS 시간표를 불러오면 수업이 자동으로 채워져요.</div>'+
-          '<button class="btn-small primary" onclick="openNeisSetupModal()" style="margin-bottom:8px;">NEIS 시간표 불러오기</button>'+
+          '<button class="btn-small primary" onclick="neisSyncAll().then(function(r){if(r){showToast(\'시간표 동기화 완료\');renderClassWeek();}}" style="margin-bottom:8px;">NEIS 시간표 불러오기</button>'+
           '<br><button class="btn-link" onclick="openClassSettings()" style="font-size:12px;">수동으로 수업 등록하기</button>'+
         '</div>';
     } else {
