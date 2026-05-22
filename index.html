@@ -19637,10 +19637,25 @@ function tmOnInput(ta){
   _tmSaveTimer = setTimeout(function(){ _tmSetToday(ta.value); }, 500);
 }
 
+// Ctrl+Enter → 편집 완료 / 편집 진입
+function tmOnKeydown(e){
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+    e.preventDefault();
+    tmEndEdit();
+  }
+}
+
 // 렌더링
 function renderTeacherMemoCard(){
   var card = document.getElementById('teacher-memo-card');
   if(!card) return;
+  // 뷰 모드에서 Ctrl+Enter → 편집 진입 (카드 포커스 시)
+  card.tabIndex = 0;
+  card.onkeydown = function(e){
+    if(!_tmEditMode && (e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+      e.preventDefault(); tmStartEdit();
+    }
+  };
 
   var text  = _tmGetToday();
   var today = _tmToday();
@@ -19666,12 +19681,14 @@ function renderTeacherMemoCard(){
       '<textarea id="tm-textarea" class="tm-textarea"' +
         ' oninput="tmOnInput(this)"' +
         ' onblur="tmEndEdit()"' +
+        ' onkeydown="tmOnKeydown(event)"' +
         ' placeholder="오늘 할 일이나 개인 메모를 적어두세요."' +
       '>' + escapeHtml(text) + '</textarea>' +
       '<div class="tm-hint">' +
         '<span><span class="tm-hint-chip">- 내용</span> 글머리</span>' +
         '<span><span class="tm-hint-chip">[] 내용</span> 체크박스</span>' +
         '<span><span class="tm-hint-chip">[x] 내용</span> 완료 체크</span>' +
+        '<span><span class="tm-hint-chip">Ctrl+Enter</span> 저장</span>' +
       '</div>';
   } else {
     if(!text.trim()){
