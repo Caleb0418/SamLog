@@ -4571,18 +4571,21 @@ details > summary::-webkit-details-marker { display:none; }
 .sgt-matrix-table thead th.student-col{
   text-align:left;padding-left:12px;
   position:sticky;left:0;z-index:3;
-  min-width:130px;
+  width:100px;min-width:100px;max-width:100px;
 }
 .sgt-matrix-table tbody td{
-  padding:8px;border-bottom:0.5px solid var(--border);
+  padding:8px 6px;border-bottom:0.5px solid var(--border);
   text-align:center;white-space:nowrap;
   cursor:pointer;transition:background 0.12s;
+  min-width:72px;
 }
 .sgt-matrix-table tbody td.student-col{
   text-align:left;padding-left:12px;
   position:sticky;left:0;z-index:1;
   background:var(--bg-surface);
   font-weight:500;
+  width:100px;min-width:100px;max-width:100px;
+  overflow:hidden;text-overflow:ellipsis;
 }
 .sgt-matrix-table tbody tr:hover td{ background:rgba(99,102,241,0.04); }
 .sgt-matrix-table tbody tr:hover td.student-col{ background:var(--bg-elevated); }
@@ -15844,8 +15847,12 @@ function renderSaenggibuMatrixView(){
         '<span class="sgt-legend-item"><span class="sgt-legend-dot dup"></span>중복 의심</span>' +
         '<span class="sgt-legend-item"><span class="sgt-legend-dot empty"></span>미작성</span>' +
       '</div>' +
-      '<div style="font-size:11px;color:var(--text-tertiary);">' +
-        '학생 ' + students.length + '명 · 영역 ' + areaCodes.length + '개 · 셀 클릭=상세, 헤더 클릭=영역 비교' +
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div style="font-size:11px;color:var(--text-tertiary);">셀 클릭=상세 · 헤더=영역 비교</div>' +
+        '<button onclick="downloadSaenggibuMatrix()" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;white-space:nowrap;">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          '엑셀 다운로드' +
+        '</button>' +
       '</div>' +
     '</div>';
 
@@ -17744,6 +17751,31 @@ function openFileFormatGuide(){
 }
 function closeFileFormatGuide(){
   document.getElementById('file-format-guide-modal').classList.remove('show');
+}
+function downloadSaenggibuMatrix(){
+  var matrix = buildClassSaenggibuMatrix();
+  var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
+  var areaLabels = areaCodes.map(function(c){ return SAENGGIBU_AREA_CODES[c].label; });
+  var sortedStudents = students.slice().sort(function(a,b){ return parseInt(a.num)-parseInt(b.num); });
+  var bom = '﻿';
+  var rows = [['번호','이름'].concat(areaLabels)];
+  sortedStudents.forEach(function(s){
+    var row = [parseInt(s.num), getDisplayName(s)];
+    areaCodes.forEach(function(code){
+      var rec = matrix[s.num][code];
+      row.push(rec ? rec.charCount + '자' : '');
+    });
+    rows.push(row);
+  });
+  var csv = bom + rows.map(function(r){
+    return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = '생기부_현황.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
 }
 function downloadStudentTemplate(){
   // UTF-8 BOM so Excel opens Korean text correctly
