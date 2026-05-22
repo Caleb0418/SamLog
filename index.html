@@ -8396,6 +8396,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             JSON 파일 업로드
           </button>
           <input type="file" id="cs-import-file-input" accept=".json,application/json" style="display:none;" onchange="if(this.files.length)loadCsImportFile(this.files[0]);this.value='';">
+          <button class="btn-small secondary" onclick="loadCsImportSample()" style="display:flex;align-items:center;gap:4px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            샘플 사용
+          </button>
           <button class="btn-small primary" onclick="validateCsImportJson()" style="margin-left:auto;">검증하기</button>
         </div>
         <div id="cs-import-validate-msg" style="font-size:11px;margin-top:6px;display:none;"></div>
@@ -22900,6 +22904,48 @@ function showCsCellInfo(id){
   if(c.note) msg += '\n비고: ' + c.note;
   if(c.originalText && c.originalText !== c.activity) msg += '\nNEIS 원문: ' + c.originalText;
   alert(msg);
+}
+
+function loadCsImportSample(){
+  var yr = (typeof getActiveYear === 'function') ? getActiveYear() : String(new Date().getFullYear());
+  var y = yr; // e.g. "2026"
+  var sample = [
+    // ① 3월 — 새 학기 자율
+    {"date":y+"-03-04","periods":[5,6],"category":"자율","activity":"새 학기 학급 자치회 조직 및 학급 규칙 정하기","originalText":"학급 자치회 조직","target":"전학년","note":""},
+    // ② 3월 — 진로 1~2학년
+    {"date":y+"-03-12","periods":[5,6],"category":"진로","activity":"꿈 발표하기 — 나의 장래희망 소개","originalText":"꿈 발표하기","target":"1~2학년","note":""},
+    // ③ 4월 — 봉사 3~4학년
+    {"date":y+"-04-09","periods":[5,6],"category":"봉사","activity":"학교 주변 환경 정화 활동","originalText":"환경 정화 봉사","target":"3~4학년","note":"우천 시 다음 날로 연기"},
+    // ④ 4월 — 동아리 5~6학년
+    {"date":y+"-04-16","periods":[5,6,7],"category":"동아리","activity":"동아리 개강 — 동아리 구성원 소개 및 연간 활동 계획 수립","originalText":"동아리 개강","target":"5~6학년","note":""},
+    // ⑤ 5월 — 자율 1학년
+    {"date":y+"-05-07","periods":[5,6],"category":"자율","activity":"어린이날 기념 학급 자치 행사 — 미니 운동회","originalText":"어린이날 기념 자치 행사","target":"1학년","note":""},
+    // ⑥ 5월 — 진로 5~6학년
+    {"date":y+"-05-21","periods":[5,6],"category":"진로","activity":"직업인 초청 강연 — 다양한 직업 세계 탐색","originalText":"직업인 초청 강연","target":"5~6학년","note":"강사 섭외 확인 필요"},
+    // ⑦ 6월 — 봉사 전학년
+    {"date":y+"-06-04","periods":[5,6],"category":"봉사","activity":"학교 텃밭 가꾸기 및 화단 정비","originalText":"텃밭 봉사","target":"전학년","note":""},
+    // ⑧ 6월 — 동아리 3~4학년
+    {"date":y+"-06-18","periods":[5,6],"category":"동아리","activity":"독서 토론 동아리 — 이달의 책 발표 및 토론","originalText":"독서 토론 동아리","target":"3~4학년","note":""},
+    // ⑨ 9월 — 자율 2학년
+    {"date":y+"-09-03","periods":[5,6],"category":"자율","activity":"2학기 학급 임원 선출 및 역할 정하기","originalText":"학급 임원 선출","target":"2학년","note":""},
+    // ⑩ 9월 — 진로 3학년
+    {"date":y+"-09-17","periods":[5,6],"category":"진로","activity":"직업 체험의 날 — 흥미 있는 직업 역할극","originalText":"직업 체험의 날","target":"3학년","note":""},
+    // ⑪ 10월 — 봉사 5~6학년
+    {"date":y+"-10-08","periods":[5,6],"category":"봉사","activity":"지역 사회 봉사 — 노인 복지관 방문 편지 쓰기","originalText":"복지관 봉사 편지","target":"5~6학년","note":""},
+    // ⑫ 10월 — 동아리 전학년
+    {"date":y+"-10-22","periods":[5,6,7],"category":"동아리","activity":"동아리 발표회 — 한 해 활동 결과 공유","originalText":"동아리 발표회","target":"전학년","note":"체육관 사용"},
+    // ⑬ 11월 — 자율 4학년
+    {"date":y+"-11-05","periods":[5,6],"category":"자율","activity":"학교폭력 예방 교육 및 사이버 안전 교육","originalText":"학교폭력 예방 교육","target":"4학년","note":""},
+    // ⑭ 11월 — 진로 6학년
+    {"date":y+"-11-19","periods":[5,6],"category":"진로","activity":"졸업 후 나의 꿈 — 중학교 생활 미리 알아보기","originalText":"중학교 진로 탐색","target":"6학년","note":""},
+    // ⑮ 12월 — 봉사 전학년
+    {"date":y+"-12-03","periods":[5,6],"category":"봉사","activity":"한 해 마무리 학급 정리 봉사 — 교실·복도 대청소","originalText":"학급 대청소 봉사","target":"전학년","note":""}
+  ];
+  document.getElementById('cs-import-json-input').value = JSON.stringify(sample, null, 2);
+  document.getElementById('cs-import-validate-msg').style.display = 'none';
+  document.getElementById('cs-import-step-3').style.display = 'none';
+  document.getElementById('cs-import-save-btn').disabled = true;
+  showToast(yr + '학년도 샘플 데이터가 입력됐어요. 검증하기를 눌러 확인하세요.');
 }
 
 function openCsImportModal(){
