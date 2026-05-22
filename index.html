@@ -7810,7 +7810,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             </div>
             <div class="intro-item" onclick="introGo('neis')">
               <div class="intro-item-name">NEIS 자동 연동</div>
-              <div class="intro-item-desc">시간표·학사일정·급식 평생 자동</div>
+              <div class="intro-item-desc">학교 이름만 검색하면 시간표·학사일정 자동 연동</div>
             </div>
           </div>
         </div>
@@ -7822,7 +7822,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
 
       <div class="intro-modal-foot">
-        <span class="intro-foot-hint">언제든 설정 → 도움말에서 다시 볼 수 있어요</span>
         <button class="intro-btn-primary" onclick="closeIntroModal()">닫기</button>
       </div>
     </div>
@@ -19240,12 +19239,12 @@ function getSetupSteps(){
       label:'첫 메모 남기기',
       sub:'학생을 선택하고 관찰 메모를 작성해보세요',
       done: hasMemo,
-      action:"switchTab('students')"
+      action:"highlightQuickMemo()"
     },
     {
       id:'neis_connect',
       label:'NEIS 연동으로 시간표 자동화',
-      sub:'5분이면 시간표·학사일정이 자동으로 채워져요',
+      sub:'학교 이름만 검색하면 시간표·학사일정이 자동으로 채워져요',
       done: hasNeis,
       action:"openNeisSetupModal()"
     }
@@ -19284,10 +19283,10 @@ function renderSetupGuideCard(){
   return '<div class="setup-guide-card">'+
     '<div class="setup-guide-title">'+
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+
-      '시작 가이드 — 3단계로 쌤로그를 완성하세요'+
+      '시작 가이드'+
     '</div>'+
     '<div class="setup-guide-steps">'+stepsHtml+'</div>'+
-    '<button class="setup-guide-dismiss" onclick="dismissSetupGuide()">다음에 할게요 ×</button>'+
+    '<button class="setup-guide-dismiss" onclick="dismissSetupGuide()">다음에 할게요</button>'+
     '<div class="setup-guide-help-link">'+
       '쌤로그가 뭘 할 수 있는지 궁금하다면 '+
       '<button onclick="openIntroModal()">전체 기능 둘러보기 →</button>'+
@@ -19318,6 +19317,22 @@ function closeIntroModal(){
     document.body.style.overflow = '';
   }
   try{ localStorage.setItem('ht2_intro_modal_seen', '1'); }catch(e){}
+}
+
+// 시작 가이드 "첫 메모 남기기" — 홈으로 이동 후 퀵 메모 하이라이트
+function highlightQuickMemo(){
+  switchTab('home');
+  setTimeout(function(){
+    var card = document.querySelector('.quick-memo-card');
+    var input = document.getElementById('quick-memo-input');
+    if(card){
+      card.style.transition = 'box-shadow 0.3s';
+      card.style.boxShadow = '0 0 0 3px var(--accent), 0 4px 16px rgba(47,111,235,0.2)';
+      card.scrollIntoView({ behavior:'smooth', block:'center' });
+      setTimeout(function(){ card.style.boxShadow = ''; }, 2500);
+    }
+    if(input) input.focus();
+  }, 250);
 }
 
 function introTry(action){
