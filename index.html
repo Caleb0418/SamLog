@@ -7332,7 +7332,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div class="settings-tabs">
         <button class="settings-tab active" data-tab="year" onclick="switchSettingsTab('year')">학년도 관리</button>
         <button class="settings-tab" data-tab="alarm" onclick="switchSettingsTab('alarm')">알람 설정</button>
-        <button class="settings-tab" data-tab="creative" onclick="switchSettingsTab('creative')">창의적 체험활동</button>
         <button class="settings-tab" data-tab="notify-sig" onclick="switchSettingsTab('notify-sig')">통지 서명</button>
         <button class="settings-tab" data-tab="backup" onclick="switchSettingsTab('backup')">데이터 백업</button>
         <button class="settings-tab settings-tab-danger" data-tab="reset" onclick="switchSettingsTab('reset')">전체 초기화</button>
@@ -7403,70 +7402,16 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
                 </div>
               </div>
             </div>
+            <!-- 교시별 수업 시간 설정 -->
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">교시별 수업 시간 설정</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">각 교시 시작 시간을 지정하면 알람 및 홈 화면 수업 표시에 반영돼요.</div>
+              <div id="period-times-settings"></div>
+              <button onclick="resetPeriodTimesToDefault()" style="margin-top:6px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg-surface);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text);">기본값으로 되돌리기</button>
+            </div>
           </div>
         </div>
 
-        <!-- ③ 창의적 체험활동 패널 -->
-        <div class="settings-panel" data-tab="creative">
-          <div class="class-master-title" style="margin-bottom:4px;">창의적 체험활동 등록</div>
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:14px;line-height:1.5;">
-            학교에서 받은 창체 운영 계획을 보고 한 번에 등록해두면, 학생 생기부 작성 시 자동으로 매칭돼요.<br>
-            출결을 확인해 결시한 활동은 자동으로 제외됩니다.
-          </div>
-          <!-- 입력 폼 -->
-          <div style="background:var(--bg-elevated);border-radius:8px;padding:14px;margin-bottom:14px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-              <div>
-                <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">날짜</label>
-                <input type="date" id="ca-form-date" class="form-input-text">
-              </div>
-              <div>
-                <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">영역</label>
-                <select id="ca-form-area" class="form-select">
-                  <option value="자율">자율·자치</option>
-                  <option value="진로">진로활동</option>
-                  <option value="동아리">동아리활동</option>
-                </select>
-              </div>
-            </div>
-            <div style="margin-bottom:10px;">
-              <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">적용 학년 <span style="color:var(--text-tertiary);font-weight:400;">(다중 선택)</span></label>
-              <div id="ca-form-grades" style="display:flex;gap:6px;flex-wrap:wrap;">
-                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="1" class="ca-grade-chk">1학년</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="2" class="ca-grade-chk">2학년</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="3" class="ca-grade-chk">3학년</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="4" class="ca-grade-chk">4학년</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="5" class="ca-grade-chk">5학년</label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);"><input type="checkbox" value="6" class="ca-grade-chk">6학년</label>
-              </div>
-            </div>
-            <div style="margin-bottom:10px;">
-              <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">활동명</label>
-              <input type="text" id="ca-form-name" class="form-input-text" placeholder="예) 생활안전교육, 학교폭력예방교육" maxlength="50">
-            </div>
-            <div style="margin-bottom:10px;">
-              <label class="form-label" style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">특기사항 메모 <span style="color:var(--text-tertiary);font-weight:400;">(선택)</span></label>
-              <textarea id="ca-form-note" class="form-input-text" rows="2" placeholder="예) 학생들과 함께 화재 예방 영상을 시청하고 자신의 학급에 적용할 수 있는 방안을 발표함." maxlength="300" style="resize:vertical;"></textarea>
-            </div>
-            <div style="display:flex;justify-content:flex-end;gap:6px;">
-              <button class="btn-small secondary" onclick="resetCreativeForm()">취소</button>
-              <button class="btn-small primary" id="ca-save-btn" onclick="saveCreativeActivity()">추가</button>
-            </div>
-          </div>
-          <!-- 등록된 활동 목록 -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">등록된 활동 <span id="ca-list-count" style="color:var(--text-tertiary);font-weight:400;"></span></div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <select id="ca-filter-area" class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="renderCreativeList()">
-                <option value="">전체 영역</option>
-                <option value="자율">자율·자치</option>
-                <option value="진로">진로활동</option>
-                <option value="동아리">동아리활동</option>
-              </select>
-            </div>
-          </div>
-          <div id="ca-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
-        </div>
 
         <!-- 통지 문자 서명 설정 -->
         <div class="settings-panel" data-tab="notify-sig">
@@ -25769,8 +25714,6 @@ function openClassSettings(){
 }
 
 function renderPeriodTimesList(){
-  var container = document.getElementById('period-times-list');
-  if(!container) return;
   var rows = [];
   for(var p = 1; p <= 7; p++){
     var t = formatPeriodTime(p);
@@ -25783,7 +25726,11 @@ function renderPeriodTimesList(){
       '</div>'
     );
   }
-  container.innerHTML = rows.join('');
+  var html = rows.join('');
+  var c1 = document.getElementById('period-times-list');
+  if(c1) c1.innerHTML = html;
+  var c2 = document.getElementById('period-times-settings');
+  if(c2) c2.innerHTML = html;
 }
 function onPeriodTimeChange(input){
   var p = parseInt(input.getAttribute('data-period'));
@@ -25873,7 +25820,7 @@ function switchSettingsTab(id){
   document.querySelectorAll('#settings-modal .settings-panel').forEach(function(p){
     p.classList.toggle('active', p.dataset.tab === id);
   });
-  if(id === 'creative') renderCreativeList();
+  if(id === 'alarm') renderPeriodTimesList();
 }
 function openAlertSettings(){ openSettings(); }
 function closeAlertSettings(){ closeSettings(); }
