@@ -18711,9 +18711,28 @@ function renderHomeTodayClasses(){
     classMaster.forEach(function(c){
       (c.slots || []).forEach(function(s){
         if(s.day === todayDow){
-          todayEntries.push({ entry:c, period:s.period });
+          todayEntries.push({ entry:c, period:s.period, isAdhoc:false });
         }
       });
+    });
+  }
+  // 보강·창체 임시 슬롯 (날짜 기반)
+  if(typeof adhocSlots !== 'undefined'){
+    adhocSlots.forEach(function(a){
+      if(a.date === todayStr){
+        todayEntries.push({
+          entry:{
+            id: 'adhoc_' + a.id,
+            subject: a.subject || (a.kind || '보강'),
+            grade: a.grade || '',
+            cls: a.cls || '',
+            slots: []
+          },
+          period: a.period,
+          isAdhoc: true,
+          adhocKind: a.kind || '보강'
+        });
+      }
     });
   }
   todayEntries.sort(function(a,b){ return a.period - b.period; });
@@ -18754,16 +18773,19 @@ function renderHomeTodayClasses(){
       meta = timeStr ? timeStr + ' 예정' : '예정';
     }
     var label;
-    if(hasPrimary){
+    if(item.isAdhoc){
+      var adhocCls = (c.grade && c.cls) ? ' (' + c.grade + '-' + c.cls + ')' : '';
+      label = escapeHtml((c.subject || '수업') + adhocCls) +
+        ' <span style="font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,0.08);vertical-align:middle;">' +
+        escapeHtml(item.adhocKind) + '</span>';
+    } else if(hasPrimary){
       label = escapeHtml(c.subject || '수업');
     } else {
       label = escapeHtml((c.grade||'') + '-' + (c.cls||'') + '반 ' + (c.subject || '수업'));
     }
-    var clickAction = '';
-    if(c.id && typeof switchClassKey === 'function'){
+    var clickAction = 'onclick="switchTab(\'class\')"';
+    if(!item.isAdhoc && c.id && typeof switchClassKey === 'function'){
       clickAction = 'onclick="switchClassKey(\'' + c.id + '\');switchTab(\'class\')"';
-    } else {
-      clickAction = 'onclick="switchTab(\'class\')"';
     }
     html += '<div class="home-cr ' + stateClass + '" ' + clickAction + '>' +
       '<div class="home-cr-period">' + period + '</div>' +
