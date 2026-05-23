@@ -12940,12 +12940,17 @@ function neisSyncAll(){
 
             // 정규 시간표 변경 감지
             var isFirstSync = Object.keys(schoolTimetable).length === 0;
-            if(isFirstSync || chgs.length === 0){
-              // 첫 동기화 또는 변경 없음 → 정규만 바로 반영
+            // 이 반의 시간표가 schoolTimetable에 아예 없으면 "첫 등록"으로 간주
+            var gradeStr = String(c.grade), clsStr = String(c.classNum);
+            var isFirstSyncForClass = !Object.keys(schoolTimetable).some(function(k){
+              return k.indexOf(gradeStr + '-' + clsStr + '-') === 0;
+            });
+            if(isFirstSync || isFirstSyncForClass || chgs.length === 0){
+              // 첫 동기화 또는 이 반의 첫 등록 또는 변경 없음 → 정규만 바로 반영
               chgs.forEach(function(ch){ schoolTimetable[ch._key] = ch.newSubject; });
               timetableAdded += chgs.length;
             } else {
-              // 변경 있음 → 사용자에게 확인 모달
+              // 기존 반에 변경 있음 → 사용자에게 확인 모달
               detectedAll = detectedAll.concat(chgs);
               timetableAdded += chgs.length;
             }
