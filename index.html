@@ -6485,6 +6485,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .setup-guide-title{
   font-size:13px;font-weight:700;color:var(--accent);
   margin-bottom:12px;display:flex;align-items:center;gap:6px;
+  flex-wrap:wrap;
+}
+.setup-guide-title-sub{
+  font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:2px;
 }
 .setup-guide-steps{display:flex;flex-direction:column;gap:8px;}
 .setup-guide-step{
@@ -19582,6 +19586,7 @@ function renderSetupGuideCard(){
     '<div class="setup-guide-title">'+
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+
       '시작 가이드'+
+      '<span class="setup-guide-title-sub">· 모두 완료하면 자동으로 사라져요</span>'+
     '</div>'+
     '<div class="setup-guide-steps">'+stepsHtml+'</div>'+
     '<button class="setup-guide-dismiss" onclick="dismissSetupGuide()">다음에 할게요</button>'+
