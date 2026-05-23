@@ -2565,10 +2565,10 @@ body{
 .att-status-unrecorded{
   font-size:12px;color:var(--text-tertiary);font-style:italic;
 }
-/* 일괄 출석 확정 배너 */
+/* 일괄 출석 처리 배너 */
 .att-confirm-bar{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:12px 16px;margin-top:16px;
+  padding:10px 14px;margin-bottom:10px;
   background:var(--accent-dim);border:1.5px solid var(--border-accent);
   border-radius:10px;
 }
@@ -8219,6 +8219,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </div>
   </div>
 
+  <!-- 일괄 출석 처리 배너 (테이블 위) -->
+  <div id="att-confirm-bar" style="display:none;"></div>
+
   <!-- 학생 명단 테이블 -->
   <div class="att-tbl-wrap">
     <table class="att-tbl">
@@ -8235,9 +8238,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </table>
     <div class="att-tbl-empty" id="att-tbl-empty" style="display:none;"></div>
   </div>
-
-  <!-- 일괄 출석 확정 배너 (미확정 날짜에만 표시) -->
-  <div id="att-confirm-bar" style="display:none;"></div>
 
   <!-- 행 액션 메뉴 -->
   <div class="att-row-menu" id="att-row-menu" style="display:none;">
@@ -22194,8 +22194,6 @@ function shiftAttendanceDate(delta){
    오늘 이후 날짜는 명시적 확정 필요
 ────────────────────────────────────────────── */
 function isAttDateConfirmed(dateStr){
-  var today = getTodayDate();
-  if(dateStr < today) return true;           // 과거 = 하위 호환 확정
   var dayRecs = attendanceRecords[dateStr];
   return !!(dayRecs && dayRecs.__confirmed);
 }
@@ -22258,35 +22256,30 @@ function renderAttConfirmBar(isNonSchool){
     return;
   }
   var today = getTodayDate();
-  // 미래 날짜 또는 과거 날짜(자동 확정)는 배너 없음 — 오늘만 표시
-  if(attendanceCurrentDate !== today){
+  // 미래 날짜는 배너 표시 안 함
+  if(attendanceCurrentDate > today){
     bar.style.display = 'none';
     return;
   }
   var confirmed = isAttDateConfirmed(attendanceCurrentDate);
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var issueCount = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
   if(confirmed){
-    // 오늘만 "확정됨" 배지 표시, 과거는 조용히
-    if(attendanceCurrentDate === today){
-      var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
-      var issueCount = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
-      var attendCount = c.students.length - issueCount;
-      bar.innerHTML =
-        '<div class="att-confirmed-badge">'
-        +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-        +'출결 확정 완료 · 출석 '+attendCount+'명 / 이슈 '+issueCount+'명'
-        +'</div>';
-      bar.style.display = 'block';
-    } else {
-      bar.style.display = 'none';
-    }
+    // 확정됨 배지
+    var attendCount = c.students.length - issueCount;
+    bar.innerHTML =
+      '<div class="att-confirmed-badge">'
+      +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+      +'출결 확정 완료 · 출석 '+attendCount+'명 / 이슈 '+issueCount+'명'
+      +'</div>';
+    bar.className = '';
+    bar.style.display = 'block';
     return;
   }
   // 미확정 — 미입력 인원 수 계산
-  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
-  var recorded = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
-  var unrecorded = c.students.length - recorded;
+  var unrecorded = c.students.length - issueCount;
   if(unrecorded <= 0){
-    // 전원 기록됨 → 자동 확정 안내
+    // 전원 이슈 기록됨 → 확정 안내
     bar.innerHTML =
       '<div class="att-confirm-bar-text">전원 출결이 입력됐어요</div>'
       +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">출결 확정하기</button>';
@@ -22295,8 +22288,8 @@ function renderAttConfirmBar(isNonSchool){
     return;
   }
   bar.innerHTML =
-    '<div class="att-confirm-bar-text"><strong>'+unrecorded+'명</strong> 미입력 · 이슈 없는 학생을 출석으로 확정해주세요</div>'
-    +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">미입력 '+unrecorded+'명 출석 처리</button>';
+    '<div class="att-confirm-bar-text"><strong>미입력 '+unrecorded+'명</strong>을 출석으로 처리할게요</div>'
+    +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">이슈 없는 학생 출석 처리</button>';
   bar.className = 'att-confirm-bar';
   bar.style.display = 'flex';
 }
