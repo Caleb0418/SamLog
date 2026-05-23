@@ -7802,43 +7802,21 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="intro-modal-body">
 
-        <!-- 지금 해보기 — 핵심 3개 -->
-        <div class="intro-highlights">
-          <div class="intro-hl-card" onclick="introTry('quick-memo')">
-            <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">퀵 메모 + @멘션</div>
-            <div class="intro-hl-desc">홈에서 한 줄. @이름 또는 @전체를 적으면 학생 기록에 자동 연결돼요.</div>
-            <div class="intro-hl-cta">지금 써보기 →</div>
-          </div>
-          <div class="intro-hl-card" onclick="introTry('saenggibu-matrix')">
-            <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">생기부 한눈에 보기</div>
-            <div class="intro-hl-desc">반 전체 × 영역별 진행률이 매트릭스로. 학기말 핵심 뷰.</div>
-            <div class="intro-hl-cta">매트릭스 열기 →</div>
-          </div>
-          <div class="intro-hl-card" onclick="introTry('class-add')">
-            <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">수업 등록하기</div>
-            <div class="intro-hl-desc">담당 반·과목을 등록하면 출결·메모·생기부가 한 곳에 모여요.</div>
-            <div class="intro-hl-cta">수업 추가하기 →</div>
-          </div>
-        </div>
-
-        <!-- 매일 쓰는 기능 -->
+        <!-- 매일 한 줄 기록 -->
         <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📝</span> 매일 쓰는 기능</div>
+          <div class="intro-cat-title"><span class="intro-cat-icon">📝</span> 매일 한 줄 기록</div>
           <div class="intro-cat-items">
             <div class="intro-item" onclick="introGo('home')">
-              <div class="intro-item-name">퀵 메모 + @멘션</div>
-              <div class="intro-item-desc">홈에서 한 줄. ⌘+Enter로 저장</div>
+              <div class="intro-item-name">퀵 메모 + @멘션·@전체</div>
+              <div class="intro-item-desc">홈에서 한 줄. @이름은 학생에, @전체는 반 공지로 자동 연결</div>
             </div>
             <div class="intro-item" onclick="introGo('class')">
               <div class="intro-item-name">수업 후 빠른 메모</div>
-              <div class="intro-item-desc">오늘 수업 카드에서 종소리 직후</div>
+              <div class="intro-item-desc">오늘 수업 카드에서 진도·반 특이사항·학생 멘션을 종소리 직후</div>
             </div>
-            <div class="intro-item" onclick="introGo('attendance')">
-              <div class="intro-item-name">출결 체크</div>
-              <div class="intro-item-desc">일일·학생별 월간·반 전체 월간</div>
+            <div class="intro-item" onclick="introGo('home')">
+              <div class="intro-item-name">오늘 수업 알람 &amp; 제출 추적</div>
+              <div class="intro-item-desc">수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에</div>
             </div>
           </div>
         </div>
@@ -7849,15 +7827,53 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <div class="intro-cat-items">
             <div class="intro-item" onclick="introGo('students')">
               <div class="intro-item-name">학생 타임라인</div>
-              <div class="intro-item-desc">관찰·상담·생활·학부모·출결·생기부 누적</div>
+              <div class="intro-item-desc">관찰·상담·생활·학부모·출결·생기부가 학생별로 자동 누적</div>
             </div>
             <div class="intro-item" onclick="introGo('students')">
               <div class="intro-item-name">5색 메모 분류</div>
-              <div class="intro-item-desc">관찰/상담/생활/학부모/미분류 필터</div>
+              <div class="intro-item-desc">관찰/상담/생활/학부모/미분류 — 색상 필터로 빠른 정리</div>
             </div>
             <div class="intro-item" onclick="introGo('students')">
               <div class="intro-item-name">태그로 빠르게 찾기</div>
-              <div class="intro-item-desc">자주 쓰는 태그 미리 등록</div>
+              <div class="intro-item-desc">자주 쓰는 태그 미리 등록 — 입력 속도와 검색 모두 향상</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 수업·출결 관리 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">🏫</span> 수업·출결 관리</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('class')">
+              <div class="intro-item-name">담당 시간표 + NEIS 자동 매칭</div>
+              <div class="intro-item-desc">내 담당 수업만 등록하면 차시 카운팅과 휴강 자동 제외까지</div>
+            </div>
+            <div class="intro-item" onclick="introGo('attendance')">
+              <div class="intro-item-name">출결 체크</div>
+              <div class="intro-item-desc">일일·학생별 월간·반 전체 월간 뷰로 누락 없이 관리</div>
+            </div>
+            <div class="intro-item" onclick="introGo('class')">
+              <div class="intro-item-name">반 시간표·창체 활동</div>
+              <div class="intro-item-desc">담임반 창체·특별 일정을 등록해두면 생기부 자율활동에 자동 연결</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 학부모 상담 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">📞</span> 학부모 상담</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('reply-answer')">
+              <div class="intro-item-name">받은 메시지 답장</div>
+              <div class="intro-item-desc">6단계로 익명화 프롬프트 자동 완성 — 답장 초안까지</div>
+            </div>
+            <div class="intro-item" onclick="introGo('reply-prepare')">
+              <div class="intro-item-name">전화·상담 전 준비</div>
+              <div class="intro-item-desc">학생 누적 기록으로 자동 브리핑 + 통화 가이드 생성</div>
+            </div>
+            <div class="intro-item" onclick="introGo('reply-prepare')">
+              <div class="intro-item-name">통화 후 결과 메모</div>
+              <div class="intro-item-desc">통화 메모가 학생 타임라인에 자동 누적 — 다음 상담의 토대</div>
             </div>
           </div>
         </div>
@@ -7868,34 +7884,15 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <div class="intro-cat-items">
             <div class="intro-item" onclick="introGo('saenggibu-write')">
               <div class="intro-item-name">작성 모드</div>
-              <div class="intro-item-desc">영역별 프롬프트 + 학생 메모 자동 결합</div>
+              <div class="intro-item-desc">영역별 프롬프트 + 학생 메모 자동 결합으로 초안 생성</div>
             </div>
             <div class="intro-item" onclick="introGo('saenggibu-matrix')">
               <div class="intro-item-name">한눈에 보기</div>
-              <div class="intro-item-desc">반 전체 × 영역 매트릭스</div>
+              <div class="intro-item-desc">반 전체 × 영역 매트릭스로 진행 상황을 한 화면에</div>
             </div>
             <div class="intro-item" onclick="introGo('saenggibu-progress')">
               <div class="intro-item-name">진행률 뷰</div>
-              <div class="intro-item-desc">어디까지 썼는지 추적</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 학부모 + 자동화 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📞</span> 학부모 상담</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('reply-answer')">
-              <div class="intro-item-name">받은 메시지 답장</div>
-              <div class="intro-item-desc">6단계로 익명화 프롬프트 자동 완성</div>
-            </div>
-            <div class="intro-item" onclick="introGo('reply-prepare')">
-              <div class="intro-item-name">전화·상담 전 준비</div>
-              <div class="intro-item-desc">누적된 정보로 통화 전 브리핑</div>
-            </div>
-            <div class="intro-item" onclick="introGo('neis')">
-              <div class="intro-item-name">NEIS 자동 연동</div>
-              <div class="intro-item-desc">학교 이름만 검색하면 시간표·학사일정 자동 연동</div>
+              <div class="intro-item-desc">어디까지 썼는지 학생·영역별로 추적</div>
             </div>
           </div>
         </div>
@@ -19483,46 +19480,75 @@ function renderSubmitModal(groupId, tab){
 
 /* ─── 시작 가이드 카드 ─── */
 function getSetupSteps(){
-  var hasMemo = false;
-  Object.keys(records).forEach(function(num){
-    if((records[num]||[]).length > 0) hasMemo = true;
-  });
+  // 1) 담당 시간표 등록 완료 여부
   var hasClass = !!(classMaster && classMaster.length > 0);
+  // 2) 퀵 메모로 첫 기록 — 어느 반이든 학생 records에 메모 1개 이상
+  var hasMemo = false;
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls || !cls.records) return;
+    Object.keys(cls.records).forEach(function(num){
+      if((cls.records[num] || []).length > 0) hasMemo = true;
+    });
+  });
+  // 3) 학생 메모 + 태그 — 메모 중 tags 길이 ≥1인 게 1개라도 있으면 완료
+  var hasTagged = false;
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls || !cls.records || hasTagged) return;
+    Object.keys(cls.records).forEach(function(num){
+      (cls.records[num] || []).forEach(function(r){
+        if(r && r.tags && r.tags.length > 0) hasTagged = true;
+      });
+    });
+  });
+  // 4) 출결 입력 — attendanceRecords에 비어있지 않은 학생 기록 1개 이상
   var hasAttendance = false;
   Object.keys(attendanceRecords).forEach(function(date){
     var dateRecs = attendanceRecords[date];
     if(!dateRecs) return;
     Object.keys(dateRecs).forEach(function(num){
       if(num === '__confirmed') return;
-      if((dateRecs[num]||[]).length > 0) hasAttendance = true;
+      if((dateRecs[num] || []).length > 0) hasAttendance = true;
     });
   });
   return [
     {
-      id:'first_memo',
-      label:'첫 메모 남기기',
-      sub:'학생을 선택하고 관찰 메모를 작성해보세요',
-      done: hasMemo,
-      action:"switchTab('students')"
-    },
-    {
       id:'register_class',
-      label:'수업 등록하기',
-      sub:'담당 과목을 등록하면 수업 관리와 생기부 초안 작성이 가능해요',
+      label:'담당 시간표 등록',
+      sub:'NEIS에서 학교 시간표를 받아오려면 먼저 내 담당 수업(학년·반·과목)을 등록해야 해요',
       done: hasClass,
       action:"openClassSettings()"
     },
     {
+      id:'first_quick_memo',
+      label:'퀵 메모로 첫 기록 남기기',
+      sub:'홈 화면에서 @이름 또는 @전체로 학생에 자동 연결돼요',
+      done: hasMemo,
+      action:"highlightQuickMemo()"
+    },
+    {
+      id:'student_memo_tag',
+      label:'학생 메모 + 태그 만들기',
+      sub:'5색 분류와 태그로 학기말 생기부의 토대를 쌓아요',
+      done: hasTagged,
+      action:"switchTab('students')"
+    },
+    {
       id:'try_attendance',
-      label:'출결 입력해보기',
-      sub:'학생의 출결 상태를 확인하고 기록해보세요',
+      label:'오늘 출결 체크',
+      sub:'매일 쓰는 핵심 루틴이에요. 일일·월간 뷰로 누락 없이 관리',
       done: hasAttendance,
       action:"switchTab('attendance')"
     }
   ];
 }
 function renderSetupGuideCard(){
-  // 1주일 후 자동 부활: 영구 dismiss 키 대신 타임스탬프
+  // 영구 완료 플래그: 한 번 완료되면 다시 안 뜸
+  var permaDone = false;
+  try{ permaDone = localStorage.getItem('ht2_setup_guide_done') === '1'; }catch(e){}
+  if(permaDone) return '';
+  // "다음에 할게요" 누른 경우 — 1주일 후 다시 뜨는 기존 동작 유지
   var dismissedAt = parseInt(localStorage.getItem('ht2_setup_guide_dismissed_at')||'0', 10);
   var ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
   if(dismissedAt && (Date.now() - dismissedAt) < ONE_WEEK){
@@ -19531,7 +19557,8 @@ function renderSetupGuideCard(){
   var steps = getSetupSteps();
   var allDone = steps.every(function(s){ return s.done; });
   if(allDone){
-    localStorage.setItem('ht2_setup_guide_dismissed_at', String(Date.now()));
+    // 모든 단계 완료 → 영구 숨김 플래그 저장
+    try{ localStorage.setItem('ht2_setup_guide_done', '1'); }catch(e){}
     return '';
   }
   var stepsHtml = steps.map(function(s, i){
@@ -19693,6 +19720,7 @@ function restoreSetupGuide(){
   try{
     localStorage.removeItem('ht2_setup_guide_dismissed_at');
     localStorage.removeItem('ht2_setup_guide_dismissed');
+    localStorage.removeItem('ht2_setup_guide_done');
   }catch(e){}
   if(typeof closeSettings === 'function') closeSettings();
   setTimeout(function(){
