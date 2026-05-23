@@ -19483,39 +19483,41 @@ function renderSubmitModal(groupId, tab){
 
 /* ─── 시작 가이드 카드 ─── */
 function getSetupSteps(){
-  var hasStudents = false;
-  var hasAnyClass = Object.keys(classes).length > 0;
-  if(hasAnyClass){
-    Object.keys(classes).forEach(function(k){
-      if((classes[k].students||[]).length > 0) hasStudents = true;
-    });
-  }
   var hasMemo = false;
   Object.keys(records).forEach(function(num){
     if((records[num]||[]).length > 0) hasMemo = true;
   });
-  var hasNeis = !!(neisSettings.atptCode && neisSettings.schulCode);
+  var hasClass = !!(classMaster && classMaster.length > 0);
+  var hasAttendance = false;
+  Object.keys(attendanceRecords).forEach(function(date){
+    var dateRecs = attendanceRecords[date];
+    if(!dateRecs) return;
+    Object.keys(dateRecs).forEach(function(num){
+      if(num === '__confirmed') return;
+      if((dateRecs[num]||[]).length > 0) hasAttendance = true;
+    });
+  });
   return [
-    {
-      id:'add_students',
-      label:'학생 명단 추가하기',
-      sub:'엑셀 업로드 또는 직접 입력',
-      done: hasStudents,
-      action:"openRosterReplace()"
-    },
     {
       id:'first_memo',
       label:'첫 메모 남기기',
       sub:'학생을 선택하고 관찰 메모를 작성해보세요',
       done: hasMemo,
-      action:"highlightQuickMemo()"
+      action:"switchTab('students')"
     },
     {
-      id:'neis_connect',
-      label:'NEIS 연동으로 시간표 자동화',
-      sub:'학교 이름만 검색하면 시간표·학사일정이 자동으로 채워져요',
-      done: hasNeis,
-      action:"openNeisSetupModal()"
+      id:'register_class',
+      label:'수업 등록하기',
+      sub:'담당 과목을 등록하면 수업 관리와 생기부 초안 작성이 가능해요',
+      done: hasClass,
+      action:"openClassSettings()"
+    },
+    {
+      id:'try_attendance',
+      label:'출결 입력해보기',
+      sub:'학생의 출결 상태를 확인하고 기록해보세요',
+      done: hasAttendance,
+      action:"switchTab('attendance')"
     }
   ];
 }
