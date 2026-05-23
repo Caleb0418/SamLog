@@ -7898,8 +7898,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
 
         <div class="intro-footer-note">
-          <strong>🔒 모든 데이터는 이 기기에만 저장돼요.</strong> 학생 정보는 학부모 상담 탭 사용 시 자동으로 익명화되어 외부 AI에 전달됩니다.
-          설정에서 <strong>데이터 백업</strong>·<strong>다크모드</strong>·<strong>샘플로 체험</strong>을 켤 수 있어요.
+          <strong>🔒 모든 데이터는 이 기기에만 저장돼요.</strong> 학부모 상담 기능은 학생 이름을 자동 익명화해서 AI에 전달해요.
         </div>
       </div>
 
@@ -17001,16 +17000,17 @@ function renderSaenggibuProgressView(){
   var matrix = buildClassSaenggibuMatrix();
   var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
   var total = students.length;
+  var ck = currentClassKey;
 
   var cardsHtml = areaCodes.map(function(code){
     var meta = SAENGGIBU_AREA_CODES[code];
-    var doneCount = students.filter(function(s){ return matrix[s.num][code]; }).length;
+    var doneCount = students.filter(function(s){ return matrix[ck+'_'+s.num] && matrix[ck+'_'+s.num][code]; }).length;
     var pct = total > 0 ? Math.round(doneCount / total * 100) : 0;
     var avgLen = 0;
     var overCount = 0;
     var lens = [];
     students.forEach(function(s){
-      var r = matrix[s.num][code];
+      var r = matrix[ck+'_'+s.num] && matrix[ck+'_'+s.num][code];
       if(r){ lens.push(r.charCount); if(r.charCount > r.charLimit) overCount++; }
     });
     if(lens.length > 0){
@@ -19655,11 +19655,13 @@ function introTry(action){
       setTimeout(function(){
         if(typeof switchSaenggibuView === 'function') switchSaenggibuView('matrix');
       }, 250);
-    } else if(action === 'class-add'){
-      switchTab('class');
+    } else if(action === 'reply-answer'){
+      switchTab('reply');
       setTimeout(function(){
-        if(typeof openAddClass === 'function') openAddClass();
+        if(typeof switchReplySub === 'function') switchReplySub('answer');
       }, 250);
+    } else if(action === 'attendance'){
+      switchTab('attendance');
     }
   }, 150);
 }
