@@ -19158,16 +19158,51 @@ function saveAddClass(){
   };
   saveAll();
 
-  // 교과 담당 반이고 NEIS 시간표가 있으면 과목 선택 단계로 전환
+  // 교과 담당 반 → 과목 선택 단계로 전환
   if(!isPrimary){
     var subjectList = getAcSubjectsForClass(g, c);
     if(subjectList.length > 0){
       showAcSubjectStep(key, g, c, subjectList);
       return; // 모달 유지
     }
+    // 시간표 없음 + NEIS 설정 있으면 자동 sync 후 과목 칩 표시
+    if(neisSettings.apiKey && neisSettings.atptCode && neisSettings.schulCode){
+      // 모달 기존 입력 영역 숨기고 로딩 표시
+      var _acModal = document.getElementById('add-class-modal');
+      var _acBody  = _acModal && _acModal.querySelector('.memo-modal-body');
+      if(_acBody){
+        Array.from(_acBody.children).forEach(function(el){
+          if(el.id !== 'ac-subject-step') el.style.display = 'none';
+        });
+        var stepEl = document.getElementById('ac-subject-step');
+        if(stepEl){
+          stepEl.style.display = '';
+          stepEl.innerHTML =
+            '<div style="text-align:center;padding:28px 0 20px;color:var(--text-secondary);font-size:13px;">'
+            +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;opacity:0.5;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>'
+            +'시간표 불러오는 중...'
+            +'</div>';
+        }
+        var titleEl = _acModal.querySelector('.memo-modal-title');
+        if(titleEl) titleEl.textContent = g+'학년 '+c+'반 담당 과목';
+        var cancelBtn = document.getElementById('ac-cancel-btn');
+        if(cancelBtn){ cancelBtn.textContent = '건너뛰기'; cancelBtn.onclick = function(){ closeAddClass(); switchClassKey(key); showToast(g+'학년 '+c+'반이 추가됐어요'); }; }
+      }
+      neisSyncAll().then(function(){
+        var subjectListAfterSync = getAcSubjectsForClass(g, c);
+        if(subjectListAfterSync.length > 0){
+          showAcSubjectStep(key, g, c, subjectListAfterSync);
+        } else {
+          closeAddClass();
+          switchClassKey(key);
+          showToast(g+'학년 '+c+'반이 추가됐어요');
+        }
+      });
+      return; // 모달 유지하면서 sync 대기
+    }
   }
 
-  // 담임반이거나 시간표 없는 경우 → 바로 완료
+  // 담임반이거나 NEIS 미설정 → 바로 완료
   closeAddClass();
   switchClassKey(key);
   showToast(g+'학년 '+c+'반이 추가됐어요');
