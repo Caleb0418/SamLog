@@ -6853,20 +6853,20 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
       <button class="tt-change-close-btn" onclick="closeTimetableChangeModal()">✕</button>
     </div>
-    <div class="tt-change-desc">NEIS에서 가져온 시간표가 현재와 다릅니다.<br>언제부터 새 시간표를 적용할까요?</div>
+    <div class="tt-change-desc" id="tt-change-desc">NEIS에서 가져온 시간표가 현재와 다릅니다.<br>언제부터 새 시간표를 적용할까요?</div>
     <div class="tt-change-options">
       <label class="tt-change-option">
         <input type="radio" name="tt-apply-mode" value="next-week" checked onchange="onTtApplyModeChange(this.value)">
         <span class="tt-change-option-inner">
           <span class="tt-change-option-title">다음 주부터</span>
-          <span class="tt-change-option-sub">다음 월요일 이후 날짜에 적용</span>
+          <span class="tt-change-option-sub" id="tt-change-sub-next-week">다음 월요일 이후 출결에 새 시간표 적용</span>
         </span>
       </label>
       <label class="tt-change-option">
         <input type="radio" name="tt-apply-mode" value="today" onchange="onTtApplyModeChange(this.value)">
         <span class="tt-change-option-inner">
           <span class="tt-change-option-title">오늘부터</span>
-          <span class="tt-change-option-sub">오늘 이후 날짜에 적용</span>
+          <span class="tt-change-option-sub" id="tt-change-sub-today">오늘 이후 출결에 새 시간표 적용</span>
         </span>
       </label>
       <label class="tt-change-option">
@@ -6880,7 +6880,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <input type="radio" name="tt-apply-mode" value="all" onchange="onTtApplyModeChange(this.value)">
         <span class="tt-change-option-inner">
           <span class="tt-change-option-title">전체 적용</span>
-          <span class="tt-change-option-sub">기준 시간표만 업데이트 (날짜별 기록 없음)</span>
+          <span class="tt-change-option-sub">날짜 구분 없이 기준 시간표만 교체 · 언제 바뀐지 모를 때 선택</span>
         </span>
       </label>
     </div>
@@ -12805,6 +12805,23 @@ function detectNeisTimetableChanges(rows){
       });
     }
   });
+  // 변경된 교시가 실제 rows에서 처음 나타나는 날짜 추출
+  if(changes.length > 0){
+    var changeKeySet = {};
+    changes.forEach(function(c){ changeKeySet[c._key] = true; });
+    var firstDate = null;
+    rows.forEach(function(row){
+      var ymd = row.ALL_TI_YMD; if(!ymd) return;
+      var d = new Date(ymd.substring(0,4)+'-'+ymd.substring(4,6)+'-'+ymd.substring(6,8));
+      var dow = d.getDay();
+      var key = row.GRADE+'-'+row.CLASS_NM+'-'+dow+'-'+row.PERIO;
+      if(changeKeySet[key]){
+        var ds = ymd.substring(0,4)+'-'+ymd.substring(4,6)+'-'+ymd.substring(6,8);
+        if(!firstDate || ds < firstDate) firstDate = ds;
+      }
+    });
+    changes._firstChangeDate = firstDate;
+  }
   // 특수일 오버라이드를 함께 반환 (neisSyncAll에서 처리)
   changes._specialDays = normalized.specialDays;
   return changes;
@@ -13315,6 +13332,35 @@ function openTimetableChangeModal(detected, syncResult){
   ttChangeState.customDate = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   var el = document.getElementById('tt-change-overlay');
   if(!el) return;
+
+  // ── 동적 텍스트 업데이트 ──
+  var KO_DOW = ['일','월','화','수','목','금','토'];
+  var KO_MON = function(d){ return (d.getMonth()+1)+'월 '+d.getDate()+'일('+KO_DOW[d.getDay()]+')'; };
+
+  // 다음 주 월요일 계산
+  var nextMon = new Date(t);
+  var dow = t.getDay();
+  var daysUntilMon = (dow === 0) ? 1 : (8 - dow);
+  nextMon.setDate(t.getDate() + daysUntilMon);
+
+  // 설명 텍스트: _firstChangeDate 있으면 그 날짜 표시
+  var descEl = document.getElementById('tt-change-desc');
+  if(descEl){
+    var fcd = detected && detected._firstChangeDate;
+    if(fcd){
+      var fcdDate = new Date(fcd);
+      descEl.innerHTML = 'NEIS에서 <strong>'+KO_MON(fcdDate)+'</strong>부터 변경된 시간표가 감지됐어요.<br>언제부터 새 시간표를 적용할까요?';
+    } else {
+      descEl.innerHTML = 'NEIS에서 가져온 시간표가 현재와 다릅니다.<br>언제부터 새 시간표를 적용할까요?';
+    }
+  }
+
+  // 옵션 서브텍스트 동적화
+  var subNextWeek = document.getElementById('tt-change-sub-next-week');
+  if(subNextWeek) subNextWeek.textContent = KO_MON(nextMon)+'부터 새 시간표로 출결이 기록돼요';
+  var subToday = document.getElementById('tt-change-sub-today');
+  if(subToday) subToday.textContent = KO_MON(t)+'부터 새 시간표로 출결이 기록돼요';
+
   el.style.display = 'flex';
   // 라디오 초기화
   var radios = el.querySelectorAll('input[name="tt-apply-mode"]');
