@@ -20918,7 +20918,7 @@ function showAutocomplete(query, input){
   } else {
     candidates = pool.filter(function(s){
       if(!query) return true;
-      return s.name.indexOf(query) >= 0;
+      return s.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
     }).slice(0, 10);
   }
 
@@ -21146,7 +21146,7 @@ function parseMentions(text, opts){
 
     var candidates = [];
     pool.forEach(function(s){
-      if(name.indexOf(s.name) === 0){
+      if(name.toLowerCase().indexOf(s.name.toLowerCase()) === 0){
         candidates.push(s);
       }
     });
