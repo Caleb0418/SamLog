@@ -15725,6 +15725,8 @@ var sgtListState = {
   search: '',
   classKey: null    // null이면 currentClassKey 사용. 다른 반 선택 시 그 classKey
 };
+// 한눈에 보기 — 반 선택 상태
+var sgtMatrixClassKey = null;
 
 function openSaengibu(){
   if(!currentStudent){ alert('학생을 먼저 선택해주세요'); return; }
@@ -16699,7 +16701,41 @@ function renderSaenggibuMatrixView(){
   var container = document.getElementById('sgt-view-matrix');
   if(!container) return;
 
+  // ── 반 선택 탭 ──
+  var classKeys = Object.keys(classes).sort(function(a, b){
+    var ga = parseInt(classes[a].grade||0), gb = parseInt(classes[b].grade||0);
+    var ca = parseInt(classes[a].classNum||0), cb = parseInt(classes[b].classNum||0);
+    return ga !== gb ? ga-gb : ca-cb;
+  });
+  // 첫 진입 시 sgtMatrixClassKey 초기화
+  if(!sgtMatrixClassKey || !classes[sgtMatrixClassKey]){
+    sgtMatrixClassKey = classKeys[0] || currentClassKey;
+  }
+  var activeMatrixKey = sgtMatrixClassKey;
+
+  var classSelectorHtml = '';
+  if(classKeys.length > 1){
+    classSelectorHtml =
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">' +
+        classKeys.map(function(key){
+          var c = classes[key];
+          var isActive = key === activeMatrixKey;
+          return '<button class="sgt-class-chip'+(isActive?' active':'')+'" onclick="selectSgtMatrixClass(\''+key+'\')">'+
+            c.grade+'학년 '+c.classNum+'반'+
+            (c.isPrimary ? ' <span style="font-size:9px;opacity:0.7;">(담임)</span>' : '')+
+          '</button>';
+        }).join('')+
+      '</div>';
+  }
+
+  // ── 매트릭스 빌드 + 반 필터 ──
   var matrix = buildClassSaenggibuMatrix();
+  if(activeMatrixKey){
+    Object.keys(matrix).forEach(function(k){
+      if(matrix[k]._classKey !== activeMatrixKey) delete matrix[k];
+    });
+  }
+
   var areaCodes = Object.keys(SAENGGIBU_AREA_CODES);
 
   // 영역별 중복 사전 계산
@@ -16749,27 +16785,18 @@ function renderSaenggibuMatrixView(){
     '</th>';
   });
 
-  // 전체 반 × 학생 목록 (학년→반→번호 순)
+  // 학생 목록 (번호 순)
   var matrixKeys = Object.keys(matrix).sort(function(a, b){
-    var mA = matrix[a], mB = matrix[b];
-    var gA = parseInt((classes[mA._classKey] || {}).grade || 0);
-    var gB = parseInt((classes[mB._classKey] || {}).grade || 0);
-    var cA = parseInt((classes[mA._classKey] || {}).classNum || 0);
-    var cB = parseInt((classes[mB._classKey] || {}).classNum || 0);
-    var nA = parseInt(mA._student.num || 0);
-    var nB = parseInt(mB._student.num || 0);
-    if(gA !== gB) return gA - gB;
-    if(cA !== cB) return cA - cB;
+    var nA = parseInt(matrix[a]._student.num || 0);
+    var nB = parseInt(matrix[b]._student.num || 0);
     return nA - nB;
   });
 
   var rowsHtml = matrixKeys.map(function(key){
     var entry = matrix[key];
     var s = entry._student;
-    var classLabel = entry._classLabel;
     var rowCells =
       '<td class="student-col">' +
-        '<span style="font-size:10px;color:var(--text-tertiary);margin-right:4px;">' + classLabel + '</span>' +
         parseInt(s.num) + '번 ' + escapeHtml(getDisplayName(s)) +
       '</td>';
     areaCodes.forEach(function(code){
@@ -16788,7 +16815,7 @@ function renderSaenggibuMatrixView(){
     return '<tr>' + rowCells + '</tr>';
   }).join('');
 
-  container.innerHTML = controlsHtml +
+  container.innerHTML = classSelectorHtml + controlsHtml +
     '<div class="sgt-matrix-wrapper">' +
       '<table class="sgt-matrix-table">' +
         '<thead><tr>' + headerCells + '</tr></thead>' +
@@ -17434,6 +17461,11 @@ function selectSgtClass(classKey){
   sgtListState.classKey = classKey;
   sgtListState.search = '';
   renderSaenggibuWriteView();
+}
+// 한눈에 보기에서 반 선택
+function selectSgtMatrixClass(classKey){
+  sgtMatrixClassKey = classKey;
+  renderSaenggibuMatrixView();
 }
 // 정렬 토글
 function toggleSgtSort(){
