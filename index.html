@@ -20065,6 +20065,15 @@ function tmEndEdit(){
   renderTeacherMemoCard();
 }
 
+// blur 시 저장만 (편집 모드 유지) — Windows에서 Ctrl 키 누를 때 blur가 먼저 발생하는 문제 방지
+function tmOnBlur(){
+  var ta = document.getElementById('tm-textarea');
+  if(ta){
+    clearTimeout(_tmSaveTimer);
+    _tmSetToday(ta.value);
+  }
+}
+
 // textarea 자동 저장 (500ms debounce)
 function tmOnInput(ta){
   clearTimeout(_tmSaveTimer);
@@ -20073,7 +20082,7 @@ function tmOnInput(ta){
 
 // Ctrl+Enter → 편집 완료 / 편집 진입
 function tmOnKeydown(e){
-  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+  if((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)){
     e.preventDefault();
     tmEndEdit();
   }
@@ -20118,7 +20127,7 @@ function renderTeacherMemoCard(){
       '</div>' +
       '<textarea id="tm-textarea" class="tm-textarea"' +
         ' oninput="tmOnInput(this)"' +
-        ' onblur="tmEndEdit()"' +
+        ' onblur="tmOnBlur()"' +
         ' onkeydown="tmOnKeydown(event)"' +
         ' placeholder="오늘 할 일이나 개인 메모를 적어두세요."' +
       '>' + escapeHtml(text) + '</textarea>' +
