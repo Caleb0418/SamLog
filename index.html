@@ -7748,7 +7748,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
                 <div style="min-width:0;flex:1;">
                   <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">시작 가이드 다시 보기</div>
-                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">홈 화면의 3단계 시작 가이드 카드를 다시 표시해요.</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">홈 화면의 4단계 시작 가이드 카드를 다시 표시해요.</div>
                 </div>
                 <button class="btn-small secondary" onclick="restoreSetupGuide()" style="flex-shrink:0;">다시 표시</button>
               </div>
@@ -19670,20 +19670,23 @@ function getSetupSteps(){
   ];
 }
 function renderSetupGuideCard(){
-  // 영구 완료 플래그: 한 번 완료되면 다시 안 뜸
+  // "다시 보기" 버튼으로 강제 표시 중인지 확인
+  var forceShow = false;
+  try{ forceShow = localStorage.getItem('ht2_setup_guide_force_show') === '1'; }catch(e){}
+  // 영구 완료 플래그: 한 번 완료되면 다시 안 뜸 (force_show 중엔 무시)
   var permaDone = false;
   try{ permaDone = localStorage.getItem('ht2_setup_guide_done') === '1'; }catch(e){}
-  if(permaDone) return '';
-  // "다음에 할게요" 누른 경우 — 1주일 후 다시 뜨는 기존 동작 유지
+  if(permaDone && !forceShow) return '';
+  // "다음에 할게요" 누른 경우 — 1주일 후 다시 뜨는 기존 동작 유지 (force_show 중엔 무시)
   var dismissedAt = parseInt(localStorage.getItem('ht2_setup_guide_dismissed_at')||'0', 10);
   var ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-  if(dismissedAt && (Date.now() - dismissedAt) < ONE_WEEK){
+  if(!forceShow && dismissedAt && (Date.now() - dismissedAt) < ONE_WEEK){
     return '';
   }
   var steps = getSetupSteps();
   var allDone = steps.every(function(s){ return s.done; });
-  if(allDone){
-    // 모든 단계 완료 → 영구 숨김 플래그 저장
+  if(allDone && !forceShow){
+    // 모든 단계 완료 → 영구 숨김 플래그 저장 (force_show 중엔 건너뜀)
     try{ localStorage.setItem('ht2_setup_guide_done', '1'); }catch(e){}
     return '';
   }
@@ -19722,6 +19725,7 @@ function dismissSetupGuide(){
   try{
     localStorage.setItem('ht2_setup_guide_dismissed_at', String(Date.now()));
     localStorage.removeItem('ht2_setup_guide_dismissed');
+    localStorage.removeItem('ht2_setup_guide_force_show');
   }catch(e){}
   renderHome();
 }
@@ -19850,6 +19854,7 @@ function restoreSetupGuide(){
     localStorage.removeItem('ht2_setup_guide_dismissed_at');
     localStorage.removeItem('ht2_setup_guide_dismissed');
     localStorage.removeItem('ht2_setup_guide_done');
+    localStorage.setItem('ht2_setup_guide_force_show', '1');
   }catch(e){}
   if(typeof closeSettings === 'function') closeSettings();
   setTimeout(function(){
