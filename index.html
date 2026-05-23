@@ -20084,6 +20084,7 @@ function tmOnInput(ta){
 function tmOnKeydown(e){
   if((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)){
     e.preventDefault();
+    e.stopPropagation(); // 버블링 차단: card.onkeydown이 tmStartEdit()을 재호출하는 것 방지
     tmEndEdit();
   }
 }
