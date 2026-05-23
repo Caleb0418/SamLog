@@ -20685,6 +20685,39 @@ function computeAlerts(){
     }
   }
 
+  /* ⑦ 미확정 출결 날짜 — 과거 평일 중 확정되지 않은 날 */
+  var _attClasses = Object.keys(classes).filter(function(k){
+    return (classes[k].students||[]).length > 0;
+  });
+  if(_attClasses.length > 0){
+    var _unconfirmedDates = [];
+    var _refGrade = (classes[_attClasses[0]] || {}).grade;
+    for(var _di = 1; _di <= 14; _di++){
+      var _pd = new Date(now);
+      _pd.setDate(_pd.getDate() - _di);
+      var _pdStr = formatDateForInput(_pd);
+      var _pdow = _pd.getDay();
+      if(_pdow === 0 || _pdow === 6) continue; // 주말 제외
+      if(typeof isNonSchoolDay === 'function' && isNonSchoolDay(_pdStr, _refGrade)) continue; // 공휴일·휴업일 제외
+      if(!isAttDateConfirmed(_pdStr)) _unconfirmedDates.push(_pdStr);
+    }
+    if(_unconfirmedDates.length > 0){
+      var _oldest = _unconfirmedDates[_unconfirmedDates.length - 1];
+      var _attDesc = _unconfirmedDates.length === 1
+        ? formatAttendanceDate(_oldest) + ' 출결이 미입력 상태예요'
+        : formatAttendanceDate(_oldest) + ' 외 ' + (_unconfirmedDates.length - 1) + '일 미입력';
+      alerts.push({
+        kind:'warn',
+        icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+        title: '미입력 출결 ' + _unconfirmedDates.length + '일',
+        desc: _attDesc,
+        cta:'출결 입력 →',
+        action: "goToAttendanceDate('" + _oldest + "')",
+        priority: 2.5
+      });
+    }
+  }
+
   /* ⑧ 시간표 미동기 (기존 유지) */
   if(!ttSyncState.synced){
     var emptySlotsCount=classMaster.filter(function(c){return !c.slots||c.slots.length===0;}).length;
@@ -22178,6 +22211,12 @@ function updateTimetableBanner(){
    출결 탭 — 메인 화면
 ═══════════════════════════════════════════ */
 var attendanceCurrentDate = null;
+
+/* ─── 홈 알람 → 특정 날짜 출결로 이동 ─── */
+function goToAttendanceDate(dateStr){
+  attendanceCurrentDate = dateStr;
+  switchTab('attendance');
+}
 
 /* ─── 날짜 이동 ─── */
 function shiftAttendanceDate(delta){
