@@ -13142,15 +13142,18 @@ function saveNeisSetup(){
 function autoSyncOnboardingSchedule(){
   if(!neisSettings.apiKey) return;
   var syncEl = document.getElementById('ob-neis-sync-label');
-  if(syncEl) syncEl.textContent = '학사일정 가져오는 중...';
-  neisFetchSchedule(neisSettings.apiKey).then(function(res){
-    if(res && res.ok){
-      var added = mergeNeisSchedule(res.rows);
-      neisSettings.lastSyncedAt = new Date().toISOString();
-      saveAll(); saveSettings();
-      if(syncEl) syncEl.textContent = '학사일정 ' + added + '건 가져옴 · 시간표는 완료 후 자동 동기화';
+  if(syncEl) syncEl.textContent = '시간표·학사일정 가져오는 중...';
+  neisSyncAll().then(function(result){
+    if(result){
+      var schedAdded = result.schedule && result.schedule.added || 0;
+      var ttAdded    = result.timetable && result.timetable.added || 0;
+      var msg = '학사일정 ' + schedAdded + '건';
+      if(ttAdded > 0) msg += ' · 시간표 ' + ttAdded + '건 가져옴';
+      else if(Object.keys(classes).length === 0) msg += ' 가져옴 · 반 등록 후 시간표 자동 연동';
+      else msg += ' 가져옴';
+      if(syncEl) syncEl.textContent = msg;
     } else {
-      if(syncEl) syncEl.textContent = '학사일정 동기화 실패 — 나중에 다시 시도하세요';
+      if(syncEl) syncEl.textContent = '동기화 실패 — 나중에 다시 시도하세요';
     }
   });
 }
