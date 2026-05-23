@@ -365,6 +365,33 @@ body{
   margin-top:6px;line-height:1.5;
 }
 
+/* 과목 선택 단계 */
+.ac-subject-chips-wrap{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin:10px 0 12px;
+}
+.ac-subject-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 13px;border-radius:20px;
+  font-size:13px;font-weight:500;cursor:pointer;
+  border:1.5px solid var(--border-strong);
+  background:var(--bg-elevated);color:var(--text-secondary);
+  transition:all 0.13s;user-select:none;
+}
+.ac-subject-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.ac-subject-chip.selected{
+  background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600;
+}
+.ac-subject-chip.selected::before{content:'✓ ';font-size:11px;}
+.ac-subject-step-title{
+  font-size:14px;font-weight:600;color:var(--text);
+  margin-bottom:4px;
+}
+.ac-subject-step-sub{
+  font-size:12px;color:var(--text-secondary);
+  margin-bottom:14px;line-height:1.55;
+}
+
 /* 명단 검증 영역 */
 .ac-roster-review{
   background:var(--bg-elevated);
@@ -2517,7 +2544,16 @@ body{
 }
 .att-date-sub{font-size:11px;color:var(--text-tertiary);font-weight:500;letter-spacing:0.3px;}
 .att-title{font-size:18px;font-weight:600;color:var(--text);margin:2px 0 0;}
-.att-header-actions{display:flex;gap:6px;}
+.att-header-actions{display:flex;gap:6px;align-items:center;}
+/* 날짜 이동 화살표 */
+.att-date-nav{display:flex;align-items:center;gap:2px;}
+.att-date-nav-btn{
+  width:30px;height:30px;border:1px solid var(--border);border-radius:6px;
+  background:var(--bg-surface);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all 0.12s;
+}
+.att-date-nav-btn:hover{background:var(--bg-elevated);border-color:var(--border-strong);}
 .att-btn-icon{
   padding:6px 10px;font-size:12px;
   background:var(--bg-surface);color:var(--text-secondary);
@@ -2525,6 +2561,47 @@ body{
   display:inline-flex;align-items:center;gap:4px;font-family:inherit;
 }
 .att-btn-icon:hover{background:var(--bg-elevated);border-color:var(--border-strong,var(--border));}
+/* 미입력 상태 셀 */
+.att-status-unrecorded{
+  font-size:12px;color:var(--text-tertiary);font-style:italic;
+}
+/* 일괄 출석 확정 배너 */
+.att-confirm-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;margin-top:16px;
+  background:var(--accent-dim);border:1.5px solid var(--border-accent);
+  border-radius:10px;
+}
+.att-confirm-bar-text{
+  font-size:13px;color:var(--text);line-height:1.4;
+}
+.att-confirm-bar-text strong{color:var(--accent);font-weight:700;}
+.att-confirm-btn{
+  flex-shrink:0;
+  padding:8px 16px;border-radius:8px;
+  background:var(--accent);color:#fff;border:none;cursor:pointer;
+  font-size:13px;font-weight:600;font-family:inherit;
+  transition:background 0.12s;white-space:nowrap;
+}
+.att-confirm-btn:hover{background:var(--accent-hover);}
+/* 출결 확정 완료 배너 */
+.att-confirmed-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  background:var(--success-dim);border:1px solid var(--success-border);
+  font-size:11.5px;font-weight:600;color:var(--success);
+  margin-top:6px;
+}
+
+/* 비등교일 배너 */
+.att-nonschool-banner{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;margin-bottom:14px;
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:10px;font-size:13px;color:var(--text-secondary);
+}
+.att-nonschool-banner svg{flex-shrink:0;color:var(--text-tertiary);}
+
 /* 통계 카드 */
 .att-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
 .att-stat-card{background:var(--bg-surface);border-radius:8px;padding:10px 14px;}
@@ -3103,7 +3180,8 @@ body{
 .smv-cal-cell.empty{
   background:transparent;cursor:default;
 }
-.smv-cal-cell.weekend{background:var(--bg-elevated);}
+.smv-cal-cell.weekend,.smv-cal-cell.holiday{background:var(--bg-elevated);}
+.smv-cal-cell.holiday .smv-cal-day{color:var(--text-tertiary);}
 .smv-cal-cell:not(.empty):hover{
   background:var(--bg-elevated);
 }
@@ -7724,43 +7802,21 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="intro-modal-body">
 
-        <!-- 지금 해보기 — 핵심 3개 -->
-        <div class="intro-highlights">
-          <div class="intro-hl-card" onclick="introTry('quick-memo')">
-            <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">퀵 메모 + @멘션</div>
-            <div class="intro-hl-desc">홈에서 한 줄. @이름 또는 @전체를 적으면 학생 기록에 자동 연결돼요.</div>
-            <div class="intro-hl-cta">지금 써보기 →</div>
-          </div>
-          <div class="intro-hl-card" onclick="introTry('reply-answer')">
-            <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">받은 메시지 답장</div>
-            <div class="intro-hl-desc">학부모 메시지를 붙여넣으면 학생 이름 익명화 + AI 답장 초안을 만들어줘요.</div>
-            <div class="intro-hl-cta">지금 써보기 →</div>
-          </div>
-          <div class="intro-hl-card" onclick="introTry('attendance')">
-            <div class="intro-hl-badge">지금 해보기</div>
-            <div class="intro-hl-title">출결 체크</div>
-            <div class="intro-hl-desc">오늘 날짜로 반 전체 출결을 한 화면에서 바로 체크해요.</div>
-            <div class="intro-hl-cta">체크해보기 →</div>
-          </div>
-        </div>
-
-        <!-- 매일 쓰는 기능 -->
+        <!-- 매일 한 줄 기록 -->
         <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📝</span> 매일 쓰는 기능</div>
+          <div class="intro-cat-title"><span class="intro-cat-icon">📝</span> 매일 한 줄 기록</div>
           <div class="intro-cat-items">
             <div class="intro-item" onclick="introGo('home')">
-              <div class="intro-item-name">퀵 메모 + @멘션</div>
-              <div class="intro-item-desc">홈에서 한 줄. ⌘+Enter로 저장</div>
+              <div class="intro-item-name">퀵 메모 + @멘션·@전체</div>
+              <div class="intro-item-desc">홈에서 한 줄. @이름은 학생에, @전체는 반 공지로 자동 연결</div>
             </div>
             <div class="intro-item" onclick="introGo('class')">
               <div class="intro-item-name">수업 후 빠른 메모</div>
-              <div class="intro-item-desc">오늘 수업 카드에서 종소리 직후</div>
+              <div class="intro-item-desc">오늘 수업 카드에서 진도·반 특이사항·학생 멘션을 종소리 직후</div>
             </div>
-            <div class="intro-item" onclick="introGo('attendance')">
-              <div class="intro-item-name">출결 체크</div>
-              <div class="intro-item-desc">일일·학생별 월간·반 전체 월간</div>
+            <div class="intro-item" onclick="introGo('home')">
+              <div class="intro-item-name">오늘 수업 알람 &amp; 제출 추적</div>
+              <div class="intro-item-desc">수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에</div>
             </div>
           </div>
         </div>
@@ -7771,15 +7827,53 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <div class="intro-cat-items">
             <div class="intro-item" onclick="introGo('students')">
               <div class="intro-item-name">학생 타임라인</div>
-              <div class="intro-item-desc">관찰·상담·생활·학부모·출결·생기부 누적</div>
+              <div class="intro-item-desc">관찰·상담·생활·학부모·출결·생기부가 학생별로 자동 누적</div>
             </div>
             <div class="intro-item" onclick="introGo('students')">
               <div class="intro-item-name">5색 메모 분류</div>
-              <div class="intro-item-desc">관찰/상담/생활/학부모/미분류 필터</div>
+              <div class="intro-item-desc">관찰/상담/생활/학부모/미분류 — 색상 필터로 빠른 정리</div>
             </div>
             <div class="intro-item" onclick="introGo('students')">
               <div class="intro-item-name">태그로 빠르게 찾기</div>
-              <div class="intro-item-desc">자주 쓰는 태그 미리 등록</div>
+              <div class="intro-item-desc">자주 쓰는 태그 미리 등록 — 입력 속도와 검색 모두 향상</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 수업·출결 관리 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">🏫</span> 수업·출결 관리</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('class')">
+              <div class="intro-item-name">담당 시간표 + NEIS 자동 매칭</div>
+              <div class="intro-item-desc">내 담당 수업만 등록하면 차시 카운팅과 휴강 자동 제외까지</div>
+            </div>
+            <div class="intro-item" onclick="introGo('attendance')">
+              <div class="intro-item-name">출결 체크</div>
+              <div class="intro-item-desc">일일·학생별 월간·반 전체 월간 뷰로 누락 없이 관리</div>
+            </div>
+            <div class="intro-item" onclick="introGo('class')">
+              <div class="intro-item-name">반 시간표·창체 활동</div>
+              <div class="intro-item-desc">담임반 창체·특별 일정을 등록해두면 생기부 자율활동에 자동 연결</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 학부모 상담 -->
+        <div class="intro-cat">
+          <div class="intro-cat-title"><span class="intro-cat-icon">📞</span> 학부모 상담</div>
+          <div class="intro-cat-items">
+            <div class="intro-item" onclick="introGo('reply-answer')">
+              <div class="intro-item-name">받은 메시지 답장</div>
+              <div class="intro-item-desc">6단계로 익명화 프롬프트 자동 완성 — 답장 초안까지</div>
+            </div>
+            <div class="intro-item" onclick="introGo('reply-prepare')">
+              <div class="intro-item-name">전화·상담 전 준비</div>
+              <div class="intro-item-desc">학생 누적 기록으로 자동 브리핑 + 통화 가이드 생성</div>
+            </div>
+            <div class="intro-item" onclick="introGo('reply-prepare')">
+              <div class="intro-item-name">통화 후 결과 메모</div>
+              <div class="intro-item-desc">통화 메모가 학생 타임라인에 자동 누적 — 다음 상담의 토대</div>
             </div>
           </div>
         </div>
@@ -7790,34 +7884,15 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <div class="intro-cat-items">
             <div class="intro-item" onclick="introGo('saenggibu-write')">
               <div class="intro-item-name">작성 모드</div>
-              <div class="intro-item-desc">영역별 프롬프트 + 학생 메모 자동 결합</div>
+              <div class="intro-item-desc">영역별 프롬프트 + 학생 메모 자동 결합으로 초안 생성</div>
             </div>
             <div class="intro-item" onclick="introGo('saenggibu-matrix')">
               <div class="intro-item-name">한눈에 보기</div>
-              <div class="intro-item-desc">반 전체 × 영역 매트릭스</div>
+              <div class="intro-item-desc">반 전체 × 영역 매트릭스로 진행 상황을 한 화면에</div>
             </div>
             <div class="intro-item" onclick="introGo('saenggibu-progress')">
               <div class="intro-item-name">진행률 뷰</div>
-              <div class="intro-item-desc">어디까지 썼는지 추적</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 학부모 + 자동화 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📞</span> 학부모 상담</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('reply-answer')">
-              <div class="intro-item-name">받은 메시지 답장</div>
-              <div class="intro-item-desc">6단계로 익명화 프롬프트 자동 완성</div>
-            </div>
-            <div class="intro-item" onclick="introGo('reply-prepare')">
-              <div class="intro-item-name">전화·상담 전 준비</div>
-              <div class="intro-item-desc">누적된 정보로 통화 전 브리핑</div>
-            </div>
-            <div class="intro-item" onclick="introGo('neis')">
-              <div class="intro-item-name">NEIS 자동 연동</div>
-              <div class="intro-item-desc">학교 이름만 검색하면 시간표·학사일정 자동 연동</div>
+              <div class="intro-item-desc">어디까지 썼는지 학생·영역별로 추적</div>
             </div>
           </div>
         </div>
@@ -8074,6 +8149,15 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <h2 class="att-title" id="att-title">오늘 출결</h2>
     </div>
     <div class="att-header-actions">
+      <!-- 날짜 좌우 이동 -->
+      <div class="att-date-nav">
+        <button class="att-date-nav-btn" onclick="shiftAttendanceDate(-1)" title="이전 날짜">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="att-date-nav-btn" onclick="shiftAttendanceDate(1)" title="다음 날짜">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
       <div style="position:relative;">
         <button class="att-btn-icon" onclick="toggleAttDatePicker(event)" title="다른 날짜">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -8105,6 +8189,12 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   </div>
 
   <div id="att-view-daily">
+
+  <!-- 비등교일 안내 배너 (주말/공휴일/방학) -->
+  <div id="att-nonschool-banner" class="att-nonschool-banner" style="display:none;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="att-nonschool-banner-text">비등교일이에요 · 출결 집계에서 제외됩니다</span>
+  </div>
 
   <!-- 통계 카드 -->
 
@@ -8140,6 +8230,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </table>
     <div class="att-tbl-empty" id="att-tbl-empty" style="display:none;"></div>
   </div>
+
+  <!-- 일괄 출석 확정 배너 (미확정 날짜에만 표시) -->
+  <div id="att-confirm-bar" style="display:none;"></div>
 
   <!-- 행 액션 메뉴 -->
   <div class="att-row-menu" id="att-row-menu" style="display:none;">
@@ -8416,10 +8509,18 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <!-- 동명이인 인라인 슬롯 (검증 통과 후 자동 표시) -->
       <div id="ac-dedupe-slot" style="display:none;"></div>
+
+      <!-- 과목 선택 단계 (반 추가 완료 후 교과 전담 시 표시) -->
+      <div id="ac-subject-step" style="display:none;">
+        <div class="ac-subject-step-title" id="ac-subject-step-title"></div>
+        <div class="ac-subject-step-sub" id="ac-subject-step-sub"></div>
+        <div class="ac-subject-chips-wrap" id="ac-subject-chips"></div>
+        <div class="ac-help-text">과목을 선택하지 않으면 수업 관리 탭에서 직접 추가할 수 있어요</div>
+      </div>
     </div>
 
     <div class="modal-actions" style="padding:14px 22px;border-top:1px solid var(--border);">
-      <button class="btn-small secondary" onclick="closeAddClass()">취소</button>
+      <button class="btn-small secondary" id="ac-cancel-btn" onclick="closeAddClass()">취소</button>
       <button class="btn-small primary" id="ac-save-btn" onclick="saveAddClass()" disabled>추가하기</button>
     </div>
   </div>
@@ -16105,6 +16206,8 @@ function formatRecordsForPrompt(contextRecords) {
 function _isStudentMissingSlot(studentNum, date, period){
   if(!attendanceRecords || !attendanceRecords[date]) return false;
   var recs = attendanceRecords[date][studentNum] || [];
+  // 기록이 없고 날짜가 미확정이면 결시 아님 (창체 이수에서 제외하지 않음)
+  if(recs.length === 0) return false;
   for(var i=0; i<recs.length; i++){
     var r = recs[i];
     var pKey = String(period);
@@ -18662,10 +18765,28 @@ function openAddClass(){
   var dw = document.getElementById('ac-duplicate-warning');
   if(dw) dw.style.display = 'none';
 
+  // 과목 선택 단계 숨기기 + 본문 영역 복원
+  var subjectStep = document.getElementById('ac-subject-step');
+  if(subjectStep){ subjectStep.style.display = 'none'; }
+  var body = modal.querySelector('.memo-modal-body');
+  if(body){
+    Array.from(body.children).forEach(function(el){
+      if(el.id === 'ac-subject-step') return;
+      el.style.display = '';
+    });
+  }
+  // 취소 버튼 복원
+  var cancelBtn = document.getElementById('ac-cancel-btn');
+  if(cancelBtn){ cancelBtn.textContent = '취소'; cancelBtn.onclick = closeAddClass; }
+
   setTimeout(function(){ document.getElementById('ac-grade').focus(); }, 50);
 }
 function closeAddClass(){
   document.getElementById('add-class-modal').classList.remove('show');
+  // 과목 선택 단계 상태 리셋 (다음 openAddClass를 위해)
+  _acSubjectStepClassKey = null;
+  _acSubjectStepGrade    = null;
+  _acSubjectStepCls      = null;
 }
 function openFileFormatGuide(){
   document.getElementById('file-format-guide-modal').classList.add('show');
@@ -19031,9 +19152,132 @@ function saveAddClass(){
     students: stu, records: {}
   };
   saveAll();
+
+  // 교과 담당 반이고 NEIS 시간표가 있으면 과목 선택 단계로 전환
+  if(!isPrimary){
+    var subjectList = getAcSubjectsForClass(g, c);
+    if(subjectList.length > 0){
+      showAcSubjectStep(key, g, c, subjectList);
+      return; // 모달 유지
+    }
+  }
+
+  // 담임반이거나 시간표 없는 경우 → 바로 완료
   closeAddClass();
   switchClassKey(key);
   showToast(g+'학년 '+c+'반이 추가됐어요');
+}
+
+/* ─── 반 추가 모달: 과목 선택 단계 ──────────────────── */
+function getAcSubjectsForClass(grade, cls){
+  if(typeof schoolTimetable === 'undefined' || !schoolTimetable) return [];
+  var gN = String(grade), cN = String(cls);
+  var freq = {};
+  Object.keys(schoolTimetable).forEach(function(k){
+    if(k.indexOf(gN+'-'+cN+'-') === 0){
+      var s = schoolTimetable[k];
+      if(s && s.indexOf('고사') === -1 && s.indexOf('시험') === -1
+            && s.indexOf('휴업') === -1 && s.indexOf('공휴') === -1){
+        freq[s] = (freq[s] || 0) + 1;
+      }
+    }
+  });
+  return Object.keys(freq).sort(function(a, b){ return freq[b] - freq[a]; });
+}
+
+var _acSubjectStepClassKey = null;
+var _acSubjectStepGrade    = null;
+var _acSubjectStepCls      = null;
+
+function showAcSubjectStep(classKey, grade, cls, subjects){
+  _acSubjectStepClassKey = classKey;
+  _acSubjectStepGrade    = grade;
+  _acSubjectStepCls      = cls;
+
+  // 기존 입력 영역 숨기기
+  var modal = document.getElementById('add-class-modal');
+  var body  = modal.querySelector('.memo-modal-body');
+  Array.from(body.children).forEach(function(el){
+    if(el.id !== 'ac-subject-step') el.style.display = 'none';
+  });
+
+  // 타이틀 업데이트
+  var titleEl   = modal.querySelector('.memo-modal-title');
+  var eyebrowEl = modal.querySelector('.memo-modal-eyebrow');
+  if(titleEl)   titleEl.textContent   = grade+'학년 '+cls+'반 담당 과목';
+  if(eyebrowEl) eyebrowEl.textContent = '2단계 — 과목 선택';
+
+  // 과목 칩 렌더링
+  var stepTitle = document.getElementById('ac-subject-step-title');
+  var stepSub   = document.getElementById('ac-subject-step-sub');
+  var chipsWrap = document.getElementById('ac-subject-chips');
+  if(stepTitle) stepTitle.textContent = '이 반에서 담당하시는 과목을 선택해주세요';
+  if(stepSub)   stepSub.textContent   = 'NEIS 시간표에서 '+grade+'학년 '+cls+'반 과목 '+subjects.length+'개를 찾았어요';
+  if(chipsWrap){
+    chipsWrap.innerHTML = subjects.map(function(s){
+      return '<button class="ac-subject-chip" onclick="toggleAcSubjectChip(this)" data-subject="'+escapeHtml(s)+'">'+escapeHtml(s)+'</button>';
+    }).join('');
+  }
+
+  // 스텝 표시
+  var step = document.getElementById('ac-subject-step');
+  if(step) step.style.display = 'block';
+
+  // 액션 버튼 교체
+  var cancelBtn = document.getElementById('ac-cancel-btn');
+  var saveBtn   = document.getElementById('ac-save-btn');
+  if(cancelBtn){ cancelBtn.textContent = '건너뛰기'; cancelBtn.onclick = skipAcSubjectStep; }
+  if(saveBtn){
+    saveBtn.textContent = '등록 완료';
+    saveBtn.disabled    = false;
+    saveBtn.onclick     = saveAcSelectedSubjects;
+  }
+}
+
+function toggleAcSubjectChip(el){
+  el.classList.toggle('selected');
+}
+
+function skipAcSubjectStep(){
+  var g = _acSubjectStepGrade, c = _acSubjectStepCls, key = _acSubjectStepClassKey;
+  closeAddClass();
+  if(key) switchClassKey(key);
+  showToast(g+'학년 '+c+'반이 추가됐어요');
+}
+
+function saveAcSelectedSubjects(){
+  var grade   = _acSubjectStepGrade;
+  var cls     = _acSubjectStepCls;
+  var classKey = _acSubjectStepClassKey;
+
+  var selected = Array.from(
+    document.querySelectorAll('#ac-subject-chips .ac-subject-chip.selected')
+  ).map(function(el){ return el.dataset.subject; });
+
+  if(selected.length === 0){
+    skipAcSubjectStep();
+    return;
+  }
+
+  selected.forEach(function(subject, i){
+    var dup = classMaster.find(function(cm){
+      return String(cm.grade) === String(grade) && String(cm.cls) === String(cls) && cm.subject === subject;
+    });
+    if(dup) return;
+    var slots = findSlotsFromTimetable(String(grade), String(cls), subject);
+    classMaster.push({
+      id: 'cm'+Date.now()+i,
+      grade: String(grade), cls: String(cls), subject: subject,
+      slots: slots, memos: [],
+      sessionResets: [], sessionOverrides: {}
+    });
+  });
+  saveAll();
+
+  closeAddClass();
+  if(classKey) switchClassKey(classKey);
+  showToast(grade+'학년 '+cls+'반 추가 · '+selected.length+'개 과목 등록됐어요');
+  renderClassTab();
 }
 
 /* ═══════════════════════════════════════════
@@ -19236,44 +19480,75 @@ function renderSubmitModal(groupId, tab){
 
 /* ─── 시작 가이드 카드 ─── */
 function getSetupSteps(){
-  var hasStudents = false;
-  var hasAnyClass = Object.keys(classes).length > 0;
-  if(hasAnyClass){
-    Object.keys(classes).forEach(function(k){
-      if((classes[k].students||[]).length > 0) hasStudents = true;
-    });
-  }
+  // 1) 담당 시간표 등록 완료 여부
+  var hasClass = !!(classMaster && classMaster.length > 0);
+  // 2) 퀵 메모로 첫 기록 — 어느 반이든 학생 records에 메모 1개 이상
   var hasMemo = false;
-  Object.keys(records).forEach(function(num){
-    if((records[num]||[]).length > 0) hasMemo = true;
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls || !cls.records) return;
+    Object.keys(cls.records).forEach(function(num){
+      if((cls.records[num] || []).length > 0) hasMemo = true;
+    });
   });
-  var hasNeis = !!(neisSettings.atptCode && neisSettings.schulCode);
+  // 3) 학생 메모 + 태그 — 메모 중 tags 길이 ≥1인 게 1개라도 있으면 완료
+  var hasTagged = false;
+  Object.keys(classes).forEach(function(ck){
+    var cls = classes[ck];
+    if(!cls || !cls.records || hasTagged) return;
+    Object.keys(cls.records).forEach(function(num){
+      (cls.records[num] || []).forEach(function(r){
+        if(r && r.tags && r.tags.length > 0) hasTagged = true;
+      });
+    });
+  });
+  // 4) 출결 입력 — attendanceRecords에 비어있지 않은 학생 기록 1개 이상
+  var hasAttendance = false;
+  Object.keys(attendanceRecords).forEach(function(date){
+    var dateRecs = attendanceRecords[date];
+    if(!dateRecs) return;
+    Object.keys(dateRecs).forEach(function(num){
+      if(num === '__confirmed') return;
+      if((dateRecs[num] || []).length > 0) hasAttendance = true;
+    });
+  });
   return [
     {
-      id:'add_students',
-      label:'학생 명단 추가하기',
-      sub:'엑셀 업로드 또는 직접 입력',
-      done: hasStudents,
-      action:"openRosterReplace()"
+      id:'register_class',
+      label:'담당 시간표 등록',
+      sub:'NEIS에서 학교 시간표를 받아오려면 먼저 내 담당 수업(학년·반·과목)을 등록해야 해요',
+      done: hasClass,
+      action:"openClassSettings()"
     },
     {
-      id:'first_memo',
-      label:'첫 메모 남기기',
-      sub:'학생을 선택하고 관찰 메모를 작성해보세요',
+      id:'first_quick_memo',
+      label:'퀵 메모로 첫 기록 남기기',
+      sub:'홈 화면에서 @이름 또는 @전체로 학생에 자동 연결돼요',
       done: hasMemo,
       action:"highlightQuickMemo()"
     },
     {
-      id:'neis_connect',
-      label:'NEIS 연동으로 시간표 자동화',
-      sub:'학교 이름만 검색하면 시간표·학사일정이 자동으로 채워져요',
-      done: hasNeis,
-      action:"openNeisSetupModal()"
+      id:'student_memo_tag',
+      label:'학생 메모 + 태그 만들기',
+      sub:'5색 분류와 태그로 학기말 생기부의 토대를 쌓아요',
+      done: hasTagged,
+      action:"switchTab('students')"
+    },
+    {
+      id:'try_attendance',
+      label:'오늘 출결 체크',
+      sub:'매일 쓰는 핵심 루틴이에요. 일일·월간 뷰로 누락 없이 관리',
+      done: hasAttendance,
+      action:"switchTab('attendance')"
     }
   ];
 }
 function renderSetupGuideCard(){
-  // 1주일 후 자동 부활: 영구 dismiss 키 대신 타임스탬프
+  // 영구 완료 플래그: 한 번 완료되면 다시 안 뜸
+  var permaDone = false;
+  try{ permaDone = localStorage.getItem('ht2_setup_guide_done') === '1'; }catch(e){}
+  if(permaDone) return '';
+  // "다음에 할게요" 누른 경우 — 1주일 후 다시 뜨는 기존 동작 유지
   var dismissedAt = parseInt(localStorage.getItem('ht2_setup_guide_dismissed_at')||'0', 10);
   var ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
   if(dismissedAt && (Date.now() - dismissedAt) < ONE_WEEK){
@@ -19282,7 +19557,8 @@ function renderSetupGuideCard(){
   var steps = getSetupSteps();
   var allDone = steps.every(function(s){ return s.done; });
   if(allDone){
-    localStorage.setItem('ht2_setup_guide_dismissed_at', String(Date.now()));
+    // 모든 단계 완료 → 영구 숨김 플래그 저장
+    try{ localStorage.setItem('ht2_setup_guide_done', '1'); }catch(e){}
     return '';
   }
   var stepsHtml = steps.map(function(s, i){
@@ -19446,6 +19722,7 @@ function restoreSetupGuide(){
   try{
     localStorage.removeItem('ht2_setup_guide_dismissed_at');
     localStorage.removeItem('ht2_setup_guide_dismissed');
+    localStorage.removeItem('ht2_setup_guide_done');
   }catch(e){}
   if(typeof closeSettings === 'function') closeSettings();
   setTimeout(function(){
@@ -21896,6 +22173,35 @@ function updateTimetableBanner(){
 ═══════════════════════════════════════════ */
 var attendanceCurrentDate = null;
 
+/* ─── 날짜 이동 ─── */
+function shiftAttendanceDate(delta){
+  if(!attendanceCurrentDate) attendanceCurrentDate = getTodayDate();
+  var d = new Date(attendanceCurrentDate);
+  d.setDate(d.getDate() + delta);
+  attendanceCurrentDate = formatDateForInput(d);
+  renderAttendanceTab();
+}
+
+/* ─── 출결 확정 유틸 ─────────────────────────────
+   attendanceRecords[date].__confirmed = true  → 교사가 확정한 날
+   과거 날짜(오늘 이전)는 __confirmed 없어도 "확정된 것"으로 간주 (하위 호환)
+   오늘 이후 날짜는 명시적 확정 필요
+────────────────────────────────────────────── */
+function isAttDateConfirmed(dateStr){
+  var today = getTodayDate();
+  if(dateStr < today) return true;           // 과거 = 하위 호환 확정
+  var dayRecs = attendanceRecords[dateStr];
+  return !!(dayRecs && dayRecs.__confirmed);
+}
+
+function confirmAttendanceDate(dateStr){
+  if(!attendanceRecords[dateStr]) attendanceRecords[dateStr] = {};
+  attendanceRecords[dateStr].__confirmed = true;
+  saveAll();
+  renderAttendanceTab();
+  showToast('출결이 확정됐어요');
+}
+
 /* ═══ 출결 테이블 UI ═══ */
 var attTableState = { searchQuery: '', issueOnly: false };
 var attCurrentView = 'daily';
@@ -21914,8 +22220,81 @@ function renderAttendanceTab(){
   document.getElementById('att-title').textContent =
     attendanceCurrentDate === getTodayDate() ? '오늘 출결' :
     formatAttendanceDate(attendanceCurrentDate) + ' 출결';
-  renderAttendanceStats();
-  renderAttendanceTable();
+
+  // 비등교일(주말/공휴일/방학) 감지
+  var _dateObj = new Date(attendanceCurrentDate);
+  var _dow = _dateObj.getDay();
+  var _isWeekend = _dow === 0 || _dow === 6;
+  var _isHoliday = typeof isNonSchoolDay === 'function' && isNonSchoolDay(attendanceCurrentDate, c.grade);
+  var _isNonSchool = _isWeekend || _isHoliday;
+
+  var banner = document.getElementById('att-nonschool-banner');
+  var bannerText = document.getElementById('att-nonschool-banner-text');
+  if(banner){
+    if(_isNonSchool){
+      var _label = _isWeekend ? (['일','월','화','수','목','금','토'][_dow]+'요일')  : '공휴일·휴업일';
+      bannerText.textContent = _label+' · 비등교일이에요. 출결 기록이 필요한 경우에만 입력해주세요.';
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  renderAttendanceStats(_isNonSchool);
+  renderAttendanceTable(_isNonSchool);
+  renderAttConfirmBar(_isNonSchool);
+}
+
+function renderAttConfirmBar(isNonSchool){
+  var bar = document.getElementById('att-confirm-bar');
+  if(!bar) return;
+  var c = getActiveClass();
+  if(!c || !c.students || isNonSchool){
+    bar.style.display = 'none';
+    return;
+  }
+  var today = getTodayDate();
+  // 미래 날짜 또는 과거 날짜(자동 확정)는 배너 없음 — 오늘만 표시
+  if(attendanceCurrentDate !== today){
+    bar.style.display = 'none';
+    return;
+  }
+  var confirmed = isAttDateConfirmed(attendanceCurrentDate);
+  if(confirmed){
+    // 오늘만 "확정됨" 배지 표시, 과거는 조용히
+    if(attendanceCurrentDate === today){
+      var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+      var issueCount = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
+      var attendCount = c.students.length - issueCount;
+      bar.innerHTML =
+        '<div class="att-confirmed-badge">'
+        +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        +'출결 확정 완료 · 출석 '+attendCount+'명 / 이슈 '+issueCount+'명'
+        +'</div>';
+      bar.style.display = 'block';
+    } else {
+      bar.style.display = 'none';
+    }
+    return;
+  }
+  // 미확정 — 미입력 인원 수 계산
+  var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var recorded = Object.keys(dateRecs).filter(function(k){ return k !== '__confirmed' && (dateRecs[k]||[]).length > 0; }).length;
+  var unrecorded = c.students.length - recorded;
+  if(unrecorded <= 0){
+    // 전원 기록됨 → 자동 확정 안내
+    bar.innerHTML =
+      '<div class="att-confirm-bar-text">전원 출결이 입력됐어요</div>'
+      +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">출결 확정하기</button>';
+    bar.className = 'att-confirm-bar';
+    bar.style.display = 'flex';
+    return;
+  }
+  bar.innerHTML =
+    '<div class="att-confirm-bar-text"><strong>'+unrecorded+'명</strong> 미입력 · 이슈 없는 학생을 출석으로 확정해주세요</div>'
+    +'<button class="att-confirm-btn" onclick="confirmAttendanceDate(\''+attendanceCurrentDate+'\')">미입력 '+unrecorded+'명 출석 처리</button>';
+  bar.className = 'att-confirm-bar';
+  bar.style.display = 'flex';
 }
 
 function switchAttView(view){
@@ -22024,6 +22403,9 @@ function renderStudentMonthlyView(){
     var cls = ['smv-cal-cell'];
     if(dow===0) cls.push('sun');
     if(dow===0||dow===6) cls.push('weekend');
+    // 평일 NEIS 휴업일 — 주말처럼 비활성화 표시
+    var _isWdHoliday = dow>=1 && dow<=5 && typeof isNonSchoolDay==='function' && isNonSchoolDay(date, c.grade);
+    if(_isWdHoliday) cls.push('holiday');
     if(date===today) cls.push('today');
     var recs = (attendanceRecords[date]||{})[smvState.studentNum]||[];
     if(recs.length>0) cls.push('has-record');
@@ -22194,6 +22576,8 @@ function renderClassMonthlyView(){
     var thCls='';
     if(dow===0||dow===6) thCls+=' weekend';
     if(dow===0) thCls+=' sun';
+    var _dStr=cmmState.year+'-'+String(cmmState.month).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    if(dow>=1&&dow<=5 && typeof isNonSchoolDay==='function' && isNonSchoolDay(_dStr, c.grade)) thCls+=' weekend';
     html+='<th class="'+thCls.trim()+'" style="width:24px;">'+d+'</th>';
   }
   html+='<th class="cmm-col-sum">결</th><th class="cmm-col-sum">지</th><th class="cmm-col-sum">조</th><th class="cmm-col-sum">과</th>';
@@ -22207,10 +22591,12 @@ function renderClassMonthlyView(){
       var date=monthPrefix+'-'+String(d).padStart(2,'0');
       var dow=new Date(cmmState.year,cmmState.month-1,d).getDay();
       var isWeekend=dow===0||dow===6;
+      var _isWdHol=!isWeekend && typeof isNonSchoolDay==='function' && isNonSchoolDay(date, c.grade);
+      var isNonSchoolCell=isWeekend||_isWdHol;
       var recs=(attendanceRecords[date]||{})[stu.num]||[];
       var cellCls=['day'];
       var cellText='';
-      if(isWeekend){
+      if(isNonSchoolCell){
         cellCls.push('weekend');
       } else if(recs.length>0){
         var priorityList=['absent','late','early_leave','partial'];
@@ -22231,7 +22617,7 @@ function renderClassMonthlyView(){
         }
       }
       var onclick='';
-      if(!isWeekend){
+      if(!isNonSchoolCell){
         if(cellText){
           // 특이사항 있는 셀 → 해당 학생 월간으로
           onclick=' onclick="onCmmCellStudentClick(\''+stu.num+'\')" style="cursor:pointer;"';
@@ -22333,12 +22719,17 @@ function exportCmmCsv(){
   showToast('CSV 파일이 다운로드됐어요');
 }
 
-function renderAttendanceStats(){
+function renderAttendanceStats(isNonSchool){
   var c = getActiveClass();
   var total = (c.students || []).length;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  var hasAnyRecord = Object.keys(dateRecs).some(function(num){
+    return num !== '__confirmed' && (dateRecs[num]||[]).length > 0;
+  });
+  var _confirmedStat = isAttDateConfirmed(attendanceCurrentDate);
   var counts = {absent:0, late:0, early_leave:0, partial:0};
   Object.keys(dateRecs).forEach(function(num){
+    if(num === '__confirmed') return;
     var recs = dateRecs[num];
     if(!recs || recs.length === 0) return;
     var priorityList = ['absent','late','early_leave','partial'];
@@ -22349,19 +22740,30 @@ function renderAttendanceStats(){
   });
   var issueTotal = counts.absent + counts.late + counts.early_leave + counts.partial;
   var attended = total - issueTotal;
+
+  // 비등교일 또는 미확정 날 → 출석 수 대신 표시 조정
+  var _noData = isNonSchool && !hasAnyRecord;
+  var _unconfirmed = !isNonSchool && !_confirmedStat;
+  var attendedDisplay = _noData ? '–' : _unconfirmed ? attended+'명*' : attended+'명';
+  var absentDisplay   = _noData ? '–' : counts.absent+'명';
+  var lateDisplay     = _noData ? '–' : counts.late+'명';
+  var etcDisplay      = _noData ? '–' : (counts.early_leave+counts.partial)+'명';
+
   var html = '';
   html += '<div class="att-stat-card"><div class="att-stat-label">전체</div><div class="att-stat-value">'+total+'명</div></div>';
-  html += '<div class="att-stat-card success"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attended+'명</div></div>';
-  html += '<div class="att-stat-card danger"><div class="att-stat-label">결석</div><div class="att-stat-value">'+counts.absent+'명</div></div>';
-  html += '<div class="att-stat-card warning"><div class="att-stat-label">지각</div><div class="att-stat-value">'+counts.late+'명</div></div>';
-  html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+(counts.early_leave+counts.partial)+'명</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':(_unconfirmed?'':' success'))+'"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attendedDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':' danger')+'"><div class="att-stat-label">결석</div><div class="att-stat-value">'+absentDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':' warning')+'"><div class="att-stat-label">지각</div><div class="att-stat-value">'+lateDisplay+'</div></div>';
+  html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+etcDisplay+'</div></div>';
   document.getElementById('att-stats').innerHTML = html;
 }
 
-function renderAttendanceTable(){
+function renderAttendanceTable(isNonSchool){
   var c = getActiveClass();
   if(!c) return;
   var dateRecs = attendanceRecords[attendanceCurrentDate] || {};
+  // 오늘·미래 날짜는 확정 여부에 따라 "출석" vs "미입력" 결정
+  var _confirmed = isAttDateConfirmed(attendanceCurrentDate);
   var allStudents = (c.students || []).slice();
 
   // 검색 필터
@@ -22414,7 +22816,16 @@ function renderAttendanceTable(){
     // 출결 상태
     html += '<td class="att-col-status" onclick="onAttRowClick(\''+s.num+'\')">';
     if(!hasIssue){
-      html += '<span class="att-status-default">출석</span>';
+      if(isNonSchool){
+        // 비등교일 기록 없음 → "–"
+        html += '<span style="color:var(--text-tertiary);font-size:13px;">–</span>';
+      } else if(_confirmed){
+        // 확정됨 → 출석
+        html += '<span class="att-status-default">출석</span>';
+      } else {
+        // 미확정 → 미입력
+        html += '<span class="att-status-unrecorded">미입력</span>';
+      }
     } else {
       var seenStatuses = [];
       recs.forEach(function(r){ if(seenStatuses.indexOf(r.status)<0) seenStatuses.push(r.status); });
@@ -25291,8 +25702,8 @@ function renderClassWeek(opts){
         '<div class="class-empty-state">'+_svg+
           '<div style="font-weight:600;margin-bottom:6px;">시간표를 아직 불러오지 않았어요</div>'+
           '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;"><strong>'+escapeHtml(_schoolName)+'</strong> 학교 설정은 완료됐어요.</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">설정에서 NEIS 시간표를 불러오면 수업이 자동으로 채워져요.</div>'+
-          '<button class="btn-small primary" onclick="neisSyncAll().then(function(r){if(r){showToast(\'시간표 동기화 완료\');renderClassWeek();}}" style="margin-bottom:8px;">NEIS 시간표 불러오기</button>'+
+          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">설정에서 NEIS 연동을 저장하면 시간표가 자동으로 채워져요.</div>'+
+          '<button class="btn-small primary" onclick="openNeisSetupModal()" style="margin-bottom:8px;">NEIS 설정 열기</button>'+
           '<br><button class="btn-link" onclick="openClassSettings()" style="font-size:12px;">수동으로 수업 등록하기</button>'+
         '</div>';
     } else {
