@@ -19900,11 +19900,12 @@ function getSetupSteps(){
       });
     });
   });
-  // 4) 출결 입력 — attendanceRecords에 비어있지 않은 학생 기록 1개 이상
+  // 4) 출결 입력 — 학생별 출결 기록 1개 이상 OR 하루라도 __confirmed=true(이슈 없는 학생 출석 처리)
   var hasAttendance = false;
   Object.keys(attendanceRecords).forEach(function(date){
     var dateRecs = attendanceRecords[date];
     if(!dateRecs) return;
+    if(dateRecs.__confirmed){ hasAttendance = true; return; }
     Object.keys(dateRecs).forEach(function(num){
       if(num === '__confirmed') return;
       if((dateRecs[num] || []).length > 0) hasAttendance = true;
