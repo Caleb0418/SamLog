@@ -18202,7 +18202,10 @@ function showOnboarding(){
   var fileInput = document.getElementById('upload-file-input');
   zone.onclick = function(){ fileInput.click(); };
   fileInput.onchange = function(e){
-    if(e.target.files.length > 0) handleRosterFile(e.target.files[0]);
+    if(e.target.files.length > 0){
+      handleRosterFile(e.target.files[0]);
+      e.target.value = '';  // 같은 파일 재선택 가능하도록 reset
+    }
   };
   zone.ondragover = function(e){ e.preventDefault(); zone.classList.add('dragover'); };
   zone.ondragleave = function(){ zone.classList.remove('dragover'); };
@@ -18719,9 +18722,10 @@ function processRoster(rows){
   // ── 담임 흐름 ──
   onboardingData.parsedStudents = parsed;
 
-  // 업로드 존 완료 상태
+  // 업로드 존 완료 상태 (재업로드 가능하도록 pointer-events 복원)
   var zone = document.getElementById('upload-zone');
   zone.classList.add('done');
+  zone.style.pointerEvents = '';  // 읽기 중 'none'으로 막힌 상태 복원 → 다시 클릭해서 교체 가능
   if(skipped > 0) showToast('합계 행 ' + skipped + '개 제외');
 
   // 편집 가능 미리보기 렌더링
