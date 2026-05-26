@@ -23159,20 +23159,32 @@ function aggregateMonthlyStats(monthRecs){
       if(isUnauth) unauth[topStatus]++;
     }
   });
+  // 출석일 = 학교일(평일 - 학사휴일) 중 오늘까지 + __confirmed=true + 학생 이슈 없음
   var year=parseInt(smvState.year), month=parseInt(smvState.month);
   var lastDate=new Date(year,month,0).getDate();
-  var weekdayCount=0;
   var today=new Date();
+  var attendDays = 0;
   for(var d=1; d<=lastDate; d++){
     var date=new Date(year,month-1,d);
     if(date>today) continue;
     var dow=date.getDay();
-    if(dow!==0&&dow!==6) weekdayCount++;
+    if(dow===0 || dow===6) continue;  // 주말 제외
+    var ds = year+'-'+String(month).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    // 학사일정 휴업일/공휴일 제외 (분모 로직과 동일)
+    var schedEv = schoolSchedule[ds] || [];
+    if(schedEv.some(function(ev){ return isHolidayDayType(ev.dayType); })) continue;
+    // 이슈 있는 날은 출석으로 카운트하지 않음
+    if(dateStatus[ds] && dateStatus[ds].some(function(r){
+      return r.reason !== 'approved' && ['absent','late','early_leave','partial'].indexOf(r.status) >= 0;
+    })) continue;
+    // "이슈 없는 학생 출석 처리"(__confirmed=true) 된 날만 출석으로 카운트
+    var dayRecs = attendanceRecords[ds];
+    if(dayRecs && dayRecs.__confirmed){ attendDays++; }
   }
   var partialSum = unauth.late + unauth.early_leave + unauth.partial;
   var convertedAbsent = Math.floor(partialSum / 3);
   return {
-    attendDays:Math.max(0,weekdayCount-issueDates),
+    attendDays: attendDays,
     absent:counts.absent, late:counts.late, early_leave:counts.early_leave, partial:counts.partial,
     unauth:{
       absent:unauth.absent, late:unauth.late, early_leave:unauth.early_leave, partial:unauth.partial,
