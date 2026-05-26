@@ -6836,10 +6836,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .home-cr.cr-done .home-cr-dot{background:#1B7F4F;}
 .home-cr.cr-miss .home-cr-dot{background:#C03A2B;}
 .home-cr.cr-soon .home-cr-dot{background:var(--accent);}
-.home-alert-rows{display:flex;flex-direction:column;gap:10px;}
+.home-alert-rows{display:flex;flex-direction:column;gap:4px;}
 .home-alert-compact{
   display:grid;
-  grid-template-columns:26px minmax(0,1fr);
+  grid-template-columns:22px minmax(0,1fr);
   gap:9px;align-items:center;
   padding:6px 11px;border-radius:8px;
   background:var(--bg-surface);
@@ -6852,7 +6852,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .home-alert-compact.ac-info{background:var(--accent-dim);border-color:var(--border-accent);}
 .home-alert-compact.ac-neutral{background:var(--bg-elevated);border-color:var(--border);}
 .hac-ico{
-  width:26px;height:26px;border-radius:7px;
+  width:22px;height:22px;border-radius:6px;
   display:flex;align-items:center;justify-content:center;
   color:#fff;flex-shrink:0;
 }
@@ -20931,10 +20931,10 @@ function renderHomeAlerts(){
 
   var renderAlert = function(a){
     var icoMap = {
-      danger: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-      warn:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-      info:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-      neutral:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      danger: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+      warn:   '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      info:   '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+      neutral:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
     };
     var kindClass = 'ac-' + (a.kind === 'danger' ? 'danger' : a.kind === 'warn' ? 'warn' : a.kind === 'info' ? 'info' : 'neutral');
     var icoSvg = (a.icon && a.icon.trim()) ? a.icon : (icoMap[a.kind] || icoMap.neutral);
