@@ -19079,10 +19079,16 @@ function openAddClass(){
   document.getElementById('ac-save-btn').onclick = saveAddClass;
   document.getElementById('ac-grade').oninput = updateAddClassBtn;
   document.getElementById('ac-class').oninput = updateAddClassBtn;
-  // 검증 영역 초기화
+  // 검증 영역 — 빈 편집 테이블 즉시 표시 (온보딩·명단 교체와 동일 UX)
   _rosterReview = [];
   var rv = document.getElementById('ac-roster-review');
-  if(rv){ rv.style.display = 'none'; rv.innerHTML = ''; }
+  if(rv){
+    rv.style.display = 'block';
+    renderRosterReview([]);
+  }
+  // 보조 버튼 (직접 입력 + 양식 다운로드) 표시
+  var aux = document.getElementById('ac-roster-aux');
+  if(aux) aux.style.display = 'flex';
   // dedupe 슬롯 초기화
   var ds = document.getElementById('ac-dedupe-slot');
   if(ds){ ds.style.display = 'none'; ds.innerHTML = ''; }
