@@ -19114,8 +19114,10 @@ function openAddClass(){
   if(subjectStep){ subjectStep.style.display = 'none'; }
   var body = modal.querySelector('.memo-modal-body');
   if(body){
+    // 조건부 표시되는 요소들은 loop에서 제외 (각자 상태 관리 보존)
+    var EXCLUDED = ['ac-subject-step', 'ac-duplicate-warning', 'ac-dedupe-slot'];
     Array.from(body.children).forEach(function(el){
-      if(el.id === 'ac-subject-step') return;
+      if(EXCLUDED.indexOf(el.id) >= 0) return;
       el.style.display = '';
     });
   }
