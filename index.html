@@ -2521,19 +2521,17 @@ body{
 }
 .cr-filter-chip{
   font-size:12px;font-weight:500;font-family:inherit;
-  padding:5px 11px;border-radius:6px;
+  padding:6px 12px;border-radius:20px;
   background:var(--bg-surface);border:1px solid var(--border);
   color:var(--text-secondary);cursor:pointer;
-  transition:all 0.12s;
-  font-variant-numeric:tabular-nums;
+  transition:all 0.12s;white-space:nowrap;
 }
 .cr-filter-chip:hover{
-  background:var(--bg-elevated);color:var(--text);
-  border-color:var(--border-strong);
+  border-color:var(--border-strong);color:var(--text);
 }
 .cr-filter-chip.active{
-  background:var(--text);color:var(--bg-surface);
-  border-color:var(--text);font-weight:600;
+  background:var(--accent-dim);color:var(--accent);
+  border-color:var(--accent);font-weight:600;
 }
 
 /* 임시 수업 배지 (그룹 헤더용) */
@@ -19765,8 +19763,8 @@ function showAcSubjectStep(classKey, grade, cls, subjects){
   var stepTitle = document.getElementById('ac-subject-step-title');
   var stepSub   = document.getElementById('ac-subject-step-sub');
   var chipsWrap = document.getElementById('ac-subject-chips');
-  if(stepTitle) stepTitle.textContent = '이 반에서 담당하시는 과목을 선택해주세요';
-  if(stepSub)   stepSub.textContent   = 'NEIS 시간표에서 '+grade+'학년 '+cls+'반 과목 '+subjects.length+'개를 찾았어요';
+  if(stepTitle) stepTitle.innerHTML = '<span style="color:var(--success,#16a34a);">✓</span> 시간표 불러오기 완료';
+  if(stepSub)   stepSub.textContent = 'NEIS 시간표에서 '+grade+'학년 '+cls+'반 과목 '+subjects.length+'개를 찾았어요. 담당 과목을 선택해주세요.';
   if(chipsWrap){
     chipsWrap.innerHTML = subjects.map(function(s){
       return '<button class="ac-subject-chip" onclick="toggleAcSubjectChip(this)" data-subject="'+escapeHtml(s)+'">'+escapeHtml(s)+'</button>';
@@ -28395,6 +28393,17 @@ function maybeAutoSyncNeis(){
 
 function openClassSettings(){
   document.getElementById('class-settings-modal').classList.add('show');
+
+  // 직접 입력 폼 초기화
+  var _g = document.getElementById('class-form-grade');
+  var _c = document.getElementById('class-form-class');
+  var _s = document.getElementById('class-form-subject');
+  if(_g) _g.value = '';
+  if(_c) _c.value = '';
+  if(_s) _s.value = '';
+  hideSuggestChips();
+  var _w = document.getElementById('class-form-class-warn');
+  if(_w) _w.style.display = 'none';
 
   // 샘플 배너: 항상 노출, 상태에 따라 라벨만 변경
   var banner = document.getElementById('sample-data-banner');
