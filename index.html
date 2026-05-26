@@ -1957,6 +1957,86 @@ body{
   font-family:monospace;font-size:10px;
 }
 
+/* 빠른 추가 */
+.tm-quickadd{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;margin-bottom:10px;
+  transition:border-color .12s;
+}
+.tm-quickadd:focus-within{border-color:var(--accent);}
+.tm-quickadd-icon{color:var(--text-tertiary);font-size:14px;user-select:none;}
+.tm-quickadd-input{
+  flex:1;border:none;background:transparent;outline:none;
+  font-family:inherit;font-size:13px;color:var(--text);padding:2px 0;
+}
+.tm-quickadd-input::placeholder{color:var(--text-tertiary);}
+
+/* 진행률 */
+.tm-progress{margin-bottom:10px;}
+.tm-progress-text{
+  font-size:11px;color:var(--text-secondary);margin-bottom:4px;
+  display:flex;align-items:center;gap:4px;
+}
+.tm-progress-text strong{color:var(--accent);font-weight:600;}
+.tm-progress-done{font-size:12px;}
+.tm-progress-bar{
+  height:4px;background:var(--bg-elevated);border-radius:2px;overflow:hidden;
+}
+.tm-progress-fill{
+  height:100%;background:var(--accent);border-radius:2px;
+  transition:width .25s ease;
+}
+
+/* 캐리오버 칩 */
+.tm-carry-chip{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--accent-dim);border:1px solid var(--border-accent);
+  border-radius:8px;padding:8px 12px;margin-bottom:10px;
+  font-size:12px;color:var(--accent);
+}
+.tm-carry-btn{
+  font-family:inherit;font-size:11px;padding:3px 9px;
+  border-radius:5px;border:1px solid var(--border-accent);
+  background:transparent;color:var(--accent);cursor:pointer;
+}
+.tm-carry-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.tm-carry-btn:hover{opacity:0.85;}
+
+/* 줄 wrapper: 드래그 핸들 + 본문 + 삭제 */
+.tm-row{
+  display:flex;align-items:flex-start;gap:4px;
+  padding:1px 0;border-radius:4px;
+  transition:background .12s;
+}
+.tm-row:hover{background:var(--bg-elevated);}
+.tm-row.done{opacity:0.85;}
+.tm-row > .tm-item, .tm-row > .tm-plain{flex:1;min-width:0;}
+.tm-drag-handle{
+  color:var(--text-tertiary);font-size:10px;line-height:1.8;
+  cursor:grab;user-select:none;
+  opacity:0;transition:opacity .12s;
+  padding:0 2px;flex-shrink:0;
+}
+.tm-row:hover .tm-drag-handle{opacity:0.6;}
+.tm-drag-handle:active{cursor:grabbing;}
+.tm-row-del{
+  background:none;border:none;color:var(--text-tertiary);
+  font-size:16px;line-height:1;cursor:pointer;
+  padding:0 4px;flex-shrink:0;
+  opacity:0;transition:opacity .12s,color .12s;
+}
+.tm-row:hover .tm-row-del{opacity:1;}
+.tm-row-del:hover{color:var(--danger,#e53935);}
+
+/* 완료 접기 토글 */
+.tm-done-toggle{
+  display:block;margin:8px 0 0;padding:4px 8px;
+  font-family:inherit;font-size:11px;color:var(--text-secondary);
+  background:none;border:none;cursor:pointer;
+}
+.tm-done-toggle:hover{color:var(--accent);}
+
 /* 홈 제출 추적 위젯 */
 .home-widget-card{
   background:var(--bg-overlay);
@@ -7065,24 +7145,33 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           엑셀 파일을 올리거나 나중에 사이드바에서 추가할 수 있어요.
         </div>
 
-        <!-- 담임용: 단일 업로드 영역 -->
+        <!-- 담임용: 단일 업로드 영역 (명단 교체 모달과 동일한 디자인) -->
         <div id="ob-step2-homeroom">
-          <div class="upload-zone" id="upload-zone">
-            <div class="upload-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            </div>
-            <div class="upload-main" id="upload-main">파일을 끌어다 놓거나 클릭하세요</div>
-            <div class="upload-sub" id="upload-sub">CSV · XLSX · XLS 지원 · 첫 행은 컬럼명</div>
-            <input type="file" id="upload-file-input" accept=".csv,.xlsx,.xls" style="display:none;">
+          <!-- 양식 보기 헤더 -->
+          <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px;">
+            <button type="button" onclick="openFileFormatGuide()" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;color:var(--accent);background:transparent;border:none;cursor:pointer;font-family:inherit;padding:2px 4px;border-radius:4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              양식 보기
+            </button>
           </div>
-          <div class="upload-hint" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-            <span><strong>필요한 컬럼:</strong> 번호, 이름 (성별은 선택)</span>
-            <button type="button" onclick="downloadStudentTemplate()" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;white-space:nowrap;">
+          <!-- 작은 업로드 영역 (.ac-upload-zone 스타일) — 클릭/드래그 핸들러는 JS에서 바인딩 -->
+          <div class="ac-upload-zone" id="upload-zone">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span id="upload-main" style="font-size:12px;color:var(--text-secondary);">NEIS 명단 파일 (CSV·XLSX)</span>
+            <span id="upload-sub" style="display:none;"></span>
+          </div>
+          <input type="file" id="upload-file-input" accept=".csv,.xlsx,.xls" style="display:none;">
+          <div class="ac-help-text">명단 없이 추가 후 나중에 업로드할 수도 있어요 · 업로드 시 검증 단계가 표시돼요</div>
+          <!-- 직접 입력하기 + 양식 다운로드 -->
+          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="btn-link" onclick="startManualEntry()" style="font-size:12px;padding:4px 8px;">직접 입력하기</button>
+            <button type="button" onclick="downloadStudentTemplate()" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               양식 다운로드
             </button>
           </div>
-          <div id="upload-preview" style="display:none;"></div>
+          <!-- 편집 테이블 (.ac-roster-* 스타일) -->
+          <div id="upload-preview" style="display:none;margin-top:14px;"></div>
         </div>
 
         <!-- 교과 전담용: 반별 임포트 리스트 -->
@@ -7097,7 +7186,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="onboarding-actions">
         <button class="btn-secondary" onclick="loadSampleRoster()" id="ob-sample-btn">샘플로 시작</button>
-        <button class="btn-secondary" onclick="startManualEntry()" id="ob-manual-btn" style="display:none;">직접 입력하기</button>
         <div style="flex:1;"></div>
         <button class="btn-secondary" onclick="onboardingNext(1)">← 이전</button>
         <button class="btn-primary" id="ob-next-2" onclick="onboardingNext(3)">다음 →</button>
@@ -18001,15 +18089,9 @@ function initOnboardingStep2(){
     document.getElementById('ob-roster-desc').innerHTML =
       'NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.';
     document.getElementById('ob-sample-btn').style.display = 'inline-flex';
-    document.getElementById('ob-manual-btn').style.display = 'inline-flex';
-    // 이미 불러온 학생 데이터가 있으면 업로드 완료 상태 복원 + 다음 버튼 활성화
+    // 이미 불러온 학생 데이터가 있으면 편집 테이블 복원
     var existing = onboardingData.parsedStudents;
     if(existing && existing.length > 0){
-      var zone = document.getElementById('upload-zone');
-      if(zone) zone.classList.add('done');
-      var uploadSub = document.getElementById('upload-sub');
-      if(uploadSub) uploadSub.textContent = '다음 단계로 진행하세요';
-      // 편집 가능 미리보기 복원
       renderObPreviewTable();
     } else {
       document.getElementById('ob-next-2').disabled = true;
@@ -18020,7 +18102,6 @@ function initOnboardingStep2(){
     document.getElementById('ob-roster-desc').innerHTML =
       '수업하는 각 반의 학생 명단을 불러옵니다.<br>지금 등록 못 한 반은 사이드바에서 나중에 추가할 수 있어요.';
     document.getElementById('ob-sample-btn').style.display = 'none';
-    document.getElementById('ob-manual-btn').style.display = 'none';
     renderOnboardingImportList();
     document.getElementById('ob-next-2').disabled = false;
   }
@@ -18354,8 +18435,8 @@ function renderDedupeBanner(){
 
 function handleRosterFile(file){
   var zone = document.getElementById('upload-zone');
-  document.getElementById('upload-main').textContent = '파일 읽는 중…';
-  document.getElementById('upload-sub').textContent = file.name;
+  var um = document.getElementById('upload-main');
+  if(um){ um.textContent = '파일 읽는 중… ('+file.name+')'; um.style.color = 'var(--text-secondary)'; um.style.fontWeight = ''; }
   zone.style.pointerEvents = 'none';
 
   var ext = file.name.split('.').pop().toLowerCase();
@@ -18403,8 +18484,8 @@ function resetUploadZone(){
   var zone = document.getElementById('upload-zone');
   zone.classList.remove('done');
   zone.style.pointerEvents = '';
-  document.getElementById('upload-main').textContent = '파일을 끌어다 놓거나 클릭하세요';
-  document.getElementById('upload-sub').textContent = 'CSV · XLSX · XLS 지원 · 첫 행은 컬럼명';
+  var um = document.getElementById('upload-main');
+  if(um){ um.textContent = 'NEIS 명단 파일 (CSV·XLSX)'; um.style.color = 'var(--text-secondary)'; um.style.fontWeight = ''; }
   document.getElementById('upload-preview').style.display = 'none';
   document.getElementById('ob-next-2').disabled = true;
 }
@@ -18445,48 +18526,64 @@ function renderObPreviewTable(){
   if(!preview) return;
   var students = onboardingData.parsedStudents;
 
-  // 헤더 카운트 갱신
+  // 업로드존 텍스트 갱신
   var uploadMain = document.getElementById('upload-main');
   if(uploadMain){
     if(students.length > 0){
       uploadMain.textContent = '✓ ' + students.length + '명 불러왔어요';
+      uploadMain.style.color = 'var(--success)';
+      uploadMain.style.fontWeight = '600';
     } else {
-      uploadMain.textContent = '학생이 없어요';
+      uploadMain.textContent = 'NEIS 명단 파일 (CSV·XLSX)';
+      uploadMain.style.color = 'var(--text-secondary)';
+      uploadMain.style.fontWeight = '';
     }
   }
 
-  var html =
-    '<div class="preview-table-wrap">' +
-      '<div class="preview-table-head">' +
-        '<span class="preview-col-num">번호</span>' +
-        '<span class="preview-col-name">이름</span>' +
-        '<span class="preview-col-gender">성별</span>' +
-        '<span style="width:28px;"></span>' +
-      '</div>' +
-      '<div class="preview-table" id="ob-preview-tbody">';
+  // 명단이 없으면 편집 테이블 숨김 (명단 교체 모달과 동일한 UX)
+  if(students.length === 0){
+    preview.style.display = 'none';
+    preview.innerHTML = '';
+    document.getElementById('ob-next-2').disabled = true;
+    return;
+  }
 
-  students.forEach(function(s, i){
-    html +=
-      '<div class="ob-preview-row-edit">' +
-        '<input class="ob-edit-num" type="text" value="' + escapeHtml(s.num) + '" maxlength="3"' +
-          ' oninput="obEditStudent(' + i + ',\'num\',this.value)">' +
-        '<input class="ob-edit-name" type="text" value="' + escapeHtml(s.name) + '" maxlength="20"' +
-          ' placeholder="이름" oninput="obEditStudent(' + i + ',\'name\',this.value)">' +
-        '<select class="ob-edit-gender" onchange="obEditStudent(' + i + ',\'gender\',this.value)">' +
-          '<option value=""'  + (s.gender === ''  ? ' selected' : '') + '>-</option>' +
-          '<option value="남"' + (s.gender === '남' ? ' selected' : '') + '>남</option>' +
-          '<option value="여"' + (s.gender === '여' ? ' selected' : '') + '>여</option>' +
-        '</select>' +
-        '<button class="ob-edit-del" onclick="obDeleteStudent(' + i + ')" title="삭제">×</button>' +
-      '</div>';
-  });
+  var rows = students.map(function(s, i){
+    var g = s.gender || '';
+    return '<tr data-idx="'+i+'">'+
+      '<td><input type="text" class="ac-roster-cell num-cell" value="'+escapeAttr(s.num)+'" oninput="obEditStudent('+i+',\'num\',this.value)"></td>'+
+      '<td><input type="text" class="ac-roster-cell" value="'+escapeAttr(s.name)+'" placeholder="이름" oninput="obEditStudent('+i+',\'name\',this.value)"></td>'+
+      '<td><select class="ac-roster-cell ac-roster-gender" onchange="obEditStudent('+i+',\'gender\',this.value)">'+
+        '<option value=""'  + (g===''  ?' selected':'') + '>-</option>'+
+        '<option value="남"' + (g==='남' ?' selected':'') + '>남</option>'+
+        '<option value="여"' + (g==='여' ?' selected':'') + '>여</option>'+
+      '</select></td>'+
+      '<td style="text-align:center;width:32px;"><button class="ac-roster-delete" onclick="obDeleteStudent('+i+')" title="이 행 삭제"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>'+
+    '</tr>';
+  }).join('');
 
-  html +=
-      '</div>' +
-      '<button class="ob-add-row-btn" onclick="obAddStudent()">+ 학생 추가</button>' +
-    '</div>';
+  preview.innerHTML = '<div class="ac-roster-review">'+
+    '<div class="ac-roster-review-head">'+
+      '<div class="ac-roster-review-title">'+
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+        '<span>명단 확인 · '+students.length+'명</span>'+
+      '</div>'+
+      '<span class="ac-roster-review-count">셀을 클릭해서 수정할 수 있어요</span>'+
+    '</div>'+
+    '<div class="ac-roster-scroll">'+
+      '<table class="ac-roster-table" id="ob-preview-tbody">'+
+        '<thead><tr>'+
+          '<th style="width:60px;text-align:center;">번호</th>'+
+          '<th>이름</th>'+
+          '<th style="width:80px;">성별</th>'+
+          '<th></th>'+
+        '</tr></thead>'+
+        '<tbody>'+rows+'</tbody>'+
+      '</table>'+
+    '</div>'+
+    '<button class="ac-roster-add-btn" onclick="obAddStudent()">+ 행 추가</button>'+
+  '</div>';
 
-  preview.innerHTML = html;
   preview.style.display = 'block';
   var hasValid = students.some(function(s){ return s.name && s.name.trim(); });
   document.getElementById('ob-next-2').disabled = !hasValid;
@@ -18522,10 +18619,11 @@ function obAddStudent(){
   setTimeout(function(){
     var tbody = document.getElementById('ob-preview-tbody');
     if(tbody){
-      var rows = tbody.querySelectorAll('.ob-preview-row-edit');
+      var rows = tbody.querySelectorAll('tbody tr');
       var lastRow = rows[rows.length - 1];
       if(lastRow){
-        var nameInput = lastRow.querySelector('.ob-edit-name');
+        // 두 번째 셀(이름)의 input
+        var nameInput = lastRow.querySelectorAll('input.ac-roster-cell')[1];
         if(nameInput){ nameInput.focus(); }
       }
     }
@@ -18541,10 +18639,6 @@ function startManualEntry(){
     zone.classList.remove('done');
     zone.style.pointerEvents = '';
   }
-  var uploadMain = document.getElementById('upload-main');
-  var uploadSub  = document.getElementById('upload-sub');
-  if(uploadMain) uploadMain.textContent = '파일 업로드 또는 직접 입력';
-  if(uploadSub)  uploadSub.textContent  = '파일을 올리거나, 아래 표에서 학생을 직접 추가하세요';
   // 빈 첫 번째 행으로 편집 테이블 시작
   obAddStudent();
 }
@@ -18619,9 +18713,7 @@ function processRoster(rows){
   // 업로드 존 완료 상태
   var zone = document.getElementById('upload-zone');
   zone.classList.add('done');
-  var subMsg = '다음 단계로 진행하세요';
-  if(skipped > 0) subMsg = '합계 행 ' + skipped + '개 제외';
-  document.getElementById('upload-sub').textContent = subMsg;
+  if(skipped > 0) showToast('합계 행 ' + skipped + '개 제외');
 
   // 편집 가능 미리보기 렌더링
   renderObPreviewTable();
@@ -18644,8 +18736,8 @@ function loadSampleRoster(){
   onboardingData.parsedStudents = sample;
   var zone = document.getElementById('upload-zone');
   zone.classList.add('done');
-  document.getElementById('upload-main').textContent = '✓ 샘플 17명 불러옴 (동명이인 포함)';
-  document.getElementById('upload-sub').textContent = '나중에 실제 명단으로 교체할 수 있어요';
+  var um = document.getElementById('upload-main');
+  if(um){ um.textContent = '✓ 샘플 17명 불러옴 (동명이인 포함)'; um.style.color = 'var(--success)'; um.style.fontWeight = '600'; }
   document.getElementById('upload-preview').style.display = 'none';
   document.getElementById('ob-next-2').disabled = false;
   onboardingNext(3);
@@ -20192,6 +20284,108 @@ function _tmParseLine(line){
   return { type:'plain', text: line };
 }
 
+// ─ 진행률/캐리오버/빠른추가/줄 조작 헬퍼 ─
+function _tmProgressStats(){
+  var lines = _tmGetToday().split('\n');
+  var total = 0, done = 0;
+  lines.forEach(function(l){
+    var p = _tmParseLine(l);
+    if(p.type === 'checkbox'){ total++; if(p.checked) done++; }
+  });
+  return { total: total, done: done };
+}
+function _tmYesterdayKey(){
+  var d = new Date(); d.setDate(d.getDate() - 1);
+  return typeof formatDateForInput === 'function'
+    ? formatDateForInput(d)
+    : d.toISOString().slice(0,10);
+}
+function _tmGetYesterdayPending(){
+  var raw = teacherMemos[_tmYesterdayKey()] || '';
+  if(!raw) return [];
+  return raw.split('\n').filter(function(l){ return /^\s*\[\]\s+\S/.test(l); });
+}
+function _tmCarrySeenKey(){ return 'ht2_tm_carry_seen_' + _tmToday(); }
+function _tmIsCarryDismissed(){
+  try{ return localStorage.getItem(_tmCarrySeenKey()) === '1'; }catch(e){ return false; }
+}
+function tmDismissCarry(){
+  try{ localStorage.setItem(_tmCarrySeenKey(), '1'); }catch(e){}
+  renderTeacherMemoCard();
+}
+
+// 빠른 추가 (체크박스 자동)
+function tmQuickAdd(inputEl){
+  if(!inputEl) return;
+  var v = (inputEl.value || '').trim();
+  if(!v) return;
+  var cur = _tmGetToday();
+  var newLine = '[] ' + v;
+  var next = cur ? (cur.replace(/\n+$/, '') + '\n' + newLine) : newLine;
+  _tmSetToday(next);
+  inputEl.value = '';
+  renderTeacherMemoCard();
+  setTimeout(function(){
+    var el = document.getElementById('tm-quickadd-input');
+    if(el) el.focus();
+  }, 0);
+}
+function tmQuickAddKey(e){
+  if(e.key !== 'Enter') return;
+  if(e.isComposing || e.keyCode === 229) return;
+  e.preventDefault();
+  tmQuickAdd(e.target);
+}
+
+// 어제 미완료 캐리오버
+function tmCarryOverYesterday(){
+  var pending = _tmGetYesterdayPending();
+  if(pending.length === 0) return;
+  var cur = _tmGetToday();
+  var prepend = pending.join('\n');
+  var next = cur ? (prepend + '\n' + cur) : prepend;
+  _tmSetToday(next);
+  try{ localStorage.setItem(_tmCarrySeenKey(), '1'); }catch(e){}
+  renderTeacherMemoCard();
+}
+
+// 줄별 삭제
+function tmDeleteLine(lineIdx){
+  var lines = _tmGetToday().split('\n');
+  if(lineIdx < 0 || lineIdx >= lines.length) return;
+  lines.splice(lineIdx, 1);
+  _tmSetToday(lines.join('\n'));
+  renderTeacherMemoCard();
+}
+
+// 드래그 정렬
+var _tmDragFrom = null;
+function tmDragStart(e, lineIdx){
+  _tmDragFrom = lineIdx;
+  e.dataTransfer.effectAllowed = 'move';
+  try{ e.dataTransfer.setData('text/plain', String(lineIdx)); }catch(_){}
+}
+function tmDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function tmDrop(e, toIdx){
+  e.preventDefault();
+  var from = _tmDragFrom;
+  _tmDragFrom = null;
+  if(from == null || from === toIdx) return;
+  var lines = _tmGetToday().split('\n');
+  if(from < 0 || from >= lines.length || toIdx < 0 || toIdx >= lines.length) return;
+  var moved = lines.splice(from, 1)[0];
+  lines.splice(toIdx, 0, moved);
+  _tmSetToday(lines.join('\n'));
+  renderTeacherMemoCard();
+}
+
+// 완료 항목 접기
+var _tmCollapseDone = true;
+function tmToggleDoneCollapse(){
+  _tmCollapseDone = !_tmCollapseDone;
+  renderTeacherMemoCard();
+}
+
 // 툴바 버튼 — 현재 줄 앞에 서식 삽입
 function tmInsert(str){
   var ta = document.getElementById('tm-textarea');
@@ -20311,31 +20505,101 @@ function renderTeacherMemoCard(){
       '</div>';
   } else {
     if(!text.trim()){
-      bodyHtml = '<div class="tm-empty" onclick="tmStartEdit()">+ 오늘 할 일이나 메모를 추가하세요</div>';
+      bodyHtml = '<div class="tm-empty" onclick="tmStartEdit()">+ 자세히 입력하려면 클릭 (편집 모드)</div>';
     } else {
       var lines = text.split('\n');
-      bodyHtml = lines.map(function(line, i){
-        if(!line.trim()) return '<div style="height:4px;"></div>';
+      var doneCount = 0, doneLines = [], visibleHtml = [];
+      lines.forEach(function(line, i){
+        if(!line.trim()){ visibleHtml.push('<div style="height:4px;"></div>'); return; }
         var p = _tmParseLine(line);
+        var isDone = (p.type === 'checkbox' && p.checked);
+        if(isDone) doneCount++;
+
+        var rowOpen =
+          '<div class="tm-row' + (isDone ? ' done' : '') + '"' +
+            ' draggable="true"' +
+            ' ondragstart="tmDragStart(event,' + i + ')"' +
+            ' ondragover="tmDragOver(event)"' +
+            ' ondrop="tmDrop(event,' + i + ')">' +
+          '<span class="tm-drag-handle" title="드래그로 순서 변경">⋮⋮</span>';
+        var rowClose =
+          '<button class="tm-row-del" onclick="event.stopPropagation();tmDeleteLine(' + i + ')" aria-label="삭제">×</button>' +
+          '</div>';
+
+        var inner;
         if(p.type === 'bullet'){
-          return '<div class="tm-item">' +
+          inner = '<div class="tm-item">' +
             '<span class="tm-bullet">•</span>' +
             '<span class="tm-text">' + escapeHtml(p.text) + '</span>' +
           '</div>';
-        }
-        if(p.type === 'checkbox'){
-          var doneCls = p.checked ? ' done' : '';
-          return '<div class="tm-item' + doneCls + '" style="cursor:pointer;" onclick="tmToggleCheck(' + i + ')">' +
+        } else if(p.type === 'checkbox'){
+          inner = '<div class="tm-item" style="cursor:pointer;" onclick="tmToggleCheck(' + i + ')">' +
             '<div class="tm-check' + (p.checked ? ' done' : '') + '"></div>' +
             '<span class="tm-text">' + escapeHtml(p.text) + '</span>' +
           '</div>';
+        } else {
+          inner = '<div class="tm-plain">' + escapeHtml(p.text) + '</div>';
         }
-        return '<div class="tm-plain">' + escapeHtml(p.text) + '</div>';
-      }).join('');
+
+        var rowHtml = rowOpen + inner + rowClose;
+        if(isDone && _tmCollapseDone) doneLines.push(rowHtml);
+        else visibleHtml.push(rowHtml);
+      });
+
+      bodyHtml = visibleHtml.join('');
+      if(doneCount > 0){
+        bodyHtml +=
+          '<button class="tm-done-toggle" onclick="tmToggleDoneCollapse()">' +
+            (_tmCollapseDone
+              ? '완료 ' + doneCount + '건 보기 ▼'
+              : '완료 ' + doneCount + '건 숨기기 ▲') +
+          '</button>';
+        if(!_tmCollapseDone) bodyHtml += doneLines.join('');
+      }
     }
   }
 
-  card.innerHTML = headHtml + '<div class="tm-body">' + bodyHtml + '</div>';
+  // 진행률 (D) — 체크박스 항목이 1건 이상일 때만
+  var stats = _tmProgressStats();
+  var progressHtml = '';
+  if(stats.total > 0 && !_tmEditMode){
+    var pct = Math.round(stats.done * 100 / stats.total);
+    progressHtml =
+      '<div class="tm-progress">' +
+        '<div class="tm-progress-text">' +
+          '오늘 <strong>' + stats.done + '</strong> / ' + stats.total + ' 완료' +
+          (stats.done === stats.total ? ' <span class="tm-progress-done">🎉</span>' : '') +
+        '</div>' +
+        '<div class="tm-progress-bar"><div class="tm-progress-fill" style="width:' + pct + '%;"></div></div>' +
+      '</div>';
+  }
+
+  // 캐리오버 칩 (B)
+  var carryHtml = '';
+  if(!_tmEditMode && !_tmIsCarryDismissed()){
+    var pending = _tmGetYesterdayPending();
+    if(pending.length > 0){
+      carryHtml =
+        '<div class="tm-carry-chip">' +
+          '<span class="tm-carry-text">어제 미완료 ' + pending.length + '건이 있어요</span>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<button class="tm-carry-btn primary" onclick="tmCarryOverYesterday()">가져오기</button>' +
+            '<button class="tm-carry-btn" onclick="tmDismissCarry()" aria-label="닫기">×</button>' +
+          '</div>' +
+        '</div>';
+    }
+  }
+
+  // 빠른 추가 입력 (A) — 뷰 모드에서만
+  var quickAddHtml = _tmEditMode ? '' :
+    '<div class="tm-quickadd">' +
+      '<span class="tm-quickadd-icon">+</span>' +
+      '<input id="tm-quickadd-input" class="tm-quickadd-input" type="text"' +
+        ' placeholder="할 일 추가 (Enter)"' +
+        ' onkeydown="tmQuickAddKey(event)">' +
+    '</div>';
+
+  card.innerHTML = headHtml + progressHtml + carryHtml + quickAddHtml + '<div class="tm-body">' + bodyHtml + '</div>';
 }
 
 function renderHome(){
