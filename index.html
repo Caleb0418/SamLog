@@ -18238,18 +18238,23 @@ function openRosterReplace(){
   // 학년·반·담임 옵션 행 숨김
   var acRow = modal.querySelector('.ac-row');
   if(acRow) acRow.style.display = 'none';
+  // 중복 경고 숨김 (명단 교체 모드에선 학년·반 변경 안 하므로 무관)
+  var dw = document.getElementById('ac-duplicate-warning');
+  if(dw) dw.style.display = 'none';
 
   document.getElementById('ac-uploaded').textContent = '';
   document.getElementById('ac-uploaded-data').value = '';
   document.getElementById('ac-save-btn').textContent = '명단 교체';
-  document.getElementById('ac-save-btn').disabled = true;
   document.getElementById('ac-save-btn').onclick = saveRosterReplace;
-  // 검증 영역: 빈 편집 테이블 즉시 표시 (온보딩과 동일한 UX)
-  _rosterReview = [];
+  // 검증 영역: 기존 명단을 편집 테이블에 미리 채워서 일부만 수정 가능하게
+  var existingStudents = (c.students || []).map(function(s){
+    return Object.assign({}, s);  // 얕은 복사로 원본 보호 (저장 시점에 c.students 교체)
+  });
+  _rosterReview = existingStudents;
   var rv = document.getElementById('ac-roster-review');
   if(rv){
-    rv.style.display = 'block';  // renderRosterReview가 빈 상태도 노출하도록 미리 설정
-    renderRosterReview([]);
+    rv.style.display = 'block';
+    renderRosterReview(existingStudents);
   }
   // 보조 버튼 (직접 입력 + 양식 다운로드) 표시
   var aux = document.getElementById('ac-roster-aux');
