@@ -1727,6 +1727,43 @@ body{
   font-size:22px;font-weight:700;letter-spacing:-0.025em;
   color:var(--text);margin-bottom:4px;
 }
+.home-role-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-left:10px;font-size:11.5px;font-weight:600;
+  padding:3px 10px;border-radius:6px;
+  background:var(--accent-dim);color:var(--accent);
+  border:1px solid var(--border-accent);
+  cursor:pointer;font-family:inherit;
+  vertical-align:middle;letter-spacing:0;
+  transition:all 0.12s;
+}
+.home-role-chip:hover{filter:brightness(0.95);}
+.home-role-chip.subject{
+  background:var(--bg-elevated);color:var(--text-secondary);
+  border-color:var(--border);
+}
+.home-role-popover{
+  background:var(--bg-surface);border:1px solid var(--border-strong);
+  border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.12);
+  padding:6px;min-width:200px;
+}
+.home-role-popover-head{
+  font-size:10.5px;font-weight:600;color:var(--text-tertiary);
+  padding:4px 8px 6px;letter-spacing:0.02em;text-transform:uppercase;
+}
+.home-role-popover-item{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:7px 10px;font-size:12.5px;color:var(--text);
+  border-radius:6px;cursor:pointer;
+  font-family:inherit;background:none;border:none;width:100%;text-align:left;
+  transition:background 0.1s;
+}
+.home-role-popover-item:hover{background:var(--bg-elevated);}
+.home-role-popover-item.current{
+  background:var(--accent-dim);color:var(--accent);font-weight:600;
+}
+.home-role-popover-item.danger{color:var(--danger);}
+.home-role-popover-item.danger:hover{background:var(--danger-dim);}
 .home-date{font-size:13px;color:var(--text-tertiary);}
 .home-stats{display:flex;gap:8px;}
 .home-stat{
@@ -4566,6 +4603,20 @@ details > summary::-webkit-details-marker { display:none; }
   padding:7px 10px;background:var(--bg-surface);
   border:0.5px solid var(--border);border-radius:6px;
   font-size:12.5px;
+  transition:all 0.12s;
+}
+.sg-creative-item:hover{border-color:var(--border-strong);}
+.sg-creative-item.checked{
+  background:var(--accent-dim);border-color:var(--border-accent);
+}
+.sg-creative-item .sg-cv-check{
+  width:16px;height:16px;border-radius:4px;flex-shrink:0;
+  border:1.5px solid var(--border-strong);background:var(--bg-surface);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;transition:all 0.12s;
+}
+.sg-creative-item.checked .sg-cv-check{
+  background:var(--accent);border-color:var(--accent);
 }
 .sg-creative-item .sg-cv-date{
   flex-shrink:0;font-size:11px;color:var(--text-tertiary);
@@ -7389,7 +7440,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- 환영 영역 -->
     <div class="home-greeting">
       <div class="home-greeting-text">
-        <div class="home-hello">안녕하세요, <span id="home-teacher-name">선생님</span></div>
+        <div class="home-hello">안녕하세요, <span id="home-teacher-name">선생님</span><span id="home-role-chip-wrap"></span></div>
         <div class="home-date" id="home-date">—</div>
       </div>
     </div>
@@ -10439,6 +10490,8 @@ function buildClassChipBar(activeKey, selectFn, opts){
   opts = opts || {};
   var keys = Object.keys(classes).sort(function(a,b){
     var ca = classes[a], cb = classes[b];
+    // 담임반 항상 맨 앞
+    if(!!ca.isPrimary !== !!cb.isPrimary) return ca.isPrimary ? -1 : 1;
     var ga = parseInt(ca.grade||0), gb = parseInt(cb.grade||0);
     var na = parseInt(ca.classNum||0), nb = parseInt(cb.classNum||0);
     return ga !== gb ? ga - gb : na - nb;
@@ -16142,23 +16195,37 @@ function renderSgCreativePreview(){
   if(activities.length === 0){
     html += '<div class="sg-creative-empty">매칭된 ' + areaLabel + '이 없어요. 수업관리 시간표에 창체를 추가하면 자동으로 잡혀요.</div>';
   } else {
+    if(!sgState.activitySelection) sgState.activitySelection = {};
     html += '<div class="sg-creative-list">';
     activities.forEach(function(a){
       var dateStr = (typeof _formatCreativeDate === 'function')
         ? _formatCreativeDate(a.date)
         : (a.date || '').replace(/-/g,'.');
-      html += '<div class="sg-creative-item">';
+      var key = (a.date||'') + '|' + (a.name||'');
+      var checked = sgState.activitySelection[key] !== false;
+      html += '<div class="sg-creative-item'+(checked?' checked':'')+'" data-key="'+escapeHtml(key)+'" onclick="toggleSgActivity(this)" style="cursor:pointer;">';
+      html += '<span class="sg-cv-check">'+(checked ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '')+'</span>';
       html += '<span class="sg-cv-date">'+escapeHtml(dateStr)+'</span>';
       html += '<span class="sg-cv-name">'+escapeHtml(a.name||'')+'</span>';
       if(a.note) html += '<span class="sg-cv-note">'+escapeHtml(a.note)+'</span>';
       html += '</div>';
     });
     html += '</div>';
-    html += '<div class="sg-creative-hint">프롬프트 생성 시 위 항목이 자동으로 포함돼요. 출결에서 결시 처리된 활동은 제외됩니다.</div>';
+    html += '<div class="sg-creative-hint">체크된 항목만 프롬프트에 포함됩니다. 출결에서 결시 처리된 활동은 자동 제외돼요.</div>';
   }
   html += '</div>';
   box.innerHTML = html;
   box.style.display = 'block';
+}
+function toggleSgActivity(el){
+  if(!sgState.activitySelection) sgState.activitySelection = {};
+  var key = el.getAttribute('data-key');
+  var cur = sgState.activitySelection[key] !== false;
+  sgState.activitySelection[key] = !cur;
+  el.classList.toggle('checked', !cur);
+  var ckEl = el.querySelector('.sg-cv-check');
+  if(ckEl) ckEl.innerHTML = !cur ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+  if(typeof refreshSgGenerateBtn === 'function') refreshSgGenerateBtn();
 }
 
 /* ──────────────────────────────────────────
@@ -16355,7 +16422,9 @@ function refreshSgAreaMaxLenHint() {
 function refreshSgGenerateBtn() {
   var btn = document.getElementById('sg-generate-btn');
   if(!btn) return;
-  var hasRecord = sgState.selectedRecIds && sgState.selectedRecIds.length > 0;
+  var recCount = (sgState.selectedRecIds && sgState.selectedRecIds.length) || 0;
+  var activityCount = sgGetSelectedActivityCount();
+  var hasRecord = (recCount + activityCount) > 0;
   var needsSubject = sgState.area === '세특';
   var hasSubject = !needsSubject || (sgState.subject && sgState.subject.length > 0);
   btn.disabled = !(hasRecord && hasSubject);
@@ -16366,9 +16435,29 @@ function refreshSgGenerateBtn() {
     } else if(needsSubject && !hasSubject) {
       label.textContent = '과목을 선택하세요';
     } else {
-      label.textContent = sgState.selectedRecIds.length+'건 선택됨';
+      var parts = [];
+      if(recCount > 0) parts.push('메모 '+recCount+'건');
+      if(activityCount > 0) parts.push('창체 '+activityCount+'건');
+      label.textContent = parts.join(' · ') + ' 선택됨';
     }
   }
+}
+// 영역이 창체인 경우, 선택된 활동 수 — 기본은 전체 선택으로 간주
+function sgGetSelectedActivityCount(){
+  var CREATIVE_AREAS = ['창체자율','창체진로','동아리'];
+  if(CREATIVE_AREAS.indexOf(sgState.area) < 0) return 0;
+  var s = students.find(function(x){ return x.num === sgState.studentNum; });
+  if(!s) return 0;
+  var activities = getAllCreativeForStudent(sgState.area, s, currentClassKey) || [];
+  if(activities.length === 0) return 0;
+  if(!sgState.activitySelection) return activities.length;
+  // 명시적 선택 상태가 있으면 그에 따름
+  var count = 0;
+  activities.forEach(function(a){
+    var key = (a.date||'') + '|' + (a.name||'');
+    if(sgState.activitySelection[key] !== false) count++;
+  });
+  return count;
 }
 
 /* ──────────────────────────────────────────
@@ -16501,9 +16590,22 @@ function renderSgRecords(){
 }
 
 function updateSgCount(){
-  var n = sgState.selectedRecIds.length;
-  document.getElementById('sg-selected-count').textContent = n === 0 ? '기록을 선택하세요' : n+'건 선택됨 · '+sgState.areaMaxLen;
-  document.getElementById('sg-generate-btn').disabled = n === 0;
+  var recCount = sgState.selectedRecIds.length;
+  var activityCount = sgGetSelectedActivityCount();
+  var total = recCount + activityCount;
+  var label = document.getElementById('sg-selected-count');
+  var btn = document.getElementById('sg-generate-btn');
+  if(label){
+    if(total === 0){
+      label.textContent = '기록을 선택하세요';
+    } else {
+      var parts = [];
+      if(recCount > 0) parts.push('메모 '+recCount+'건');
+      if(activityCount > 0) parts.push('창체 '+activityCount+'건');
+      label.textContent = parts.join(' · ') + ' 선택됨 · ' + sgState.areaMaxLen;
+    }
+  }
+  if(btn) btn.disabled = total === 0;
 }
 
 function toggleAllSgRecs(select){
@@ -16796,6 +16898,15 @@ function getAllCreativeForStudent(builderArea, student, classKey){
   });
   return result;
 }
+// 사용자 선택을 반영한 활동 리스트 (sgState.activitySelection 기준 — 명시적으로 false인 항목만 제외)
+function getSelectedCreativeForStudent(builderArea, student, classKey){
+  var all = getAllCreativeForStudent(builderArea, student, classKey) || [];
+  if(!sgState || !sgState.activitySelection) return all;
+  return all.filter(function(a){
+    var key = (a.date||'') + '|' + (a.name||'');
+    return sgState.activitySelection[key] !== false;
+  });
+}
 function formatCreativeNameDateForPrompt(activities, areaLabel){
   if(!activities || activities.length === 0) return [];
   var lines = [];
@@ -16884,7 +16995,7 @@ function buildJayulPrompt(ctx) {
   lines.push('· 활동 사실의 단순 나열 금지 — 학생만의 역할·기여·변화 중심');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var jayulActs = getAllCreativeForStudent('창체자율', ctx.student, currentClassKey);
+  var jayulActs = getSelectedCreativeForStudent('창체자율', ctx.student, currentClassKey);
   lines.push.apply(lines, formatCreativeNameDateForPrompt(jayulActs, '자율·자치활동'));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
@@ -16912,7 +17023,7 @@ function buildJinroPrompt(ctx) {
   lines.push('· 학생의 흥미·적성과 활동이 일관되게 보이도록 구성');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var jinroActs = getAllCreativeForStudent('창체진로', ctx.student, currentClassKey);
+  var jinroActs = getSelectedCreativeForStudent('창체진로', ctx.student, currentClassKey);
   lines.push.apply(lines, formatCreativeNameDateForPrompt(jinroActs, '진로활동'));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
@@ -16938,7 +17049,7 @@ function buildDongariPrompt(ctx) {
   lines.push('· "최우수" 같은 등급 표현 대신 구체적 활동·역할로 서술');
   lines.push('');
   lines.push.apply(lines, formatRecordsForPrompt(ctx.contextRecords));
-  var dongariActs = getAllCreativeForStudent('동아리', ctx.student, currentClassKey);
+  var dongariActs = getSelectedCreativeForStudent('동아리', ctx.student, currentClassKey);
   lines.push.apply(lines, formatCreativeDongariForPrompt(dongariActs));
   if(ctx.comment){ lines.push(''); lines.push('[선생님 한마디]'); lines.push(ctx.comment); }
   lines.push.apply(lines, buildPromptFooter(ctx));
@@ -17937,7 +18048,8 @@ function restoreSgtFromHistory(recId){
    generateSaengibuPrompt — 영역별 빌더 라우팅
 ═══════════════════════════════════════════ */
 function generateSaengibuPrompt(){
-  if(sgState.selectedRecIds.length === 0) return;
+  var hasActivities = sgGetSelectedActivityCount() > 0;
+  if(sgState.selectedRecIds.length === 0 && !hasActivities) return;
 
   // ─── 세특 과목 필수 검증 ───
   if(sgState.area === '세특' && !sgState.subject) {
@@ -19149,6 +19261,33 @@ function applySampleData(gradeArg, clsArg){
       {id:'ca_sample_'+w.label+'_3', date:friD, area:'진로',  name:w.fri, note:'', grades:[grade+'학년']}
     );
   });
+
+  // 오늘 임장 예시 — 선생님 오늘 수업 시간 중 하나에 매칭되도록 추가
+  var todayDow = now.getDay();
+  if(todayDow >= 1 && todayDow <= 5){
+    var todayDateStr = relDate(0);
+    var todayPeriods = [];
+    classMaster.forEach(function(c){
+      if(String(c.id||'').indexOf('cm_sample_') === 0){
+        (c.slots||[]).forEach(function(s){
+          if(s.day === todayDow) todayPeriods.push(s.period);
+        });
+      }
+    });
+    if(todayPeriods.length > 0){
+      todayPeriods.sort(function(a,b){return a-b;});
+      var pickPeriod = todayPeriods[Math.floor(todayPeriods.length/2)];
+      classSchedule.push({
+        id:'cs_sample_today', date:todayDateStr, periods:[pickPeriod],
+        category:'자율', activity:'학급 자치 회의', originalText:'',
+        target:grade+'학년', note:'홈 화면 임장 미리보기 예시', createdAt:now.toISOString()
+      });
+      creativeActivities.push({
+        id:'ca_sample_today', date:todayDateStr, area:'자율',
+        name:'학급 자치 회의', note:'', grades:[grade+'학년']
+      });
+    }
+  }
 
   saveAll();
 }
@@ -21089,8 +21228,109 @@ function renderTeacherMemoCard(){
   card.innerHTML = headHtml + progressHtml + carryHtml + quickAddHtml + '<div class="tm-body">' + bodyHtml + '</div>';
 }
 
+function renderHomeRoleChip(){
+  var wrap = document.getElementById('home-role-chip-wrap');
+  if(!wrap) return;
+  var primary = null;
+  Object.keys(classes||{}).forEach(function(k){
+    if(classes[k].isPrimary) primary = classes[k];
+  });
+  var chevron = ' <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  if(primary){
+    wrap.innerHTML = '<button class="home-role-chip" onclick="toggleHomeRolePopover(event)" title="담임반 변경">'+
+      escapeHtml(primary.grade+'학년 '+primary.classNum+'반 담임') + chevron +
+    '</button>';
+  } else if(Object.keys(classes||{}).length > 0){
+    wrap.innerHTML = '<button class="home-role-chip subject" onclick="toggleHomeRolePopover(event)" title="담임반 지정">'+
+      '교과 담당' + chevron +
+    '</button>';
+  } else {
+    wrap.innerHTML = '';
+  }
+}
+function toggleHomeRolePopover(e){
+  e.stopPropagation();
+  var existing = document.getElementById('home-role-popover');
+  if(existing){ existing.remove(); document.removeEventListener('click', closeHomeRolePopoverOutside); return; }
+
+  var chip = e.currentTarget;
+  var rect = chip.getBoundingClientRect();
+  var keys = Object.keys(classes||{}).sort(function(a,b){
+    var ca = classes[a], cb = classes[b];
+    if(!!ca.isPrimary !== !!cb.isPrimary) return ca.isPrimary ? -1 : 1;
+    var ga = parseInt(ca.grade||0), gb = parseInt(cb.grade||0);
+    var na = parseInt(ca.classNum||0), nb = parseInt(cb.classNum||0);
+    return ga !== gb ? ga - gb : na - nb;
+  });
+  var hasPrimary = keys.some(function(k){return classes[k].isPrimary;});
+
+  var pop = document.createElement('div');
+  pop.id = 'home-role-popover';
+  pop.className = 'home-role-popover';
+  pop.style.position = 'absolute';
+  pop.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+  pop.style.left = (window.scrollX + rect.left) + 'px';
+  pop.style.zIndex = '200';
+
+  var html = '<div class="home-role-popover-head">담임반 선택</div>';
+  keys.forEach(function(k){
+    var c = classes[k];
+    var isPrim = c.isPrimary;
+    html += '<button class="home-role-popover-item'+(isPrim?' current':'')+'" onclick="setPrimaryClassFromHome(\''+k+'\')">'+
+      '<span>'+escapeHtml(c.grade+'학년 '+c.classNum+'반')+'</span>'+
+      (isPrim ? '<span style="font-size:10px;font-weight:600;">현재 담임</span>' : '')+
+    '</button>';
+  });
+  if(hasPrimary){
+    html += '<div style="border-top:1px solid var(--border);margin:4px 0;"></div>'+
+      '<button class="home-role-popover-item danger" onclick="clearPrimaryFromHome()">담임 해제 (전부 교과 담당)</button>';
+  }
+  pop.innerHTML = html;
+  document.body.appendChild(pop);
+  setTimeout(function(){
+    document.addEventListener('click', closeHomeRolePopoverOutside);
+  }, 0);
+}
+function closeHomeRolePopoverOutside(e){
+  var pop = document.getElementById('home-role-popover');
+  if(!pop) return;
+  if(pop.contains(e.target)) return;
+  pop.remove();
+  document.removeEventListener('click', closeHomeRolePopoverOutside);
+}
+function setPrimaryClassFromHome(classKey){
+  var pop = document.getElementById('home-role-popover');
+  var c = classes[classKey];
+  if(!c){ if(pop) pop.remove(); return; }
+  if(c.isPrimary){ if(pop) pop.remove(); return; }
+  Object.keys(classes).forEach(function(k){ classes[k].isPrimary = false; });
+  c.isPrimary = true;
+  saveAll();
+  showToast(c.grade+'학년 '+c.classNum+'반이 담임반으로 지정됐어요');
+  if(pop) pop.remove();
+  document.removeEventListener('click', closeHomeRolePopoverOutside);
+  if(typeof updateHeaderClass === 'function') updateHeaderClass();
+  if(typeof renderClassDropdown === 'function') renderClassDropdown();
+  renderHomeRoleChip();
+  if(typeof renderHome === 'function') renderHome();
+}
+function clearPrimaryFromHome(){
+  if(!confirm('현재 담임반을 해제하고 모든 반을 교과 담당으로 바꿀까요?')) return;
+  Object.keys(classes).forEach(function(k){ classes[k].isPrimary = false; });
+  saveAll();
+  showToast('담임반이 해제됐어요');
+  var pop = document.getElementById('home-role-popover');
+  if(pop) pop.remove();
+  document.removeEventListener('click', closeHomeRolePopoverOutside);
+  if(typeof updateHeaderClass === 'function') updateHeaderClass();
+  if(typeof renderClassDropdown === 'function') renderClassDropdown();
+  renderHomeRoleChip();
+  if(typeof renderHome === 'function') renderHome();
+}
+
 function renderHome(){
   document.getElementById('home-teacher-name').textContent = TEACHER_NAME+'님';
+  renderHomeRoleChip();
 
   // 오늘 날짜
   var now = new Date();
