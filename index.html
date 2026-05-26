@@ -18202,7 +18202,10 @@ function showOnboarding(){
   var fileInput = document.getElementById('upload-file-input');
   zone.onclick = function(){ fileInput.click(); };
   fileInput.onchange = function(e){
-    if(e.target.files.length > 0) handleRosterFile(e.target.files[0]);
+    if(e.target.files.length > 0){
+      handleRosterFile(e.target.files[0]);
+      e.target.value = '';  // 같은 파일 재선택 가능하도록 reset
+    }
   };
   zone.ondragover = function(e){ e.preventDefault(); zone.classList.add('dragover'); };
   zone.ondragleave = function(){ zone.classList.remove('dragover'); };
