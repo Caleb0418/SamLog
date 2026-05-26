@@ -7299,6 +7299,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
     </div>
 
+    <!-- 반 주간 시간표 카드 (담임반 고정) -->
+    <div id="home-timetable-card" class="home-card" style="display:none;margin-bottom:14px;padding:14px 16px;background:var(--bg-surface);border:0.5px solid var(--border);border-radius:12px;"></div>
+
     <!-- 반 시간표(창체) 카드 — 담임반일 때만 표시 -->
     <div id="home-cs-today" class="home-card" style="display:none;margin-bottom:14px;padding:14px 16px;background:var(--bg-surface);border:0.5px solid var(--border);border-radius:12px;"></div>
 
@@ -20210,6 +20213,9 @@ function renderHome(){
   // 알림·공지
   renderHomeAlerts();
 
+  // 반 주간 시간표 카드 (담임반 고정)
+  renderHomeTimetableCard();
+
   // 반 시간표(창체) 카드
   renderHomeClassSchedule();
 
@@ -20242,6 +20248,15 @@ function renderHome(){
    반 시간표 — 홈 화면용 일정 조회 (6-A)
 ═══════════════════════════════════════════ */
 
+// 담임반 객체 반환 (currentClassKey 무관)
+function getPrimaryClass(){
+  var keys = Object.keys(classes);
+  for(var i = 0; i < keys.length; i++){
+    if(classes[keys[i]].isPrimary) return classes[keys[i]];
+  }
+  return null;
+}
+
 // 오늘의 창체 일정 (담임반)
 function getCsForToday(){
   return getCsByDate(formatDateForInput(new Date()));
@@ -20250,8 +20265,8 @@ function getCsForToday(){
 // 특정 날짜의 창체 일정 (날짜 정확 매칭)
 function getCsByDate(dateStr){
   if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
-  var activeClass = getActiveClass();
-  if(!activeClass || !activeClass.isPrimary) return [];
+  var primaryClass = getPrimaryClass();
+  if(!primaryClass) return [];
   return classSchedule
     .filter(function(c){ return c.date === dateStr; })
     .sort(function(a, b){
@@ -20264,8 +20279,8 @@ function getCsByDate(dateStr){
 // 앞으로 N일간 (오늘 포함)의 창체 일정
 function getCsUpcoming(days){
   if(!Array.isArray(classSchedule) || classSchedule.length === 0) return [];
-  var activeClass = getActiveClass();
-  if(!activeClass || !activeClass.isPrimary) return [];
+  var primaryClass = getPrimaryClass();
+  if(!primaryClass) return [];
   var today = new Date(); today.setHours(0,0,0,0);
   var endDate = new Date(today); endDate.setDate(endDate.getDate() + days);
   return classSchedule
@@ -20289,6 +20304,40 @@ function _csShortDateLabel(ymd){
   return (d.getMonth()+1) + '.' + d.getDate() + '.(' + wd + ')';
 }
 
+function renderHomeTimetableCard(){
+  var card = document.getElementById('home-timetable-card');
+  if(!card) return;
+
+  var primaryClass = getPrimaryClass();
+
+  // 담임반 미지정 안내
+  if(!primaryClass){
+    card.innerHTML =
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+        '<span style="font-size:13px;font-weight:600;">반 시간표</span>' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);">담임반을 지정하세요.</div>';
+    card.style.display = 'block';
+    return;
+  }
+
+  // 주간 시간표 렌더링
+  card.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:6px;">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+        '<span style="font-size:13px;font-weight:600;">' + primaryClass.grade + '학년 ' + primaryClass.classNum + '반 시간표</span>' +
+      '</div>' +
+      '<button class="btn-small secondary" onclick="goToClassScheduleView()" style="font-size:10px;padding:3px 8px;">전체 보기</button>' +
+    '</div>' +
+    '<div id="home-week-mount"></div>';
+
+  card.style.display = 'block';
+  // _noSaveLast:true → shiftWeek()의 _lastClassWeekOpts를 덮어쓰지 않음
+  renderClassWeek({ mode:'primary', mountId:'home-week-mount', primaryClass:primaryClass, _noSaveLast:true });
+}
+
 function renderHomeClassSchedule(){
   renderHomeCsToday();
 }
@@ -20298,8 +20347,8 @@ function renderHomeCsToday(){
   var card = document.getElementById('home-cs-today');
   if(!card) return;
 
-  var activeClass = getActiveClass();
-  if(!activeClass || !activeClass.isPrimary){
+  var primaryClass = getPrimaryClass();
+  if(!primaryClass){
     card.style.display = 'none';
     return;
   }
@@ -25829,8 +25878,9 @@ function renderClassWeek(opts){
   var mountId = opts.mountId || 'class-week-grid'; // 그리드를 렌더할 DOM id
   var primaryClass = opts.primaryClass || null;    // 'primary' 모드에서 사용할 반 객체
   // 마지막 호출 컨텍스트 저장 (shiftWeek 등이 같은 모드로 재렌더 가능하게)
-  if(mode === 'primary'){ _lastClassWeekOpts = { mode:mode, mountId:mountId, primaryClass:primaryClass }; }
-  else { _lastClassWeekOpts = null; }
+  // _noSaveLast:true 이면 홈 화면 등 부가 호출이므로 덮어쓰지 않음
+  if(mode === 'primary' && !opts._noSaveLast){ _lastClassWeekOpts = { mode:mode, mountId:mountId, primaryClass:primaryClass }; }
+  else if(!opts._noSaveLast){ _lastClassWeekOpts = null; }
   ensureCurrentWeek();
   var container = document.getElementById(mountId);
   if(!container) return;
