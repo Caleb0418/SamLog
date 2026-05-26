@@ -1702,6 +1702,16 @@ body{
 .preview-col-num{width:40px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;}
 .preview-col-name{flex:1;color:var(--text);}
 .preview-col-gender{width:36px;color:var(--text-tertiary);font-size:11px;}
+/* ── 온보딩 미리보기 편집 행 ── */
+.ob-preview-row-edit{display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);}
+.ob-preview-row-edit:last-child{border-bottom:none;}
+.ob-edit-num{width:46px;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-input,var(--bg-surface));color:var(--text);text-align:center;font-variant-numeric:tabular-nums;}
+.ob-edit-name{flex:1;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-input,var(--bg-surface));color:var(--text);}
+.ob-edit-gender{width:54px;font-size:12px;padding:3px 4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-input,var(--bg-surface));color:var(--text);}
+.ob-edit-del{width:24px;height:24px;border:none;background:transparent;cursor:pointer;color:var(--text-tertiary);font-size:16px;line-height:1;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ob-edit-del:hover{color:var(--danger,#e53e3e);background:var(--bg-elevated);}
+.ob-add-row-btn{width:100%;padding:8px;margin-top:6px;border:1.5px dashed var(--border-strong,var(--border));border-radius:6px;background:transparent;cursor:pointer;font-size:12px;color:var(--text-secondary);text-align:center;}
+.ob-add-row-btn:hover{background:var(--bg-elevated);color:var(--accent);border-color:var(--accent);}
 
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 
@@ -17990,21 +18000,10 @@ function initOnboardingStep2(){
     if(existing && existing.length > 0){
       var zone = document.getElementById('upload-zone');
       if(zone) zone.classList.add('done');
-      var uploadMain = document.getElementById('upload-main');
-      var uploadSub  = document.getElementById('upload-sub');
-      if(uploadMain) uploadMain.textContent = '✓ ' + existing.length + '명 불러왔어요';
-      if(uploadSub)  uploadSub.textContent  = '다음 단계로 진행하세요';
-      var preview = document.getElementById('upload-preview');
-      if(preview){
-        var previewHtml = '<div class="preview-table-wrap"><div class="preview-table-head"><span class="preview-col-num">번호</span><span class="preview-col-name">이름</span><span class="preview-col-gender">성별</span></div><div class="preview-table">';
-        existing.forEach(function(s){
-          previewHtml += '<div class="preview-row"><span class="preview-col-num">'+s.num+'</span><span class="preview-col-name">'+escapeHtml(s.name)+'</span><span class="preview-col-gender">'+escapeHtml(s.gender)+'</span></div>';
-        });
-        previewHtml += '</div></div>';
-        preview.innerHTML = previewHtml;
-        preview.style.display = 'block';
-      }
-      document.getElementById('ob-next-2').disabled = false;
+      var uploadSub = document.getElementById('upload-sub');
+      if(uploadSub) uploadSub.textContent = '다음 단계로 진행하세요';
+      // 편집 가능 미리보기 복원
+      renderObPreviewTable();
     } else {
       document.getElementById('ob-next-2').disabled = true;
     }
@@ -18422,6 +18421,98 @@ function isSummaryRow(row, nameKey, numKey){
   return false;
 }
 
+/* ── 온보딩 미리보기 편집 테이블 ── */
+function renderObPreviewTable(){
+  var preview = document.getElementById('upload-preview');
+  if(!preview) return;
+  var students = onboardingData.parsedStudents;
+
+  // 헤더 카운트 갱신
+  var uploadMain = document.getElementById('upload-main');
+  if(uploadMain){
+    if(students.length > 0){
+      uploadMain.textContent = '✓ ' + students.length + '명 불러왔어요';
+    } else {
+      uploadMain.textContent = '학생이 없어요';
+    }
+  }
+
+  var html =
+    '<div class="preview-table-wrap">' +
+      '<div class="preview-table-head">' +
+        '<span class="preview-col-num">번호</span>' +
+        '<span class="preview-col-name">이름</span>' +
+        '<span class="preview-col-gender">성별</span>' +
+        '<span style="width:28px;"></span>' +
+      '</div>' +
+      '<div class="preview-table" id="ob-preview-tbody">';
+
+  students.forEach(function(s, i){
+    html +=
+      '<div class="ob-preview-row-edit">' +
+        '<input class="ob-edit-num" type="text" value="' + escapeHtml(s.num) + '" maxlength="3"' +
+          ' oninput="obEditStudent(' + i + ',\'num\',this.value)">' +
+        '<input class="ob-edit-name" type="text" value="' + escapeHtml(s.name) + '" maxlength="20"' +
+          ' placeholder="이름" oninput="obEditStudent(' + i + ',\'name\',this.value)">' +
+        '<select class="ob-edit-gender" onchange="obEditStudent(' + i + ',\'gender\',this.value)">' +
+          '<option value=""'  + (s.gender === ''  ? ' selected' : '') + '>-</option>' +
+          '<option value="남"' + (s.gender === '남' ? ' selected' : '') + '>남</option>' +
+          '<option value="여"' + (s.gender === '여' ? ' selected' : '') + '>여</option>' +
+        '</select>' +
+        '<button class="ob-edit-del" onclick="obDeleteStudent(' + i + ')" title="삭제">×</button>' +
+      '</div>';
+  });
+
+  html +=
+      '</div>' +
+      '<button class="ob-add-row-btn" onclick="obAddStudent()">+ 학생 추가</button>' +
+    '</div>';
+
+  preview.innerHTML = html;
+  preview.style.display = 'block';
+  document.getElementById('ob-next-2').disabled = students.length === 0;
+}
+
+function obEditStudent(idx, field, value){
+  if(!onboardingData.parsedStudents[idx]) return;
+  onboardingData.parsedStudents[idx][field] = value;
+  // 이름이 비어있는 학생이 없는 경우만 다음 활성화
+  var hasValid = onboardingData.parsedStudents.some(function(s){ return s.name.trim(); });
+  document.getElementById('ob-next-2').disabled = !hasValid;
+  // 헤더 카운트는 행 수 기준
+  var uploadMain = document.getElementById('upload-main');
+  if(uploadMain) uploadMain.textContent = '✓ ' + onboardingData.parsedStudents.length + '명 불러왔어요';
+}
+
+function obDeleteStudent(idx){
+  onboardingData.parsedStudents.splice(idx, 1);
+  renderObPreviewTable();
+}
+
+function obAddStudent(){
+  var students = onboardingData.parsedStudents;
+  // 마지막 번호 기준으로 다음 번호 자동 계산
+  var nextNum = students.length + 1;
+  if(students.length > 0){
+    var lastNum = parseInt(students[students.length - 1].num) || students.length;
+    nextNum = lastNum + 1;
+  }
+  students.push({ num: String(nextNum).padStart(2, '0'), name: '', gender: '' });
+  renderObPreviewTable();
+  // 새 행의 이름 입력창에 포커스
+  setTimeout(function(){
+    var tbody = document.getElementById('ob-preview-tbody');
+    if(tbody){
+      var rows = tbody.querySelectorAll('.ob-preview-row-edit');
+      var lastRow = rows[rows.length - 1];
+      if(lastRow){
+        var nameInput = lastRow.querySelector('.ob-edit-name');
+        if(nameInput){ nameInput.focus(); }
+      }
+    }
+  }, 30);
+}
+
 function processRoster(rows){
   if(!rows || rows.length === 0){
     showToast('데이터를 찾지 못했어요');
@@ -18484,30 +18575,18 @@ function processRoster(rows){
     return;
   }
 
-  // ── 담임 흐름 (기존) ──
+  // ── 담임 흐름 ──
   onboardingData.parsedStudents = parsed;
 
   // 업로드 존 완료 상태
   var zone = document.getElementById('upload-zone');
   zone.classList.add('done');
-  var msg = '✓ '+parsed.length+'명 불러왔어요';
-  if(skipped > 0) msg += ' (합계 행 '+skipped+'개 제외)';
-  document.getElementById('upload-main').textContent = msg;
-  document.getElementById('upload-sub').textContent = '다음 단계로 진행하세요';
+  var subMsg = '다음 단계로 진행하세요';
+  if(skipped > 0) subMsg = '합계 행 ' + skipped + '개 제외';
+  document.getElementById('upload-sub').textContent = subMsg;
 
-  // 미리보기 (전체 학생 - 스크롤)
-  var preview = document.getElementById('upload-preview');
-  preview.style.display = 'block';
-  var previewHtml = '<div class="preview-table-wrap">';
-  previewHtml += '<div class="preview-table-head"><span class="preview-col-num">번호</span><span class="preview-col-name">이름</span><span class="preview-col-gender">성별</span></div>';
-  previewHtml += '<div class="preview-table">';
-  parsed.forEach(function(s){
-    previewHtml += '<div class="preview-row"><span class="preview-col-num">'+s.num+'</span><span class="preview-col-name">'+escapeHtml(s.name)+'</span><span class="preview-col-gender">'+escapeHtml(s.gender)+'</span></div>';
-  });
-  previewHtml += '</div></div>';
-  preview.innerHTML = previewHtml;
-
-  document.getElementById('ob-next-2').disabled = false;
+  // 편집 가능 미리보기 렌더링
+  renderObPreviewTable();
 }
 
 function loadSampleRoster(){
