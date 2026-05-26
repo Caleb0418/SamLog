@@ -4882,8 +4882,32 @@ details > summary::-webkit-details-marker { display:none; }
   border-color:var(--accent);color:var(--accent);background:var(--accent-dim);
 }
 .class-chip-menu-btn{
-  padding:6px 10px;font-weight:700;
+  padding:5px 11px;font-weight:500;font-size:12px;
+  border-style:dashed;color:var(--text-tertiary);
 }
+.class-chip-menu-btn:hover{
+  border-color:var(--accent);color:var(--accent);background:var(--accent-dim);
+  border-style:dashed;
+}
+.class-chip-menu-btn.chip-cancel-btn{
+  background:var(--danger-dim);color:var(--danger);
+  border-color:var(--danger-border);
+  border-style:solid;font-weight:600;
+}
+.chip-delete-wrap{
+  display:inline-flex;align-items:center;gap:0;position:relative;
+}
+.chip-delete-wrap .sgt-class-chip{ padding-right:24px; }
+.chip-delete-x{
+  position:absolute;right:3px;top:50%;transform:translateY(-50%);
+  width:17px;height:17px;border-radius:50%;
+  border:none;background:var(--danger);color:#fff;
+  font-size:13px;font-weight:700;line-height:1;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+}
+.chip-delete-x:hover{filter:brightness(0.92);}
 .class-chip-menu{
   position:absolute;top:100%;right:0;margin-top:4px;
   background:var(--bg-surface);border:1px solid var(--border);
@@ -10478,11 +10502,11 @@ function switchClassKey(classKey){
 /* ═══════════════════════════════════════════
    탭 내 반 선택 칩 바 — 공용 헬퍼
 ═══════════════════════════════════════════ */
+var _classDeleteMode = false;
 function buildClassChipBar(activeKey, selectFn, opts){
   opts = opts || {};
   var keys = Object.keys(classes).sort(function(a,b){
     var ca = classes[a], cb = classes[b];
-    // 담임반 항상 맨 앞
     if(!!ca.isPrimary !== !!cb.isPrimary) return ca.isPrimary ? -1 : 1;
     var ga = parseInt(ca.grade||0), gb = parseInt(cb.grade||0);
     var na = parseInt(ca.classNum||0), nb = parseInt(cb.classNum||0);
@@ -10491,30 +10515,70 @@ function buildClassChipBar(activeKey, selectFn, opts){
   var chips = keys.map(function(k){
     var c = classes[k];
     var active = k === activeKey;
-    var label = c.grade + '-' + c.classNum;  // 콤팩트 표기
+    var label = c.grade + '-' + c.classNum;
     var primary = c.isPrimary ? ' <span style="font-size:9px;opacity:0.7;">(담임)</span>' : '';
+    if(_classDeleteMode){
+      return '<span class="chip-delete-wrap">' +
+        '<button class="sgt-class-chip' + (active ? ' active' : '') + '" onclick="' + selectFn + '(\'' + k + '\')">' + label + primary + '</button>' +
+        '<button class="chip-delete-x" onclick="deleteClassFromChip(\'' + k + '\')" title="이 반 삭제">×</button>' +
+      '</span>';
+    }
     return '<button class="sgt-class-chip' + (active ? ' active' : '') +
            '" onclick="' + selectFn + '(\'' + k + '\')" title="' +
            (c.isPrimary ? '담임반' : '교과 담당') + '">' + label + primary + '</button>';
   }).join('');
-  // + 반 추가 칩 (점선)
-  chips += '<button class="sgt-class-chip ac-add-chip" onclick="openAddClass()" title="새 반 추가">+ 반 추가</button>';
-  // 옵션: 활성 반 옵션 메뉴 (⋮) — 학생관리 탭에서만
-  var menuHtml = '';
+
+  // 반 설정 메뉴 — 항상 표시. 메뉴 내용은 opts.showMenu에 따라 확장
+  var menuItems = '<button onclick="openAddClass();toggleClassChipMenu(null,true)">+ 새 반 추가</button>';
   if(opts.showMenu && activeKey){
     var ac = classes[activeKey];
     var primaryLabel = ac && ac.isPrimary ? '담임 해제 (교과로)' : '담임반으로 지정';
-    menuHtml =
-      '<div class="class-chip-menu-wrap" style="position:relative;margin-left:auto;">'
-      +'<button class="sgt-class-chip class-chip-menu-btn" onclick="toggleClassChipMenu(event)" title="반 옵션">⋮</button>'
-      +'<div class="class-chip-menu" id="class-chip-menu" style="display:none;">'
-      +'<button onclick="openRosterReplace();toggleClassChipMenu(null,true)">명단 교체</button>'
+    menuItems +=
+      '<button onclick="openRosterReplace();toggleClassChipMenu(null,true)">명단 교체</button>'
       +'<button onclick="toggleClassRole(currentClassKey);toggleClassChipMenu(null,true)">'+primaryLabel+'</button>'
-      +'<button class="danger" onclick="confirmDeleteActiveClass();toggleClassChipMenu(null,true)">반 삭제</button>'
-      +'</div>'
-      +'</div>';
+      +'<button class="danger" onclick="enterClassDeleteMode()">반 삭제</button>';
   }
+
+  var btnText = _classDeleteMode ? '취소' : '반 설정';
+  var btnAction = _classDeleteMode ? 'exitClassDeleteMode()' : 'toggleClassChipMenu(event)';
+  var btnClass = 'sgt-class-chip class-chip-menu-btn' + (_classDeleteMode ? ' chip-cancel-btn' : '');
+
+  var menuHtml =
+    '<div class="class-chip-menu-wrap" style="position:relative;">'
+    +'<button class="'+btnClass+'" onclick="'+btnAction+'">'+btnText+'</button>'
+    + (_classDeleteMode ? '' : '<div class="class-chip-menu" id="class-chip-menu" style="display:none;">' + menuItems + '</div>')
+    +'</div>';
+
   return '<div class="ac-chip-bar">' + chips + menuHtml + '</div>';
+}
+function enterClassDeleteMode(){
+  if(typeof toggleClassChipMenu === 'function') toggleClassChipMenu(null, true);
+  window._classDeleteMode = true;
+  _classDeleteMode = true;
+  rerenderActiveChipBar();
+}
+function exitClassDeleteMode(){
+  window._classDeleteMode = false;
+  _classDeleteMode = false;
+  rerenderActiveChipBar();
+}
+function deleteClassFromChip(classKey){
+  var c = classes[classKey];
+  if(!c) return;
+  var keys = Object.keys(classes);
+  if(keys.length <= 1){
+    showToast('마지막 남은 반은 삭제할 수 없어요');
+    return;
+  }
+  if(!confirm(c.grade+'학년 '+c.classNum+'반을 삭제할까요?\n학생·메모·기록이 모두 사라져요.')) return;
+  deleteClass(classKey);
+  exitClassDeleteMode();
+}
+function rerenderActiveChipBar(){
+  var tab = (typeof getActiveTab === 'function') ? getActiveTab() : null;
+  if(tab === 'students' && typeof renderStudentsClassBar === 'function') renderStudentsClassBar();
+  if(tab === 'attendance' && typeof renderAttendanceTab === 'function') renderAttendanceTab();
+  if(tab === 'saenggibu' && typeof renderSaenggibuTab === 'function') renderSaenggibuTab();
 }
 function toggleClassChipMenu(e, forceClose){
   if(e && e.stopPropagation) e.stopPropagation();
@@ -23601,7 +23665,7 @@ var cmmState = { year: null, month: null };
 function renderAttendanceTab(){
   // 반 선택 칩 바 (항상 먼저 렌더 — 활성반 없어도 + 반 추가 칩으로 시작 가능)
   var bar = document.getElementById('att-class-bar');
-  if(bar) bar.innerHTML = buildClassChipBar(currentClassKey, 'switchClassKey');
+  if(bar) bar.innerHTML = buildClassChipBar(currentClassKey, 'switchClassKey', { showMenu: true });
 
   var c = getActiveClass();
   if(!c || !c.students || c.students.length === 0){
