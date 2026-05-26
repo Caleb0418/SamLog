@@ -2706,6 +2706,10 @@ body{
 .att-stat-card.success .att-stat-value{color:var(--success);}
 .att-stat-card.danger .att-stat-value{color:var(--danger);}
 .att-stat-card.warning .att-stat-value{color:var(--warning);}
+.att-stat-note{
+  font-size:10.5px;line-height:1.3;margin-top:4px;
+  color:var(--warning-text,#A87211);font-weight:500;
+}
 /* ═══ 출결 테이블 UI ═══ */
 .att-tbl-controls{
   display:flex;align-items:center;gap:10px;margin-bottom:12px;
@@ -8259,6 +8263,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
+        <button class="att-btn-icon" onclick="goToTodayAttendance()" title="오늘로 이동">
+          <span>오늘</span>
+        </button>
         <div style="position:relative;">
           <button class="att-btn-icon" onclick="toggleAttDatePicker(event)" title="다른 날짜">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -22859,6 +22866,11 @@ function shiftAttendanceDate(delta){
   renderAttendanceTab();
 }
 
+function goToTodayAttendance(){
+  attendanceCurrentDate = getTodayDate();
+  renderAttendanceTab();
+}
+
 /* ─── 출결 확정 유틸 ─────────────────────────────
    attendanceRecords[date].__confirmed = true  → 교사가 확정한 날
    과거 날짜(오늘 이전)는 __confirmed 없어도 "확정된 것"으로 간주 (하위 호환)
@@ -23424,14 +23436,15 @@ function renderAttendanceStats(isNonSchool){
   // 비등교일 또는 미확정 날 → 출석 수 대신 표시 조정
   var _noData = isNonSchool && !hasAnyRecord;
   var _unconfirmed = !isNonSchool && !_confirmedStat;
-  var attendedDisplay = _noData ? '–' : _unconfirmed ? attended+'명*' : attended+'명';
+  var attendedDisplay = _noData ? '–' : attended+'명';
   var absentDisplay   = _noData ? '–' : counts.absent+'명';
   var lateDisplay     = _noData ? '–' : counts.late+'명';
   var etcDisplay      = _noData ? '–' : (counts.early_leave+counts.partial)+'명';
+  var unconfirmedNote = _unconfirmed ? '<div class="att-stat-note">⚠ 모든 학생 출결 처리가 필요합니다</div>' : '';
 
   var html = '';
   html += '<div class="att-stat-card"><div class="att-stat-label">전체</div><div class="att-stat-value">'+total+'명</div></div>';
-  html += '<div class="att-stat-card'+(_noData?'':(_unconfirmed?'':' success'))+'"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attendedDisplay+'</div></div>';
+  html += '<div class="att-stat-card'+(_noData?'':(_unconfirmed?'':' success'))+'"><div class="att-stat-label">출석</div><div class="att-stat-value">'+attendedDisplay+'</div>'+unconfirmedNote+'</div>';
   html += '<div class="att-stat-card'+(_noData?'':' danger')+'"><div class="att-stat-label">결석</div><div class="att-stat-value">'+absentDisplay+'</div></div>';
   html += '<div class="att-stat-card'+(_noData?'':' warning')+'"><div class="att-stat-label">지각</div><div class="att-stat-value">'+lateDisplay+'</div></div>';
   html += '<div class="att-stat-card"><div class="att-stat-label">조퇴·결과</div><div class="att-stat-value">'+etcDisplay+'</div></div>';
