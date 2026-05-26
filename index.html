@@ -8036,6 +8036,15 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   </div>
 
   <div id="tab-students">
+    <!-- 페이지 헤더 -->
+    <div style="max-width:1280px;margin:0 auto;padding:20px 16px 0;">
+      <div class="sgt-header">
+        <div>
+          <h2 class="sgt-title">학생 관리</h2>
+          <div class="sgt-subtitle">학생들의 기록을 남겨보세요</div>
+        </div>
+      </div>
+    </div>
     <!-- 반 선택 칩 + ⋮ 메뉴 -->
     <div id="students-class-bar" style="max-width:1280px;margin:0 auto;padding:0 16px;"></div>
     <div class="main-layout">
@@ -8273,9 +8282,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 ═══════════════════════════════════════════ -->
 <div id="tab-attendance" style="display:none;max-width:960px;margin:0 auto;">
 
-  <!-- 반 선택 칩 -->
-  <div id="att-class-bar"></div>
-
   <!-- 헤더: 날짜 + 액션 버튼 -->
   <div class="att-header">
     <div class="att-header-left">
@@ -8309,6 +8315,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </button>
     </div>
   </div>
+
+  <!-- 반 선택 칩 -->
+  <div id="att-class-bar"></div>
 
   <!-- 뷰 토글 -->
   <div class="att-view-tabs">
@@ -10409,7 +10418,7 @@ function renderStudentsClassBar(){
   bar.innerHTML = buildClassChipBar(currentClassKey, 'switchClassKey', { showMenu: true });
 }
 function getActiveTab(){
-  var tabs = ['home','students','class','reply'];
+  var tabs = ['home','students','class','attendance','saenggibu','reply'];
   for(var i=0;i<tabs.length;i++){
     var el = document.getElementById('tab-'+tabs[i]);
     if(el && (el.style.display === 'block' || el.style.display === 'grid')) return tabs[i];
