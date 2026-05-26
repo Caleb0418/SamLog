@@ -1750,15 +1750,14 @@ body{
 
 .quick-memo-card{
   background:var(--bg-surface);border:1px solid var(--border);
-  border-radius:var(--radius-lg);padding:20px;
-  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  border-radius:12px;padding:14px 16px;
   position:relative;
 }
 .quick-memo-head{
   display:flex;align-items:flex-start;justify-content:space-between;
-  margin-bottom:12px;gap:10px;
+  margin-bottom:10px;gap:10px;
 }
-.quick-memo-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.quick-memo-title{font-size:14px;font-weight:700;letter-spacing:-0.01em;}
 .quick-memo-sub{font-size:12px;color:var(--text-tertiary);margin-top:2px;}
 .quick-memo-tip{
   font-size:11px;color:var(--text-tertiary);
@@ -7329,6 +7328,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       설정
     </button>
+    <button class="nav-item" onclick="openHelp()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      도움말
+    </button>
   </nav>
 
   <!-- 하단 다크모드 -->
@@ -7710,9 +7713,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       <div class="settings-tabs">
         <button class="settings-tab active" data-tab="year" onclick="switchSettingsTab('year')">학년도 관리</button>
         <button class="settings-tab" data-tab="alarm" onclick="switchSettingsTab('alarm')">알람 설정</button>
-        <button class="settings-tab" data-tab="notify-sig" onclick="switchSettingsTab('notify-sig')">통지 서명</button>
         <button class="settings-tab" data-tab="backup" onclick="switchSettingsTab('backup')">데이터 백업</button>
-        <button class="settings-tab" data-tab="help" onclick="switchSettingsTab('help')">도움말</button>
         <button class="settings-tab settings-tab-danger" data-tab="reset" onclick="switchSettingsTab('reset')">전체 초기화</button>
       </div>
 
@@ -7793,19 +7794,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
 
 
-        <!-- 통지 문자 서명 설정 -->
-        <div class="settings-panel" data-tab="notify-sig">
-          <div class="class-master-title" style="margin-bottom:4px;">학부모 통지 문자 서명</div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
-            출결 통지 문자 하단에 자동으로 붙는 서명 문구입니다.
-          </div>
-          <textarea id="notify-sig-input" rows="3"
-            style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg-elevated);color:var(--text);resize:vertical;"
-            placeholder="예) ○○초등학교 4학년 2반 담임 김미래 드림"></textarea>
-          <button onclick="saveNotifySig()" style="margin-top:8px;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg-surface);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">저장</button>
-          <div id="notify-sig-saved" style="display:none;font-size:11px;color:#22c55e;margin-top:6px;">저장됐어요 ✓</div>
-        </div>
-
         <!-- ④ 데이터 백업 패널 -->
         <div class="settings-panel" data-tab="backup">
           <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:10px;margin-bottom:16px;">
@@ -7851,53 +7839,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </div>
         </div>
 
-        <!-- ④ 도움말 패널 -->
-        <div class="settings-panel" data-tab="help">
-          <div class="class-master-title" style="margin-bottom:14px;">도움말</div>
-          <div style="display:flex;flex-direction:column;gap:14px;">
-
-            <div style="border:1px solid var(--border-accent);border-radius:10px;padding:14px 16px;background:var(--accent-dim);">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-                <div style="min-width:0;flex:1;">
-                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">쌤로그 둘러보기</div>
-                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">쌤로그가 어떤 기능을 가지고 있는지 한 번에 훑어보세요.</div>
-                </div>
-                <button class="btn-small primary" onclick="closeSettings(); setTimeout(openIntroModal, 200);" style="flex-shrink:0;">열기</button>
-              </div>
-            </div>
-
-            <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-                <div style="min-width:0;flex:1;">
-                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">시작 가이드 다시 보기</div>
-                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">홈 화면의 4단계 시작 가이드 카드를 다시 표시해요.</div>
-                </div>
-                <button class="btn-small secondary" onclick="restoreSetupGuide()" style="flex-shrink:0;">다시 표시</button>
-              </div>
-            </div>
-
-            <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-                <div style="min-width:0;flex:1;">
-                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">샘플 데이터로 체험</div>
-                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">샘플 학생·시간표·메모로 모든 기능을 미리 써볼 수 있어요.</div>
-                </div>
-                <button class="btn-small secondary" onclick="closeSettings(); setTimeout(function(){ openClassSettings(); }, 200);" style="flex-shrink:0;">샘플 적용하기</button>
-              </div>
-            </div>
-
-            <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
-              <div>
-                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">문의 · 피드백</div>
-                <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">막히는 곳이나 개선 아이디어를 보내주세요.</div>
-                <div style="font-size:12px;margin-top:6px;">
-                  <a href="mailto:changha3927@gmail.com" style="color:var(--accent);text-decoration:none;">changha3927@gmail.com</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- ⑤ 전체 초기화 패널 -->
         <div class="settings-panel" data-tab="reset">
           <div class="class-master-title" style="margin-bottom:4px;color:#e53e3e;">전체 초기화</div>
@@ -7908,6 +7849,64 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </button>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- 도움말 모달 -->
+  <div class="modal-overlay" id="help-modal" onclick="if(event.target===this)closeHelp()">
+    <div class="modal class-settings-modal-inner" style="max-width:480px;">
+      <div class="memo-modal-head">
+        <div class="memo-modal-head-text">
+          <div class="memo-modal-eyebrow">쌤로그</div>
+          <div class="memo-modal-title">도움말</div>
+        </div>
+        <button class="memo-modal-close" onclick="closeHelp()">×</button>
+      </div>
+      <div class="memo-modal-body">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+
+          <div style="border:1px solid var(--border-accent);border-radius:10px;padding:14px 16px;background:var(--accent-dim);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">쌤로그 둘러보기</div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">쌤로그가 어떤 기능을 가지고 있는지 한 번에 훑어보세요.</div>
+              </div>
+              <button class="btn-small primary" onclick="closeHelp(); setTimeout(openIntroModal, 200);" style="flex-shrink:0;">열기</button>
+            </div>
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">시작 가이드 다시 보기</div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">홈 화면의 4단계 시작 가이드 카드를 다시 표시해요.</div>
+              </div>
+              <button class="btn-small secondary" onclick="restoreSetupGuide()" style="flex-shrink:0;">다시 표시</button>
+            </div>
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">샘플 데이터로 체험</div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">샘플 학생·시간표·메모로 모든 기능을 미리 써볼 수 있어요.</div>
+              </div>
+              <button class="btn-small secondary" onclick="closeHelp(); setTimeout(function(){ openClassSettings(); }, 200);" style="flex-shrink:0;">샘플 적용하기</button>
+            </div>
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">문의 · 피드백</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">막히는 곳이나 개선 아이디어를 보내주세요.</div>
+              <div style="font-size:12px;margin-top:6px;">
+                <a href="mailto:changha3927@gmail.com" style="color:var(--accent);text-decoration:none;">changha3927@gmail.com</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
@@ -8412,47 +8411,77 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 <!-- 출결 설정 모달 -->
 <div id="att-settings-overlay" class="onboarding-overlay" style="display:none;">
   <div class="onboarding-card" style="max-width:480px;">
-    <div class="onboarding-title" style="margin-bottom:4px;">출결 설정</div>
-    <div class="onboarding-desc" style="margin-bottom:18px;">학교급에 맞게 교시 수를 설정하세요</div>
-    <div class="att-settings-modal-body">
-      <div class="att-settings-section">
-        <label class="att-settings-label">학교급</label>
-        <div class="att-level-group">
-          <button class="att-level-btn" data-level="elementary" onclick="selectAttLevel('elementary')">초등학교<span class="att-level-btn-sub">기본 6교시</span></button>
-          <button class="att-level-btn" data-level="middle" onclick="selectAttLevel('middle')">중학교<span class="att-level-btn-sub">기본 7교시</span></button>
-          <button class="att-level-btn" data-level="high" onclick="selectAttLevel('high')">고등학교<span class="att-level-btn-sub">기본 8교시</span></button>
-        </div>
-      </div>
-      <div class="att-settings-section">
-        <label class="att-settings-label">정규 교시 수 <span style="color:var(--text-tertiary);font-weight:400;">학교 사정에 맞게 조정 가능</span></label>
-        <div class="att-period-counter">
-          <button class="att-period-counter-btn" id="att-period-minus" onclick="adjustAttPeriodCount(-1)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <div class="att-period-counter-display"><span id="att-period-count">7</span><small>교시</small></div>
-          <button class="att-period-counter-btn" id="att-period-plus" onclick="adjustAttPeriodCount(1)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="att-settings-section">
-        <label class="att-settings-label">조회·종례 포함</label>
-        <div class="att-checkbox-row">
-          <label class="att-checkbox-label"><input type="checkbox" id="att-include-morning" onchange="onAttCheckboxChange()" /><span>조회 포함</span></label>
-          <label class="att-checkbox-label"><input type="checkbox" id="att-include-afternoon" onchange="onAttCheckboxChange()" /><span>종례 포함</span></label>
-        </div>
-      </div>
-      <div class="att-settings-section">
-        <div class="att-preview-box">
-          <div class="att-preview-label">출결 입력 시 그리드 미리보기</div>
-          <div class="att-preview-slots" id="att-preview-slots"></div>
-          <div class="att-preview-count" id="att-preview-count"></div>
-        </div>
+    <div class="memo-modal-head">
+      <div class="memo-modal-head-text">
+        <div class="memo-modal-eyebrow">출결</div>
+        <div class="memo-modal-title">출결 설정</div>
       </div>
     </div>
-    <div class="onboarding-actions">
-      <button class="btn-secondary" onclick="closeAttendanceSettings()">취소</button>
-      <button class="btn-primary" onclick="saveAttSettingsFromModal()">저장</button>
+
+    <!-- 가로 탭 -->
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="att-main" onclick="switchAttSettingsTab('att-main')">출결 설정</button>
+      <button class="settings-tab" data-tab="att-notify-sig" onclick="switchAttSettingsTab('att-notify-sig')">통지 서명</button>
+    </div>
+
+    <!-- 출결 설정 패널 -->
+    <div class="settings-panel active" data-att-tab="att-main">
+      <div class="att-settings-modal-body">
+        <div class="att-settings-section">
+          <label class="att-settings-label">학교급</label>
+          <div class="att-level-group">
+            <button class="att-level-btn" data-level="elementary" onclick="selectAttLevel('elementary')">초등학교<span class="att-level-btn-sub">기본 6교시</span></button>
+            <button class="att-level-btn" data-level="middle" onclick="selectAttLevel('middle')">중학교<span class="att-level-btn-sub">기본 7교시</span></button>
+            <button class="att-level-btn" data-level="high" onclick="selectAttLevel('high')">고등학교<span class="att-level-btn-sub">기본 8교시</span></button>
+          </div>
+        </div>
+        <div class="att-settings-section">
+          <label class="att-settings-label">정규 교시 수 <span style="color:var(--text-tertiary);font-weight:400;">학교 사정에 맞게 조정 가능</span></label>
+          <div class="att-period-counter">
+            <button class="att-period-counter-btn" id="att-period-minus" onclick="adjustAttPeriodCount(-1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="att-period-counter-display"><span id="att-period-count">7</span><small>교시</small></div>
+            <button class="att-period-counter-btn" id="att-period-plus" onclick="adjustAttPeriodCount(1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="att-settings-section">
+          <label class="att-settings-label">조회·종례 포함</label>
+          <div class="att-checkbox-row">
+            <label class="att-checkbox-label"><input type="checkbox" id="att-include-morning" onchange="onAttCheckboxChange()" /><span>조회 포함</span></label>
+            <label class="att-checkbox-label"><input type="checkbox" id="att-include-afternoon" onchange="onAttCheckboxChange()" /><span>종례 포함</span></label>
+          </div>
+        </div>
+        <div class="att-settings-section">
+          <div class="att-preview-box">
+            <div class="att-preview-label">출결 입력 시 그리드 미리보기</div>
+            <div class="att-preview-slots" id="att-preview-slots"></div>
+            <div class="att-preview-count" id="att-preview-count"></div>
+          </div>
+        </div>
+      </div>
+      <div class="onboarding-actions">
+        <button class="btn-secondary" onclick="closeAttendanceSettings()">취소</button>
+        <button class="btn-primary" onclick="saveAttSettingsFromModal()">저장</button>
+      </div>
+    </div>
+
+    <!-- 통지 서명 패널 -->
+    <div class="settings-panel" data-att-tab="att-notify-sig">
+      <div class="class-master-title" style="margin-bottom:4px;">학부모 통지 문자 서명</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">
+        출결 통지 문자 하단에 자동으로 붙는 서명 문구입니다.
+      </div>
+      <textarea id="notify-sig-input" rows="3"
+        style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg-elevated);color:var(--text);resize:vertical;"
+        placeholder="예) ○○초등학교 4학년 2반 담임 김미래 드림"></textarea>
+      <button onclick="saveNotifySig()" style="margin-top:8px;padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg-surface);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">저장</button>
+      <div id="notify-sig-saved" style="display:none;font-size:11px;color:#22c55e;margin-top:6px;">저장됐어요 ✓</div>
+      <div class="onboarding-actions" style="margin-top:16px;">
+        <button class="btn-secondary" onclick="closeAttendanceSettings()">닫기</button>
+      </div>
     </div>
   </div>
 </div>
@@ -24358,12 +24387,22 @@ function attDatePickerSelect(ds){
 function openAttendanceDatePicker(){ toggleAttDatePicker({stopPropagation:function(){}}); }
 
 /* 출결 설정 모달 */
+function switchAttSettingsTab(id){
+  document.querySelectorAll('#att-settings-overlay .settings-tab').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.tab === id);
+  });
+  document.querySelectorAll('#att-settings-overlay .settings-panel').forEach(function(panel){
+    panel.classList.toggle('active', panel.dataset.attTab === id);
+  });
+  if(id === 'att-notify-sig') loadNotifySig();
+}
 function openAttendanceSettings(){
   selectAttLevel(attendanceSettings.schoolLevel, true);
   document.getElementById('att-period-count').textContent = attendanceSettings.periodCount;
   document.getElementById('att-include-morning').checked = attendanceSettings.includeMorning;
   document.getElementById('att-include-afternoon').checked = attendanceSettings.includeAfternoon;
   renderAttSettingsPreview();
+  switchAttSettingsTab('att-main');
   document.getElementById('att-settings-overlay').style.display = 'flex';
 }
 function closeAttendanceSettings(){
@@ -28553,6 +28592,12 @@ function openSettings(){
 }
 function closeSettings(){
   document.getElementById('settings-modal').classList.remove('show');
+}
+function openHelp(){
+  document.getElementById('help-modal').classList.add('show');
+}
+function closeHelp(){
+  document.getElementById('help-modal').classList.remove('show');
 }
 function switchSettingsTab(id){
   document.querySelectorAll('#settings-modal .settings-tab').forEach(function(b){
