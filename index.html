@@ -21387,7 +21387,7 @@ function onQuickMemoInput(input){
   var hasAllMention = allMentionPattern.test(text);
   var hasContent = text
     .replace(/@\d+-\d+전체/g, '')
-    .replace(/@[가-힣]{2,5}[A-Z]?(?:#\d{1,3})?/g, '')
+    .replace(/@[가-힣a-zA-Z]{1,15}(?:\([^)]+\))?[A-Z]?(?:#\d{1,3})?/g, '')
     .trim().length > 0;
   var hasMatches = matches.matched.length > 0 || hasAllMention;
   document.getElementById('quick-memo-save-btn').disabled = !(hasMatches && hasContent);
@@ -21533,14 +21533,12 @@ function pickAutocompleteItem(item, input){
       s._classLabel = it.classLabel;
       return s;
     });
-    var sameName = pool.filter(function(x){return x.name === name;})
-      .sort(function(a,b){
-        if(a._classLabel !== b._classLabel) return a._classLabel.localeCompare(b._classLabel);
-        return parseInt(a.num)-parseInt(b.num);
-      });
-    var idx = sameName.findIndex(function(x){return x.num === num && x._classKey === classKey;});
-    var alpha = idx >= 0 && idx < 26 ? String.fromCharCode(65+idx) : '';
-    replacement = '@'+name+alpha+' ';
+    var picked = pool.find(function(x){ return x.num === num && x._classKey === classKey; });
+    var classLabel = picked && picked._classLabel ? picked._classLabel : '';
+    // 같은 반에 동명이인 또 있는 드문 경우 #번호도 부착
+    var sameClassSameName = (classes[classKey] && classes[classKey].students || []).filter(function(s){ return s && s.name === name; }).length;
+    var numSuffix = (sameClassSameName > 1) ? '#' + parseInt(num) : '';
+    replacement = '@' + name + (classLabel ? '(' + classLabel + ')' : '') + numSuffix + ' ';
   } else {
     replacement = '@'+name+' ';
   }
@@ -21638,13 +21636,17 @@ function parseMentions(text, opts){
     pool = students;
   }
 
-  // @이름A 또는 @이름#번호 또는 @이름 패턴 (한글·영문 모두 허용)
-  var regex = /@([가-힣a-zA-Z]{1,15})([A-Z])?(?:#(\d{1,3}))?/g;
+  // @이름(반) 또는 @이름A(구버전) 또는 @이름#번호 또는 @이름
+  // m[1]=한글 이름 / m[2]=구 A/B suffix / m[3]=영문 이름
+  // m[4]=신 (1-1) 반 라벨 / m[5]=#번호
+  var regex = /@(?:([가-힣]{1,15})([A-Z])?|([a-zA-Z]{1,15}))(?:\(([^)]+)\))?(?:#(\d{1,3}))?/g;
   var m;
   while((m = regex.exec(text)) !== null){
-    var name = m[1];
+    var name = m[1] || m[3];
+    if(!name) continue;
     var alphaHint = m[2];
-    var numHint = m[3];
+    var classHint = m[4];
+    var numHint = m[5];
 
     var candidates = [];
     pool.forEach(function(s){
@@ -21663,6 +21665,12 @@ function parseMentions(text, opts){
     }
 
     var dupKey = function(s){return (s._classKey||'-')+':'+s.num;};
+
+    // 신버전 (반) 라벨로 후보 좁히기 — alphaHint 처리 전에 먼저
+    if(classHint && candidates.length > 1){
+      var byClass = candidates.filter(function(c){ return c._classLabel === classHint; });
+      if(byClass.length >= 1) candidates = byClass;
+    }
 
     if(alphaHint && candidates.length > 1){
       var sortedCands = candidates.slice().sort(function(a,b){
@@ -21830,7 +21838,7 @@ function saveQuickMemo(){
   // - "@지훈#1 오늘" → "지훈 오늘"  (번호 접미사 제거)
   var memoContent = text
     .replace(/@\d+-\d+전체\s*/g, '')
-    .replace(/@([가-힣]{2,5})[A-Z]?(?:#\d{1,3})?/g, '$1')
+    .replace(/@([가-힣a-zA-Z]{1,15})(?:\([^)]+\))?[A-Z]?(?:#\d{1,3})?/g, '$1')
     .replace(/\s+/g,' ').trim();
   if(!memoContent){
     showToast('메모 내용을 입력해주세요');
