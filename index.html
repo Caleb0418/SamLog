@@ -7056,6 +7056,18 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
   <div class="onboarding-card">
     <!-- STEP 1: 환영 + 기본정보 -->
     <div id="onboarding-step-1" class="onboarding-step">
+      <!-- 샘플 체험 카드 -->
+      <button type="button" onclick="startWithSample()" style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;margin-bottom:18px;padding:12px 14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent)';" onmouseout="this.style.borderColor='var(--border-accent)';">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <span style="font-size:18px;line-height:1;">💡</span>
+          <div style="min-width:0;">
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:2px;">처음이세요?</div>
+            <div style="font-size:12px;color:var(--text-secondary);">쌤로그의 모든 기능을 샘플 데이터로 바로 체험해볼 수 있어요.</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
       <div class="onboarding-step-badge">1 / 3</div>
       <div class="onboarding-title">쌤로그에 오신 걸 환영합니다</div>
       <div class="onboarding-desc">담당 정보를 알려주세요. 모든 데이터는 이 기기에만 저장됩니다.</div>
@@ -7217,9 +7229,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
       </div>
 
-      <div class="onboarding-actions">
-        <button class="btn-secondary" onclick="loadSampleRoster()" id="ob-sample-btn">샘플로 시작</button>
-        <div style="flex:1;"></div>
+      <div class="onboarding-actions" style="justify-content:space-between;">
         <button class="btn-secondary" onclick="onboardingNext(1)">← 이전</button>
         <button class="btn-primary" id="ob-next-2" onclick="onboardingNext(3)">다음 →</button>
       </div>
@@ -7762,7 +7772,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
             </div>
             <div>
               <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">브라우저 알림 <span id="notify-permission-badge" style="font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:6px;"></span></div>
-              <button class="btn-small secondary" id="notify-request-btn" onclick="requestBrowserNotify()">알림 권한 허용하기</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <button class="btn-small secondary" id="notify-request-btn" onclick="requestBrowserNotify()">알림 권한 허용하기</button>
+                <button class="btn-small secondary" id="notify-test-btn" onclick="testBrowserNotify()" style="display:none;">테스트 알림 보내기</button>
+              </div>
               <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">허용하면 탭이 백그라운드 상태일 때도 수업 시작 전 알람이 와요.</div>
             </div>
             <div>
@@ -7893,7 +7906,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
                 <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">샘플 데이터로 체험</div>
                 <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">샘플 학생·시간표·메모로 모든 기능을 미리 써볼 수 있어요.</div>
               </div>
-              <button class="btn-small secondary" onclick="closeHelp(); setTimeout(function(){ openClassSettings(); }, 200);" style="flex-shrink:0;">샘플 적용하기</button>
+              <button class="btn-small secondary" onclick="applyHelpSample()" style="flex-shrink:0;">샘플 적용하기</button>
             </div>
           </div>
 
@@ -7921,7 +7934,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="intro-modal-head-text">
           <div class="intro-modal-eyebrow">쌤로그 둘러보기</div>
           <div class="intro-modal-title">쌤로그로 할 수 있는 것들</div>
-          <div class="intro-modal-sub">한 번만 훑어보세요. 다음부터는 설정에서 다시 열 수 있어요.</div>
+          <div class="intro-modal-sub">한 번만 훑어보세요. 다음부터는 사이드바 도움말에서 다시 열 수 있어요.</div>
         </div>
         <button class="intro-modal-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
       </div>
@@ -18192,8 +18205,7 @@ function initOnboardingStep2(){
     document.getElementById('ob-step2-homeroom').style.display = 'block';
     document.getElementById('ob-step2-subject').style.display  = 'none';
     document.getElementById('ob-roster-desc').innerHTML =
-      'NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.';
-    document.getElementById('ob-sample-btn').style.display = 'inline-flex';
+      'NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.';
     // 이미 불러온 학생 데이터가 있으면 편집 테이블 복원
     var existing = onboardingData.parsedStudents;
     if(existing && existing.length > 0){
@@ -18206,7 +18218,6 @@ function initOnboardingStep2(){
     document.getElementById('ob-step2-subject').style.display  = 'block';
     document.getElementById('ob-roster-desc').innerHTML =
       '수업하는 각 반의 학생 명단을 불러옵니다.<br>지금 등록 못 한 반은 사이드바에서 나중에 추가할 수 있어요.';
-    document.getElementById('ob-sample-btn').style.display = 'none';
     renderOnboardingImportList();
     document.getElementById('ob-next-2').disabled = false;
   }
@@ -18833,7 +18844,86 @@ function processRoster(rows){
   renderObPreviewTable();
 }
 
+function applyHelpSample(){
+  var grade = '9';
+  var cls   = '9';
+  var key   = getClassKey(grade, cls);
+  var existing = !!classes[key];
+  var msg = existing
+    ? '샘플 반(' + grade + '학년 ' + cls + '반)이 이미 있어요. 샘플 데이터를 다시 적용할까요?'
+    : '샘플 반(' + grade + '학년 ' + cls + '반)을 추가하고 시간표·창체 샘플을 적용합니다. 계속하시겠어요?';
+  if(!confirm(msg)) return;
+
+  var sampleStudents = [
+    {num:'01',name:'강도윤',gender:'남'},{num:'02',name:'강서영',gender:'여'},
+    {num:'03',name:'김민서',gender:'여'},{num:'04',name:'김태현',gender:'남'},
+    {num:'05',name:'박지훈',gender:'남'},{num:'06',name:'서다은',gender:'여'},
+    {num:'07',name:'송예린',gender:'여'},{num:'08',name:'이수진',gender:'여'},
+    {num:'09',name:'임도현',gender:'남'},{num:'10',name:'장하윤',gender:'여'},
+    {num:'11',name:'정하늘',gender:'남'},{num:'12',name:'조민준',gender:'남'},
+    {num:'13',name:'최서연',gender:'여'},{num:'14',name:'한지우',gender:'여'},
+    {num:'15',name:'홍서준',gender:'남'},
+    {num:'16',name:'이수진',gender:'여'},
+    {num:'17',name:'김민서',gender:'남'},
+  ];
+
+  classes[key] = {
+    grade: parseInt(grade), classNum: parseInt(cls),
+    isPrimary: false,
+    students: sampleStudents,
+    records: (classes[key] && classes[key].records) ? classes[key].records : {}
+  };
+
+  // 재적용 시 이전 샘플 항목 제거
+  classMaster = classMaster.filter(function(c){
+    return !(String(c.grade) === grade && String(c.cls) === cls && String(c.id || '').indexOf('cm_help_sample_') === 0);
+  });
+  classSchedule = classSchedule.filter(function(s){
+    return String(s.id || '').indexOf('cs_help_sample_') !== 0;
+  });
+  creativeActivities = creativeActivities.filter(function(a){
+    return String(a.id || '').indexOf('ca_help_sample_') !== 0;
+  });
+
+  // 시간표·classMaster·창체 적용
+  applySampleData(grade, cls);
+
+  // 적용된 항목의 id를 도움말 샘플임을 표시할 수 있도록 마지막 추가분 식별 마킹은 생략 (applySampleData는 cm_sample_/cs_s/ca_s prefix 사용)
+
+  currentClassKey = key;
+  if(typeof syncActiveClass === 'function') syncActiveClass();
+  if(typeof updateHeaderClass === 'function') updateHeaderClass();
+  saveAll();
+  closeHelp();
+  if(typeof switchTab === 'function') switchTab('home');
+  if(typeof showToast === 'function') showToast('샘플 데이터 적용 완료 — ' + grade + '학년 ' + cls + '반으로 이동');
+}
+
+function startWithSample(){
+  var sample = [
+    {num:'01',name:'강도윤',gender:'남'},{num:'02',name:'강서영',gender:'여'},
+    {num:'03',name:'김민서',gender:'여'},{num:'04',name:'김태현',gender:'남'},
+    {num:'05',name:'박지훈',gender:'남'},{num:'06',name:'서다은',gender:'여'},
+    {num:'07',name:'송예린',gender:'여'},{num:'08',name:'이수진',gender:'여'},
+    {num:'09',name:'임도현',gender:'남'},{num:'10',name:'장하윤',gender:'여'},
+    {num:'11',name:'정하늘',gender:'남'},{num:'12',name:'조민준',gender:'남'},
+    {num:'13',name:'최서연',gender:'여'},{num:'14',name:'한지우',gender:'여'},
+    {num:'15',name:'홍서준',gender:'남'},
+    {num:'16',name:'이수진',gender:'여'},
+    {num:'17',name:'김민서',gender:'남'},
+  ];
+  onboardingData.isSample      = true;
+  onboardingData.role          = 'homeroom';
+  onboardingData.schoolLevel   = 'middle';
+  onboardingData.teacher       = '샘플 선생님';
+  onboardingData.grade         = '2';
+  onboardingData.classNum      = '3';
+  onboardingData.parsedStudents = sample;
+  completeOnboarding();
+}
+
 function loadSampleRoster(){
+  onboardingData.isSample = true;
   var sample = [
     {num:'01',name:'강도윤',gender:'남'},{num:'02',name:'강서영',gender:'여'},
     {num:'03',name:'김민서',gender:'여'},{num:'04',name:'김태현',gender:'남'},
@@ -18855,6 +18945,63 @@ function loadSampleRoster(){
   document.getElementById('upload-preview').style.display = 'none';
   document.getElementById('ob-next-2').disabled = false;
   onboardingNext(3);
+}
+
+function applySampleData(gradeArg, clsArg){
+  var grade = String(gradeArg != null ? gradeArg : SCHOOL_GRADE);
+  var cls   = String(clsArg   != null ? clsArg   : SCHOOL_CLASS);
+  var now   = new Date();
+
+  function relDate(offsetDays){
+    var d = new Date(now);
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().slice(0,10);
+  }
+  var dow = now.getDay();
+  var monOffset = (dow === 0) ? -6 : (1 - dow);
+  var monDate = relDate(monOffset);
+  var wedDate = relDate(monOffset + 2);
+  var friDate = relDate(monOffset + 4);
+
+  // 주간 시간표
+  var ttPrefix = grade + '-' + cls + '-';
+  var weekSubjects = {
+    1: ['국어','수학','영어','사회','과학','체육','창체'],
+    2: ['수학','국어','도덕','영어','기가','미술','음악'],
+    3: ['영어','사회','수학','국어','체육','과학','창체'],
+    4: ['도덕','영어','국어','수학','미술','기가','사회'],
+    5: ['사회','체육','영어','국어','수학','음악','진로']
+  };
+  [1,2,3,4,5].forEach(function(day){
+    weekSubjects[day].forEach(function(subj, i){
+      schoolTimetable[ttPrefix + day + '-' + (i + 1)] = subj;
+    });
+  });
+
+  // 국어 교과 (담임반) — 월1·화2·수4·목3교시
+  classMaster.push({
+    id: 'cm_sample_' + Date.now(),
+    grade: grade, cls: cls,
+    subject: '국어',
+    slots: [{day:1,period:1},{day:2,period:2},{day:3,period:4},{day:4,period:3}],
+    memos: [], sessionResets: [], sessionOverrides: {}
+  });
+
+  // 창체 일정 (담임반 classSchedule)
+  classSchedule.push(
+    {id:'cs_s1', date:monDate, periods:[7],   category:'자율',  activity:'학급 자치 회의', originalText:'', target:grade+'학년', note:'학급 규칙 만들기', createdAt:now.toISOString()},
+    {id:'cs_s2', date:wedDate, periods:[6,7], category:'동아리', activity:'동아리 활동',    originalText:'', target:grade+'학년', note:'',           createdAt:now.toISOString()},
+    {id:'cs_s3', date:friDate, periods:[6,7], category:'진로',  activity:'진로 탐색의 날',  originalText:'', target:grade+'학년', note:'직업 체험 활동', createdAt:now.toISOString()}
+  );
+
+  // 창의적 체험활동 (creativeActivities)
+  creativeActivities.push(
+    {id:'ca_s1', date:monDate, area:'자율',  name:'학급 자치 회의', note:'학급 규칙 만들기', grades:[grade+'학년']},
+    {id:'ca_s2', date:wedDate, area:'동아리', name:'동아리 활동',    note:'',           grades:[grade+'학년']},
+    {id:'ca_s3', date:friDate, area:'진로',  name:'진로 탐색의 날',  note:'직업 체험 활동', grades:[grade+'학년']}
+  );
+
+  saveAll();
 }
 
 function completeOnboarding(){
@@ -18921,13 +19068,14 @@ function completeOnboarding(){
 
   saveSettings();
   saveAll();
+  if(onboardingData.isSample) applySampleData();
   try{ localStorage.setItem('ht2_onboarded','1'); }catch(e){}
 
   document.getElementById('onboarding-overlay').style.display = 'none';
   updateHeaderClass();
   switchTab('home');
 
-  if(neisSettings.apiKey && neisSettings.atptCode && Object.keys(classes).length > 0){
+  if(!onboardingData.isSample && neisSettings.apiKey && neisSettings.atptCode && Object.keys(classes).length > 0){
     setTimeout(function(){
       neisSyncAll().then(function(result){
         if(!result) return;
@@ -21238,7 +21386,7 @@ function requestBrowserNotify(){
   });
 }
 function sendBrowserNotify(title, body){
-  if(!ALERT_SETTINGS.browserNotify) return;
+  if(!('Notification' in window)) return;
   if(Notification.permission !== 'granted') return;
   try{ new Notification(title, {body: body}); }catch(e){}
 }
@@ -28584,12 +28732,18 @@ function onConsultAlarmChange(el){
   ALERT_SETTINGS.consultAlarm = el.checked;
   saveAlertSettings();
 }
+function testBrowserNotify(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  try{ new Notification('쌤로그 알림 테스트', {body: '브라우저 알림이 정상적으로 작동하고 있어요.'}); }catch(e){}
+}
 function renderAlertSettingsUI(){
   var btn = document.getElementById('notify-request-btn');
   var badge = document.getElementById('notify-permission-badge');
+  var testBtn = document.getElementById('notify-test-btn');
   if(!btn || !badge) return;
   if(!('Notification' in window)){
     btn.style.display = 'none';
+    if(testBtn) testBtn.style.display = 'none';
     badge.textContent = '이 브라우저는 알림을 지원하지 않아요';
     return;
   }
@@ -28599,15 +28753,18 @@ function renderAlertSettingsUI(){
     btn.disabled = true;
     badge.textContent = '활성화됨';
     badge.style.color = 'var(--success)';
+    if(testBtn) testBtn.style.display = '';
   } else if(perm === 'denied'){
     btn.textContent = '차단됨 (브라우저 설정에서 해제)';
     btn.disabled = true;
     badge.textContent = '차단됨';
     badge.style.color = 'var(--danger)';
+    if(testBtn) testBtn.style.display = 'none';
   } else {
     btn.textContent = '알림 권한 허용하기';
     btn.disabled = false;
     badge.textContent = '미설정';
+    if(testBtn) testBtn.style.display = 'none';
   }
 }
 
@@ -28657,10 +28814,14 @@ function init(){
   updateHeaderClass();
   switchTab('home');
 
-  // 1분마다 알람 갱신 (수업 N분 전 등 타이머 알람 대응)
+  // 1분마다 알람 갱신 — 홈 탭이면 렌더링, 다른 탭이면 브라우저 알림만 발송
   setInterval(function(){
     var homeTab = document.getElementById('tab-home');
-    if(homeTab && homeTab.style.display !== 'none') renderHomeAlerts();
+    if(homeTab && homeTab.style.display !== 'none'){
+      renderHomeAlerts();
+    } else {
+      computeAlerts();
+    }
   }, 60000);
 }
 
