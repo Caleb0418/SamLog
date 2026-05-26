@@ -19138,6 +19138,33 @@ function applySampleData(gradeArg, clsArg){
     );
   });
 
+  // 오늘 임장 예시 — 선생님 오늘 수업 시간 중 하나에 매칭되도록 추가
+  var todayDow = now.getDay();
+  if(todayDow >= 1 && todayDow <= 5){
+    var todayDateStr = relDate(0);
+    var todayPeriods = [];
+    classMaster.forEach(function(c){
+      if(String(c.id||'').indexOf('cm_sample_') === 0){
+        (c.slots||[]).forEach(function(s){
+          if(s.day === todayDow) todayPeriods.push(s.period);
+        });
+      }
+    });
+    if(todayPeriods.length > 0){
+      todayPeriods.sort(function(a,b){return a-b;});
+      var pickPeriod = todayPeriods[Math.floor(todayPeriods.length/2)];
+      classSchedule.push({
+        id:'cs_sample_today', date:todayDateStr, periods:[pickPeriod],
+        category:'자율', activity:'학급 자치 회의', originalText:'',
+        target:grade+'학년', note:'홈 화면 임장 미리보기 예시', createdAt:now.toISOString()
+      });
+      creativeActivities.push({
+        id:'ca_sample_today', date:todayDateStr, area:'자율',
+        name:'학급 자치 회의', note:'', grades:[grade+'학년']
+      });
+    }
+  }
+
   saveAll();
 }
 
