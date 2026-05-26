@@ -12219,7 +12219,7 @@ var REPLY_TYPES = [
 var CONSULT_KNOWLEDGE = {
   general: {
     riskLevel: 1,
-    keyPrinciple: '강점 먼저 언급, 객관 사실 중심, 후속 약속 명확화',
+    keyPrinciple: '강점 먼저 언급, 객관 사실 중심, 새로운 약속 없이 따뜻한 마무리',
     forbidden: ['단정적 진단', '과장된 칭찬', '개인정보 과도 공유'],
     legalRules: [],
     expressions: {
@@ -14523,6 +14523,10 @@ function generateReplyPrompt(){
   lines.push('');
   lines.push('[작성 지침]');
   lines.push('· 정중하고 따뜻한 톤, 한국 교사가 실제 쓰는 자연스러운 문체');
+  lines.push('· ⚠ 교사가 추가 행동·확인·조사·연락을 약속하는 표현은 절대 금지');
+  lines.push('  - 금지 예: "알아봐드릴게요" / "확인해드릴게요" / "살펴보겠습니다" / "안내해드릴게요" / "다시 연락드릴게요" / "조치하겠습니다" / "처리해드릴게요" / "함께 방법을 찾아보겠습니다"');
+  lines.push('  - 대신: 학부모의 우려를 인정하고 현재 상황을 사실 그대로 전달한 뒤, 따뜻한 인사로 끝낼 것');
+  lines.push('  - 후속 행동이 정말 필요하면 학부모가 먼저 요청하도록 여지를 두는 어조 (예: "필요하시면 언제든 말씀해 주세요")');
   lines.push('· 답장 서두: 공감 표현으로 시작 — "' + kb.expressions.empathy + '"');
   if(kb.expressions.opening){
     lines.push('· 도입 예시: ' + kb.expressions.opening);
@@ -14545,17 +14549,15 @@ function generateReplyPrompt(){
     if(kb.expressions.boundary){
       lines.push('  - 경계 설정: "' + kb.expressions.boundary + '"');
     }
-    lines.push('  - 필요 시 추가 상담·통화 제안');
+    lines.push('  - 교사의 추가 행동 약속 없이, 학부모가 요청 시 응할 수 있다는 어조까지만');
   } else {
-    lines.push('· 일반 사안 — 강점 언급 → 사실 전달 → 후속 약속');
+    lines.push('· 일반 사안 — 강점 언급 → 사실 전달 → 따뜻한 마무리');
     lines.push('  - 학생의 긍정적 모습을 구체적 사실로 먼저 언급');
     lines.push('  - 학부모의 우려에 공감하되 단정하지 않기');
-    lines.push('  - 필요 시 추가 상담·통화 제안');
+    lines.push('  - 새로운 약속 없이 학부모의 관심에 감사 표현으로 마무리');
   }
 
-  if(kb.expressions.closing){
-    lines.push('· 마무리 예시: "' + kb.expressions.closing + '"');
-  }
+  lines.push('· 마무리는 새로운 약속·후속 일정 없이 짧고 따뜻한 인사로 끝낼 것 (예: "관심 가져주셔서 감사합니다.")');
 
   lines.push('');
   lines.push('[절대 금지 표현]');
@@ -14606,7 +14608,7 @@ function generateReplyPrompt(){
   lines.push('· 풀네임 (격식): [학생]  예) "[학생] 학생은 평소 성실합니다"');
   lines.push('· 친근한 호칭 (주격): [학생호칭]가  예) "[학생호칭]가 친구들과 잘 지내고 있어요"');
   lines.push('· 친근한 호칭 (보조사): [학생호칭]는  예) "[학생호칭]는 책 읽기를 좋아해요"');
-  lines.push('· 친근한 호칭 (목적격): [학생호칭]를  예) "[학생호칭]를 잘 살펴보겠습니다"');
+  lines.push('· 친근한 호칭 (목적격): [학생호칭]를  예) "[학생호칭]를 응원하고 있어요"');
   lines.push('· 친근한 호칭 (관형격): [학생호칭]의  예) "[학생호칭]의 노력이 보여요"');
   lines.push('학부모에게 보내는 답장은 보통 친근한 호칭이 더 자연스러워. 격식이 필요한 첫 문장 정도에만 풀네임을 써.');
   lines.push('');
@@ -15678,7 +15680,7 @@ function generatePrepPrompt(){
   lines.push('· 풀네임 (격식): [학생]  예) "[학생] 학생 어머님이시죠?"');
   lines.push('· 친근한 호칭 (주격): [학생호칭]가  예) "[학생호칭]가 요즘 학교에서…"');
   lines.push('· 친근한 호칭 (보조사): [학생호칭]는  예) "[학생호칭]는 평소 책 읽기를 좋아해요"');
-  lines.push('· 친근한 호칭 (목적격): [학생호칭]를  예) "[학생호칭]를 잘 살펴보겠습니다"');
+  lines.push('· 친근한 호칭 (목적격): [학생호칭]를  예) "[학생호칭]를 응원하고 있어요"');
   lines.push('· 친근한 호칭 (관형격): [학생호칭]의  예) "[학생호칭]의 노력이 보여요"');
   lines.push('통화에서는 본론부터는 친근한 호칭이 더 자연스러워. 시작 멘트 첫 문장에만 풀네임을 써.');
   lines.push('');
