@@ -2280,7 +2280,7 @@ body{
 .home-alerts-more svg{transition:transform 0.15s;}
 .home-alerts-more.expanded svg{transform:rotate(180deg);}
 .home-recent-inline{
-  background:var(--warning-dim);
+  background:var(--bg-surface);
   border:1px solid var(--warning-border);
   border-top:none;
   border-radius:0 0 var(--radius-md) var(--radius-md);
@@ -2288,26 +2288,29 @@ body{
   margin-top:-4px;
 }
 .home-recent-item{
-  display:flex;gap:10px;align-items:center;
-  padding:9px 14px 9px 50px;
-  border-bottom:1px solid var(--warning-border);cursor:pointer;
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);cursor:pointer;
   transition:background 0.1s;
 }
 .home-recent-item:last-child{border-bottom:none;}
-.home-recent-item:hover{filter:brightness(0.97);}
+.home-recent-item:hover{background:var(--bg-elevated);}
 .home-recent-item-avatar{
-  width:22px;height:22px;border-radius:50%;flex-shrink:0;
-  background:var(--bg-surface);border:1px solid var(--border);
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:var(--warning-dim);border:1px solid var(--warning-border);
   display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:600;color:var(--text-secondary);
+  font-size:11px;font-weight:700;color:var(--warning);
+  margin-top:1px;
 }
 .home-recent-item-body{flex:1;min-width:0;}
 .home-recent-item-meta{
-  font-size:11px;color:var(--text-tertiary);margin-bottom:1px;
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--text-tertiary);margin-bottom:2px;
 }
-.home-recent-item-name{font-weight:600;color:var(--text);}
+.home-recent-item-name{font-weight:600;color:var(--text);font-size:12.5px;}
+.home-recent-item-time{margin-left:auto;font-variant-numeric:tabular-nums;}
 .home-recent-item-content{
-  font-size:12px;color:var(--text-secondary);line-height:1.5;
+  font-size:12.5px;color:var(--text-secondary);line-height:1.45;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .home-recent-link{
@@ -5753,15 +5756,36 @@ details > summary::-webkit-details-marker { display:none; }
 
 /* 창체 보기 — 오늘 뷰용 인라인 배지 */
 .cs-overlay-today{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:600;
-  padding:3px 8px;border-radius:5px;
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:9.5px;font-weight:600;
+  padding:1px 5px;border-radius:4px;
   background:rgba(251,146,60,0.15);
   color:#c2410c;
   border:1px solid rgba(251,146,60,0.4);
   margin-left:6px;
   cursor:pointer;
+  line-height:1.4;
+  vertical-align:middle;
 }
+/* 홈 오늘 수업 카드 내 창체 배지 — 부모 상태에 맞춰 색상 변경 */
+.home-cr.cr-done .cs-overlay-today{
+  background:rgba(34,170,110,0.15);
+  color:#1B7F4F;
+  border-color:#A7D9BE;
+}
+.home-cr.cr-done .cs-overlay-today .cs-overlay-dot{ background:#1B7F4F; }
+.home-cr.cr-miss .cs-overlay-today{
+  background:rgba(239,68,68,0.15);
+  color:#C03A2B;
+  border-color:#F5B9B3;
+}
+.home-cr.cr-miss .cs-overlay-today .cs-overlay-dot{ background:#C03A2B; }
+.home-cr.cr-soon .cs-overlay-today{
+  background:var(--accent-dim);
+  color:var(--accent);
+  border-color:var(--border-accent);
+}
+.home-cr.cr-soon .cs-overlay-today .cs-overlay-dot{ background:var(--accent); }
 [data-theme="dark"] .cs-overlay-today{
   background:rgba(251,146,60,0.2);
   color:#fb923c;
@@ -6849,8 +6873,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .home-cr.cr-miss .home-cr-period{color:#C03A2B;}
 .home-cr.cr-soon .home-cr-period{color:var(--accent);}
 .home-cr-name{
+  display:flex;align-items:center;gap:4px;
   font-size:11.5px;font-weight:600;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  overflow:hidden;white-space:nowrap;
+  min-width:0;
 }
 .home-cr.cr-done .home-cr-name{color:#1B7F4F;}
 .home-cr.cr-miss .home-cr-name{color:#C03A2B;}
@@ -7863,6 +7889,22 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           </button>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- 분류 대기 메모 모달 -->
+  <div class="modal-overlay" id="unsorted-memos-modal" onclick="if(event.target===this)closeUnsortedMemosModal()">
+    <div class="modal class-settings-modal-inner" style="max-width:520px;">
+      <div class="memo-modal-head">
+        <div class="memo-modal-head-text">
+          <div class="memo-modal-eyebrow">홈 · 알림</div>
+          <div class="memo-modal-title">분류 대기 메모</div>
+        </div>
+        <button class="memo-modal-close" onclick="closeUnsortedMemosModal()">×</button>
+      </div>
+      <div class="memo-modal-body" style="padding:0;">
+        <div id="unsorted-memos-list" style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:14px;"></div>
       </div>
     </div>
   </div>
@@ -18876,19 +18918,17 @@ function applyHelpSample(){
 
   // 재적용 시 이전 샘플 항목 제거
   classMaster = classMaster.filter(function(c){
-    return !(String(c.grade) === grade && String(c.cls) === cls && String(c.id || '').indexOf('cm_help_sample_') === 0);
+    return String(c.id || '').indexOf('cm_sample_') !== 0;
   });
   classSchedule = classSchedule.filter(function(s){
-    return String(s.id || '').indexOf('cs_help_sample_') !== 0;
+    return String(s.id || '').indexOf('cs_sample_') !== 0;
   });
   creativeActivities = creativeActivities.filter(function(a){
-    return String(a.id || '').indexOf('ca_help_sample_') !== 0;
+    return String(a.id || '').indexOf('ca_sample_') !== 0;
   });
 
-  // 시간표·classMaster·창체 적용
+  // 시간표·classMaster·창체 적용 (보조 반 9-1, 9-2도 함께 생성됨)
   applySampleData(grade, cls);
-
-  // 적용된 항목의 id를 도움말 샘플임을 표시할 수 있도록 마지막 추가분 식별 마킹은 생략 (applySampleData는 cm_sample_/cs_s/ca_s prefix 사용)
 
   currentClassKey = key;
   if(typeof syncActiveClass === 'function') syncActiveClass();
@@ -18915,7 +18955,7 @@ function startWithSample(){
   onboardingData.isSample      = true;
   onboardingData.role          = 'homeroom';
   onboardingData.schoolLevel   = 'middle';
-  onboardingData.teacher       = '샘플 선생님';
+  onboardingData.teacher       = '샘플 선생';
   onboardingData.grade         = '2';
   onboardingData.classNum      = '3';
   onboardingData.parsedStudents = sample;
@@ -18951,6 +18991,7 @@ function applySampleData(gradeArg, clsArg){
   var grade = String(gradeArg != null ? gradeArg : SCHOOL_GRADE);
   var cls   = String(clsArg   != null ? clsArg   : SCHOOL_CLASS);
   var now   = new Date();
+  var stamp = Date.now();
 
   function relDate(offsetDays){
     var d = new Date(now);
@@ -18959,47 +19000,143 @@ function applySampleData(gradeArg, clsArg){
   }
   var dow = now.getDay();
   var monOffset = (dow === 0) ? -6 : (1 - dow);
-  var monDate = relDate(monOffset);
-  var wedDate = relDate(monOffset + 2);
-  var friDate = relDate(monOffset + 4);
 
-  // 주간 시간표
-  var ttPrefix = grade + '-' + cls + '-';
-  var weekSubjects = {
-    1: ['국어','수학','영어','사회','과학','체육','창체'],
+  // 교과 담당 보조 반 2개 — 동일 학년, 다른 반 (담임반과 충돌 회피)
+  var auxClsList = ['1','2','3'].filter(function(n){ return n !== cls; }).slice(0,2);
+  var aux1Cls = auxClsList[0];
+  var aux2Cls = auxClsList[1];
+
+  var auxStudents1 = [
+    {num:'01',name:'김재현',gender:'남'},{num:'02',name:'박소은',gender:'여'},
+    {num:'03',name:'이지훈',gender:'남'},{num:'04',name:'정유진',gender:'여'},
+    {num:'05',name:'최민수',gender:'남'},{num:'06',name:'황서아',gender:'여'},
+    {num:'07',name:'윤도윤',gender:'남'},{num:'08',name:'배수빈',gender:'여'},
+    {num:'09',name:'장현우',gender:'남'},{num:'10',name:'한지민',gender:'여'},
+    {num:'11',name:'조은서',gender:'여'},{num:'12',name:'오재훈',gender:'남'}
+  ];
+  var auxStudents2 = [
+    {num:'01',name:'한서윤',gender:'여'},{num:'02',name:'권민호',gender:'남'},
+    {num:'03',name:'서지아',gender:'여'},{num:'04',name:'노준영',gender:'남'},
+    {num:'05',name:'유하린',gender:'여'},{num:'06',name:'백선우',gender:'남'},
+    {num:'07',name:'문예지',gender:'여'},{num:'08',name:'고도현',gender:'남'},
+    {num:'09',name:'신지원',gender:'여'},{num:'10',name:'심태윤',gender:'남'},
+    {num:'11',name:'홍채원',gender:'여'},{num:'12',name:'양시우',gender:'남'}
+  ];
+
+  // 교과 담당 반 생성 (이미 있으면 학생만 갱신)
+  [
+    {c: aux1Cls, students: auxStudents1},
+    {c: aux2Cls, students: auxStudents2}
+  ].forEach(function(it){
+    var k = getClassKey(grade, it.c);
+    if(classes[k]){
+      classes[k].students = it.students.slice();
+      classes[k].isPrimary = false;
+    } else {
+      classes[k] = {
+        grade: parseInt(grade), classNum: parseInt(it.c),
+        isPrimary: false, students: it.students.slice(),
+        records: {}
+      };
+    }
+  });
+
+  // 반별 주간 시간표 — 국어가 들어가는 위치를 분산시킴 (시간 충돌 없도록 배치)
+  var schedules = {};
+  schedules[cls] = {
+    1: ['국어','수학','영어','사회','국어','체육','창체'],
     2: ['수학','국어','도덕','영어','기가','미술','음악'],
-    3: ['영어','사회','수학','국어','체육','과학','창체'],
-    4: ['도덕','영어','국어','수학','미술','기가','사회'],
-    5: ['사회','체육','영어','국어','수학','음악','진로']
+    3: ['영어','사회','국어','수학','체육','과학','창체'],
+    4: ['도덕','국어','영어','수학','미술','기가','사회'],
+    5: ['사회','체육','영어','국어','수학','국어','진로']
   };
-  [1,2,3,4,5].forEach(function(day){
-    weekSubjects[day].forEach(function(subj, i){
-      schoolTimetable[ttPrefix + day + '-' + (i + 1)] = subj;
+  schedules[aux1Cls] = {
+    1: ['수학','국어','사회','영어','과학','국어','창체'],
+    2: ['국어','수학','도덕','영어','기가','미술','국어'],
+    3: ['영어','국어','수학','사회','체육','과학','창체'],
+    4: ['도덕','영어','수학','국어','미술','기가','사회'],
+    5: ['국어','체육','영어','수학','사회','음악','진로']
+  };
+  schedules[aux2Cls] = {
+    1: ['사회','영어','국어','수학','체육','과학','창체'],
+    2: ['영어','수학','도덕','국어','기가','미술','음악'],
+    3: ['수학','영어','사회','국어','체육','국어','창체'],
+    4: ['도덕','사회','국어','영어','미술','기가','국어'],
+    5: ['영어','수학','국어','사회','체육','음악','진로']
+  };
+
+  Object.keys(schedules).forEach(function(c){
+    var prefix = grade + '-' + c + '-';
+    var sch = schedules[c];
+    [1,2,3,4,5].forEach(function(day){
+      sch[day].forEach(function(subj, i){
+        schoolTimetable[prefix + day + '-' + (i + 1)] = subj;
+      });
     });
   });
 
-  // 국어 교과 (담임반) — 월1·화2·수4·목3교시
+  // 반별 국어 classMaster (slot은 위 schedules에서 국어가 있는 위치와 일치)
   classMaster.push({
-    id: 'cm_sample_' + Date.now(),
+    id: 'cm_sample_p_' + stamp,
     grade: grade, cls: cls,
     subject: '국어',
-    slots: [{day:1,period:1},{day:2,period:2},{day:3,period:4},{day:4,period:3}],
+    slots: [
+      {day:1,period:1},{day:1,period:5},
+      {day:2,period:2},
+      {day:3,period:3},
+      {day:4,period:2},
+      {day:5,period:4},{day:5,period:6}
+    ],
+    memos: [], sessionResets: [], sessionOverrides: {}
+  });
+  classMaster.push({
+    id: 'cm_sample_a1_' + stamp,
+    grade: grade, cls: aux1Cls,
+    subject: '국어',
+    slots: [
+      {day:1,period:2},{day:1,period:6},
+      {day:2,period:1},{day:2,period:7},
+      {day:3,period:2},
+      {day:4,period:4},
+      {day:5,period:1}
+    ],
+    memos: [], sessionResets: [], sessionOverrides: {}
+  });
+  classMaster.push({
+    id: 'cm_sample_a2_' + stamp,
+    grade: grade, cls: aux2Cls,
+    subject: '국어',
+    slots: [
+      {day:1,period:3},
+      {day:2,period:4},
+      {day:3,period:4},{day:3,period:6},
+      {day:4,period:3},{day:4,period:7},
+      {day:5,period:3}
+    ],
     memos: [], sessionResets: [], sessionOverrides: {}
   });
 
-  // 창체 일정 (담임반 classSchedule)
-  classSchedule.push(
-    {id:'cs_s1', date:monDate, periods:[7],   category:'자율',  activity:'학급 자치 회의', originalText:'', target:grade+'학년', note:'학급 규칙 만들기', createdAt:now.toISOString()},
-    {id:'cs_s2', date:wedDate, periods:[6,7], category:'동아리', activity:'동아리 활동',    originalText:'', target:grade+'학년', note:'',           createdAt:now.toISOString()},
-    {id:'cs_s3', date:friDate, periods:[6,7], category:'진로',  activity:'진로 탐색의 날',  originalText:'', target:grade+'학년', note:'직업 체험 활동', createdAt:now.toISOString()}
-  );
-
-  // 창의적 체험활동 (creativeActivities)
-  creativeActivities.push(
-    {id:'ca_s1', date:monDate, area:'자율',  name:'학급 자치 회의', note:'학급 규칙 만들기', grades:[grade+'학년']},
-    {id:'ca_s2', date:wedDate, area:'동아리', name:'동아리 활동',    note:'',           grades:[grade+'학년']},
-    {id:'ca_s3', date:friDate, area:'진로',  name:'진로 탐색의 날',  note:'직업 체험 활동', grades:[grade+'학년']}
-  );
+  // 창체 — 전 주·이번 주·다음 주 (담임반 기준)
+  var weekDefs = [
+    {label:'prev', off:-7, mon:'학급 회의',     wed:'동아리 활동',  fri:'진로 강연'},
+    {label:'curr', off:0,  mon:'학급 자치 회의', wed:'동아리 활동',  fri:'진로 탐색의 날'},
+    {label:'next', off:7,  mon:'학급 안건 토의', wed:'동아리 발표',  fri:'직업 체험'}
+  ];
+  weekDefs.forEach(function(w){
+    var monD = relDate(monOffset + w.off);
+    var wedD = relDate(monOffset + w.off + 2);
+    var friD = relDate(monOffset + w.off + 4);
+    classSchedule.push(
+      {id:'cs_sample_'+w.label+'_1', date:monD, periods:[7],   category:'자율',  activity:w.mon, originalText:'', target:grade+'학년', note:'', createdAt:now.toISOString()},
+      {id:'cs_sample_'+w.label+'_2', date:wedD, periods:[6,7], category:'동아리', activity:w.wed, originalText:'', target:grade+'학년', note:'', createdAt:now.toISOString()},
+      {id:'cs_sample_'+w.label+'_3', date:friD, periods:[6,7], category:'진로',  activity:w.fri, originalText:'', target:grade+'학년', note:'', createdAt:now.toISOString()}
+    );
+    creativeActivities.push(
+      {id:'ca_sample_'+w.label+'_1', date:monD, area:'자율',  name:w.mon, note:'', grades:[grade+'학년']},
+      {id:'ca_sample_'+w.label+'_2', date:wedD, area:'동아리', name:w.wed, note:'', grades:[grade+'학년']},
+      {id:'ca_sample_'+w.label+'_3', date:friD, area:'진로',  name:w.fri, note:'', grades:[grade+'학년']}
+    );
+  });
 
   saveAll();
 }
@@ -20540,10 +20677,22 @@ function renderHomeTodayClasses(){
     if(!item.isAdhoc && c.id && typeof switchClassKey === 'function'){
       clickAction = 'onclick="switchClassKey(\'' + c.id + '\');switchTab(\'class\')"';
     }
+    // 이 수업 시간에 잡힌 창체 (담당 반 + 같은 교시) — 유형 라벨만 표시
+    var csHtml = '';
+    if(!item.isAdhoc && c.grade && c.cls && typeof _csMatchCell === 'function'){
+      var csMatches = _csMatchCell(c.grade, c.cls, todayStr, period);
+      if(csMatches && csMatches.length > 0){
+        csHtml = csMatches.map(function(cs){
+          return '<span class="cs-overlay-today" onclick="event.stopPropagation();showCsCellInfo(\''+cs.id+'\')" title="'+escapeHtml(cs.activity)+'">' +
+            '<span class="cs-overlay-dot"></span>' + escapeHtml(_csCategoryLabel(cs.category)) +
+          '</span>';
+        }).join(' ');
+      }
+    }
     html += '<div class="home-cr ' + stateClass + '" ' + clickAction + '>' +
       '<div class="home-cr-period">' + period + '</div>' +
       '<div>' +
-        '<div class="home-cr-name">' + label + '</div>' +
+        '<div class="home-cr-name">' + label + csHtml + '</div>' +
         '<div class="home-cr-meta">' + meta + '</div>' +
       '</div>' +
       '<div class="home-cr-dot"></div>' +
@@ -21087,7 +21236,8 @@ function renderHomeClassSchedule(){
 /* ─── 홈 창체 일정 카드 (6-B · 6-C) ─── */
 function renderHomeCsToday(){
   var card = document.getElementById('home-cs-today');
-  if(!card) return;
+  if(card) card.style.display = 'none';
+  return;
 
   var primaryClass = getPrimaryClass();
   if(!primaryClass){
@@ -21164,7 +21314,7 @@ function goToClassScheduleView(){
    - 시간표 미동기인데 담당수업 슬롯 비어있음
    - 시간표 동기 후 신규 매칭됐을 때
 ═══════════════════════════════════════════ */
-function buildUnsortedListHtml(){
+function buildUnsortedListContent(limit){
   var all = [];
   var allStuds = getAllStudentsAcrossClasses();
   allStuds.forEach(function(item){
@@ -21175,31 +21325,53 @@ function buildUnsortedListHtml(){
     });
   });
   all.sort(function(a,b){return (b.rec.createdAt||0)-(a.rec.createdAt||0);});
-  if(all.length === 0) return '';
+  if(all.length === 0) return {html:'', total:0};
 
-  var rows = all.slice(0,5).map(function(item){
+  var items = (limit && limit > 0) ? all.slice(0, limit) : all;
+  var rows = items.map(function(item){
     var s = item.student;
     var name = getDisplayName(s);
     var avatar = s.name.charAt(0);
-    return '<div class="home-recent-item" onclick="openStudentFromHome(\''+item.classKey+'\',\''+s.num+'\')">'+
+    return '<div class="home-recent-item" onclick="closeUnsortedMemosModal();openStudentFromHome(\''+item.classKey+'\',\''+s.num+'\')">'+
       '<div class="home-recent-item-avatar">'+escapeHtml(avatar)+'</div>'+
       '<div class="home-recent-item-body">'+
         '<div class="home-recent-item-meta">'+
           '<span class="home-class-pill">'+item.classLabel+'</span>'+
-          '<span class="home-recent-item-name">'+escapeHtml(name)+'</span> · '+escapeHtml(item.rec.time||'')+
+          '<span class="home-recent-item-name">'+escapeHtml(name)+'</span>'+
+          '<span class="home-recent-item-time">'+escapeHtml(item.rec.time||'')+'</span>'+
         '</div>'+
         '<div class="home-recent-item-content">'+escapeHtml(item.rec.content)+'</div>'+
       '</div>'+
     '</div>';
   }).join('');
 
-  var footer = all.length > 5
-    ? '<div style="padding:9px 14px 9px 50px;border-top:1px solid var(--warning-border);">'+
-        '<button class="home-recent-link" onclick="switchTab(\'students\')">전체 '+all.length+'건 보기 →</button>'+
+  return {html:rows, total:all.length};
+}
+function buildUnsortedListHtml(){
+  var result = buildUnsortedListContent(5);
+  if(result.total === 0) return '';
+  var footer = result.total > 5
+    ? '<div style="padding:9px 14px;border-top:1px solid var(--border);text-align:center;">'+
+        '<button class="home-recent-link" onclick="switchTab(\'students\')">전체 '+result.total+'건 보기 →</button>'+
       '</div>'
     : '';
-
-  return '<div class="home-recent-inline">'+rows+footer+'</div>';
+  return '<div class="home-recent-inline">'+result.html+footer+'</div>';
+}
+function openUnsortedMemosModal(){
+  var modal = document.getElementById('unsorted-memos-modal');
+  var listEl = document.getElementById('unsorted-memos-list');
+  if(!modal || !listEl) return;
+  var result = buildUnsortedListContent(0);
+  if(result.total === 0){
+    listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;">분류 대기 메모가 없어요</div>';
+  } else {
+    listEl.innerHTML = result.html;
+  }
+  modal.classList.add('show');
+}
+function closeUnsortedMemosModal(){
+  var modal = document.getElementById('unsorted-memos-modal');
+  if(modal) modal.classList.remove('show');
 }
 
 /* 홈 알람·목록 → 학생 상세로 (필요 시 반 전환) */
@@ -21251,10 +21423,6 @@ function renderHomeAlerts(){
       '</div>' +
     '</div>';
 
-    // 분류 대기 알람 바로 아래에 목록 인라인 삽입
-    if(a._unsortedList){
-      alertHtml += buildUnsortedListHtml();
-    }
     return alertHtml;
   };
 
@@ -21539,8 +21707,7 @@ function computeAlerts(){
       icon:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
       title:'분류 대기 메모 '+totalUnsorted+'건',
       desc: descUnsort,
-      cta:'목록 보기 ↓', action:"",
-      _unsortedList: true,
+      cta:'목록 보기 →', action:"openUnsortedMemosModal()",
       priority: 4
     });
   }
@@ -25407,19 +25574,13 @@ function toggleCsOnSchedule(){
   }
 }
 
-// weekDates: 옵션 — 매칭 건수를 라벨에 표시
+// weekDates: 옵션 — 매칭 건수를 라벨에 표시 (단일 날짜 또는 주간 날짜 배열)
 function _csToggleBtnHtml(weekDates){
   var countSuffix = '';
   if(_csShowOnSchedule){
-    if(weekDates && weekDates.length){
-      var n = _csCountMatchesForWeek(weekDates);
-      countSuffix = ' · 이번 주 ' + n + '건';
-    } else {
-      // 오늘 모드: 오늘 날짜만 카운트
-      var todayStr = formatDateForInput(new Date());
-      var n2 = (Array.isArray(classSchedule) ? classSchedule.filter(function(c){return c.date === todayStr;}).length : 0);
-      countSuffix = ' · 오늘 ' + n2 + '건';
-    }
+    var dates = (weekDates && weekDates.length) ? weekDates : [new Date()];
+    var n = _csCountMatchesForWeek(dates);
+    countSuffix = ' · ' + n + '건';
   }
   return '<button class="cs-toggle-btn' + (_csShowOnSchedule ? ' active' : '') + '" onclick="toggleCsOnSchedule()" title="이 시간표에 표시되는 날짜 중 등록된 창체가 있으면 셀에 배지가 떠요">' +
     '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
@@ -26316,7 +26477,7 @@ function renderClassToday(){
   var activeClass = getActiveClass();
   var _hasPrimary = activeClass && activeClass.isPrimary;
   var _csToggleHtml = _hasPrimary ?
-    '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' + _csToggleBtnHtml() + '</div>' : '';
+    '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' + _csToggleBtnHtml([viewDate]) + '</div>' : '';
 
   var html = '<div class="class-day-card">';
   html += '<div class="class-day-head">'+
@@ -26874,8 +27035,14 @@ function renderClassWeek(opts){
 
   // 창체 보기 토글 버튼 (담임반에서만)
   var _csHasPrimary = activeClassObj && activeClassObj.isPrimary;
+  var _csHintText = (mode === 'primary')
+    ? '반 시간표에는 우리 반 전체 창체 시간이 표시됩니다.'
+    : '주간 시간표에는 내 담당 수업과 겹치는 창체만 표시돼요. 임장 일정 확인용입니다.';
   var _csToggleHtml = _csHasPrimary ?
-    '<div style="display:flex;justify-content:flex-end;margin:8px 0;">' + _csToggleBtnHtml(weekDates) + '</div>' : '';
+    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin:8px 0;">' +
+      _csToggleBtnHtml(weekDates) +
+      (_csShowOnSchedule ? '<div style="font-size:11px;color:var(--text-tertiary);line-height:1.5;text-align:right;">' + _csHintText + '</div>' : '') +
+    '</div>' : '';
 
   // 그리드 HTML
   var html = headerHtml + _csToggleHtml + legendHtml;
