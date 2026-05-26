@@ -18526,13 +18526,14 @@ function startManualEntry(){
   onboardingData.parsedStudents = [];
   var zone = document.getElementById('upload-zone');
   if(zone){
-    zone.classList.add('done');
-    zone.style.pointerEvents = 'none'; // 업로드 비활성화
+    // 업로드 영역은 여전히 클릭 가능하게 유지 (파일로 추가도 허용)
+    zone.classList.remove('done');
+    zone.style.pointerEvents = '';
   }
   var uploadMain = document.getElementById('upload-main');
   var uploadSub  = document.getElementById('upload-sub');
-  if(uploadMain) uploadMain.textContent = '직접 입력 모드';
-  if(uploadSub)  uploadSub.textContent  = '아래 표에서 학생을 추가하세요';
+  if(uploadMain) uploadMain.textContent = '파일 업로드 또는 직접 입력';
+  if(uploadSub)  uploadSub.textContent  = '파일을 올리거나, 아래 표에서 학생을 직접 추가하세요';
   // 빈 첫 번째 행으로 편집 테이블 시작
   obAddStudent();
 }
@@ -26039,30 +26040,38 @@ function renderClassWeek(opts){
       // ① NEIS 시간표까지 불러왔지만 담당 수업이 없는 경우
       emptyHtml =
         '<div class="class-empty-state">'+_svg+
-          '<div style="font-weight:600;margin-bottom:6px;">담당 수업이 아직 없어요</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">NEIS 시간표 연동은 완료됐어요.</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">내가 가르치는 수업을 <strong>시간표·수업 설정</strong>에서 등록하면 여기에 표시돼요.</div>'+
-          '<button class="btn-small primary" onclick="openClassSettings()" style="margin-bottom:8px;">시간표·수업 설정 열기</button>'+
+          '<div style="font-weight:600;margin-bottom:10px;">담당 수업이 아직 없어요</div>'+
+          '<div style="text-align:left;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--text-secondary);">'+
+            '<div>✓ NEIS 학교 등록 완료</div>'+
+            '<div>✓ NEIS 시간표 연동 완료</div>'+
+            '<div><span style="color:var(--accent);font-weight:600;">③ 담당 수업 등록</span> — 시간표·수업 설정에서 내가 가르치는 수업을 선택하세요</div>'+
+          '</div>'+
+          '<button class="btn-small primary" onclick="openClassSettings()" style="margin-bottom:8px;">③ 시간표·수업 설정 열기</button>'+
         '</div>';
     } else if(_neisHasSchool){
       // ② 학교는 설정됐지만 시간표를 아직 불러오지 않은 경우
       var _schoolName = neisSettings.schoolName || '설정된 학교';
       emptyHtml =
         '<div class="class-empty-state">'+_svg+
-          '<div style="font-weight:600;margin-bottom:6px;">시간표를 아직 불러오지 않았어요</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;"><strong>'+escapeHtml(_schoolName)+'</strong> 학교 설정은 완료됐어요.</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">설정에서 NEIS 연동을 저장하면 시간표가 자동으로 채워져요.</div>'+
-          '<button class="btn-small primary" onclick="openNeisSetupModal()" style="margin-bottom:8px;">NEIS 설정 열기</button>'+
+          '<div style="font-weight:600;margin-bottom:10px;">시간표를 아직 불러오지 않았어요</div>'+
+          '<div style="text-align:left;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--text-secondary);">'+
+            '<div>✓ NEIS 학교 등록 완료 ('+escapeHtml(_schoolName)+')</div>'+
+            '<div><span style="color:var(--accent);font-weight:600;">② NEIS 연동 저장</span> — 설정에서 저장하면 시간표가 자동으로 채워져요</div>'+
+            '<div style="opacity:0.6;">③ 담당 수업 등록 — 내가 가르치는 수업을 선택해요</div>'+
+          '</div>'+
+          '<button class="btn-small primary" onclick="openNeisSetupModal()" style="margin-bottom:8px;">② NEIS 설정 열기</button>'+
           '<br><button class="btn-link" onclick="openClassSettings()" style="font-size:12px;">수동으로 수업 등록하기</button>'+
         '</div>';
     } else {
       // ③ NEIS 학교 자체가 미설정
       emptyHtml =
         '<div class="class-empty-state">'+_svg+
-          '<div style="font-weight:600;margin-bottom:6px;">시간표가 아직 없어요</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">학교 이름만 검색하면 NEIS 시간표가 자동으로 채워져요.</div>'+
-          '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">또는 담당 수업을 직접 등록할 수도 있어요.</div>'+
-          '<button class="btn-small primary" onclick="openNeisSetupModal()" style="margin-bottom:8px;">NEIS 학교 검색하기</button>'+
+          '<div style="font-weight:600;margin-bottom:10px;">시간표 설정이 필요해요</div>'+
+          '<div style="text-align:left;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--text-secondary);">'+
+            '<div><span style="color:var(--accent);font-weight:600;">① NEIS 학교 등록</span> — 학교 이름을 검색해 연결하세요</div>'+
+            '<div style="opacity:0.6;">② 담당 수업 등록 — 내가 가르치는 수업을 선택해요</div>'+
+          '</div>'+
+          '<button class="btn-small primary" onclick="openNeisSetupModal()" style="margin-bottom:8px;">① NEIS 학교 검색하기</button>'+
           '<br><button class="btn-link" onclick="openClassSettings()" style="font-size:12px;">수동으로 수업 등록하기</button>'+
         '</div>';
     }
