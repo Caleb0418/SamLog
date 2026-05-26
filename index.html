@@ -4817,6 +4817,36 @@ details > summary::-webkit-details-marker { display:none; }
   background:var(--accent-dim);color:var(--accent);
   border-color:var(--accent);font-weight:600;
 }
+/* 공용 반 선택 칩 바 */
+.ac-chip-bar{
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
+  margin-bottom:14px;
+}
+.sgt-class-chip.ac-add-chip{
+  border-style:dashed;color:var(--text-tertiary);
+}
+.sgt-class-chip.ac-add-chip:hover{
+  border-color:var(--accent);color:var(--accent);background:var(--accent-dim);
+}
+.class-chip-menu-btn{
+  padding:6px 10px;font-weight:700;
+}
+.class-chip-menu{
+  position:absolute;top:100%;right:0;margin-top:4px;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  min-width:160px;z-index:50;
+  flex-direction:column;padding:4px;
+}
+.class-chip-menu button{
+  text-align:left;padding:8px 12px;font-size:12.5px;
+  background:none;border:none;cursor:pointer;border-radius:6px;
+  color:var(--text);font-family:inherit;
+  display:block;width:100%;
+}
+.class-chip-menu button:hover{ background:var(--bg-elevated); color:var(--accent); }
+.class-chip-menu button.danger{ color:var(--danger); }
+.class-chip-menu button.danger:hover{ background:var(--danger-dim); color:var(--danger); }
 
 /* ═══════════════════════════════════════════
    생기부 매트릭스 뷰
@@ -7268,17 +7298,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     쌤로그
   </button>
 
-  <!-- 반 스위처 -->
-  <div class="sidebar-class-switcher" id="class-switcher">
-    <button class="class-switcher-btn" id="class-switcher-btn" onclick="toggleClassDropdown(event)">
-      <span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
-        <span id="brand-class" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span>
-        <span class="class-switcher-role" id="class-switcher-role"></span>
-      </span>
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="class-dropdown" id="class-dropdown" style="display:none;"></div>
-  </div>
+  <!-- (반 스위처 제거됨 — 각 탭 내부의 반 선택 칩으로 이전) -->
 
   <!-- 네비게이션 -->
   <nav class="app-nav">
@@ -8015,7 +8035,10 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     </div>
   </div>
 
-  <div class="main-layout" id="tab-students">
+  <div id="tab-students">
+    <!-- 반 선택 칩 + ⋮ 메뉴 -->
+    <div id="students-class-bar" style="max-width:1280px;margin:0 auto;padding:0 16px;"></div>
+    <div class="main-layout">
 
     <!-- 사이드바 -->
     <aside class="sidebar">
@@ -8151,7 +8174,8 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         </div>
       </div>
     </main>
-  </div>
+    </div><!-- /.main-layout -->
+  </div><!-- /#tab-students -->
 
   <!-- ═══════════════════════════════════════════
        생기부 탭
@@ -8248,6 +8272,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
      출결 탭
 ═══════════════════════════════════════════ -->
 <div id="tab-attendance" style="display:none;max-width:960px;margin:0 auto;">
+
+  <!-- 반 선택 칩 -->
+  <div id="att-class-bar"></div>
 
   <!-- 헤더: 날짜 + 액션 버튼 -->
   <div class="att-header">
@@ -10301,14 +10328,85 @@ function switchClassKey(classKey){
   renderClassDropdown();
   var activeTab = getActiveTab();
   if(activeTab === 'home') renderHome();
-  if(activeTab === 'students') renderSidebar('');
+  if(activeTab === 'students'){ renderSidebar(''); renderStudentsClassBar(); }
   if(activeTab === 'class') renderClassTab();
+  if(activeTab === 'attendance') renderAttendanceTab();
+  if(activeTab === 'saenggibu' && typeof renderSaenggibuTab === 'function') renderSaenggibuTab();
   if(activeTab === 'reply'){ resetReplyFlow(); renderReplyFlow(); }
   // 학생 상세 닫기
   var detail = document.getElementById('student-detail');
   var empty = document.getElementById('empty-state');
   if(detail) detail.style.display = 'none';
   if(empty) empty.style.display = 'block';
+}
+
+/* ═══════════════════════════════════════════
+   탭 내 반 선택 칩 바 — 공용 헬퍼
+═══════════════════════════════════════════ */
+function buildClassChipBar(activeKey, selectFn, opts){
+  opts = opts || {};
+  var keys = Object.keys(classes).sort(function(a,b){
+    var ca = classes[a], cb = classes[b];
+    var ga = parseInt(ca.grade||0), gb = parseInt(cb.grade||0);
+    var na = parseInt(ca.classNum||0), nb = parseInt(cb.classNum||0);
+    return ga !== gb ? ga - gb : na - nb;
+  });
+  var chips = keys.map(function(k){
+    var c = classes[k];
+    var active = k === activeKey;
+    var label = c.grade + '-' + c.classNum;  // 콤팩트 표기
+    var primary = c.isPrimary ? ' <span style="font-size:9px;opacity:0.7;">(담임)</span>' : '';
+    return '<button class="sgt-class-chip' + (active ? ' active' : '') +
+           '" onclick="' + selectFn + '(\'' + k + '\')" title="' +
+           (c.isPrimary ? '담임반' : '교과 담당') + '">' + label + primary + '</button>';
+  }).join('');
+  // + 반 추가 칩 (점선)
+  chips += '<button class="sgt-class-chip ac-add-chip" onclick="openAddClass()" title="새 반 추가">+ 반 추가</button>';
+  // 옵션: 활성 반 옵션 메뉴 (⋮) — 학생관리 탭에서만
+  var menuHtml = '';
+  if(opts.showMenu && activeKey){
+    var ac = classes[activeKey];
+    var primaryLabel = ac && ac.isPrimary ? '담임 해제 (교과로)' : '담임반으로 지정';
+    menuHtml =
+      '<div class="class-chip-menu-wrap" style="position:relative;margin-left:auto;">'
+      +'<button class="sgt-class-chip class-chip-menu-btn" onclick="toggleClassChipMenu(event)" title="반 옵션">⋮</button>'
+      +'<div class="class-chip-menu" id="class-chip-menu" style="display:none;">'
+      +'<button onclick="openRosterReplace();toggleClassChipMenu(null,true)">명단 교체</button>'
+      +'<button onclick="toggleClassRole(currentClassKey);toggleClassChipMenu(null,true)">'+primaryLabel+'</button>'
+      +'<button class="danger" onclick="confirmDeleteActiveClass();toggleClassChipMenu(null,true)">반 삭제</button>'
+      +'</div>'
+      +'</div>';
+  }
+  return '<div class="ac-chip-bar">' + chips + menuHtml + '</div>';
+}
+function toggleClassChipMenu(e, forceClose){
+  if(e && e.stopPropagation) e.stopPropagation();
+  var m = document.getElementById('class-chip-menu');
+  if(!m) return;
+  if(forceClose){ m.style.display = 'none'; return; }
+  var willOpen = m.style.display === 'none';
+  m.style.display = willOpen ? 'block' : 'none';
+  if(willOpen){
+    setTimeout(function(){
+      document.addEventListener('click', _classChipMenuOutside);
+    }, 10);
+  }
+}
+function _classChipMenuOutside(e){
+  var m = document.getElementById('class-chip-menu');
+  if(!m) return;
+  if(!m.contains(e.target) && !e.target.closest('.class-chip-menu-btn')){
+    m.style.display = 'none';
+    document.removeEventListener('click', _classChipMenuOutside);
+  }
+}
+function confirmDeleteActiveClass(){
+  if(currentClassKey) deleteClass(currentClassKey);
+}
+function renderStudentsClassBar(){
+  var bar = document.getElementById('students-class-bar');
+  if(!bar) return;
+  bar.innerHTML = buildClassChipBar(currentClassKey, 'switchClassKey', { showMenu: true });
 }
 function getActiveTab(){
   var tabs = ['home','students','class','reply'];
@@ -12138,19 +12236,20 @@ function switchTab(tab){
   if(logoBtn) logoBtn.classList.toggle('active', tab === 'home');
 
   document.getElementById('tab-home').style.display = tab === 'home' ? 'block' : 'none';
-  document.getElementById('tab-students').style.display = tab === 'students' ? 'grid' : 'none';
+  document.getElementById('tab-students').style.display = tab === 'students' ? 'block' : 'none';
   document.getElementById('tab-saenggibu').style.display = tab === 'saenggibu' ? 'block' : 'none';
   document.getElementById('tab-class').style.display = tab === 'class' ? 'block' : 'none';
   document.getElementById('tab-reply').style.display = tab === 'reply' ? 'block' : 'none';
   document.getElementById('tab-attendance').style.display = tab === 'attendance' ? 'block' : 'none';
 
   if(tab === 'home') renderHome();
-  if(tab === 'students') renderSidebar('');
+  if(tab === 'students'){ renderStudentsClassBar(); renderSidebar(''); }
   if(tab === 'saenggibu') renderSaenggibuTab();
   if(tab === 'class'){
     renderClassTab();
     maybeAutoSyncNeis();
   }
+  if(tab === 'attendance') renderAttendanceTab();
   if(tab === 'reply') renderReplyFlow();
   if(tab === 'attendance'){
     attCurrentView = 'daily';
@@ -16829,20 +16928,8 @@ function renderSaenggibuMatrixView(){
   }
   var activeMatrixKey = sgtMatrixClassKey;
 
-  var classSelectorHtml = '';
-  if(classKeys.length > 1){
-    classSelectorHtml =
-      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">' +
-        classKeys.map(function(key){
-          var c = classes[key];
-          var isActive = key === activeMatrixKey;
-          return '<button class="sgt-class-chip'+(isActive?' active':'')+'" onclick="selectSgtMatrixClass(\''+key+'\')">'+
-            c.grade+'학년 '+c.classNum+'반'+
-            (c.isPrimary ? ' <span style="font-size:9px;opacity:0.7;">(담임)</span>' : '')+
-          '</button>';
-        }).join('')+
-      '</div>';
-  }
+  // 반 선택 칩 — 공용 buildClassChipBar 사용
+  var classSelectorHtml = buildClassChipBar(activeMatrixKey, 'selectSgtMatrixClass');
 
   // ── 매트릭스 빌드 + 반 필터 ──
   var matrix = buildClassSaenggibuMatrix();
@@ -17393,28 +17480,8 @@ function renderSaenggibuWriteView(){
     '<div style="padding:16px 20px;text-align:center;color:var(--text-tertiary);font-size:12px;">' +
       '학생을 클릭하면 생기부 작성 창이 열려요. 영역별로 작성·저장하면 한눈에 보기에서 현황을 확인할 수 있어요.' +
     '</div>';
-  // 반 선택 드롭다운 (전체 반 목록)
-  var classKeys = Object.keys(classes).sort(function(a,b){
-    var ga = parseInt(classes[a].grade||0), gb = parseInt(classes[b].grade||0);
-    var ca = parseInt(classes[a].classNum||0), cb = parseInt(classes[b].classNum||0);
-    return ga !== gb ? ga - gb : ca - cb;
-  });
-  var classSelectorHtml =
-    '<div style="margin-bottom:12px;">' +
-      '<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase;">반 선택</div>' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-        classKeys.map(function(key){
-          var c = classes[key];
-          var isActive = key === sgtClassKey;
-          var isPrimary = c.isPrimary;
-          return '<button class="sgt-class-chip' + (isActive ? ' active' : '') + '" onclick="selectSgtClass(\'' + key + '\')" ' +
-            'title="' + (isPrimary ? '담임반' : '교과 담당') + '">' +
-            c.grade + '학년 ' + c.classNum + '반' +
-            (isPrimary ? ' <span style="font-size:9px;opacity:0.7;">(담임)</span>' : '') +
-          '</button>';
-        }).join('') +
-      '</div>' +
-    '</div>';
+  // 반 선택 칩 — 공용 buildClassChipBar 사용
+  var classSelectorHtml = buildClassChipBar(sgtClassKey, 'selectSgtClass');
 
   container.innerHTML = classSelectorHtml + listHtml + hintHtml;
 }
@@ -18860,9 +18927,11 @@ function getTeacherRoleShort(){
 }
 
 function updateHeaderClass(){
+  // 사이드바 반 스위처 제거됨 — 호환성을 위해 element 존재 시에만 동작 (no-op 안전)
   var c = getActiveClass();
   var label = document.getElementById('brand-class');
   var role = document.getElementById('class-switcher-role');
+  if(!label || !role) return;
   if(!c){
     label.textContent = '반 없음';
     role.style.display = 'none';
@@ -22946,12 +23015,27 @@ var smvState = { studentNum: null, year: null, month: null };
 var cmmState = { year: null, month: null };
 
 function renderAttendanceTab(){
+  // 반 선택 칩 바 (항상 먼저 렌더 — 활성반 없어도 + 반 추가 칩으로 시작 가능)
+  var bar = document.getElementById('att-class-bar');
+  if(bar) bar.innerHTML = buildClassChipBar(currentClassKey, 'switchClassKey');
+
   var c = getActiveClass();
   if(!c || !c.students || c.students.length === 0){
-    document.getElementById('tab-attendance').innerHTML =
-      '<div class="att-empty" style="margin-top:40px;">활성 반이 없거나 학생 명단이 비어 있어요.<br>학급을 먼저 등록해주세요.</div>';
+    // 본문 구조는 그대로 두고, 타이틀과 메시지만 표시
+    var titleEl = document.getElementById('att-title');
+    if(titleEl) titleEl.textContent = '출결';
+    var statsEl = document.getElementById('att-stats');
+    if(statsEl) statsEl.innerHTML = '<div class="att-empty" style="grid-column:1 / -1;padding:40px 16px;text-align:center;color:var(--text-tertiary);">활성 반이 없거나 학생 명단이 비어 있어요.<br>위 칩의 "+ 반 추가"로 반을 등록하세요.</div>';
+    var tbl = document.querySelector('#tab-attendance .att-tbl-wrap');
+    if(tbl) tbl.style.display = 'none';
+    var confirmBar = document.getElementById('att-confirm-bar');
+    if(confirmBar) confirmBar.style.display = 'none';
     return;
   }
+  // 활성반 있음 — 본문 구조 복원 (이전 empty 상태에서 들어왔다면)
+  var _tbl = document.querySelector('#tab-attendance .att-tbl-wrap');
+  if(_tbl) _tbl.style.display = '';
+
   if(!attendanceCurrentDate) attendanceCurrentDate = getTodayDate();
   document.getElementById('att-title').textContent =
     formatAttendanceDate(attendanceCurrentDate) + ' 출결';
@@ -24310,12 +24394,11 @@ function saveAttSettingsFromModal(){
 }
 
 function renderClassTab(){
-  // 담임반 여부 확인 후 반시간표 버튼 표시 토글
-  var _activeForCs = getActiveClass();
-  var _isPrimaryForCs = _activeForCs && _activeForCs.isPrimary;
+  // 담임반이 시스템에 하나라도 있으면 반시간표 버튼 항상 표시 (currentClassKey와 무관)
+  var _hasPrimary = !!getPrimaryClass();
   var _scheduleBtn = document.getElementById('class-view-btn-schedule');
-  if(_scheduleBtn) _scheduleBtn.style.display = _isPrimaryForCs ? '' : 'none';
-  if(!_isPrimaryForCs && currentClassView === 'schedule'){
+  if(_scheduleBtn) _scheduleBtn.style.display = _hasPrimary ? '' : 'none';
+  if(!_hasPrimary && currentClassView === 'schedule'){
     currentClassView = 'today';
   }
   if(currentClassView === 'schedule'){
@@ -24330,8 +24413,8 @@ function renderClassTab(){
 }
 
 function switchClassView(view){
-  // 비담임이 'schedule'로 진입 시도하면 'today'로 보정
-  if(view === 'schedule' && !isHomeroomActive()) view = 'today';
+  // 담임반이 미지정일 때만 'today'로 보정 (currentClass가 교과 담당이어도 schedule 진입 허용)
+  if(view === 'schedule' && !getPrimaryClass()) view = 'today';
   if(view === 'today') currentTodayDate = new Date();
   currentClassView = view;
   document.querySelectorAll('.class-view-btn').forEach(function(b){
@@ -24362,9 +24445,10 @@ function getHomeroomGrade(){
 function updateClassScheduleBtnVisibility(){
   var btn = document.getElementById('class-view-btn-schedule');
   if(!btn) return;
-  btn.style.display = isHomeroomActive() ? '' : 'none';
-  // 담임반이 아닌데 현재 schedule 뷰면 today로 자동 전환
-  if(!isHomeroomActive() && currentClassView === 'schedule'){
+  // 담임반이 시스템에 하나라도 존재하면 항상 표시 (currentClassKey와 무관)
+  var hasPrimary = !!getPrimaryClass();
+  btn.style.display = hasPrimary ? '' : 'none';
+  if(!hasPrimary && currentClassView === 'schedule'){
     switchClassView('today');
   }
 }
@@ -24514,12 +24598,13 @@ function renderClassSchedule(){
   var container = document.getElementById('class-view-schedule');
   if(!container) return;
 
-  var activeClass = getActiveClass();
-  if(!activeClass || !activeClass.isPrimary){
+  // 항상 담임반 기준으로 표시 (currentClassKey가 교과 담당반이어도)
+  var activeClass = getPrimaryClass();
+  if(!activeClass){
     container.innerHTML =
       '<div style="padding:40px 16px;text-align:center;color:var(--text-tertiary);">' +
-        '<div style="font-size:14px;margin-bottom:6px;">담임반에서만 사용할 수 있어요</div>' +
-        '<div style="font-size:12px;">반 시간표는 담임 교사의 학급 운영을 돕는 기능이에요.</div>' +
+        '<div style="font-size:14px;margin-bottom:6px;">담임반을 지정하세요</div>' +
+        '<div style="font-size:12px;">반 시간표는 담임반 학생들의 주간 시간표·창체 일정을 보여줘요.<br>설정에서 담임반을 지정하거나, 반 추가 시 담임으로 등록하세요.</div>' +
       '</div>';
     return;
   }
