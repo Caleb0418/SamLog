@@ -7097,6 +7097,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 
       <div class="onboarding-actions">
         <button class="btn-secondary" onclick="loadSampleRoster()" id="ob-sample-btn">샘플로 시작</button>
+        <button class="btn-secondary" onclick="startManualEntry()" id="ob-manual-btn" style="display:none;">직접 입력하기</button>
         <div style="flex:1;"></div>
         <button class="btn-secondary" onclick="onboardingNext(1)">← 이전</button>
         <button class="btn-primary" id="ob-next-2" onclick="onboardingNext(3)">다음 →</button>
@@ -17995,6 +17996,7 @@ function initOnboardingStep2(){
     document.getElementById('ob-roster-desc').innerHTML =
       'NEIS에서 받은 엑셀(.xlsx) 또는 CSV 파일을 올려주세요.<br>또는 샘플 데이터로 먼저 둘러볼 수 있어요.';
     document.getElementById('ob-sample-btn').style.display = 'inline-flex';
+    document.getElementById('ob-manual-btn').style.display = 'inline-flex';
     // 이미 불러온 학생 데이터가 있으면 업로드 완료 상태 복원 + 다음 버튼 활성화
     var existing = onboardingData.parsedStudents;
     if(existing && existing.length > 0){
@@ -18013,6 +18015,7 @@ function initOnboardingStep2(){
     document.getElementById('ob-roster-desc').innerHTML =
       '수업하는 각 반의 학생 명단을 불러옵니다.<br>지금 등록 못 한 반은 사이드바에서 나중에 추가할 수 있어요.';
     document.getElementById('ob-sample-btn').style.display = 'none';
+    document.getElementById('ob-manual-btn').style.display = 'none';
     renderOnboardingImportList();
     document.getElementById('ob-next-2').disabled = false;
   }
@@ -18182,7 +18185,11 @@ function onboardingNext(stepNum){
     initOnboardingStep2();
   }
   if(stepNum === 3){
-    // STEP 2 → 3 (completeOnboarding 호출로 이동)
+    // 이름 없는 빈 행 자동 제거
+    if(onboardingData.role === 'homeroom'){
+      onboardingData.parsedStudents = onboardingData.parsedStudents.filter(function(s){ return s.name && s.name.trim(); });
+    }
+    // STEP 2 → 3
     if(onboardingData.role === 'homeroom'){
       var roleLabel = '담임반';
       var cls = onboardingData.grade+'학년 '+onboardingData.classNum+'반 ('+roleLabel+')';
@@ -18470,7 +18477,8 @@ function renderObPreviewTable(){
 
   preview.innerHTML = html;
   preview.style.display = 'block';
-  document.getElementById('ob-next-2').disabled = students.length === 0;
+  var hasValid = students.some(function(s){ return s.name && s.name.trim(); });
+  document.getElementById('ob-next-2').disabled = !hasValid;
 }
 
 function obEditStudent(idx, field, value){
@@ -18513,6 +18521,22 @@ function obAddStudent(){
   }, 30);
 }
 
+// 파일 없이 직접 입력 시작
+function startManualEntry(){
+  onboardingData.parsedStudents = [];
+  var zone = document.getElementById('upload-zone');
+  if(zone){
+    zone.classList.add('done');
+    zone.style.pointerEvents = 'none'; // 업로드 비활성화
+  }
+  var uploadMain = document.getElementById('upload-main');
+  var uploadSub  = document.getElementById('upload-sub');
+  if(uploadMain) uploadMain.textContent = '직접 입력 모드';
+  if(uploadSub)  uploadSub.textContent  = '아래 표에서 학생을 추가하세요';
+  // 빈 첫 번째 행으로 편집 테이블 시작
+  obAddStudent();
+}
+
 function processRoster(rows){
   if(!rows || rows.length === 0){
     showToast('데이터를 찾지 못했어요');
@@ -18520,15 +18544,17 @@ function processRoster(rows){
     return;
   }
 
-  var nameKey = findCol(rows[0], ['이름','name','성명','학생명']);
-  var numKey = findCol(rows[0], ['번호','no','학번','순번']);
-  var genderKey = findCol(rows[0], ['성별','gender','sex']);
-  var parentNameKey = findCol(rows[0], ['학부모','보호자','부모','부모님','학부모명','보호자명','부','모']);
-  var parentPhoneKey = findCol(rows[0], ['학부모연락처','보호자연락처','학부모전화','보호자전화','연락처','전화','전화번호','phone','휴대폰']);
-  var parentRelKey = findCol(rows[0], ['관계','보호자관계','부모관계','속성']);
+  var nameKey   = findCol(rows[0], ['이름','name','성명','학생명','학생이름','성명(이름)','이름(name)','student','학생 이름','성명/이름']);
+  var numKey    = findCol(rows[0], ['번호','no','학번','순번','출석번호','출석번','연번','번','number','num','학생번호','출석','일련번호','순서','no.']);
+  var genderKey = findCol(rows[0], ['성별','gender','sex','m/f','성','구분','male/female']);
+  var parentNameKey  = findCol(rows[0], ['학부모','보호자','부모','부모님','학부모명','보호자명','부','모','학부모이름','보호자이름']);
+  var parentPhoneKey = findCol(rows[0], ['학부모연락처','보호자연락처','학부모전화','보호자전화','연락처','전화','전화번호','phone','휴대폰','핸드폰','mobile','tel']);
+  var parentRelKey   = findCol(rows[0], ['관계','보호자관계','부모관계','속성','관계(부/모)']);
 
   if(!nameKey){
-    showToast('이름 컬럼을 찾지 못했어요. 컬럼명을 "이름"으로 해주세요.');
+    // 헤더가 없는 파일일 수 있음 — 컬럼 목록 표시
+    var headerKeys = Object.keys(rows[0]).join(', ');
+    showToast('이름 컬럼을 찾지 못했어요. 인식된 컬럼: ' + (headerKeys || '없음'));
     resetUploadZone();
     return;
   }
