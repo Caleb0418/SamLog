@@ -1957,6 +1957,86 @@ body{
   font-family:monospace;font-size:10px;
 }
 
+/* 빠른 추가 */
+.tm-quickadd{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;margin-bottom:10px;
+  transition:border-color .12s;
+}
+.tm-quickadd:focus-within{border-color:var(--accent);}
+.tm-quickadd-icon{color:var(--text-tertiary);font-size:14px;user-select:none;}
+.tm-quickadd-input{
+  flex:1;border:none;background:transparent;outline:none;
+  font-family:inherit;font-size:13px;color:var(--text);padding:2px 0;
+}
+.tm-quickadd-input::placeholder{color:var(--text-tertiary);}
+
+/* 진행률 */
+.tm-progress{margin-bottom:10px;}
+.tm-progress-text{
+  font-size:11px;color:var(--text-secondary);margin-bottom:4px;
+  display:flex;align-items:center;gap:4px;
+}
+.tm-progress-text strong{color:var(--accent);font-weight:600;}
+.tm-progress-done{font-size:12px;}
+.tm-progress-bar{
+  height:4px;background:var(--bg-elevated);border-radius:2px;overflow:hidden;
+}
+.tm-progress-fill{
+  height:100%;background:var(--accent);border-radius:2px;
+  transition:width .25s ease;
+}
+
+/* 캐리오버 칩 */
+.tm-carry-chip{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--accent-dim);border:1px solid var(--border-accent);
+  border-radius:8px;padding:8px 12px;margin-bottom:10px;
+  font-size:12px;color:var(--accent);
+}
+.tm-carry-btn{
+  font-family:inherit;font-size:11px;padding:3px 9px;
+  border-radius:5px;border:1px solid var(--border-accent);
+  background:transparent;color:var(--accent);cursor:pointer;
+}
+.tm-carry-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.tm-carry-btn:hover{opacity:0.85;}
+
+/* 줄 wrapper: 드래그 핸들 + 본문 + 삭제 */
+.tm-row{
+  display:flex;align-items:flex-start;gap:4px;
+  padding:1px 0;border-radius:4px;
+  transition:background .12s;
+}
+.tm-row:hover{background:var(--bg-elevated);}
+.tm-row.done{opacity:0.85;}
+.tm-row > .tm-item, .tm-row > .tm-plain{flex:1;min-width:0;}
+.tm-drag-handle{
+  color:var(--text-tertiary);font-size:10px;line-height:1.8;
+  cursor:grab;user-select:none;
+  opacity:0;transition:opacity .12s;
+  padding:0 2px;flex-shrink:0;
+}
+.tm-row:hover .tm-drag-handle{opacity:0.6;}
+.tm-drag-handle:active{cursor:grabbing;}
+.tm-row-del{
+  background:none;border:none;color:var(--text-tertiary);
+  font-size:16px;line-height:1;cursor:pointer;
+  padding:0 4px;flex-shrink:0;
+  opacity:0;transition:opacity .12s,color .12s;
+}
+.tm-row:hover .tm-row-del{opacity:1;}
+.tm-row-del:hover{color:var(--danger,#e53935);}
+
+/* 완료 접기 토글 */
+.tm-done-toggle{
+  display:block;margin:8px 0 0;padding:4px 8px;
+  font-family:inherit;font-size:11px;color:var(--text-secondary);
+  background:none;border:none;cursor:pointer;
+}
+.tm-done-toggle:hover{color:var(--accent);}
+
 /* 홈 제출 추적 위젯 */
 .home-widget-card{
   background:var(--bg-overlay);
@@ -20204,6 +20284,108 @@ function _tmParseLine(line){
   return { type:'plain', text: line };
 }
 
+// ─ 진행률/캐리오버/빠른추가/줄 조작 헬퍼 ─
+function _tmProgressStats(){
+  var lines = _tmGetToday().split('\n');
+  var total = 0, done = 0;
+  lines.forEach(function(l){
+    var p = _tmParseLine(l);
+    if(p.type === 'checkbox'){ total++; if(p.checked) done++; }
+  });
+  return { total: total, done: done };
+}
+function _tmYesterdayKey(){
+  var d = new Date(); d.setDate(d.getDate() - 1);
+  return typeof formatDateForInput === 'function'
+    ? formatDateForInput(d)
+    : d.toISOString().slice(0,10);
+}
+function _tmGetYesterdayPending(){
+  var raw = teacherMemos[_tmYesterdayKey()] || '';
+  if(!raw) return [];
+  return raw.split('\n').filter(function(l){ return /^\s*\[\]\s+\S/.test(l); });
+}
+function _tmCarrySeenKey(){ return 'ht2_tm_carry_seen_' + _tmToday(); }
+function _tmIsCarryDismissed(){
+  try{ return localStorage.getItem(_tmCarrySeenKey()) === '1'; }catch(e){ return false; }
+}
+function tmDismissCarry(){
+  try{ localStorage.setItem(_tmCarrySeenKey(), '1'); }catch(e){}
+  renderTeacherMemoCard();
+}
+
+// 빠른 추가 (체크박스 자동)
+function tmQuickAdd(inputEl){
+  if(!inputEl) return;
+  var v = (inputEl.value || '').trim();
+  if(!v) return;
+  var cur = _tmGetToday();
+  var newLine = '[] ' + v;
+  var next = cur ? (cur.replace(/\n+$/, '') + '\n' + newLine) : newLine;
+  _tmSetToday(next);
+  inputEl.value = '';
+  renderTeacherMemoCard();
+  setTimeout(function(){
+    var el = document.getElementById('tm-quickadd-input');
+    if(el) el.focus();
+  }, 0);
+}
+function tmQuickAddKey(e){
+  if(e.key !== 'Enter') return;
+  if(e.isComposing || e.keyCode === 229) return;
+  e.preventDefault();
+  tmQuickAdd(e.target);
+}
+
+// 어제 미완료 캐리오버
+function tmCarryOverYesterday(){
+  var pending = _tmGetYesterdayPending();
+  if(pending.length === 0) return;
+  var cur = _tmGetToday();
+  var prepend = pending.join('\n');
+  var next = cur ? (prepend + '\n' + cur) : prepend;
+  _tmSetToday(next);
+  try{ localStorage.setItem(_tmCarrySeenKey(), '1'); }catch(e){}
+  renderTeacherMemoCard();
+}
+
+// 줄별 삭제
+function tmDeleteLine(lineIdx){
+  var lines = _tmGetToday().split('\n');
+  if(lineIdx < 0 || lineIdx >= lines.length) return;
+  lines.splice(lineIdx, 1);
+  _tmSetToday(lines.join('\n'));
+  renderTeacherMemoCard();
+}
+
+// 드래그 정렬
+var _tmDragFrom = null;
+function tmDragStart(e, lineIdx){
+  _tmDragFrom = lineIdx;
+  e.dataTransfer.effectAllowed = 'move';
+  try{ e.dataTransfer.setData('text/plain', String(lineIdx)); }catch(_){}
+}
+function tmDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function tmDrop(e, toIdx){
+  e.preventDefault();
+  var from = _tmDragFrom;
+  _tmDragFrom = null;
+  if(from == null || from === toIdx) return;
+  var lines = _tmGetToday().split('\n');
+  if(from < 0 || from >= lines.length || toIdx < 0 || toIdx >= lines.length) return;
+  var moved = lines.splice(from, 1)[0];
+  lines.splice(toIdx, 0, moved);
+  _tmSetToday(lines.join('\n'));
+  renderTeacherMemoCard();
+}
+
+// 완료 항목 접기
+var _tmCollapseDone = true;
+function tmToggleDoneCollapse(){
+  _tmCollapseDone = !_tmCollapseDone;
+  renderTeacherMemoCard();
+}
+
 // 툴바 버튼 — 현재 줄 앞에 서식 삽입
 function tmInsert(str){
   var ta = document.getElementById('tm-textarea');
@@ -20323,31 +20505,101 @@ function renderTeacherMemoCard(){
       '</div>';
   } else {
     if(!text.trim()){
-      bodyHtml = '<div class="tm-empty" onclick="tmStartEdit()">+ 오늘 할 일이나 메모를 추가하세요</div>';
+      bodyHtml = '<div class="tm-empty" onclick="tmStartEdit()">+ 자세히 입력하려면 클릭 (편집 모드)</div>';
     } else {
       var lines = text.split('\n');
-      bodyHtml = lines.map(function(line, i){
-        if(!line.trim()) return '<div style="height:4px;"></div>';
+      var doneCount = 0, doneLines = [], visibleHtml = [];
+      lines.forEach(function(line, i){
+        if(!line.trim()){ visibleHtml.push('<div style="height:4px;"></div>'); return; }
         var p = _tmParseLine(line);
+        var isDone = (p.type === 'checkbox' && p.checked);
+        if(isDone) doneCount++;
+
+        var rowOpen =
+          '<div class="tm-row' + (isDone ? ' done' : '') + '"' +
+            ' draggable="true"' +
+            ' ondragstart="tmDragStart(event,' + i + ')"' +
+            ' ondragover="tmDragOver(event)"' +
+            ' ondrop="tmDrop(event,' + i + ')">' +
+          '<span class="tm-drag-handle" title="드래그로 순서 변경">⋮⋮</span>';
+        var rowClose =
+          '<button class="tm-row-del" onclick="event.stopPropagation();tmDeleteLine(' + i + ')" aria-label="삭제">×</button>' +
+          '</div>';
+
+        var inner;
         if(p.type === 'bullet'){
-          return '<div class="tm-item">' +
+          inner = '<div class="tm-item">' +
             '<span class="tm-bullet">•</span>' +
             '<span class="tm-text">' + escapeHtml(p.text) + '</span>' +
           '</div>';
-        }
-        if(p.type === 'checkbox'){
-          var doneCls = p.checked ? ' done' : '';
-          return '<div class="tm-item' + doneCls + '" style="cursor:pointer;" onclick="tmToggleCheck(' + i + ')">' +
+        } else if(p.type === 'checkbox'){
+          inner = '<div class="tm-item" style="cursor:pointer;" onclick="tmToggleCheck(' + i + ')">' +
             '<div class="tm-check' + (p.checked ? ' done' : '') + '"></div>' +
             '<span class="tm-text">' + escapeHtml(p.text) + '</span>' +
           '</div>';
+        } else {
+          inner = '<div class="tm-plain">' + escapeHtml(p.text) + '</div>';
         }
-        return '<div class="tm-plain">' + escapeHtml(p.text) + '</div>';
-      }).join('');
+
+        var rowHtml = rowOpen + inner + rowClose;
+        if(isDone && _tmCollapseDone) doneLines.push(rowHtml);
+        else visibleHtml.push(rowHtml);
+      });
+
+      bodyHtml = visibleHtml.join('');
+      if(doneCount > 0){
+        bodyHtml +=
+          '<button class="tm-done-toggle" onclick="tmToggleDoneCollapse()">' +
+            (_tmCollapseDone
+              ? '완료 ' + doneCount + '건 보기 ▼'
+              : '완료 ' + doneCount + '건 숨기기 ▲') +
+          '</button>';
+        if(!_tmCollapseDone) bodyHtml += doneLines.join('');
+      }
     }
   }
 
-  card.innerHTML = headHtml + '<div class="tm-body">' + bodyHtml + '</div>';
+  // 진행률 (D) — 체크박스 항목이 1건 이상일 때만
+  var stats = _tmProgressStats();
+  var progressHtml = '';
+  if(stats.total > 0 && !_tmEditMode){
+    var pct = Math.round(stats.done * 100 / stats.total);
+    progressHtml =
+      '<div class="tm-progress">' +
+        '<div class="tm-progress-text">' +
+          '오늘 <strong>' + stats.done + '</strong> / ' + stats.total + ' 완료' +
+          (stats.done === stats.total ? ' <span class="tm-progress-done">🎉</span>' : '') +
+        '</div>' +
+        '<div class="tm-progress-bar"><div class="tm-progress-fill" style="width:' + pct + '%;"></div></div>' +
+      '</div>';
+  }
+
+  // 캐리오버 칩 (B)
+  var carryHtml = '';
+  if(!_tmEditMode && !_tmIsCarryDismissed()){
+    var pending = _tmGetYesterdayPending();
+    if(pending.length > 0){
+      carryHtml =
+        '<div class="tm-carry-chip">' +
+          '<span class="tm-carry-text">어제 미완료 ' + pending.length + '건이 있어요</span>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<button class="tm-carry-btn primary" onclick="tmCarryOverYesterday()">가져오기</button>' +
+            '<button class="tm-carry-btn" onclick="tmDismissCarry()" aria-label="닫기">×</button>' +
+          '</div>' +
+        '</div>';
+    }
+  }
+
+  // 빠른 추가 입력 (A) — 뷰 모드에서만
+  var quickAddHtml = _tmEditMode ? '' :
+    '<div class="tm-quickadd">' +
+      '<span class="tm-quickadd-icon">+</span>' +
+      '<input id="tm-quickadd-input" class="tm-quickadd-input" type="text"' +
+        ' placeholder="할 일 추가 (Enter)"' +
+        ' onkeydown="tmQuickAddKey(event)">' +
+    '</div>';
+
+  card.innerHTML = headHtml + progressHtml + carryHtml + quickAddHtml + '<div class="tm-body">' + bodyHtml + '</div>';
 }
 
 function renderHome(){
