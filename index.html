@@ -8610,7 +8610,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
           <span style="font-size:12px;color:var(--text-secondary);">NEIS 명단 파일 (CSV·XLSX)</span>
           <span id="ac-uploaded" style="font-size:11px;font-weight:600;color:var(--success);"></span>
         </div>
-        <input type="file" id="ac-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAddClassFile(this.files[0])">
+        <input type="file" id="ac-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length){handleAddClassFile(this.files[0]);this.value='';}">
         <input type="hidden" id="ac-uploaded-data" value="">
         <div class="ac-help-text">명단 없이 추가 후 나중에 업로드할 수도 있어요 · 업로드 시 검증 단계가 표시돼요</div>
         <!-- 명단 교체 모드 전용 보조 버튼 (직접 입력 + 양식 다운로드) -->
@@ -19237,9 +19237,14 @@ function handleAddClassFile(file){
 
       renderRosterReview(parsed);
     }catch(e){
-      console.warn(e);
-      showToast('파일 읽기 실패');
+      console.error('[handleAddClassFile] parse error:', e);
+      var msg = (e && e.message) ? e.message.slice(0, 80) : '파일 형식 오류';
+      showToast('파일 읽기 실패 — ' + msg);
     }
+  };
+  reader.onerror = function(ev){
+    console.error('[handleAddClassFile] FileReader error:', ev);
+    showToast('파일을 읽지 못했어요 (FileReader 오류)');
   };
   if(ext === 'csv') reader.readAsText(file, 'utf-8');
   else reader.readAsArrayBuffer(file);
