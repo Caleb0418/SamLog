@@ -7244,6 +7244,9 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
       </div>
     </div>
 
+    <!-- 시작 가이드 카드 (최상단 — 퀵메모 위) -->
+    <div id="home-setup-guide"></div>
+
     <!-- 퀵 메모 — 항상 고정 위치 -->
     <div class="quick-memo-card">
       <div class="quick-memo-head">
@@ -7279,9 +7282,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
     <!-- 오늘 업무 메모 -->
     <div class="tm-card" id="teacher-memo-card"></div>
 
-    <!-- 시작 가이드 카드 -->
-    <div id="home-setup-guide"></div>
-
     <!-- 홈 2컬럼 — 오늘 수업(좌) + 알람(우) -->
     <div class="home-split" id="home-split">
       <div class="home-split-col" id="home-split-left">
@@ -7309,9 +7309,6 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <div class="home-alert-rows" id="home-alerts"></div>
       </div>
     </div>
-
-    <!-- 반 주간 시간표 카드 (담임반 고정) -->
-    <div id="home-timetable-card" class="home-card" style="display:none;margin-bottom:14px;padding:14px 16px;background:var(--bg-surface);border:0.5px solid var(--border);border-radius:12px;"></div>
 
     <!-- 반 시간표(창체) 카드 — 담임반일 때만 표시 -->
     <div id="home-cs-today" class="home-card" style="display:none;margin-bottom:14px;padding:14px 16px;background:var(--bg-surface);border:0.5px solid var(--border);border-radius:12px;"></div>
@@ -8521,6 +8518,14 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
         <input type="file" id="ac-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAddClassFile(this.files[0])">
         <input type="hidden" id="ac-uploaded-data" value="">
         <div class="ac-help-text">명단 없이 추가 후 나중에 업로드할 수도 있어요 · 업로드 시 검증 단계가 표시돼요</div>
+        <!-- 명단 교체 모드 전용 보조 버튼 (직접 입력 + 양식 다운로드) -->
+        <div id="ac-roster-aux" style="display:none;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="btn-link" onclick="acStartManualEntry()" style="font-size:12px;padding:4px 8px;">직접 입력하기</button>
+          <button type="button" onclick="downloadStudentTemplate()" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-dim);border:0.5px solid var(--border-accent);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            양식 다운로드
+          </button>
+        </div>
       </div>
 
       <!-- 명단 검증 영역 (업로드 직후 표시) -->
@@ -18146,10 +18151,16 @@ function openRosterReplace(){
   document.getElementById('ac-save-btn').textContent = '명단 교체';
   document.getElementById('ac-save-btn').disabled = true;
   document.getElementById('ac-save-btn').onclick = saveRosterReplace;
-  // 검증 영역 초기화
+  // 검증 영역: 빈 편집 테이블 즉시 표시 (온보딩과 동일한 UX)
   _rosterReview = [];
   var rv = document.getElementById('ac-roster-review');
-  if(rv){ rv.style.display = 'none'; rv.innerHTML = ''; }
+  if(rv){
+    rv.style.display = 'block';  // renderRosterReview가 빈 상태도 노출하도록 미리 설정
+    renderRosterReview([]);
+  }
+  // 보조 버튼 (직접 입력 + 양식 다운로드) 표시
+  var aux = document.getElementById('ac-roster-aux');
+  if(aux) aux.style.display = 'flex';
   // dedupe 슬롯 초기화
   var ds = document.getElementById('ac-dedupe-slot');
   if(ds){ ds.style.display = 'none'; ds.innerHTML = ''; }
@@ -19009,6 +19020,9 @@ function closeAddClass(){
   _acSubjectStepClassKey = null;
   _acSubjectStepGrade    = null;
   _acSubjectStepCls      = null;
+  // 명단 교체 보조 버튼 숨기기 (신규 추가 모드 진입 시를 위해)
+  var aux = document.getElementById('ac-roster-aux');
+  if(aux) aux.style.display = 'none';
 }
 function openFileFormatGuide(){
   document.getElementById('file-format-guide-modal').classList.add('show');
@@ -19134,7 +19148,9 @@ function renderRosterReview(parsed){
   _rosterReview = parsed.slice();
   var slot = document.getElementById('ac-roster-review');
   if(!slot) return;
-  if(_rosterReview.length === 0){
+  // 빈 상태 처리: slot이 명시적으로 display:block이면(명단 교체 모드) 빈 테이블도 노출,
+  // display:none이면(신규 추가 모드 초기 상태) 그대로 숨김.
+  if(_rosterReview.length === 0 && slot.style.display !== 'block'){
     slot.style.display = 'none';
     slot.innerHTML = '';
     return;
@@ -19148,18 +19164,27 @@ function renderRosterReview(parsed){
 
 function buildRosterReviewHTML(){
   var rows = _rosterReview.map(function(s, i){
+    var g = s.gender || '';
     return '<tr data-idx="'+i+'">'+
       '<td><input type="text" class="ac-roster-cell num-cell" data-idx="'+i+'" data-field="num" value="'+escapeAttr(s.num)+'"></td>'+
-      '<td><input type="text" class="ac-roster-cell" data-idx="'+i+'" data-field="name" value="'+escapeAttr(s.name)+'"></td>'+
-      '<td><input type="text" class="ac-roster-cell" data-idx="'+i+'" data-field="gender" value="'+escapeAttr(s.gender||'')+'" placeholder="—"></td>'+
+      '<td><input type="text" class="ac-roster-cell" data-idx="'+i+'" data-field="name" value="'+escapeAttr(s.name)+'" placeholder="이름"></td>'+
+      '<td><select class="ac-roster-cell ac-roster-gender" data-idx="'+i+'" data-field="gender">'+
+        '<option value=""'  + (g===''  ?' selected':'') + '>-</option>'+
+        '<option value="남"' + (g==='남' ?' selected':'') + '>남</option>'+
+        '<option value="여"' + (g==='여' ?' selected':'') + '>여</option>'+
+      '</select></td>'+
       '<td style="text-align:center;width:32px;"><button class="ac-roster-delete" data-idx="'+i+'" title="이 행 삭제"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>'+
     '</tr>';
   }).join('');
+  var emptyRow = _rosterReview.length === 0
+    ? '<tr><td colspan="4" style="text-align:center;padding:20px 12px;color:var(--text-tertiary);font-size:12.5px;">학생이 없어요 — 아래 "+ 행 추가" 버튼으로 직접 입력하세요</td></tr>'
+    : '';
+  var titleText = _rosterReview.length === 0 ? '명단 직접 입력' : '명단 확인 · '+_rosterReview.length+'명';
   return '<div class="ac-roster-review">'+
     '<div class="ac-roster-review-head">'+
       '<div class="ac-roster-review-title">'+
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
-        '<span>명단 확인 · '+_rosterReview.length+'명</span>'+
+        '<span>'+titleText+'</span>'+
       '</div>'+
       '<span class="ac-roster-review-count">셀을 클릭해서 수정할 수 있어요</span>'+
     '</div>'+
@@ -19171,7 +19196,7 @@ function buildRosterReviewHTML(){
           '<th style="width:80px;">성별</th>'+
           '<th></th>'+
         '</tr></thead>'+
-        '<tbody>'+rows+'</tbody>'+
+        '<tbody>'+(rows || emptyRow)+'</tbody>'+
       '</table>'+
     '</div>'+
     '<button class="ac-roster-add-btn" onclick="addRosterRow()">+ 행 추가</button>'+
@@ -19182,14 +19207,16 @@ function attachRosterReviewHandlers(){
   var slot = document.getElementById('ac-roster-review');
   if(!slot) return;
   slot.querySelectorAll('.ac-roster-cell').forEach(function(inp){
-    inp.oninput = function(){
+    var handler = function(){
       var idx = parseInt(inp.dataset.idx);
       var field = inp.dataset.field;
       if(_rosterReview[idx]){
-        _rosterReview[idx][field] = inp.value.trim();
+        _rosterReview[idx][field] = (inp.value || '').trim();
       }
       updateAddClassSaveBtn();
     };
+    inp.oninput = handler;
+    inp.onchange = handler;  // select 드롭다운용
   });
   slot.querySelectorAll('.ac-roster-delete').forEach(function(btn){
     btn.onclick = function(){
@@ -19200,8 +19227,24 @@ function attachRosterReviewHandlers(){
   });
 }
 
+function acStartManualEntry(){
+  // 명단 교체 모달에서 직접 입력 시작 (빈 행 1개 추가 + 포커스)
+  if(_rosterReview.length === 0){
+    addRosterRow();
+  } else {
+    showToast('이미 명단이 있어요');
+  }
+}
+
 function addRosterRow(){
-  var nextNum = String(_rosterReview.length+1).padStart(2,'0');
+  // 다음 번호 계산: 마지막 행의 번호 +1 (없으면 1)
+  var nextNum;
+  if(_rosterReview.length > 0){
+    var lastNum = parseInt(_rosterReview[_rosterReview.length-1].num) || _rosterReview.length;
+    nextNum = String(lastNum + 1).padStart(2,'0');
+  } else {
+    nextNum = '01';
+  }
   _rosterReview.push({num:nextNum, name:'', gender:''});
   renderRosterReview(_rosterReview);
   // 새로 추가된 행의 이름 input에 포커스
@@ -20340,9 +20383,6 @@ function renderHome(){
 
   // 알림·공지
   renderHomeAlerts();
-
-  // 반 주간 시간표 카드 (담임반 고정)
-  renderHomeTimetableCard();
 
   // 반 시간표(창체) 카드
   renderHomeClassSchedule();
