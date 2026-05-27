@@ -5150,38 +5150,30 @@ details > summary::-webkit-details-marker { display:none; }
   color:var(--success);
 }
 
-/* 담당 수업 입력 방식 카드 (NEIS 시간표 업로드 / 직접 입력) */
-.cm-method-cards{
-  display:flex;flex-direction:column;gap:0;margin-bottom:12px;
+/* 담당 수업 입력 방식 — 칩 토글 [NEIS 시간표 업로드] 또는 [직접 입력] */
+.cm-chip-row{
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;
 }
-.cm-method-card{
-  background:var(--bg-surface);border:1px solid var(--border);
-  border-radius:var(--radius-lg);padding:14px 16px;
+.cm-chip{
+  font-family:inherit;font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:999px;cursor:pointer;
+  background:var(--bg-elevated);border:1px solid var(--border);
+  color:var(--text-secondary);
+  transition:background .12s, border-color .12s, color .12s;
 }
-.cm-method-card-head{
-  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+.cm-chip:hover{
+  background:var(--bg-surface);color:var(--text);
 }
-.cm-method-card-badge{
-  font-size:10px;font-weight:700;color:var(--accent);
-  background:var(--accent-dim);border:1px solid var(--border-accent);
-  border-radius:4px;padding:2px 6px;flex-shrink:0;
+.cm-chip.active{
+  background:var(--accent-dim);border-color:var(--border-accent);
+  color:var(--accent);
 }
-.cm-method-card-title{
-  font-size:14px;font-weight:700;color:var(--text);flex:1;min-width:0;
+.cm-chip-divider{
+  font-size:11px;font-weight:500;color:var(--text-tertiary);
+  letter-spacing:0.5px;padding:0 2px;
 }
-.cm-method-card-sub{
-  font-size:11px;color:var(--text-tertiary);margin-top:-6px;margin-bottom:10px;
-}
-.cm-method-divider{
-  display:flex;align-items:center;gap:10px;
-  margin:10px 0;color:var(--text-tertiary);
-}
-.cm-method-divider-line{
-  flex:1;height:1px;background:var(--border);
-}
-.cm-method-divider-text{
-  font-size:11px;font-weight:600;color:var(--text-tertiary);
-  padding:0 4px;letter-spacing:0.5px;
+.cm-input-panel{
+  /* 활성 칩에 따라 display: '' / 'none' 토글됨 */
 }
 
 /* NEIS 시간표 업로드 결과 미리보기 */
@@ -7815,82 +7807,68 @@ window.addEventListener('load', function(){
             </div>
           </div>
 
-          <div class="class-master-section">
-            <!-- ③ 담당 수업 입력 방식: 카드 두 개 (NEIS 위, 직접 입력 아래) — 둘 중 하나만 -->
-            <div class="cm-method-cards">
-
-              <!-- 카드 ①: NEIS 시간표 업로드 (먼저 노출) -->
-              <div class="cm-method-card" id="cm-card-neis">
-                <div class="cm-method-card-head">
-                  <span class="cm-method-card-badge">추천</span>
-                  <div class="cm-method-card-title">NEIS 시간표 업로드</div>
-                </div>
-                <div class="cm-method-card-sub">NEIS → 교과담임 → 시간표관리 → 교사별시간표조회 → 엑셀 다운로드</div>
-
-                <div class="tt-upload-banner" id="tt-upload-banner">
-                  <div class="tt-upload-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  </div>
-                  <div class="tt-upload-text">
-                    <div class="tt-upload-title">교사별 시간표 엑셀 파일 업로드</div>
-                    <div class="tt-upload-sub">xlsx, xls, csv 형식 지원</div>
-                  </div>
-                  <div class="tt-upload-actions">
-                    <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
-                    <button class="btn-small secondary" onclick="document.getElementById('tt-file-input').click()">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                      업로드
-                    </button>
-                    <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTeacherTimetableFile(this.files[0]);this.value='';">
-                  </div>
-                </div>
-
-                <!-- 업로드 결과 미리보기 -->
-                <div id="tt-upload-preview" class="tt-upload-preview" style="display:none;"></div>
-              </div>
-
-              <!-- 중앙 분리선 + "또는" -->
-              <div class="cm-method-divider">
-                <div class="cm-method-divider-line"></div>
-                <span class="cm-method-divider-text">또는</span>
-                <div class="cm-method-divider-line"></div>
-              </div>
-
-              <!-- 카드 ②: 직접 입력 -->
-              <div class="cm-method-card" id="cm-card-direct">
-                <div class="cm-method-card-head">
-                  <div class="cm-method-card-title">직접 입력</div>
-                </div>
-                <div class="cm-method-card-sub">학년·반·과목을 한 줄씩 직접 추가</div>
-
-                <div class="class-form">
-                  <div class="class-form-row">
-                    <div class="class-form-field" style="width:74px;">
-                      <label class="form-label" style="display:block;">학년</label>
-                      <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2" oninput="onClassGradeClassInput()">
-                    </div>
-                    <div class="class-form-field" style="width:74px;">
-                      <label class="form-label" style="display:block;">반</label>
-                      <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3" oninput="onClassGradeClassInput()">
-                    </div>
-                    <div class="class-form-field" style="flex:1;min-width:120px;">
-                      <label class="form-label" style="display:block;">과목</label>
-                      <input type="text" class="form-input-text" id="class-form-subject" placeholder="예) 수학"
-                        oninput="onClassSubjectInput()" autocomplete="off">
-                    </div>
-                    <button class="btn-small primary" onclick="addClassMaster()" style="height:34px;align-self:flex-end;">추가</button>
-                  </div>
-                  <div id="class-form-class-warn" class="class-form-warn" style="display:none;"></div>
-                  <div id="tt-suggest-chips" class="tt-suggest-chips" style="display:none;"></div>
-                  <div id="class-form-hint" style="margin-top:8px;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    시간표 업로드 시 과목이 일치하는 모든 요일·교시가 자동으로 채워져요.
-                  </div>
-                </div>
-                <div id="class-master-list"></div>
-              </div>
-
+          <div>
+            <!-- ③ 담당 수업 입력 방식 — 칩 토글 [NEIS 시간표 업로드] 또는 [직접 입력] -->
+            <div class="cm-chip-row">
+              <button class="cm-chip active" data-cm-chip="neis" onclick="switchClassMasterChip('neis')" type="button">NEIS 시간표 업로드</button>
+              <span class="cm-chip-divider">또는</span>
+              <button class="cm-chip" data-cm-chip="direct" onclick="switchClassMasterChip('direct')" type="button">직접 입력</button>
             </div>
+
+            <!-- 패널 ①: NEIS 시간표 업로드 -->
+            <div id="cm-input-neis" class="cm-input-panel">
+              <div class="tt-upload-banner" id="tt-upload-banner">
+                <div class="tt-upload-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="tt-upload-text">
+                  <div class="tt-upload-title">교사별 시간표 엑셀 파일 업로드</div>
+                  <div class="tt-upload-sub">NEIS → 교과담임 → 시간표관리 → 교사별시간표조회 · xlsx/xls/csv</div>
+                </div>
+                <div class="tt-upload-actions">
+                  <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
+                  <button class="btn-small secondary" onclick="document.getElementById('tt-file-input').click()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    업로드
+                  </button>
+                  <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTeacherTimetableFile(this.files[0]);this.value='';">
+                </div>
+              </div>
+
+              <!-- 업로드 결과 미리보기 -->
+              <div id="tt-upload-preview" class="tt-upload-preview" style="display:none;"></div>
+            </div>
+
+            <!-- 패널 ②: 직접 입력 -->
+            <div id="cm-input-direct" class="cm-input-panel" style="display:none;">
+              <div class="class-form">
+                <div class="class-form-row">
+                  <div class="class-form-field" style="width:74px;">
+                    <label class="form-label" style="display:block;">학년</label>
+                    <input type="number" class="form-input-text" id="class-form-grade" min="1" max="6" placeholder="예) 2" oninput="onClassGradeClassInput()">
+                  </div>
+                  <div class="class-form-field" style="width:74px;">
+                    <label class="form-label" style="display:block;">반</label>
+                    <input type="number" class="form-input-text" id="class-form-class" min="1" max="20" placeholder="예) 3" oninput="onClassGradeClassInput()">
+                  </div>
+                  <div class="class-form-field" style="flex:1;min-width:120px;">
+                    <label class="form-label" style="display:block;">과목</label>
+                    <input type="text" class="form-input-text" id="class-form-subject" placeholder="예) 수학"
+                      oninput="onClassSubjectInput()" autocomplete="off">
+                  </div>
+                  <button class="btn-small primary" onclick="addClassMaster()" style="height:34px;align-self:flex-end;">추가</button>
+                </div>
+                <div id="class-form-class-warn" class="class-form-warn" style="display:none;"></div>
+                <div id="tt-suggest-chips" class="tt-suggest-chips" style="display:none;"></div>
+                <div id="class-form-hint" style="margin-top:8px;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  시간표 업로드 시 과목이 일치하는 모든 요일·교시가 자동으로 채워져요.
+                </div>
+              </div>
+            </div>
+
+            <!-- 등록된 수업 리스트 (칩과 무관하게 항상 표시) -->
+            <div id="class-master-list" style="margin-top:14px;"></div>
           </div>
         </div>
 
@@ -28048,7 +28026,17 @@ function deleteClassMaster(id){
   showToast('수업이 삭제됐어요.');
 }
 
-/* (switchClassMasterTab 제거됨 — 카드 두 개 동시 표시 구조로 전환) */
+/* 담당 수업 입력 방식 칩 전환 (NEIS 시간표 업로드 ↔ 직접 입력)
+   — 패널만 토글하며, 아래 등록된 수업 리스트는 항상 표시됨 */
+function switchClassMasterChip(chip){
+  document.querySelectorAll('[data-cm-chip]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.cmChip === chip);
+  });
+  var neis   = document.getElementById('cm-input-neis');
+  var direct = document.getElementById('cm-input-direct');
+  if(neis)   neis.style.display   = (chip === 'neis')   ? '' : 'none';
+  if(direct) direct.style.display = (chip === 'direct') ? '' : 'none';
+}
 
 /* ─── 학년·반 입력 시 실시간 검증 ─── */
 function onClassGradeClassInput(){
