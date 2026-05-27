@@ -16205,6 +16205,16 @@ function closeSaengibu(){
   _sgOriginalStudent  = null;
 }
 
+// 생기부 빈 상태에서 "학생 탭에서 메모 남기기" 버튼 → 모달 닫고 해당 학생으로 이동
+function goToStudentMemoFromSg(){
+  var targetNum = sgState.studentNum;
+  closeSaengibu();
+  switchTab('students');
+  if(targetNum){
+    selectStudent(targetNum);
+  }
+}
+
 function selectSgArea(btn){
   document.querySelectorAll('#sg-area-chips .sg-area-chip').forEach(function(b){b.classList.remove('selected');});
   btn.classList.add('selected');
@@ -16599,7 +16609,7 @@ function renderSgRecords(){
       '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px;opacity:0.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
       '<div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">아직 이 영역의 기록이 없어요</div>' +
       '<div style="font-size:12px;margin-bottom:14px;">학생 탭에서 관찰·상담 메모를 남기면 여기에 활용됩니다</div>' +
-      '<button onclick="switchTab(\'students\')" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border-accent);background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">학생 탭에서 메모 남기기 →</button>' +
+      '<button onclick="goToStudentMemoFromSg()" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border-accent);background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">학생 탭에서 메모 남기기 →</button>' +
       '</div>';
     list.innerHTML = emptyHtml;
     updateSgCount();
