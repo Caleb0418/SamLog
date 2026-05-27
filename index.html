@@ -9120,7 +9120,7 @@ window.addEventListener('load', function(){
     <div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px;">
       <button class="btn-small primary" style="padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="closeCsEmptyPrompt();openCsImportModal();">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        일괄 등록하기
+        양식 업로드하기
       </button>
       <button class="btn-small secondary" style="padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="closeCsEmptyPrompt();openCsFormModal(null);">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -9217,7 +9217,7 @@ window.addEventListener('load', function(){
       <div class="memo-modal-head-text">
         <div class="memo-modal-eyebrow">창체</div>
         <div class="memo-modal-title">창체 일정 일괄 등록</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">AI를 사용해 학교 창체영역편성표를 한 번에 등록해요</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">양식 파일을 다운로드해 작성한 뒤 업로드하면 한 번에 등록돼요</div>
       </div>
       <button class="memo-modal-close" onclick="closeCsImportModal()" aria-label="닫기">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -9226,39 +9226,46 @@ window.addEventListener('load', function(){
 
     <div class="modal-body" style="padding:14px 16px;overflow-y:auto;flex:1;">
 
-      <!-- ① 변환 프롬프트 복사 -->
+      <!-- ① 양식 다운로드 -->
       <div id="cs-import-step-1" class="cs-import-step">
-        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">① 변환 프롬프트 복사</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">① 양식 다운로드</div>
         <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;line-height:1.6;">
-          아래 프롬프트를 복사한 다음 ChatGPT, Claude, Gemini 등 AI에 붙여넣으세요.<br>
-          학교에서 받은 창체영역편성표 파일(PDF·이미지·엑셀 등)도 함께 첨부하면 JSON이 나옵니다.
+          양식 파일(CSV)을 다운로드한 뒤 엑셀이나 메모장으로 열어 작성해주세요.<br>
+          헤더 바로 아래 예시 한 행이 들어 있어요. 그 행은 지우고 우리 학교 일정을 입력하면 됩니다.
         </div>
-        <textarea id="cs-import-prompt-box" readonly style="width:100%;height:140px;font-size:11px;font-family:monospace;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
-        <div style="display:flex;justify-content:flex-end;margin-top:6px;">
-          <button class="btn-small primary" onclick="copyCsImportPrompt()" style="display:flex;align-items:center;gap:4px;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            프롬프트 복사
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn-small primary" onclick="downloadCsTemplate()" style="display:flex;align-items:center;gap:4px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            양식 다운로드
           </button>
+        </div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:10px;padding:10px 12px;background:var(--bg-elevated);border-radius:6px;line-height:1.7;">
+          <strong style="color:var(--text);">컬럼 안내</strong><br>
+          · <strong>날짜</strong>: <code style="font-size:10px;">2026-04-15</code> 형식<br>
+          · <strong>교시</strong>: 한 교시면 <code style="font-size:10px;">5</code>, 여러 교시면 <code style="font-size:10px;">"5,6"</code> (큰따옴표로 감싸기)<br>
+          · <strong>영역</strong>: <code style="font-size:10px;">자율 / 동아리 / 봉사 / 진로</code> 중 하나<br>
+          · <strong>이름</strong>: 활동명<br>
+          · <strong>학년</strong>: <code style="font-size:10px;">1학년</code>, <code style="font-size:10px;">전학년</code>, <code style="font-size:10px;">1,2학년</code>, <code style="font-size:10px;">1학년 3반</code> 등<br>
+          · <strong>NEIS 원문</strong>(선택): 비우면 "이름"으로 자동 채움<br>
+          · <strong>검수 메모</strong>(선택): 자유 입력
         </div>
       </div>
 
       <div style="height:14px;"></div>
 
-      <!-- ② JSON 붙여넣기 또는 파일 업로드 -->
+      <!-- ② 작성한 파일 업로드 -->
       <div id="cs-import-step-2" class="cs-import-step">
-        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">② JSON 붙여넣기 또는 파일 업로드</div>
-        <textarea id="cs-import-json-input" placeholder='AI가 출력한 JSON 배열을 여기에 붙여넣으세요&#10;&#10;예) [{"date":"2026-03-04","periods":[5,6],"category":"자율","activity":"...","originalText":"...","target":"1학년","note":""}]' style="width:100%;height:140px;font-size:11px;font-family:monospace;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
-        <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-small secondary" onclick="document.getElementById('cs-import-file-input').click()" style="display:flex;align-items:center;gap:4px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">② 작성한 파일 업로드</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;line-height:1.6;">
+          CSV 또는 XLSX 파일을 업로드해주세요. 한글 인코딩(UTF-8·EUC-KR)은 자동으로 감지돼요.
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-small primary" onclick="document.getElementById('cs-import-file-input').click()" style="display:flex;align-items:center;gap:4px;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            JSON 파일 업로드
+            파일 선택
           </button>
-          <input type="file" id="cs-import-file-input" accept=".json,application/json" style="display:none;" onchange="if(this.files.length)loadCsImportFile(this.files[0]);this.value='';">
-          <button class="btn-small secondary" onclick="loadCsImportSample()" style="display:flex;align-items:center;gap:4px;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            샘플 사용
-          </button>
-          <button class="btn-small primary" onclick="validateCsImportJson()" style="margin-left:auto;">검증하기</button>
+          <input type="file" id="cs-import-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length){handleCsTemplateFile(this.files[0]);this.value='';}">
+          <span id="cs-import-file-name" style="font-size:11px;color:var(--text-tertiary);"></span>
         </div>
         <div id="cs-import-validate-msg" style="font-size:11px;margin-top:6px;display:none;"></div>
       </div>
@@ -9671,66 +9678,6 @@ var CURRENT_SCHOOL_LEVEL = SCHOOL_LEVELS.MID;
    교사가 학교 창체영역편성표를 외부 AI(ChatGPT/Claude/Gemini)에
    붙여넣고 함께 사용하는 변환 프롬프트
 ═══════════════════════════════════════════ */
-var CS_AI_PROMPT_TEMPLATE = [
-  '첨부된 파일은 우리 학교의 창체영역편성표입니다.',
-  '이 표를 JSON 배열로 변환해주세요. 학교 전체(전 학년·전 반)의 모든 활동을 포함합니다.',
-  '',
-  '== 변환 규칙 ==',
-  '',
-  '각 활동을 하나의 객체로 만들어 배열에 담아주세요.',
-  '',
-  '객체 형식:',
-  '{',
-  '  "date": "YYYY-MM-DD",         // 활동 날짜',
-  '  "periods": [숫자, ...],        // 교시 배열 (예: 5-6교시 → [5,6])',
-  '  "category": "자율"|"동아리"|"봉사"|"진로",',
-  '  "activity": "활동명",          // 표시용으로 정리한 활동명',
-  '  "originalText": "원문 그대로", // 표에 적힌 그대로 (예: "5-6. 스포츠(예체)")',
-  '  "target": "1학년",            // 학년·반 (예: "1학년", "1학년 3반", "2,3학년", "전교")',
-  '  "note": ""                   // 모호하면 "확인 필요: 이유"',
-  '}',
-  '',
-  '날짜는 반드시 YYYY-MM-DD 형식. 표에 연도 없으면 학년도 기준 추론.',
-  '1학기(3~7월)는 해당 연도, 2학기 8~12월은 해당 연도, 2학기 1~2월은 다음 연도.',
-  '',
-  '카테고리 매핑:',
-  '  "자율활동" "자치활동" "자율·자치" → "자율"',
-  '  "동아리활동" → "동아리"',
-  '  "봉사활동" → "봉사"',
-  '  "진로활동" → "진로"',
-  '',
-  'originalText는 NEIS 누가기록용. 표의 활동명을 한 글자도 바꾸지 말고 그대로.',
-  'activity는 동일하거나 표시용으로 정리한 버전.',
-  '',
-  'target은 가능한 한 구체적으로:',
-  '  - 1학년만: "1학년"',
-  '  - 1학년 3반만: "1학년 3반"',
-  '  - 1·2학년: "1,2학년"',
-  '  - 전교 공통: "전교"',
-  '',
-  '학년·반별로 활동이 다르면 각각 별도 객체로 분리.',
-  '같은 날 같은 시간이라도 1학년=자율, 2학년=동아리라면 객체 2개.',
-  '',
-  '한 셀에 여러 활동이 붙어있는 경우(예: "4. 정보통신윤리교육5-6. 학생회장선거")',
-  '각 활동을 별도 객체로 분리. periods는 해당 교시만 적용.',
-  '',
-  '같은 날·같은 학년·같은 영역에 동일 활동이 중복으로 보이는 경우',
-  '객체 1개만 생성하고 note에 "확인 필요: 표 병합 구조상 중복 가능성" 기록.',
-  '',
-  '아래 항목은 note에 반드시 표시:',
-  '  - (진탐) 표기가 있는 경우: note에 "자유학기 진로탐색 별도 보고 항목"',
-  '  - 교시 번호 없이 활동명만 있는 경우: note에 "확인 필요: 교시 번호 없음"',
-  '  - 날짜·학년·영역 등 정보가 불분명한 경우: note에 "확인 필요: [구체적 이유]"',
-  '',
-  '표 하단의 집계·합계 행(시수 숫자만 있는 행)은 변환 대상에서 제외.',
-  '',
-  '== 출력 형식 ==',
-  '',
-  '코드 블록 없이 순수 JSON 배열만.',
-  '첫 글자 [ , 마지막 글자 ] .',
-  '설명·주석·기타 텍스트 절대 금지.'
-].join('\n');
-
 var AREA_META = {
   '행동특성': {
     fullName: '행동특성 및 종합의견',
@@ -16205,6 +16152,16 @@ function closeSaengibu(){
   _sgOriginalStudent  = null;
 }
 
+// 생기부 빈 상태에서 "학생 탭에서 메모 남기기" 버튼 → 모달 닫고 해당 학생으로 이동
+function goToStudentMemoFromSg(){
+  var targetNum = sgState.studentNum;
+  closeSaengibu();
+  switchTab('students');
+  if(targetNum){
+    selectStudent(targetNum);
+  }
+}
+
 function selectSgArea(btn){
   document.querySelectorAll('#sg-area-chips .sg-area-chip').forEach(function(b){b.classList.remove('selected');});
   btn.classList.add('selected');
@@ -16599,7 +16556,7 @@ function renderSgRecords(){
       '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px;opacity:0.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
       '<div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">아직 이 영역의 기록이 없어요</div>' +
       '<div style="font-size:12px;margin-bottom:14px;">학생 탭에서 관찰·상담 메모를 남기면 여기에 활용됩니다</div>' +
-      '<button onclick="switchTab(\'students\')" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border-accent);background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">학생 탭에서 메모 남기기 →</button>' +
+      '<button onclick="goToStudentMemoFromSg()" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border-accent);background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">학생 탭에서 메모 남기기 →</button>' +
       '</div>';
     list.innerHTML = emptyHtml;
     updateSgCount();
@@ -25958,84 +25915,11 @@ function showCsCellInfo(id){
   alert(msg);
 }
 
-function loadCsImportSample(){
-  var yr = (typeof getActiveYear === 'function') ? getActiveYear() : String(new Date().getFullYear());
-  var y = yr;
-  var level = (typeof SCHOOL_LEVEL !== 'undefined') ? SCHOOL_LEVEL : 'middle';
-  var levelLabel = {elementary:'초등학교', middle:'중학교', high:'고등학교'}[level] || '학교';
-  var sample;
-
-  if(level === 'elementary'){
-    // ── 초등학교 샘플 (1~6학년) ──
-    sample = [
-      {"date":y+"-03-04","periods":[5,6],"category":"자율","activity":"새 학기 학급 자치회 조직 및 학급 규칙 정하기","originalText":"학급 자치회 조직","target":"전학년","note":""},
-      {"date":y+"-03-12","periods":[5,6],"category":"진로","activity":"꿈 발표하기 — 나의 장래희망 소개","originalText":"꿈 발표하기","target":"1~2학년","note":""},
-      {"date":y+"-04-02","periods":[5,6],"category":"동아리","activity":"동아리 개강 — 구성원 소개 및 연간 활동 계획 수립","originalText":"동아리 개강","target":"3~6학년","note":""},
-      {"date":y+"-04-09","periods":[5,6],"category":"봉사","activity":"학교 주변 환경 정화 활동","originalText":"환경 정화 봉사","target":"3~4학년","note":"우천 시 다음 날로 연기"},
-      {"date":y+"-05-07","periods":[5,6],"category":"자율","activity":"어린이날 기념 학급 자치 행사 — 미니 운동회","originalText":"어린이날 기념 자치 행사","target":"전학년","note":""},
-      {"date":y+"-05-14","periods":[5,6],"category":"진로","activity":"직업인 초청 강연 — 다양한 직업 세계 탐색","originalText":"직업인 초청 강연","target":"5~6학년","note":"강사 섭외 확인 필요"},
-      {"date":y+"-06-04","periods":[5,6],"category":"봉사","activity":"학교 텃밭 가꾸기 및 화단 정비","originalText":"텃밭 봉사","target":"전학년","note":""},
-      {"date":y+"-06-18","periods":[5,6],"category":"동아리","activity":"동아리 중간 발표 — 활동 결과 공유 및 반성","originalText":"동아리 중간 발표","target":"3~6학년","note":""},
-      {"date":y+"-09-03","periods":[5,6],"category":"자율","activity":"2학기 학급 임원 선출 및 역할 정하기","originalText":"학급 임원 선출","target":"전학년","note":""},
-      {"date":y+"-09-17","periods":[5,6],"category":"진로","activity":"직업 체험의 날 — 흥미 있는 직업 역할극","originalText":"직업 체험의 날","target":"3~4학년","note":""},
-      {"date":y+"-10-08","periods":[5,6],"category":"봉사","activity":"지역 사회 봉사 — 노인 복지관 편지 쓰기","originalText":"복지관 봉사 편지","target":"5~6학년","note":""},
-      {"date":y+"-10-22","periods":[5,6,7],"category":"동아리","activity":"동아리 발표회 — 한 해 활동 결과 공유","originalText":"동아리 발표회","target":"전학년","note":"체육관 사용"},
-      {"date":y+"-11-05","periods":[5,6],"category":"자율","activity":"학교폭력 예방 교육 및 사이버 안전 교육","originalText":"학교폭력 예방 교육","target":"전학년","note":""},
-      {"date":y+"-11-19","periods":[5,6],"category":"진로","activity":"졸업 후 나의 꿈 — 중학교 생활 미리 알아보기","originalText":"중학교 진로 탐색","target":"6학년","note":""},
-      {"date":y+"-12-03","periods":[5,6],"category":"봉사","activity":"한 해 마무리 학급 정리 봉사 — 교실·복도 대청소","originalText":"학급 대청소 봉사","target":"전학년","note":""}
-    ];
-  } else if(level === 'high'){
-    // ── 고등학교 샘플 (1~3학년) ──
-    sample = [
-      {"date":y+"-03-05","periods":[6,7],"category":"자율","activity":"새 학기 학급 자치회 조직 및 학교생활규정 안내","originalText":"학급 자치회 조직","target":"전학년","note":""},
-      {"date":y+"-03-12","periods":[6,7],"category":"진로","activity":"학과·전공 탐색 — 진로 희망 조사 및 나의 강점 분석","originalText":"진로 희망 조사","target":"1학년","note":""},
-      {"date":y+"-03-19","periods":[6,7],"category":"동아리","activity":"자율동아리 개강 — 구성 및 연간 활동 계획 수립","originalText":"자율동아리 개강","target":"전학년","note":""},
-      {"date":y+"-04-02","periods":[6,7],"category":"봉사","activity":"교내 환경 정화 및 학교 시설 봉사","originalText":"교내 환경 봉사","target":"전학년","note":""},
-      {"date":y+"-04-23","periods":[6,7],"category":"진로","activity":"직업인 멘토 초청 강연 — 대학 전공별 진로 이야기","originalText":"직업인 멘토 강연","target":"2학년","note":"강사 섭외 확인 필요"},
-      {"date":y+"-05-07","periods":[6,7],"category":"자율","activity":"학교폭력 예방 교육 및 인터넷·스마트폰 윤리 교육","originalText":"학교폭력 예방 교육","target":"전학년","note":""},
-      {"date":y+"-05-21","periods":[6,7],"category":"동아리","activity":"교과 탐구 동아리 중간 발표 및 포트폴리오 점검","originalText":"동아리 중간 발표","target":"전학년","note":""},
-      {"date":y+"-06-04","periods":[6,7],"category":"봉사","activity":"지역 사회 봉사 — 지역 도서관·복지관 환경 정비","originalText":"지역 사회 봉사","target":"2~3학년","note":""},
-      {"date":y+"-09-03","periods":[6,7],"category":"자율","activity":"2학기 학급 자치회 운영 — 학기 목표 설정 및 역할 분담","originalText":"학급 자치회 운영","target":"전학년","note":""},
-      {"date":y+"-09-17","periods":[6,7],"category":"진로","activity":"대학 입시 설명회 — 수시·정시 전형 안내","originalText":"대입 설명회","target":"3학년","note":""},
-      {"date":y+"-09-24","periods":[6,7],"category":"진로","activity":"전공 체험 캠프 — 이공계·인문사회·예체능 분야 탐색","originalText":"전공 체험 캠프","target":"1~2학년","note":""},
-      {"date":y+"-10-15","periods":[6,7],"category":"동아리","activity":"자율동아리 발표회 — 연구·탐구 결과 발표","originalText":"동아리 발표회","target":"전학년","note":"시청각실 사용"},
-      {"date":y+"-10-29","periods":[6,7],"category":"봉사","activity":"지역 연계 봉사 — 독거노인 가정 방문 및 생활 지원","originalText":"지역 연계 봉사","target":"2학년","note":""},
-      {"date":y+"-11-12","periods":[6,7],"category":"자율","activity":"진로 포트폴리오 완성 및 자기소개서 초안 작성","originalText":"진로 포트폴리오","target":"2학년","note":""},
-      {"date":y+"-12-03","periods":[6,7],"category":"봉사","activity":"학년 마무리 봉사 — 교실·복도 환경 정리 및 시설 점검","originalText":"학년 마무리 봉사","target":"전학년","note":""}
-    ];
-  } else {
-    // ── 중학교 샘플 (1~3학년) — 기본값 ──
-    sample = [
-      {"date":y+"-03-05","periods":[5,6],"category":"자율","activity":"새 학기 학급 자치회 조직 및 학생 생활 규정 안내","originalText":"학급 자치회 조직","target":"전학년","note":""},
-      {"date":y+"-03-12","periods":[5,6],"category":"진로","activity":"진로 흥미 검사 및 나의 꿈 탐색 — 자유학년 활동","originalText":"진로 흥미 검사","target":"1학년","note":"자유학년제"},
-      {"date":y+"-03-19","periods":[5,6],"category":"동아리","activity":"동아리 개강 — 구성원 소개 및 연간 활동 계획 수립","originalText":"동아리 개강","target":"전학년","note":""},
-      {"date":y+"-04-02","periods":[5,6],"category":"봉사","activity":"학교 주변 환경 정화 활동 및 분리수거 캠페인","originalText":"환경 정화 봉사","target":"전학년","note":"우천 시 다음 날로 연기"},
-      {"date":y+"-04-23","periods":[5,6],"category":"진로","activity":"직업인 초청 강연 — 다양한 진로 분야 탐색","originalText":"직업인 초청 강연","target":"1~2학년","note":"강사 섭외 확인 필요"},
-      {"date":y+"-05-07","periods":[5,6],"category":"자율","activity":"학교폭력 예방 교육 및 사이버 폭력 예방 교육","originalText":"학교폭력 예방 교육","target":"전학년","note":""},
-      {"date":y+"-05-21","periods":[5,6],"category":"동아리","activity":"동아리 중간 발표 — 활동 결과 공유 및 반성","originalText":"동아리 중간 발표","target":"전학년","note":""},
-      {"date":y+"-06-04","periods":[5,6],"category":"봉사","activity":"지역 사회 봉사 — 복지관 방문 및 환경 정비","originalText":"지역 사회 봉사","target":"2~3학년","note":""},
-      {"date":y+"-09-03","periods":[5,6],"category":"자율","activity":"2학기 학급 임원 선출 및 학급 목표 설정","originalText":"학급 임원 선출","target":"전학년","note":""},
-      {"date":y+"-09-17","periods":[5,6],"category":"진로","activity":"자유학기 주제 탐구 발표 — 직업 체험 결과 공유","originalText":"주제 탐구 발표","target":"1학년","note":"자유학년제"},
-      {"date":y+"-09-24","periods":[5,6],"category":"진로","activity":"고등학교 진학 설명회 — 진학 유형별 준비 방법","originalText":"고입 진학 설명회","target":"3학년","note":""},
-      {"date":y+"-10-15","periods":[5,6,7],"category":"동아리","activity":"동아리 발표회 — 한 해 탐구·창작 결과 발표","originalText":"동아리 발표회","target":"전학년","note":"시청각실 사용"},
-      {"date":y+"-10-22","periods":[5,6],"category":"봉사","activity":"지역 연계 봉사 — 환경 캠페인 및 홍보물 제작","originalText":"지역 연계 봉사","target":"2학년","note":""},
-      {"date":y+"-11-05","periods":[5,6],"category":"자율","activity":"학생 자치 활동 — 학교 행사 기획 및 운영 보고","originalText":"학생 자치 활동","target":"전학년","note":""},
-      {"date":y+"-12-03","periods":[5,6],"category":"봉사","activity":"학년 마무리 봉사 — 교실·복도·급식실 대청소","originalText":"학년 마무리 봉사","target":"전학년","note":""}
-    ];
-  }
-
-  document.getElementById('cs-import-json-input').value = JSON.stringify(sample, null, 2);
-  document.getElementById('cs-import-validate-msg').style.display = 'none';
-  document.getElementById('cs-import-step-3').style.display = 'none';
-  document.getElementById('cs-import-save-btn').disabled = true;
-  showToast(yr + '학년도 ' + levelLabel + ' 샘플 데이터가 입력됐어요. 검증하기를 눌러 확인하세요.');
-}
-
 function openCsImportModal(){
   if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
   document.getElementById('cs-import-modal').classList.add('show');
-  document.getElementById('cs-import-prompt-box').value = CS_AI_PROMPT_TEMPLATE;
-  document.getElementById('cs-import-json-input').value = '';
+  var fileName = document.getElementById('cs-import-file-name');
+  if(fileName) fileName.textContent = '';
   document.getElementById('cs-import-validate-msg').style.display = 'none';
   document.getElementById('cs-import-step-3').style.display = 'none';
   document.getElementById('cs-import-save-btn').disabled = true;
@@ -26050,80 +25934,175 @@ function closeCsImportModal(){
 }
 function closeClassScheduleAi(){ closeCsImportModal(); }
 
-function copyCsImportPrompt(){
-  var text = document.getElementById('cs-import-prompt-box').value || '';
-  if(!text){ showToast('프롬프트가 없어요'); return; }
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(function(){
-      showToast('프롬프트가 복사됐어요. AI에 붙여넣은 뒤 표를 추가해주세요.');
-    }, function(){ _csFallbackCopy(text); });
-  } else {
-    _csFallbackCopy(text);
-  }
+/* ──────────────────────────────────────────
+   창체 양식 다운로드 (CSV with UTF-8 BOM)
+   - 헤더 + 예시 행 1줄
+────────────────────────────────────────── */
+function downloadCsTemplate(){
+  var bom = '﻿';
+  var headers = ['날짜','교시','영역','이름','학년','NEIS 원문','검수 메모'];
+  var example = ['2026-04-15','5,6','자율','학년 단체 사진 촬영','전학년','학년 단체 사진 촬영',''];
+  function esc(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }
+  var csv = bom + [headers.map(esc).join(','), example.map(esc).join(',')].join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = '창체일정_양식.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+  showToast('양식 파일이 다운로드됐어요');
 }
 
-function _csFallbackCopy(text){
-  try{
-    var ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    showToast('복사됐어요. AI에 붙여넣은 뒤 표를 추가해주세요.');
-  }catch(e){ showToast('복사 실패. 직접 선택해 복사해주세요.'); }
-}
-
-function loadCsImportFile(file){
+/* ──────────────────────────────────────────
+   창체 양식 파일 업로드 → 검증
+   - CSV는 parseCsvToRows, XLSX는 parseExcelToRows 재사용
+────────────────────────────────────────── */
+function handleCsTemplateFile(file){
   if(!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e){
-    document.getElementById('cs-import-json-input').value = e.target.result;
-    showToast('파일을 불러왔어요. 검증을 눌러주세요.');
-  };
-  reader.onerror = function(){ showToast('파일을 읽지 못했어요.'); };
-  reader.readAsText(file);
-}
-
-function validateCsImportJson(){
-  var input = document.getElementById('cs-import-json-input').value.trim();
+  console.log('[창체 양식] === 업로드 시작 ===', file.name, file.size);
+  var ext = file.name.split('.').pop().toLowerCase();
+  var fileName = document.getElementById('cs-import-file-name');
+  if(fileName) fileName.textContent = file.name + ' 처리 중…';
   var msgEl = document.getElementById('cs-import-validate-msg');
-  msgEl.style.display = 'block';
+  msgEl.style.display = 'none';
   document.getElementById('cs-import-step-3').style.display = 'none';
   document.getElementById('cs-import-save-btn').disabled = true;
 
-  if(!input){
+  if(typeof XLSX === 'undefined' && ext !== 'csv'){
+    if(typeof showXlsxLoadError === 'function') showXlsxLoadError();
+    else showToast('XLSX 라이브러리 로딩 실패');
+    return;
+  }
+  if(['csv','xlsx','xls'].indexOf(ext) < 0){
+    msgEl.style.display = 'block';
     msgEl.style.color = 'var(--danger)';
-    msgEl.textContent = '⚠ JSON을 붙여넣어 주세요.';
+    msgEl.textContent = '⚠ CSV·XLSX·XLS 파일만 지원해요';
+    if(fileName) fileName.textContent = '';
     return;
   }
 
-  // 코드 블록(```json ... ```) 제거
-  input = input.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
-
-  var arr;
-  try{
-    arr = JSON.parse(input);
-  }catch(e){
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var rows;
+      if(ext === 'csv'){
+        var text = decodeCsvBuffer(ev.target.result);
+        rows = parseCsvToRows(text);
+      } else {
+        rows = parseExcelToRows(ev.target.result);
+      }
+      console.log('[창체 양식] 행 수:', rows.length, '첫 행:', rows[0]);
+      _csValidateRows(rows, file.name);
+    }catch(e){
+      console.error('[창체 양식] 파싱 실패:', e);
+      msgEl.style.display = 'block';
+      msgEl.style.color = 'var(--danger)';
+      msgEl.textContent = '⚠ 파일 읽기 실패: ' + (e.message || '알 수 없는 오류');
+      if(fileName) fileName.textContent = '';
+    }
+  };
+  reader.onerror = function(){
+    msgEl.style.display = 'block';
     msgEl.style.color = 'var(--danger)';
-    msgEl.textContent = '⚠ JSON 파싱 실패: ' + e.message;
+    msgEl.textContent = '⚠ 파일 읽기 실패';
+    if(fileName) fileName.textContent = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function _csValidateRows(rows, fileName){
+  var msgEl = document.getElementById('cs-import-validate-msg');
+  var fileNameEl = document.getElementById('cs-import-file-name');
+  msgEl.style.display = 'block';
+
+  if(!rows || rows.length === 0){
+    msgEl.style.color = 'var(--danger)';
+    msgEl.textContent = '⚠ 파일에 데이터가 없어요. 헤더 외 데이터 행이 필요합니다.';
+    if(fileNameEl) fileNameEl.textContent = '';
     return;
   }
 
-  if(!Array.isArray(arr)){
+  var firstRow = rows[0];
+  var dateKey     = findCol(firstRow, ['날짜','date']);
+  var periodKey   = findCol(firstRow, ['교시','periods','시간']);
+  var categoryKey = findCol(firstRow, ['영역','분류','category']);
+  var activityKey = findCol(firstRow, ['이름','활동','activity','활동명']);
+  var targetKey   = findCol(firstRow, ['학년','대상','target']);
+  var originalKey = findCol(firstRow, ['neis 원문','원문','neis','originaltext']);
+  var noteKey     = findCol(firstRow, ['검수 메모','메모','note','검수']);
+
+  console.log('[창체 양식] 컬럼 매칭:', {date:dateKey, period:periodKey, category:categoryKey, activity:activityKey, target:targetKey});
+
+  // 필수 컬럼 확인
+  var missing = [];
+  if(!dateKey) missing.push('날짜');
+  if(!periodKey) missing.push('교시');
+  if(!categoryKey) missing.push('영역');
+  if(!activityKey) missing.push('이름');
+  if(!targetKey) missing.push('학년');
+  if(missing.length){
     msgEl.style.color = 'var(--danger)';
-    msgEl.textContent = '⚠ 최상위가 배열([])이어야 해요.';
+    msgEl.textContent = '⚠ 필수 컬럼 누락: ' + missing.join(', ') + ' / 인식된 컬럼: ' + Object.keys(firstRow).join(', ');
+    if(fileNameEl) fileNameEl.textContent = '';
     return;
   }
 
-  // 각 항목 검증
+  var CATEGORY_ALIASES = {
+    '자율':'자율','자율활동':'자율','자치':'자율','자율자치':'자율','자율·자치':'자율',
+    '동아리':'동아리','동아리활동':'동아리',
+    '봉사':'봉사','봉사활동':'봉사',
+    '진로':'진로','진로활동':'진로'
+  };
+
   var validated = [];
   var errors = [];
-  arr.forEach(function(item, idx){
+  rows.forEach(function(row, idx){
+    var rowNum = idx + 2; // 헤더 다음 행이 2번
+    var dateRaw = String(row[dateKey] || '').trim();
+    var periodRaw = String(row[periodKey] || '').trim();
+    var categoryRaw = String(row[categoryKey] || '').trim();
+    var activity = String(row[activityKey] || '').trim();
+    var target = String(row[targetKey] || '').trim();
+
+    // 빈 행 스킵
+    if(!dateRaw && !periodRaw && !categoryRaw && !activity) return;
+
+    // 영역 정규화
+    var categoryKey2 = categoryRaw.replace(/\s+/g,'').toLowerCase();
+    var category = CATEGORY_ALIASES[categoryRaw] || CATEGORY_ALIASES[categoryKey2];
+
+    // 교시 파싱: "5,6" 또는 "5-6" 또는 "5"
+    var periods = [];
+    if(periodRaw){
+      // "5,6" / "5/6" / "5-6" 모두 지원
+      var rangeMatch = periodRaw.match(/^(\d+)\s*[-~]\s*(\d+)$/);
+      if(rangeMatch){
+        var s = parseInt(rangeMatch[1],10), e = parseInt(rangeMatch[2],10);
+        if(s <= e) for(var p=s; p<=e; p++) periods.push(p);
+      } else {
+        periods = periodRaw.split(/[,\/·]/).map(function(s){ return parseInt(s.trim(),10); }).filter(function(n){ return !isNaN(n); });
+      }
+    }
+
+    // 객체 형태로 빌드 후 기존 검증 함수 재사용
+    var item = {
+      date: dateRaw,
+      periods: periods,
+      category: category,
+      activity: activity,
+      originalText: originalKey ? String(row[originalKey]||'').trim() : '',
+      target: target,
+      note: noteKey ? String(row[noteKey]||'').trim() : ''
+    };
     var err = _validateCsImportItem(item);
     if(err){
-      errors.push('항목 ' + (idx+1) + ': ' + err);
+      errors.push('행 ' + rowNum + ': ' + err);
     } else {
       validated.push(_normalizeCsImportItem(item));
     }
   });
+
+  if(fileNameEl) fileNameEl.textContent = fileName + ' · ' + validated.length + '건 인식' + (errors.length ? ' · ' + errors.length + '건 오류' : '');
 
   if(validated.length === 0){
     msgEl.style.color = 'var(--danger)';
@@ -26133,7 +26112,10 @@ function validateCsImportJson(){
 
   _csImportParsed = validated;
   msgEl.style.color = 'var(--success)';
-  msgEl.textContent = '✓ ' + validated.length + '건 검증 통과' + (errors.length > 0 ? ' / ' + errors.length + '건 실패' : '');
+  msgEl.textContent = '✓ ' + validated.length + '건 검증 통과' + (errors.length > 0 ? ' / ' + errors.length + '건 오류 (콘솔 확인)' : '');
+  if(errors.length){
+    console.warn('[창체 양식] 검증 오류:\n' + errors.join('\n'));
+  }
 
   _csRenderImportReviewTable();
   document.getElementById('cs-import-step-3').style.display = 'block';
