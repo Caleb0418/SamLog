@@ -8196,7 +8196,7 @@ window.addEventListener('load', function(){
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <div>
               <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:3px;">데이터는 이 기기에만 저장돼요</div>
-              <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">쌤로그는 클라우드를 사용하지 않아요. 브라우저 데이터를 지우거나 다른 기기로 옮기면 데이터가 사라질 수 있어요. 정기적으로 JSON 백업을 해두세요.</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">쌤로그는 클라우드를 사용하지 않아요. 안전을 위해 브라우저 내부에 2중으로 저장하지만, <strong>브라우저 데이터를 완전히 지우면 두 저장소가 모두 사라질 수 있어요.</strong> 정기적으로 JSON 백업을 해두세요.</div>
             </div>
           </div>
           <div class="class-master-title" style="margin-bottom:4px;">데이터 백업</div>
@@ -10949,6 +10949,200 @@ function renderCreativeList(){
 
 var BACKUP_YEAR_KEYS = ['ht2_classes','ht2_class_master','ht2_school_timetable','ht2_timetable_overrides','ht2_timetable_history','ht2_tt_sync_state','ht2_adhoc_slots','ht2_creative_activities','ht2_class_schedule','ht2_tag_pool','ht2_attendance','ht2_school_schedule'];
 var BACKUP_GLOBAL_KEYS = ['ht2_settings','ht2_alert_settings','ht2_theme','ht2_attendance_settings','ht2_neis_key'];
+
+/* ═══════════════════════════════════════════
+   IndexedDB 미러링 레이어
+   - localStorage 핵심 데이터를 IndexedDB에 자동 미러링
+   - 캐시 삭제 등으로 localStorage가 날아갔을 때 자동 복구
+   - DB 이름: samlog_mirror (기존 iamsam_backup과 분리)
+═══════════════════════════════════════════ */
+var MIRROR_DB_NAME = 'samlog_mirror';
+var MIRROR_STORE = 'kv';
+var _mirrorDBPromise = null;
+
+function _openMirrorDB(){
+  if(_mirrorDBPromise) return _mirrorDBPromise;
+  _mirrorDBPromise = new Promise(function(resolve){
+    if(!window.indexedDB){ resolve(null); return; }
+    try{
+      var req = indexedDB.open(MIRROR_DB_NAME, 1);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if(!db.objectStoreNames.contains(MIRROR_STORE)){
+          db.createObjectStore(MIRROR_STORE);
+        }
+      };
+      req.onsuccess = function(e){ resolve(e.target.result); };
+      req.onerror = function(){ resolve(null); };
+      req.onblocked = function(){ resolve(null); };
+    }catch(e){ resolve(null); }
+  });
+  return _mirrorDBPromise;
+}
+
+function mirrorSet(key, value){
+  return _openMirrorDB().then(function(db){
+    if(!db) return;
+    return new Promise(function(resolve){
+      try{
+        var tx = db.transaction(MIRROR_STORE, 'readwrite');
+        tx.objectStore(MIRROR_STORE).put(value, key);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+        tx.onabort = function(){ resolve(); };
+      }catch(e){ resolve(); }
+    });
+  }).catch(function(){});
+}
+
+function mirrorDelete(key){
+  return _openMirrorDB().then(function(db){
+    if(!db) return;
+    return new Promise(function(resolve){
+      try{
+        var tx = db.transaction(MIRROR_STORE, 'readwrite');
+        tx.objectStore(MIRROR_STORE).delete(key);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+        tx.onabort = function(){ resolve(); };
+      }catch(e){ resolve(); }
+    });
+  }).catch(function(){});
+}
+
+function mirrorGetAll(){
+  return _openMirrorDB().then(function(db){
+    if(!db) return {};
+    return new Promise(function(resolve){
+      try{
+        var tx = db.transaction(MIRROR_STORE, 'readonly');
+        var store = tx.objectStore(MIRROR_STORE);
+        var result = {};
+        var req = store.openCursor();
+        req.onsuccess = function(e){
+          var cur = e.target.result;
+          if(cur){ result[cur.key] = cur.value; cur.continue(); }
+          else resolve(result);
+        };
+        req.onerror = function(){ resolve({}); };
+      }catch(e){ resolve({}); }
+    });
+  }).catch(function(){ return {}; });
+}
+
+/* 미러링 대상 키인지 판별
+   - 학년도 suffix(_2024 등)를 제거한 베이스 키로 비교
+   - BACKUP_YEAR_KEYS, BACKUP_GLOBAL_KEYS에 포함되거나
+     ht2_active_year, ht2_years_list 같은 메타 키도 포함 */
+var MIRROR_EXTRA_KEYS = ['ht2_active_year','ht2_years_list','ht2_onboarded','ht2_last_backup','ht2_auto_backup','ht2_backup_folder_name','ht2_attendance_migrated_v1','ht2_class_view_settings'];
+
+function _shouldMirror(key){
+  if(!key || typeof key !== 'string') return false;
+  if(key.indexOf('ht2_') !== 0) return false;
+  var bare = key.replace(/_\d{4}$/, '');
+  if(BACKUP_YEAR_KEYS.indexOf(bare) !== -1) return true;
+  if(BACKUP_GLOBAL_KEYS.indexOf(bare) !== -1) return true;
+  if(MIRROR_EXTRA_KEYS.indexOf(bare) !== -1) return true;
+  return false;
+}
+
+/* localStorage.setItem / removeItem 가로채기
+   - 원본 함수는 _origSetItem, _origRemoveItem으로 보존
+   - 미러링 대상 키만 IndexedDB에 fire-and-forget 동기화 */
+var _origSetItem = localStorage.setItem.bind(localStorage);
+var _origRemoveItem = localStorage.removeItem.bind(localStorage);
+
+localStorage.setItem = function(key, value){
+  _origSetItem(key, value);
+  if(_shouldMirror(key)){
+    mirrorSet(key, value);
+  }
+};
+
+localStorage.removeItem = function(key){
+  _origRemoveItem(key);
+  if(_shouldMirror(key)){
+    mirrorDelete(key);
+  }
+};
+
+/* 영구 저장소 권한 요청 — IndexedDB 보호 강화
+   브라우저가 저장소 부족 시 자동 정리하는 걸 막아준다 */
+function requestPersistentStorage(){
+  try{
+    if(navigator.storage && navigator.storage.persist){
+      navigator.storage.persist().then(function(granted){
+        console.log('[쌤로그] 영구 저장소:', granted ? '승인' : '미승인');
+      }).catch(function(){});
+    }
+  }catch(e){}
+}
+
+/* 앱 시작 시 localStorage 손실 감지 + 복구 제안
+   - localStorage에 핵심 키가 없는데 IndexedDB엔 있으면 복구
+   - 복구는 사용자 확인 후에만 실행 */
+async function checkAndRestoreFromMirror(){
+  try{
+    var activeYear = localStorage.getItem('ht2_active_year');
+    var hasLSData = false;
+    if(activeYear){
+      hasLSData = !!localStorage.getItem('ht2_classes_' + activeYear);
+    }
+    if(!hasLSData){
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(k && k.indexOf('ht2_classes_') === 0){ hasLSData = true; break; }
+      }
+    }
+    if(hasLSData) return false;
+
+    var mirror = await mirrorGetAll();
+    var mirrorKeys = Object.keys(mirror);
+    if(mirrorKeys.length === 0) return false;
+
+    var hasMirrorData = mirrorKeys.some(function(k){
+      return k.indexOf('ht2_classes_') === 0 && mirror[k];
+    });
+    if(!hasMirrorData) return false;
+
+    var ok = confirm(
+      '⚠️ 쌤로그 데이터가 사라진 것 같아요.\n\n' +
+      '브라우저 캐시 삭제 등으로 데이터가 비워졌지만,\n' +
+      '쌤로그 자동 백업본이 남아있습니다.\n\n' +
+      '백업본으로 복구하시겠어요?\n' +
+      '(취소하면 새로 시작합니다)'
+    );
+    if(!ok) return false;
+
+    mirrorKeys.forEach(function(k){
+      if(mirror[k] != null){
+        try{ _origSetItem(k, mirror[k]); }catch(e){}
+      }
+    });
+
+    alert('복구가 완료되었어요. 새로고침합니다.');
+    location.reload();
+    return true;
+  }catch(e){
+    console.warn('[쌤로그] 복구 체크 실패:', e);
+    return false;
+  }
+}
+
+/* 기존 localStorage 내용을 IndexedDB에 1회성 풀 미러링
+   - 매 앱 시작마다 호출해도 안전 (덮어쓰기)
+   - 비동기로 백그라운드에서 진행, await 불필요 */
+function fullMirrorFromLocalStorage(){
+  try{
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(_shouldMirror(k)){
+        var v = localStorage.getItem(k);
+        if(v !== null) mirrorSet(k, v);
+      }
+    }
+  }catch(e){ console.warn('[쌤로그] 풀 미러링 실패:', e); }
+}
 
 /* ─── 백업 폴더 핸들 (IndexedDB) ─── */
 function _openBackupDB(){
@@ -29558,7 +29752,14 @@ function migrateSgDeadlineToUserSchedule(){
   }catch(e){}
 }
 
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', async function(){
+  requestPersistentStorage();
+  var restored = await checkAndRestoreFromMirror();
+  if(restored) return;
+  init();
+  // init() 이후 백그라운드에서 풀 미러링 (UI 차단 없음)
+  setTimeout(fullMirrorFromLocalStorage, 3000);
+});
 
 /* ═══════════════════════════════════════════
    월간 일정 — 캘린더 모달
