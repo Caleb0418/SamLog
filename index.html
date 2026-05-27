@@ -18819,6 +18819,60 @@ function decodeCsvBuffer(buffer){
   return new TextDecoder('utf-8').decode(buffer);
 }
 
+/**
+ * CSV 텍스트 → 행 배열 (SheetJS 완전 우회 — 날짜 자동변환 없음)
+ * 모든 값을 문자열로 반환
+ */
+function parseCsvToRows(text){
+  text = text.replace(/^﻿/, '');  // BOM 제거
+  var lines = text.split(/\r?\n/).filter(function(l){ return l.trim().length > 0; });
+  if(lines.length < 2) return [];
+
+  function splitCsvLine(line){
+    var result = [], current = '', inQuote = false;
+    for(var i = 0; i < line.length; i++){
+      var c = line[i];
+      if(c === '"' && line[i+1] === '"'){ current += '"'; i++; }
+      else if(c === '"'){ inQuote = !inQuote; }
+      else if(c === ',' && !inQuote){ result.push(current); current = ''; }
+      else { current += c; }
+    }
+    result.push(current);
+    return result.map(function(s){ return s.trim(); });
+  }
+
+  var headers = splitCsvLine(lines[0]);
+  console.log('[명단] CSV 헤더:', headers);
+  var rows = [];
+  for(var i = 1; i < lines.length; i++){
+    var cols = splitCsvLine(lines[i]);
+    var row = {};
+    for(var j = 0; j < headers.length; j++){
+      row[headers[j]] = String(cols[j] != null ? cols[j] : '');
+    }
+    rows.push(row);
+  }
+  console.log('[명단] CSV 파싱 완료, 행 수:', rows.length, '첫 행:', rows[0]);
+  return rows;
+}
+
+/**
+ * Excel ArrayBuffer → 행 배열 (날짜 자동변환 차단, 모든 값 문자열)
+ */
+function parseExcelToRows(buffer){
+  var wb = XLSX.read(new Uint8Array(buffer), {type:'array', cellDates:false, raw:true});
+  var ws = wb.Sheets[wb.SheetNames[0]];
+  var json = XLSX.utils.sheet_to_json(ws, {defval:'', raw:true});
+  return json.map(function(row){
+    var newRow = {};
+    Object.keys(row).forEach(function(key){
+      var v = row[key];
+      newRow[key] = (v instanceof Date) ? v.toISOString().substring(0, 10) : String(v == null ? '' : v);
+    });
+    return newRow;
+  });
+}
+
 function handleRosterFile(file){
   console.log('[명단] === 학생 명단 업로드 시작 ===');
   console.log('[명단] 파일명:', file.name);
@@ -18846,18 +18900,17 @@ function handleRosterFile(file){
   reader.onload = function(ev){
     try{
       var data = ev.target.result;
-      var wb;
+      var rows;
       if(ext === 'csv'){
+        // CSV는 SheetJS로 보내지 않음 — "02-01" 같은 값이 날짜로 자동변환되는 것을 방지
         var text = decodeCsvBuffer(data);
         console.log('[명단] CSV 디코딩 완료, 길이:', text.length);
         console.log('[명단] 첫 200자:', text.substring(0, 200));
-        wb = XLSX.read(text, {type:'string'});
+        rows = parseCsvToRows(text);
       } else {
-        wb = XLSX.read(new Uint8Array(data), {type:'array'});
+        rows = parseExcelToRows(data);
       }
-      var ws = wb.Sheets[wb.SheetNames[0]];
-      var json = XLSX.utils.sheet_to_json(ws, {defval:''});
-      processRoster(json);
+      processRoster(rows);
     }catch(e){
       console.error(e);
       showToast('파일 읽기 실패. 다른 파일을 시도해주세요.');
@@ -19067,10 +19120,17 @@ function processRoster(rows){
     if(isSummaryRow(row, nameKey, numKey)){ skipped++; return; }
     var name = String(row[nameKey] || '').trim();
     var numRaw = numKey ? String(row[numKey] || '').trim() : '';
-    // 합본 형식 분리: "02-15", "2/29" 등 → 뒤의 출석번호만 추출
     var num = numRaw;
-    var combinedMatch = numRaw.match(/^(\d+)\s*[\-\/]\s*(\d+)$/);
-    if(combinedMatch){ num = combinedMatch[2]; }
+    // 날짜 시리얼 방어: 36000~50000 = 엑셀 날짜 변환 결과 (2001~2036년대)
+    var numAsInt = parseInt(numRaw, 10);
+    if(numRaw && !isNaN(numAsInt) && numAsInt >= 36000 && numAsInt <= 50000 && !numRaw.match(/[\-\/]/)){
+      console.warn('[명단] 날짜 일련번호로 의심되는 번호:', numRaw, '→ 인덱스로 폴백');
+      num = '';
+    } else {
+      // 합본 형식 분리: "02-15", "2/29" 등 → 뒤의 출석번호만 추출
+      var combinedMatch = numRaw.match(/^(\d+)\s*[\-\/]\s*(\d+)$/);
+      if(combinedMatch){ num = combinedMatch[2]; }
+    }
     if(!num) num = String(parsed.length+1).padStart(2,'0');
     if(num.length === 1) num = '0'+num;
     var gender = genderKey ? String(row[genderKey] || '').trim() : '';
@@ -19879,16 +19939,15 @@ function handleAddClassFile(file){
   reader.onload = function(ev){
     try{
       var data = ev.target.result;
-      var wb;
+      var json;
       if(ext === 'csv'){
+        // CSV는 SheetJS로 보내지 않음 — "02-01" 날짜 자동변환 방지
         var text = decodeCsvBuffer(data);
         console.log('[명단] CSV 디코딩 완료, 길이:', text.length);
-        wb = XLSX.read(text, {type:'string'});
+        json = parseCsvToRows(text);
       } else {
-        wb = XLSX.read(new Uint8Array(data), {type:'array'});
+        json = parseExcelToRows(data);
       }
-      var ws = wb.Sheets[wb.SheetNames[0]];
-      var json = XLSX.utils.sheet_to_json(ws, {defval:''});
       if(!json || json.length === 0){ showToast('데이터를 찾지 못했어요'); return; }
       var nameKey = findCol(json[0], ['이름','name','성명','학생명','학생이름','학생 이름']);
       var numKey = findCol(json[0], ['번호','no','학번','순번','출석번호','연번','number','num','학생번호']);
@@ -19905,8 +19964,15 @@ function handleAddClassFile(file){
         var name = String(row[nameKey] || '').trim();
         var numRaw = numKey ? String(row[numKey] || '').trim() : '';
         var num = numRaw;
-        var combinedMatch = numRaw.match(/^(\d+)\s*[\-\/]\s*(\d+)$/);
-        if(combinedMatch){ num = combinedMatch[2]; }
+        // 날짜 시리얼 방어: 36000~50000 = 엑셀 날짜 변환 결과 (2001~2036년대)
+        var numAsInt = parseInt(numRaw, 10);
+        if(numRaw && !isNaN(numAsInt) && numAsInt >= 36000 && numAsInt <= 50000 && !numRaw.match(/[\-\/]/)){
+          console.warn('[명단] 날짜 일련번호로 의심되는 번호:', numRaw, '→ 인덱스로 폴백');
+          num = '';
+        } else {
+          var combinedMatch = numRaw.match(/^(\d+)\s*[\-\/]\s*(\d+)$/);
+          if(combinedMatch){ num = combinedMatch[2]; }
+        }
         if(!num) num = String(parsed.length+1).padStart(2,'0');
         if(num.length === 1) num = '0'+num;
         var gender = genderKey ? String(row[genderKey]||'').trim() : '';
