@@ -7736,22 +7736,14 @@ window.addEventListener('load', function(){
           </div>
 
           <div class="class-master-section">
-            <div class="class-master-head" onclick="toggleClassMaster()">
-              <div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;">
-                <div class="class-master-title">직접 입력</div>
-                <svg id="class-master-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;flex-shrink:0;color:var(--text-tertiary);"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <button class="btn-small secondary" onclick="event.stopPropagation();document.getElementById('assign-file-input').click()" style="flex-shrink:0;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                파일로 등록
-              </button>
-              <input type="file" id="assign-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleAssignFile(this.files[0]);this.value='';">
-              <button class="assign-help-btn" onclick="event.stopPropagation();openAssignGuide()" style="margin-left:4px;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg>
-                형식 안내
-              </button>
+            <!-- ③ 담당 수업 입력 방식 선택 — 세그먼트 컨트롤 -->
+            <div class="class-view-toggle" style="margin-bottom:10px;">
+              <button class="class-view-btn active" data-cm-tab="direct" onclick="switchClassMasterTab('direct')">직접 입력</button>
+              <button class="class-view-btn" data-cm-tab="neis" onclick="switchClassMasterTab('neis')">NEIS 시간표 업로드</button>
             </div>
-            <div class="class-master-body" id="class-master-body" style="display:none;">
+
+            <!-- Pane #1: 직접 입력 -->
+            <div id="cm-pane-direct" class="cm-pane">
               <div class="class-form">
                 <div class="class-form-row">
                   <div class="class-form-field" style="width:74px;">
@@ -7778,36 +7770,29 @@ window.addEventListener('load', function(){
               </div>
               <div id="class-master-list"></div>
             </div>
-          </div>
-        </div>
 
-        <!-- ③ 다른 방법으로 시간표 가져오기 (접힘) -->
-        <!-- ③ 교사별 시간표 업로드 (접힘) -->
-        <details style="margin-top:16px;">
-          <summary id="alt-method-summary" style="cursor:pointer;padding:8px 4px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;list-style:none;user-select:none;">
-            <svg id="alt-method-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
-            <span id="alt-method-label">교사별 시간표로 한 번에 등록하기</span>
-          </summary>
-          <div style="padding:8px 4px 4px;">
-            <div class="tt-upload-banner" id="tt-upload-banner" style="margin-top:6px;">
-              <div class="tt-upload-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </div>
-              <div class="tt-upload-text">
-                <div class="tt-upload-title">교사별 시간표 업로드</div>
-                <div class="tt-upload-sub">NEIS → 교과담임 → 시간표관리 → 교사별시간표조회 → 엑셀 다운로드</div>
-              </div>
-              <div class="tt-upload-actions">
-                <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
-                <button class="btn-small secondary" onclick="document.getElementById('tt-file-input').click()">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  업로드
-                </button>
-                <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTeacherTimetableFile(this.files[0]);this.value='';">
+            <!-- Pane #2: NEIS 시간표 업로드 -->
+            <div id="cm-pane-neis" class="cm-pane" style="display:none;">
+              <div class="tt-upload-banner" id="tt-upload-banner">
+                <div class="tt-upload-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="tt-upload-text">
+                  <div class="tt-upload-title">교사별 시간표 업로드</div>
+                  <div class="tt-upload-sub">NEIS → 교과담임 → 시간표관리 → 교사별시간표조회 → 엑셀 다운로드</div>
+                </div>
+                <div class="tt-upload-actions">
+                  <span id="tt-sync-status" class="tt-sync-status" style="display:none;"></span>
+                  <button class="btn-small secondary" onclick="document.getElementById('tt-file-input').click()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    업로드
+                  </button>
+                  <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTeacherTimetableFile(this.files[0]);this.value='';">
+                </div>
               </div>
             </div>
           </div>
-        </details>
+        </div>
 
 <!-- ④ 교시별 시작 시간 (접힘) -->
 <details style="margin-top:8px;" id="period-times-details">
@@ -9392,163 +9377,6 @@ window.addEventListener('load', function(){
           기본값으로 초기화
         </button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     담당 수업 일괄 업로드 미리보기 모달
-═══════════════════════════════════════════ -->
-<div class="modal-overlay" id="assign-modal" onclick="if(event.target===this)closeAssignModal()">
-  <div class="modal assign-modal">
-    <div class="assign-modal-head">
-      <div style="flex:1;min-width:0;">
-        <div class="assign-modal-eyebrow">담당 수업 일괄 등록</div>
-        <div class="assign-modal-title" id="assign-modal-title">파일 인식 결과</div>
-        <div class="assign-modal-sub" id="assign-modal-sub">파일을 분석하는 중...</div>
-      </div>
-      <button class="memo-modal-close" onclick="closeAssignModal()">×</button>
-    </div>
-
-    <div class="assign-modal-body">
-      <div id="assign-summary" class="assign-summary-row" style="display:none;"></div>
-
-      <div class="assign-toolbar">
-        <span id="assign-selected-count">—</span>
-        <div class="assign-toolbar-actions">
-          <button class="assign-select-all" onclick="toggleAllAssignItems(true)">전체 선택</button>
-          <span style="color:var(--border-strong);">·</span>
-          <button class="assign-deselect-all" onclick="toggleAllAssignItems(false)">전체 해제</button>
-        </div>
-      </div>
-
-      <div id="assign-preview-list" class="assign-preview-list"></div>
-
-      <div style="margin-top:12px;text-align:center;">
-        <button onclick="openAssignGuide()" style="font-size:11px;color:var(--text-tertiary);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:2px;">
-          파일 형식이 헷갈리나요? 안내 다시 보기
-        </button>
-      </div>
-    </div>
-
-    <div class="assign-modal-foot">
-      <button class="btn-small primary" id="assign-import-btn" onclick="importAssignSelected()" style="flex:1;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        선택한 수업 등록하기
-      </button>
-      <button class="btn-small secondary" onclick="closeAssignModal()">취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     파일 형식 안내 모달 (담당 수업 일괄 업로드 가이드)
-═══════════════════════════════════════════ -->
-<div class="modal-overlay" id="assign-guide-modal" onclick="if(event.target===this)closeAssignGuide()">
-  <div class="modal assign-guide-modal">
-    <div class="assign-guide-head">
-      <div style="flex:1;min-width:0;">
-        <div class="assign-modal-eyebrow">담당 수업 일괄 등록</div>
-        <div class="assign-modal-title">엑셀·CSV 파일 형식 안내</div>
-        <div class="assign-modal-sub">아래 두 가지 형식 중 편한 쪽을 사용하세요.</div>
-      </div>
-      <button class="memo-modal-close" onclick="closeAssignGuide()">×</button>
-    </div>
-
-    <div class="assign-guide-body">
-      <!-- 형식 ① -->
-      <div class="assign-guide-card">
-        <div class="assign-guide-card-head">
-          <span class="assign-guide-badge recommended">추천</span>
-          <span class="assign-guide-card-title">담당 학급 템플릿</span>
-          <span class="assign-guide-card-sub">한 행에 여러 반을 묶어 입력</span>
-        </div>
-        <div class="assign-guide-table-wrap">
-          <table class="assign-guide-table">
-            <thead>
-              <tr>
-                <th class="required">학년</th>
-                <th class="required">담당 학급</th>
-                <th class="required">과목</th>
-                <th class="optional">선생님 이름</th>
-                <th class="optional">비고</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1학년</td>
-                <td>1반,2반,3반</td>
-                <td>국어</td>
-                <td>김국어</td>
-                <td></td>
-              </tr>
-              <tr>
-                <td>2학년</td>
-                <td>1반,2반</td>
-                <td>국어</td>
-                <td>김국어</td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="assign-guide-tips">
-          <div class="assign-guide-tip"><span class="tip-num">1</span>한 행이 여러 수업으로 자동 분리돼요. 위 예시는 <strong>5개 수업</strong>(1-1, 1-2, 1-3, 2-1, 2-2 국어)으로 등록됩니다.</div>
-          <div class="assign-guide-tip"><span class="tip-num">2</span>학급 구분자는 쉼표(<code>,</code>), 공백, 슬래시(<code>/</code>) 모두 인식해요. (예: <code>1반,2반</code> · <code>1 2 3</code> · <code>1/2/3</code>)</div>
-          <div class="assign-guide-tip"><span class="tip-num">3</span>시간표 파일을 이미 올렸다면 <strong>요일·교시가 자동으로 매칭</strong>돼요. 한 과목이 주 3회면 3개 슬롯이 한 번에 채워집니다.</div>
-        </div>
-      </div>
-
-      <!-- 형식 ② -->
-      <div class="assign-guide-card">
-        <div class="assign-guide-card-head">
-          <span class="assign-guide-badge">기본</span>
-          <span class="assign-guide-card-title">표준 템플릿</span>
-          <span class="assign-guide-card-sub">한 행에 한 수업</span>
-        </div>
-        <div class="assign-guide-table-wrap">
-          <table class="assign-guide-table">
-            <thead>
-              <tr>
-                <th class="required">학년</th>
-                <th class="required">반</th>
-                <th class="required">과목</th>
-                <th class="optional">요일</th>
-                <th class="optional">교시</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>1</td><td>국어</td><td>월</td><td>1</td></tr>
-              <tr><td>1</td><td>2</td><td>국어</td><td>화</td><td>3</td></tr>
-              <tr><td>2</td><td>3</td><td>수학</td><td></td><td></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="assign-guide-tips">
-          <div class="assign-guide-tip"><span class="tip-num">1</span>요일·교시를 직접 적으면 그대로 슬롯이 등록돼요.</div>
-          <div class="assign-guide-tip"><span class="tip-num">2</span>비워두면 시간표 파일에서 같은 과목을 찾아 자동 매칭됩니다.</div>
-          <div class="assign-guide-tip"><span class="tip-num">3</span>요일은 한글(<code>월화수목금</code>)·영어(<code>mon~fri</code>)·숫자(<code>1~5</code>) 모두 인식해요.</div>
-        </div>
-      </div>
-
-      <!-- 공통 규칙 -->
-      <div class="assign-guide-rules">
-        <div class="assign-guide-rules-title">📌 공통 규칙</div>
-        <ul class="assign-guide-rules-list">
-          <li><strong>헤더 행</strong>은 1행이 아니어도 돼요. 1·2행에 제목/안내가 있으면 자동으로 진짜 헤더를 찾아요.</li>
-          <li>컬럼명은 일부만 일치해도 인식돼요. 예: <code>담당 학급 (쉼표 구분)</code> → "담당 학급"으로 인식</li>
-          <li>학년·반은 <code>1학년</code>처럼 단위가 붙어 있어도 숫자만 자동 추출해요.</li>
-          <li>같은 (학년-반-과목)이 이미 등록돼 있으면 <strong>중복으로 표시</strong>되고 기본 미선택돼요.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="assign-guide-foot">
-      <button class="btn-small secondary" onclick="closeAssignGuide()">닫기</button>
-      <button class="btn-small primary" onclick="downloadAssignTemplate()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        양식 다운로드 (xlsx)
-      </button>
     </div>
   </div>
 </div>
@@ -23389,500 +23217,10 @@ function applyTimetableData(result){
 }
 
 /* ═══════════════════════════════════════════
-   담당 수업 일괄 업로드 (엑셀/CSV)
-
-   지원 컬럼:
-   - 학년 (필수)
-   - 담당 학급 또는 학급 또는 반 (쉼표/공백 구분 가능)
-   - 과목 (필수)
-   - 요일 (선택, 월/화/수/목/금 또는 1~5)
-   - 교시 (선택, 1~7)
+   담당 수업 일괄 업로드 (엑셀/CSV) — 제거됨
+   "파일로 등록" / "형식 안내" 경로는 NEIS 교사별 시간표 업로드로 대체.
+   handleTeacherTimetableFile 사용.
 ═══════════════════════════════════════════ */
-var _assignParsed = []; // [{grade, cls, subject, slots:[{day,period}], selected, fromTimetable, isDuplicate}]
-
-var ASSIGN_COL = {
-  grade:   ['학년','grade'],
-  cls:     ['반','class','cls','학급'],
-  multiCls:['담당 학급','담당학급'],
-  subject: ['과목','교과','subject','과목명','교과명','담당과목','담당 과목'],
-  dow:     ['요일','day','dow'],
-  period:  ['교시','period','시간']
-};
-var ASSIGN_DOW_MAP = {'월':1,'화':2,'수':3,'목':4,'금':5,'mon':1,'tue':2,'wed':3,'thu':4,'fri':5,'1':1,'2':2,'3':3,'4':4,'5':5};
-
-function findAssignKey(headers, aliases){
-  // 1차: 완전 일치
-  for(var i=0; i<headers.length; i++){
-    var h = headers[i].trim().toLowerCase();
-    for(var j=0; j<aliases.length; j++){
-      if(h === aliases[j].toLowerCase()) return headers[i];
-    }
-  }
-  // 2차: 포함 일치
-  for(var i=0; i<headers.length; i++){
-    var h = headers[i].trim().toLowerCase();
-    for(var j=0; j<aliases.length; j++){
-      if(h.indexOf(aliases[j].toLowerCase()) !== -1) return headers[i];
-    }
-  }
-  return null;
-}
-
-function handleAssignFile(file){
-  if(!file) return;
-  var ext = file.name.split('.').pop().toLowerCase();
-  showToast('담당 수업 파일을 읽는 중...');
-
-  // rawRows: [[cell, cell, ...], ...] 형태 → 헤더 자동 감지 후 객체화
-  function processRawRows(rawRows){
-    var detected = detectAssignHeader(rawRows);
-    if(detected.error){ showToast(detected.error); return; }
-    var headers = detected.headers;
-    var dataRows = rawRows.slice(detected.headerIdx + 1);
-
-    var rowObjects = dataRows.map(function(cells){
-      var row = {};
-      headers.forEach(function(h, idx){
-        row[h] = String(cells[idx] || '').trim();
-      });
-      return row;
-    }).filter(function(row){
-      // 완전 빈 행 제거
-      return Object.keys(row).some(function(k){return row[k];});
-    });
-
-    if(rowObjects.length === 0){
-      showToast('데이터 행이 없어요. 헤더 아래에 내용이 있는지 확인해주세요.');
-      return;
-    }
-
-    var result = parseAssignRows(rowObjects, headers);
-    if(result.error){ showToast(result.error); return; }
-    _assignParsed = result.entries;
-    showAssignModal(result);
-  }
-
-  if(ext === 'csv'){
-    var reader = new FileReader();
-    reader.onload = function(e){
-      var text = e.target.result.replace(/^\uFEFF/,'');
-      var lines = text.split(/\r?\n/);
-      var rawRows = lines.map(function(line){
-        return line.split(',').map(function(c){return c.trim().replace(/^"|"$/g,'');});
-      });
-      if(rawRows.length < 2){ showToast('내용이 없는 파일이에요.'); return; }
-      processRawRows(rawRows);
-    };
-    reader.readAsText(file, 'UTF-8');
-  } else if(ext === 'xlsx' || ext === 'xls'){
-    if(typeof XLSX === 'undefined'){
-      showXlsxLoadError();
-      return;
-    }
-    var reader = new FileReader();
-    reader.onload = function(e){
-      try{
-        var wb;
-        if(ext === 'xls') wb = XLSX.read(e.target.result, {type:'binary'});
-        else wb = XLSX.read(e.target.result, {type:'array'});
-        // 선생님담당 시트 우선, "참고"/"안내"/"목록" 등은 건너뜀
-        var sheetName = wb.SheetNames[0];
-        for(var si=0; si<wb.SheetNames.length; si++){
-          var sn = wb.SheetNames[si];
-          if(sn.indexOf('담당') !== -1 || sn.indexOf('선생님') !== -1){ sheetName = sn; break; }
-        }
-        var ws = wb.Sheets[sheetName];
-        var rawRows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-        // 모든 셀을 문자열로 강제
-        rawRows = rawRows.map(function(r){
-          return (r || []).map(function(c){return String(c == null ? '' : c).trim();});
-        });
-        if(rawRows.length < 2){ showToast('내용이 없는 파일이에요.'); return; }
-        processRawRows(rawRows);
-      }catch(err){
-        showToast('파일을 읽을 수 없어요: '+err.message);
-      }
-    };
-    if(ext === 'xls') reader.readAsBinaryString(file);
-    else reader.readAsArrayBuffer(file);
-  } else {
-    showToast('xls, xlsx, csv 파일만 지원해요.');
-  }
-}
-
-/* 헤더 행 자동 감지 — 처음 10행 중 핵심 키워드가 들어 있는 행을 헤더로 잡음.
-   처음 N행이 제목/안내 텍스트인 템플릿(예: "📋 선생님 담당 정보 입력 템플릿") 지원.
-   "과목"/"교과"/"subject" + "학급"/"반"/"class" 가 같은 행에 있어야 진짜 헤더로 간주. */
-function detectAssignHeader(rawRows){
-  var SUBJECT_KW = ['과목','교과','subject'];
-  var CLS_KW     = ['학급','반','class'];
-
-  function rowHasKeyword(row, kwList){
-    return row.some(function(cell){
-      var c = String(cell || '').toLowerCase();
-      return kwList.some(function(kw){return c.indexOf(kw.toLowerCase()) !== -1;});
-    });
-  }
-
-  var maxScan = Math.min(rawRows.length, 10);
-  for(var i=0; i<maxScan; i++){
-    var row = rawRows[i] || [];
-    // 빈 행 또는 한 칸만 채워진 행(제목 행)은 헤더 후보 제외
-    var nonEmptyCount = row.filter(function(c){return String(c||'').trim();}).length;
-    if(nonEmptyCount < 2) continue;
-
-    if(rowHasKeyword(row, SUBJECT_KW) && rowHasKeyword(row, CLS_KW)){
-      var headers = row.map(function(c){return String(c||'').trim();});
-      return { headerIdx:i, headers:headers };
-    }
-  }
-
-  // 헤더를 못 찾으면 1행을 헤더로 가정 (기존 동작 fallback)
-  if(rawRows.length > 0){
-    var nonEmpty = (rawRows[0] || []).filter(function(c){return String(c||'').trim();}).length;
-    if(nonEmpty >= 2){
-      return { headerIdx:0, headers:rawRows[0].map(function(c){return String(c||'').trim();}) };
-    }
-  }
-
-  return { error:'헤더 행을 찾을 수 없어요. "과목"과 "학급"(또는 "반") 컬럼이 같은 행에 있어야 합니다.' };
-}
-
-function parseAssignRows(rowObjects, headers){
-  var gKey = findAssignKey(headers, ASSIGN_COL.grade);
-  var sKey = findAssignKey(headers, ASSIGN_COL.subject);
-  var dKey = findAssignKey(headers, ASSIGN_COL.dow);
-  var pKey = findAssignKey(headers, ASSIGN_COL.period);
-
-  // multiCls 우선, 없으면 일반 cls
-  var multiClsKey = findAssignKey(headers, ASSIGN_COL.multiCls);
-  var cKey = multiClsKey || findAssignKey(headers, ASSIGN_COL.cls);
-  var isMultiClsMode = !!multiClsKey;
-
-  if(!sKey){
-    return { error:'과목 컬럼을 찾을 수 없어요. 헤더에 "과목" 또는 "subject"가 있는지 확인해주세요.' };
-  }
-  if(!cKey){
-    return { error:'반 컬럼을 찾을 수 없어요. 헤더에 "반", "학급", 또는 "담당 학급"이 있는지 확인해주세요.' };
-  }
-
-  var entries = [];
-  var skipped = 0;
-
-  rowObjects.forEach(function(row, ri){
-    var subject = (row[sKey] || '').trim();
-    if(!subject){ skipped++; return; }
-
-    var gradeRaw = gKey ? (row[gKey] || '').trim() : '';
-    var gradeNum = gradeRaw.replace(/[^0-9]/g,'');
-    if(!gradeNum){ skipped++; return; }
-
-    var clsRaw = (row[cKey] || '').trim();
-    if(!clsRaw){ skipped++; return; }
-
-    // 다중 반 모드: 쉼표/공백 구분 → 여러 entry로 펼침
-    var clsParts;
-    if(isMultiClsMode){
-      clsParts = clsRaw.split(/[,，\s\/]+/).map(function(s){return s.trim();}).filter(Boolean);
-    } else {
-      clsParts = [clsRaw];
-    }
-
-    // 요일·교시 직접 지정?
-    var dowRaw = dKey ? (row[dKey] || '').trim() : '';
-    var perRaw = pKey ? (row[pKey] || '').trim() : '';
-    var manualDay = ASSIGN_DOW_MAP[dowRaw] || ASSIGN_DOW_MAP[(dowRaw||'').toLowerCase()] || 0;
-    var manualPer = parseInt(perRaw) || 0;
-    var hasManualSlot = manualDay && manualPer;
-
-    clsParts.forEach(function(cp){
-      var clsNum = cp.replace(/[^0-9]/g,'');
-      if(!clsNum) return;
-
-      var slots = [];
-      var fromTimetable = false;
-
-      if(hasManualSlot){
-        slots.push({day:manualDay, period:manualPer});
-      } else {
-        // 시간표에서 자동 매칭
-        var matched = findSlotsFromTimetable(gradeNum, clsNum, subject);
-        if(matched.length > 0){
-          slots = matched;
-          fromTimetable = true;
-        }
-      }
-
-      // 이미 등록된 (grade, cls, subject) 중복 체크
-      var isDup = classMaster.some(function(c){
-        return String(c.grade) === gradeNum && String(c.cls) === clsNum && c.subject === subject;
-      });
-
-      entries.push({
-        grade: gradeNum, cls: clsNum, subject: subject,
-        slots: slots, fromTimetable: fromTimetable,
-        isDuplicate: isDup, selected: !isDup, // 중복은 기본 미선택
-        _rowIdx: ri
-      });
-    });
-  });
-
-  if(entries.length === 0){
-    return { error:'인식된 수업이 없어요. 헤더와 데이터 행을 확인해주세요.' };
-  }
-
-  return { entries:entries, skipped:skipped, isMultiClsMode:isMultiClsMode };
-}
-
-function showAssignModal(result){
-  var modal = document.getElementById('assign-modal');
-  var title = document.getElementById('assign-modal-title');
-  var sub   = document.getElementById('assign-modal-sub');
-  var sum   = document.getElementById('assign-summary');
-
-  var total = _assignParsed.length;
-  var matched = _assignParsed.filter(function(e){return e.fromTimetable;}).length;
-  var unmatched = _assignParsed.filter(function(e){return !e.fromTimetable && e.slots.length === 0;}).length;
-  var manual = _assignParsed.filter(function(e){return !e.fromTimetable && e.slots.length > 0;}).length;
-  var dupCount = _assignParsed.filter(function(e){return e.isDuplicate;}).length;
-
-  title.textContent = total+'개 수업이 인식됐어요';
-  sub.textContent = '아래에서 등록할 수업을 선택하세요'+(result.skipped > 0 ? ' · '+result.skipped+'행 건너뜀' : '');
-
-  // 요약 카드
-  var summaryParts = [];
-  if(matched > 0) summaryParts.push('<span><span class="assign-summary-num">'+matched+'</span> 시간표 매칭</span>');
-  if(manual > 0)  summaryParts.push('<span><span class="assign-summary-num">'+manual+'</span> 요일·교시 직접 지정</span>');
-  if(unmatched > 0) summaryParts.push('<span><span class="assign-summary-num">'+unmatched+'</span> 슬롯 미지정</span>');
-  if(dupCount > 0)  summaryParts.push('<span style="color:var(--warning);"><span class="assign-summary-num">'+dupCount+'</span> 중복 (기본 해제)</span>');
-  if(summaryParts.length > 0){
-    sum.innerHTML = summaryParts.join('<span style="color:var(--border-accent);">·</span>');
-    sum.style.display = 'flex';
-  } else {
-    sum.style.display = 'none';
-  }
-
-  renderAssignList();
-  modal.classList.add('show');
-}
-
-function renderAssignList(){
-  var list = document.getElementById('assign-preview-list');
-  list.innerHTML = _assignParsed.map(function(e, idx){
-    var slotsHtml;
-    if(e.slots.length > 0){
-      slotsHtml = e.slots.map(function(s){
-        return '<span class="assign-row-slot-chip">'+WEEKDAYS[s.day]+s.period+'교시</span>';
-      }).join('');
-    } else {
-      slotsHtml = '<span style="color:var(--warning);">슬롯 미지정 — 등록 후 시간표 업로드로 채울 수 있어요</span>';
-    }
-
-    var badge;
-    if(e.isDuplicate){
-      badge = '<span class="assign-row-badge duplicate">중복</span>';
-    } else if(e.fromTimetable){
-      badge = '<span class="assign-row-badge matched">시간표 매칭</span>';
-    } else if(e.slots.length > 0){
-      badge = '<span class="assign-row-badge matched">직접 지정</span>';
-    } else {
-      badge = '<span class="assign-row-badge unmatched">미매칭</span>';
-    }
-
-    return '<div class="assign-preview-item'+(e.selected?'':' unchecked')+(e.isDuplicate?' duplicate':'')+'">'+
-      '<input type="checkbox" class="assign-check" '+(e.selected?'checked':'')+' onchange="toggleAssignItem('+idx+', this.checked)">'+
-      '<div class="assign-info">'+
-        '<div class="assign-row-head">'+
-          '<span class="assign-row-class">'+escapeHtml(e.grade)+'학년 '+escapeHtml(e.cls)+'반</span>'+
-          '<span class="assign-row-subject">'+escapeHtml(e.subject)+'</span>'+
-          badge+
-        '</div>'+
-        '<div class="assign-row-slots">'+slotsHtml+'</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-
-  updateAssignSelectedCount();
-}
-
-function updateAssignSelectedCount(){
-  var sel = _assignParsed.filter(function(e){return e.selected;}).length;
-  document.getElementById('assign-selected-count').textContent =
-    sel+'/'+_assignParsed.length+'개 선택됨';
-  var btn = document.getElementById('assign-import-btn');
-  btn.disabled = sel === 0;
-  btn.style.opacity = sel === 0 ? '0.5' : '1';
-}
-
-function toggleAssignItem(idx, checked){
-  if(_assignParsed[idx]){
-    _assignParsed[idx].selected = checked;
-    renderAssignList();
-  }
-}
-
-function toggleAllAssignItems(checked){
-  _assignParsed.forEach(function(e){
-    // 중복은 전체선택해도 건드리지 않음 (사용자 의도 명시적으로)
-    if(!checked || !e.isDuplicate) e.selected = checked;
-  });
-  renderAssignList();
-}
-
-function importAssignSelected(){
-  var selected = _assignParsed.filter(function(e){return e.selected;});
-  if(selected.length === 0){ showToast('등록할 수업을 선택해주세요.'); return; }
-
-  var added = 0, skipped = 0, totalSlots = 0;
-  selected.forEach(function(e){
-    // 중복 재확인
-    var dup = classMaster.find(function(c){
-      return String(c.grade) === e.grade && String(c.cls) === e.cls && c.subject === e.subject;
-    });
-    if(dup){ skipped++; return; }
-
-    classMaster.push({
-      id: 'cm'+Date.now()+'_'+added,
-      grade: e.grade, cls: e.cls, subject: e.subject,
-      slots: e.slots.slice(),
-      memos: [],
-      sessionResets: [],
-      sessionOverrides: {}
-    });
-    added++;
-    totalSlots += e.slots.length;
-  });
-
-  saveAll();
-  closeAssignModal();
-  renderClassTab();
-  if(document.getElementById('tab-home').style.display === 'block') renderHome();
-
-  var msg = added+'개 수업이 등록됐어요';
-  if(totalSlots > 0) msg += ' · '+totalSlots+'개 슬롯 자동 매칭';
-  if(skipped > 0) msg += ' ('+skipped+'개는 이미 등록돼 있어 건너뜀)';
-  showToast(msg);
-}
-
-function closeAssignModal(){
-  document.getElementById('assign-modal').classList.remove('show');
-  _assignParsed = [];
-}
-
-/* ─── 파일 형식 안내 모달 ─── */
-function openAssignGuide(){
-  document.getElementById('assign-guide-modal').classList.add('show');
-}
-function closeAssignGuide(){
-  document.getElementById('assign-guide-modal').classList.remove('show');
-}
-
-/* ─── 양식 파일 다운로드 (xlsx) ─── */
-function downloadAssignTemplate(){
-  if(typeof XLSX === 'undefined'){
-    showXlsxLoadError();
-    return;
-  }
-  try{
-    var wb = XLSX.utils.book_new();
-
-    /* ─ 시트 1: 선생님담당 (추천: 담당 학급 템플릿) ─ */
-    var sheet1Data = [
-      ['📋 선생님 담당 정보 입력 템플릿', '', '', '', ''],
-      ['※ 한 선생님이 여러 과목/학급을 담당할 경우 행을 추가하세요. 학급은 쉼표로 구분 (예: 1반,2반,3반)', '', '', '', ''],
-      ['선생님 이름', '담당 과목', '학년', '담당 학급 (쉼표 구분)', '비고'],
-      ['김국어', '국어', '1학년', '1반,2반,3반', ''],
-      ['김국어', '국어', '2학년', '1반,2반', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-    ];
-    var ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
-
-    // 컬럼 너비 설정
-    ws1['!cols'] = [
-      {wch:14}, // 선생님 이름
-      {wch:14}, // 담당 과목
-      {wch:10}, // 학년
-      {wch:24}, // 담당 학급
-      {wch:18}, // 비고
-    ];
-
-    // 셀 병합 (제목·안내 행)
-    ws1['!merges'] = [
-      {s:{r:0,c:0}, e:{r:0,c:4}},
-      {s:{r:1,c:0}, e:{r:1,c:4}},
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws1, '선생님담당');
-
-    /* ─ 시트 2: 표준 템플릿 ─ */
-    var sheet2Data = [
-      ['📋 표준 템플릿 — 한 행에 한 수업씩 입력', '', '', '', ''],
-      ['※ 요일·교시를 비워두면 시간표 파일에서 자동으로 찾아 채워줘요', '', '', '', ''],
-      ['학년', '반', '과목', '요일', '교시'],
-      ['1', '1', '국어', '월', '1'],
-      ['1', '2', '국어', '화', '3'],
-      ['2', '3', '수학', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-    ];
-    var ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
-    ws2['!cols'] = [{wch:8},{wch:8},{wch:14},{wch:8},{wch:8}];
-    ws2['!merges'] = [
-      {s:{r:0,c:0}, e:{r:0,c:4}},
-      {s:{r:1,c:0}, e:{r:1,c:4}},
-    ];
-    XLSX.utils.book_append_sheet(wb, ws2, '표준템플릿');
-
-    /* ─ 시트 3: 과목 참고 목록 ─ */
-    var sheet3Data = [
-      ['📌 자주 쓰이는 과목명 (참고)', ''],
-      ['시간표 자동 매칭이 잘 되도록, NEIS에 등록된 정확한 과목명을 쓰는 것을 권장해요.', ''],
-      ['', ''],
-      ['과목명', '비고'],
-      ['국어', ''],
-      ['수학', ''],
-      ['영어', ''],
-      ['과학', ''],
-      ['사회', ''],
-      ['역사', ''],
-      ['도덕', ''],
-      ['체육', ''],
-      ['음악', ''],
-      ['미술', ''],
-      ['기술·가정', '"기술·가정" (가운뎃점 ·) 정확히 사용'],
-      ['정보', ''],
-      ['한문', ''],
-      ['진로와 직업', ''],
-      ['(자)주제선택활동', '자유학기 활동'],
-      ['(자)진로탐색활동', '자유학기 활동'],
-      ['(창)동아리활동', '창의적 체험활동'],
-      ['(창)자율·자치활동', '창의적 체험활동'],
-      ['동아리활동', ''],
-      ['봉사활동', ''],
-    ];
-    var ws3 = XLSX.utils.aoa_to_sheet(sheet3Data);
-    ws3['!cols'] = [{wch:18},{wch:40}];
-    ws3['!merges'] = [
-      {s:{r:0,c:0}, e:{r:0,c:1}},
-      {s:{r:1,c:0}, e:{r:1,c:1}},
-    ];
-    XLSX.utils.book_append_sheet(wb, ws3, '과목목록(참고)');
-
-    /* 파일명 — 오늘 날짜 포함 */
-    var d = new Date();
-    var dateStr = d.getFullYear()+
-      String(d.getMonth()+1).padStart(2,'0')+
-      String(d.getDate()).padStart(2,'0');
-    var filename = '담임보조_담당수업_템플릿_'+dateStr+'.xlsx';
-
-    XLSX.writeFile(wb, filename);
-    showToast('양식 파일을 다운로드했어요: '+filename);
-  }catch(err){
-    showToast('양식 파일을 만들 수 없어요: '+err.message);
-  }
-}
 
 function updateTimetableBanner(){
   var banner = document.getElementById('tt-upload-banner');
@@ -28503,16 +27841,15 @@ function deleteClassMaster(id){
   showToast('수업이 삭제됐어요.');
 }
 
-function toggleClassMaster(){
-  var head = document.querySelector('.class-master-head');
-  var body = document.getElementById('class-master-body');
-  if(body.style.display === 'none'){
-    body.style.display = 'block';
-    head.classList.add('open');
-  } else {
-    body.style.display = 'none';
-    head.classList.remove('open');
-  }
+/* 담당 수업 입력 방식 탭 전환 (직접 입력 ↔ NEIS 시간표 업로드) */
+function switchClassMasterTab(tab){
+  document.querySelectorAll('[data-cm-tab]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.cmTab === tab);
+  });
+  var direct = document.getElementById('cm-pane-direct');
+  var neis   = document.getElementById('cm-pane-neis');
+  if(direct) direct.style.display = (tab === 'direct') ? '' : 'none';
+  if(neis)   neis.style.display   = (tab === 'neis')   ? '' : 'none';
 }
 
 /* ─── 학년·반 입력 시 실시간 검증 ─── */
@@ -29349,16 +28686,6 @@ function openClassSettings(){
 
   refreshNeisBanner();
 
-  // "다른 방법" 토글 라벨 조정
-  var altLabel = document.getElementById('alt-method-label');
-  if(altLabel){
-    if(!neisSettings.atptCode && !neisSettings.skipped){
-      altLabel.textContent = 'NEIS 연동이 어려우세요? 다른 방법 보기';
-    } else {
-      altLabel.textContent = '수동으로 NEIS 시간표 업로드하기';
-    }
-  }
-
   // 교시별 시간 편집 UI 렌더
   renderPeriodTimesList();
 }
@@ -29415,17 +28742,7 @@ function resetPeriodTimesToDefaultModal(){
   showToast('기본값으로 되돌렸어요');
 }
 
-/* details 토글 시 화살표 회전 (한 번만 등록) */
-(function(){
-  document.addEventListener('toggle', function(e){
-    if(e.target.tagName === 'DETAILS'){
-      var chev = e.target.querySelector('#alt-method-chev');
-      if(chev){
-        chev.style.transform = e.target.open ? 'rotate(90deg)' : 'rotate(0deg)';
-      }
-    }
-  }, true);
-})();
+/* (alt-method-chev details 토글 핸들러 제거됨 — class-master tabs로 대체) */
 
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
