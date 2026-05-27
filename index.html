@@ -7628,6 +7628,48 @@ window.addEventListener('load', function(){
         홈 화면의 <strong>퀵 메모</strong>로 바로 시작해보세요.
       </div>
 
+      <!-- 백업 폴더 지정 카드 (캐시 삭제 사고 방지) -->
+      <div id="ob-backup-card" style="margin:18px 0;padding:16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14"/><polyline points="3 14 9 14 11 17 13 17 15 14 21 14"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">자동 백업 설정하기</div>
+            <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;">
+              브라우저 캐시를 지우면 데이터가 사라질 수 있어요. <strong>PC 폴더 하나를 지정</strong>하면 매일 그 폴더에 자동으로 백업이 쌓여요.
+            </div>
+          </div>
+        </div>
+
+        <!-- 미지원 브라우저 안내 -->
+        <div id="ob-backup-unsupported" style="display:none;font-size:12px;color:var(--text-tertiary);background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;line-height:1.6;">
+          이 브라우저(Safari/Firefox)는 폴더 자동 저장을 지원하지 않아요.<br>
+          앱 사용 후 설정 화면에서 수시로 <strong>JSON 백업</strong>을 받아두세요.
+        </div>
+
+        <!-- 폴더 지정 영역 -->
+        <div id="ob-backup-supported" style="display:none;">
+          <div id="ob-backup-status" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;">
+            <svg id="ob-backup-status-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span id="ob-backup-status-text" style="font-size:13px;color:var(--text-tertiary);flex:1;">아직 폴더가 지정되지 않았어요</span>
+          </div>
+
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="ob-backup-pick-btn" onclick="obPickBackupFolder()" style="flex:1;padding:10px 12px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+              📁 백업 폴더 지정
+            </button>
+            <button type="button" onclick="obSkipBackupSetup()" style="padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:12.5px;cursor:pointer;font-family:inherit;">
+              나중에
+            </button>
+          </div>
+
+          <div style="font-size:11.5px;color:var(--text-tertiary);margin-top:10px;line-height:1.5;">
+            💡 <strong>추천:</strong> Documents 폴더에 "쌤로그 백업" 폴더를 새로 만들어 지정하세요.
+          </div>
+        </div>
+      </div>
+
       <!-- 동명이인 배너 (필요 시 표시) -->
       <div id="dedupe-banner" class="dedupe-banner" style="display:none;">
         <div class="dedupe-head">
@@ -18964,6 +19006,7 @@ function onboardingNext(stepNum){
       document.getElementById('ob-summary-count').textContent = totalStudents;
     }
     renderDedupeBanner();
+    refreshObBackupCard(); // 백업 카드 상태 초기화
   }
   document.getElementById('onboarding-step-1').style.display = stepNum === 1 ? 'block' : 'none';
   document.getElementById('onboarding-step-2').style.display = stepNum === 2 ? 'block' : 'none';
@@ -19798,6 +19841,73 @@ function applySampleData(gradeArg, clsArg){
   saveAll();
 }
 
+/* ═══════════════════════════════════════════
+   온보딩 STEP 3 — 백업 폴더 지정 흐름
+═══════════════════════════════════════════ */
+function refreshObBackupCard(){
+  var supportedEl   = document.getElementById('ob-backup-supported');
+  var unsupportedEl = document.getElementById('ob-backup-unsupported');
+  if(!supportedEl || !unsupportedEl) return;
+
+  if(!window.showDirectoryPicker){
+    supportedEl.style.display   = 'none';
+    unsupportedEl.style.display = 'block';
+    return;
+  }
+  supportedEl.style.display   = 'block';
+  unsupportedEl.style.display = 'none';
+
+  var folderName = '';
+  try{ folderName = localStorage.getItem('ht2_backup_folder_name') || ''; }catch(e){}
+
+  var statusText = document.getElementById('ob-backup-status-text');
+  var statusIcon = document.getElementById('ob-backup-status-icon');
+  var pickBtn    = document.getElementById('ob-backup-pick-btn');
+
+  if(folderName){
+    if(statusText){
+      statusText.innerHTML = '✓ <strong>' + folderName + '</strong> 폴더에 매일 백업돼요';
+      statusText.style.color = 'var(--text)';
+    }
+    if(statusIcon) statusIcon.setAttribute('stroke', 'var(--success)');
+    if(pickBtn){
+      pickBtn.textContent = '📁 다른 폴더로 변경';
+      pickBtn.style.background = 'transparent';
+      pickBtn.style.color = 'var(--accent)';
+    }
+  } else {
+    if(statusText){
+      statusText.textContent = '아직 폴더가 지정되지 않았어요';
+      statusText.style.color = 'var(--text-tertiary)';
+    }
+    if(statusIcon) statusIcon.setAttribute('stroke', 'var(--text-tertiary)');
+    if(pickBtn){
+      pickBtn.innerHTML = '📁 백업 폴더 지정';
+      pickBtn.style.background = 'var(--accent)';
+      pickBtn.style.color = '#fff';
+    }
+  }
+}
+
+async function obPickBackupFolder(){
+  try{
+    await pickBackupFolder();
+  }catch(e){
+    console.warn('온보딩 백업 폴더 지정 실패:', e);
+  }
+  refreshObBackupCard();
+}
+
+function obSkipBackupSetup(){
+  var card = document.getElementById('ob-backup-card');
+  if(card){
+    card.style.opacity = '0.6';
+  }
+  if(typeof showToast === 'function'){
+    showToast('나중에 설정 > 데이터 백업에서 지정할 수 있어요');
+  }
+}
+
 function completeOnboarding(){
   TEACHER_NAME  = onboardingData.teacher;
   SCHOOL_LEVEL  = onboardingData.schoolLevel || 'middle';
@@ -19863,6 +19973,15 @@ function completeOnboarding(){
   saveSettings();
   saveAll();
   if(onboardingData.isSample) applySampleData();
+
+  // 신규 사용자 기본값: 자동 백업 매일 (이미 weekly 등 명시 설정한 경우 유지)
+  try{
+    var existingCycle = localStorage.getItem('ht2_auto_backup');
+    if(!existingCycle || existingCycle === 'manual'){
+      localStorage.setItem('ht2_auto_backup', 'daily');
+    }
+  }catch(e){}
+
   try{ localStorage.setItem('ht2_onboarded','1'); }catch(e){}
 
   document.getElementById('onboarding-overlay').style.display = 'none';
