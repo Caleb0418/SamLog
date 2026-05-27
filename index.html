@@ -18,8 +18,38 @@
 <!-- Pretendard 폰트 -->
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-<!-- SheetJS for xlsx/xls/csv parsing -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- SheetJS for xlsx/xls/csv parsing — 다중 폴백으로 로드 -->
+<script>
+(function(){
+  var sources = [
+    './vendor/xlsx.full.min.js',
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+  ];
+  var idx = 0;
+  function loadNext(){
+    if(idx >= sources.length){
+      window.__XLSX_LOAD_FAILED__ = true;
+      console.error('[쌤로그] 모든 XLSX 라이브러리 소스 로드 실패. 네트워크 또는 방화벽을 확인하세요.');
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = sources[idx];
+    s.onload = function(){
+      window.__XLSX_LOADED_FROM__ = sources[idx];
+      console.log('[쌤로그] XLSX 라이브러리 로드 성공:', sources[idx]);
+    };
+    s.onerror = function(){
+      console.warn('[쌤로그] XLSX 로드 실패, 다음 소스 시도:', sources[idx]);
+      idx++;
+      loadNext();
+    };
+    document.head.appendChild(s);
+  }
+  loadNext();
+})();
+</script>
 <style>
 :root{
   /* 배경 */
@@ -7013,6 +7043,19 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .ac-neutral .hac-meta{color:var(--text-secondary);}
 /* P2-5: SVG stroke 통일 — skip to avoid breaking existing icons */
 </style>
+<script>
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    console.log('[쌤로그 진단]', {
+      XLSX_loaded: typeof XLSX !== 'undefined',
+      XLSX_source: window.__XLSX_LOADED_FROM__ || '(미로드)',
+      XLSX_load_failed: window.__XLSX_LOAD_FAILED__ === true,
+      userAgent: navigator.userAgent,
+      online: navigator.onLine
+    });
+  }, 2000);
+});
+</script>
 </head>
 <body>
 
@@ -11419,6 +11462,19 @@ function showToast(msg, undoFn, btnLabel){
   }
   toast.classList.add('show');
   setTimeout(function(){toast.classList.remove('show');}, 3500);
+}
+
+/* XLSX 라이브러리 로드 실패 시 공통 안내 */
+function showXlsxLoadError(){
+  var msg = '엑셀 라이브러리를 불러오지 못했어요. 페이지를 새로고침(F5)하거나, 학교 네트워크에서 이용 중이라면 다른 네트워크에서 시도해주세요.';
+  if(typeof showToast === 'function'){
+    showToast(msg);
+  } else {
+    alert(msg);
+  }
+  if(typeof resetUploadZone === 'function'){
+    try{ resetUploadZone(); }catch(e){}
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -18795,7 +18851,7 @@ function handleRosterFile(file){
 
   var ext = file.name.split('.').pop().toLowerCase();
   if(typeof XLSX === 'undefined'){
-    showToast('파일 파서를 불러오지 못했어요. 샘플로 시작하세요.');
+    showXlsxLoadError();
     return;
   }
   if(['xlsx','xls','csv'].indexOf(ext) < 0){
@@ -19812,7 +19868,7 @@ function updateAddClassBtn(){
 }
 function handleAddClassFile(file){
   if(typeof XLSX === 'undefined'){
-    showToast('파일 파서를 불러오지 못했어요');
+    showXlsxLoadError();
     return;
   }
   var ext = file.name.split('.').pop().toLowerCase();
@@ -22978,7 +23034,7 @@ function handleTimetableFile(file){
     reader.readAsText(file, 'UTF-8');
   } else if(ext === 'xlsx' || ext === 'xls'){
     if(typeof XLSX === 'undefined'){
-      showToast('엑셀 라이브러리를 불러올 수 없어요. CSV 파일을 사용해주세요.');
+      showXlsxLoadError();
       return;
     }
     var reader = new FileReader();
@@ -23200,7 +23256,7 @@ function handleAssignFile(file){
     reader.readAsText(file, 'UTF-8');
   } else if(ext === 'xlsx' || ext === 'xls'){
     if(typeof XLSX === 'undefined'){
-      showToast('엑셀 라이브러리를 불러올 수 없어요. CSV 파일을 사용해주세요.');
+      showXlsxLoadError();
       return;
     }
     var reader = new FileReader();
@@ -23504,7 +23560,7 @@ function closeAssignGuide(){
 /* ─── 양식 파일 다운로드 (xlsx) ─── */
 function downloadAssignTemplate(){
   if(typeof XLSX === 'undefined'){
-    showToast('엑셀 라이브러리를 불러올 수 없어요.');
+    showXlsxLoadError();
     return;
   }
   try{
