@@ -28087,6 +28087,8 @@ function deleteClassMaster(id){
 
   classMaster = classMaster.filter(function(c){return c.id !== id;});
   saveAll();
+  // 담당 수업 모달 안의 리스트도 직접 갱신 (renderClassTab은 schedule view에서 early-return하기 때문)
+  if(typeof renderClassMasterList === 'function') renderClassMasterList();
   renderClassTab();
   if(document.getElementById('tab-home').style.display === 'block') renderHome();
   if(document.getElementById('tab-students').style.display !== 'none'){
