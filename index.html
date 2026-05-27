@@ -12876,7 +12876,8 @@ function saveSettings(){
       neisSchoolName: neisSettings.schoolName,
       neisSchoolKind: neisSettings.schoolKind,
       neisLastSyncedAt: neisSettings.lastSyncedAt,
-      neisRememberKey: neisSettings.rememberKey
+      neisRememberKey: neisSettings.rememberKey,
+      neisSkipped: neisSettings.skipped || false
     }));
     // apiKey는 고정값 사용 — 저장하지 않음
   }catch(e){}
@@ -12896,6 +12897,7 @@ function loadSettings(){
       if(d.neisSchoolName) neisSettings.schoolName = d.neisSchoolName;
       if(d.neisSchoolKind) neisSettings.schoolKind = d.neisSchoolKind;
       if(d.neisLastSyncedAt) neisSettings.lastSyncedAt = d.neisLastSyncedAt;
+      if(d.neisSkipped) neisSettings.skipped = true;
       // apiKey는 고정값(NEIS_API_KEY) 사용 — localStorage 무시
     }
   }catch(e){}
@@ -13781,11 +13783,13 @@ function obSelectNeisSchool(row){
 
 function skipOnboardingNeis(){
   onboardingData._neisSkipped = true;
+  neisSettings.skipped = true;
   refreshOnboardingNeisState();
 }
 
 function undoSkipOnboardingNeis(){
   onboardingData._neisSkipped = false;
+  neisSettings.skipped = false;
   refreshOnboardingNeisState();
 }
 
@@ -25243,9 +25247,7 @@ function renderClassTab(){
   }
   if(currentClassView === 'schedule'){
     renderClassSchedule();
-    return;
-  }
-  if(currentClassView === 'today') renderClassToday();
+  } else if(currentClassView === 'today') renderClassToday();
   else if(currentClassView === 'week') renderClassWeek();
   else if(currentClassView === 'records') renderClassRecords();
   renderClassMasterList();
@@ -29270,6 +29272,10 @@ function openClassSettings(){
 
   refreshNeisBanner();
 
+  // 담당 수업 목록 갱신 (항상 최신 상태 반영)
+  if(typeof renderClassMasterList === 'function') renderClassMasterList();
+  if(typeof updateClassMasterMeta === 'function') updateClassMasterMeta();
+
   // 교시별 시간 편집 UI 렌더
   renderPeriodTimesList();
 }
@@ -29330,6 +29336,8 @@ function resetPeriodTimesToDefaultModal(){
 
 function closeClassSettings(){
   document.getElementById('class-settings-modal').classList.remove('show');
+  if(typeof saveAll === 'function') saveAll();
+  if(typeof renderClassTab === 'function') renderClassTab();
 }
 
 /* ═══════════════════════════════════════════
