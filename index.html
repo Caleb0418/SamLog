@@ -21168,7 +21168,7 @@ function renderHomeTodayClasses(){
     } else if(hour >= endHour){
       var gapH = hour - endHour;
       stateClass = 'cr-miss';
-      meta = gapH > 0 ? gapH + '시간 경과' : '미기록';
+      meta = gapH > 0 ? gapH + '시간 경과 · 수업 메모를 남기세요' : '수업 메모를 남기세요';
     } else {
       stateClass = 'cr-soon';
       var timeStr = startArr ? (String(startArr[0]).padStart(2,'0') + ':' + String(startArr[1]).padStart(2,'0')) : '';
