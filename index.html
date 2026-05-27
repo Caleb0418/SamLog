@@ -7831,7 +7831,7 @@ window.addEventListener('load', function(){
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     업로드
                   </button>
-                  <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="if(this.files.length)handleTeacherTimetableFile(this.files[0]);this.value='';">
+                  <input type="file" id="tt-file-input" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none;" onchange="console.log('[onchange] 발화, files:', this.files); if(this.files.length){handleTeacherTimetableFile(this.files[0]);} else {console.warn('[onchange] 파일 없음');} this.value='';">
                 </div>
               </div>
 
@@ -22949,129 +22949,195 @@ function rematchAllClassMasters(){
    - 결과를 classMaster에 추가하고 rematchAllClassMasters() 호출
 ═══════════════════════════════════════════ */
 function handleTeacherTimetableFile(file){
-  if(!file) return;
+  console.log('[교사시간표] === 시작 ===');
+  console.log('[교사시간표] file:', file);
+
+  if(!file){
+    console.error('[교사시간표] file이 없음 — onchange 핸들러가 안 불렸거나 파일 미선택');
+    showToast('파일이 선택되지 않았어요');
+    return;
+  }
+
+  console.log('[교사시간표] 파일명:', file.name);
+  console.log('[교사시간표] 파일크기:', file.size, 'bytes');
+  console.log('[교사시간표] MIME:', file.type);
+
   var ext = file.name.split('.').pop().toLowerCase();
-  showToast('교사별 시간표를 읽는 중...');
+  console.log('[교사시간표] 확장자:', ext);
+
+  showToast('교사별 시간표를 읽는 중... (콘솔 F12 확인)');
 
   function processRows(rows){
+    console.log('[교사시간표] processRows 진입, 행 수:', rows.length);
+    console.log('[교사시간표] 첫 5행 미리보기:');
+    for(var i=0; i<Math.min(5, rows.length); i++){
+      console.log('  행['+i+']:', JSON.stringify(rows[i]));
+    }
+    console.log('[교사시간표] 헤더 후보 영역(0~10행)에서 요일 검색 중...');
+
     var result = parseTeacherTimetableGrid(rows);
-    if(result.error){ showToast(result.error); return; }
+    console.log('[교사시간표] 파싱 결과:', result);
+
+    if(result.error){
+      console.error('[교사시간표] 파싱 에러:', result.error);
+      showToast('❌ ' + result.error);
+      return;
+    }
+
+    console.log('[교사시간표] 인식된 담당 수업 수:', result.entries.length);
+    result.entries.forEach(function(e, idx){
+      console.log('  ['+idx+']', e.grade+'학년-'+e.cls+'반-'+e.subject, '슬롯:', e.slots);
+    });
+
     applyTeacherTimetable(result);
   }
 
   if(ext === 'csv'){
+    console.log('[교사시간표] CSV 모드');
     var reader = new FileReader();
     reader.onload = function(e){
+      console.log('[교사시간표] CSV 로드 완료, 크기:', e.target.result.length);
       var text = e.target.result.replace(/^﻿/,'');
       var lines = text.split(/\r?\n/);
+      console.log('[교사시간표] 줄 수:', lines.length);
       var rows = lines.map(function(line){
         return line.split(',').map(function(c){return c.trim().replace(/^"|"$/g,'');});
       });
       processRows(rows);
     };
+    reader.onerror = function(err){
+      console.error('[교사시간표] CSV 읽기 실패:', err);
+      showToast('CSV 파일을 읽을 수 없어요');
+    };
     reader.readAsText(file, 'UTF-8');
   } else if(ext === 'xlsx' || ext === 'xls'){
+    console.log('[교사시간표] Excel 모드');
     if(typeof XLSX === 'undefined'){
-      showXlsxLoadError();
+      console.error('[교사시간표] XLSX 라이브러리 미로딩!');
+      showToast('xlsx 라이브러리를 불러올 수 없어요');
       return;
     }
+    console.log('[교사시간표] XLSX 라이브러리 OK');
     var reader = new FileReader();
     reader.onload = function(e){
       try{
+        console.log('[교사시간표] Excel 바이너리 로드 완료, 크기:', e.target.result.byteLength || e.target.result.length);
         var wb;
         if(ext === 'xls'){
           wb = XLSX.read(e.target.result, {type:'binary'});
         } else {
           wb = XLSX.read(e.target.result, {type:'array'});
         }
+        console.log('[교사시간표] 워크북 시트들:', wb.SheetNames);
         var ws = wb.Sheets[wb.SheetNames[0]];
         var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        console.log('[교사시간표] 시트 변환 완료, 행수:', rows.length);
         processRows(rows);
       }catch(err){
+        console.error('[교사시간표] Excel 파싱 실패:', err);
         showToast('파일을 읽을 수 없어요: '+err.message);
       }
     };
+    reader.onerror = function(err){
+      console.error('[교사시간표] Excel 읽기 실패:', err);
+      showToast('Excel 파일을 읽을 수 없어요');
+    };
     if(ext === 'xls') reader.readAsBinaryString(file);
     else reader.readAsArrayBuffer(file);
+  } else if(ext === 'pdf'){
+    console.error('[교사시간표] PDF 파일임! 격자형 엑셀이 아니에요.');
+    showToast('❌ PDF는 지원하지 않아요. NEIS에서 엑셀(💾 저장 버튼)로 받아주세요.');
+  } else if(ext === 'html' || ext === 'htm'){
+    console.error('[교사시간표] HTML 파일임! 격자형 엑셀이 아니에요.');
+    showToast('❌ HTML 파일은 지원하지 않아요. NEIS에서 엑셀로 받아주세요.');
   } else {
-    showToast('xls, xlsx, csv 파일만 지원해요.');
+    console.error('[교사시간표] 지원 안 되는 확장자:', ext);
+    showToast('❌ xls, xlsx, csv 파일만 지원해요. (받은 확장자: '+ext+')');
   }
 }
 
 function parseTeacherTimetableGrid(rows){
-  if(!rows || rows.length < 2) return { error:'파일에 데이터가 없어요.' };
+  console.log('[파서] 진입, 행수:', rows ? rows.length : 0);
+  if(!rows || rows.length < 2){
+    return { error:'파일에 데이터가 없어요. (행 수: '+(rows?rows.length:0)+')' };
+  }
 
-  // 1. 헤더 행 찾기 — 요일(월/화/수/목/금) 단어가 들어있는 행
   var headerIdx = -1;
-  var dayCols = {}; // {colIdx: dayNumber(1=월~7=일)}
+  var dayCols = {};
   var DAY_MAP = {'월':1,'화':2,'수':3,'목':4,'금':5,'토':6,'일':7};
 
-  for(var i=0; i<Math.min(rows.length, 10); i++){
+  // 헤더 행 탐색 — 최대 15행까지 시도 (NEIS 다양한 형식 대응)
+  for(var i=0; i<Math.min(rows.length, 15); i++){
     var row = rows[i];
     if(!row) continue;
     var found = {};
     for(var j=0; j<row.length; j++){
-      var cell = String(row[j] || '').trim();
-      // "월요일", "월" 등 매칭
-      var m = cell.match(/^([월화수목금토일])(?:요일)?$/);
+      var cell = String(row[j] || '').trim().replace(/\s+/g,'');
+      // 다양한 요일 표기 매칭: "월", "월요일", "MON" 등
+      var m = cell.match(/^([월화수목금토일])(요일)?$/);
       if(m && DAY_MAP[m[1]]){
         found[j] = DAY_MAP[m[1]];
       }
     }
-    // 평일(월~금) 5개가 다 잡히면 헤더로 인정
     var dayCount = 0;
     for(var k in found){
       if(found[k] >= 1 && found[k] <= 5) dayCount++;
     }
+    console.log('[파서] 행['+i+'] 요일 발견:', found, '평일수:', dayCount);
     if(dayCount >= 5){
       headerIdx = i;
       dayCols = found;
+      console.log('[파서] ✅ 헤더 행 발견: 행['+i+']');
       break;
     }
   }
 
   if(headerIdx === -1){
-    return { error:'교사별 시간표 형식이 아닌 것 같아요. 헤더에 "월요일~금요일" 컬럼이 필요해요.' };
+    console.error('[파서] ❌ 헤더 행을 못 찾음');
+    console.log('[파서] 처음 10행 raw 덤프:');
+    for(var d=0; d<Math.min(10, rows.length); d++){
+      console.log('  ['+d+']:', JSON.stringify(rows[d]));
+    }
+    return { error:'시간표 형식이 아닌 것 같아요. 헤더에 "월요일~금요일"이 있어야 해요. (콘솔 확인)' };
   }
 
-  // 2. 교시 컬럼 찾기 — 헤더 행의 다른 셀 중 "교시" 포함
+  // 교시 컬럼 탐색
   var perioCol = -1;
-  for(var j=0; j<rows[headerIdx].length; j++){
-    var c = String(rows[headerIdx][j] || '').replace(/\s+/g,'');
-    if(c.indexOf('교시') !== -1){ perioCol = j; break; }
+  for(var j2=0; j2<rows[headerIdx].length; j2++){
+    var c2 = String(rows[headerIdx][j2] || '').replace(/\s+/g,'');
+    if(c2.indexOf('교시') !== -1 || c2 === '교시' || c2 === '교 시'){
+      perioCol = j2;
+      break;
+    }
   }
   if(perioCol === -1){
-    // 못 찾으면 요일 컬럼들 중 가장 작은 인덱스 바로 왼쪽으로 가정
-    var minDayCol = Math.min.apply(null, Object.keys(dayCols).map(Number));
-    perioCol = minDayCol - 1;
-    if(perioCol < 0) perioCol = 0;
+    var dayColNums = Object.keys(dayCols).map(Number);
+    var minDayCol = Math.min.apply(null, dayColNums);
+    perioCol = Math.max(0, minDayCol - 1);
+    console.log('[파서] 교시 컬럼 못 찾음, 추정:', perioCol);
+  } else {
+    console.log('[파서] 교시 컬럼:', perioCol);
   }
 
-  // 3. 셀 파싱: "N학년-과목명(반)" 또는 "N학년-과목명" (괄호 없는 경우)
-  //    줄바꿈/공백/탭/가운뎃점 변형 정규화
   function parseCellEntry(raw){
-    if(!raw) return null;
+    if(raw === undefined || raw === null) return null;
     var s = String(raw).replace(/\s+/g,'').replace(/[·•]/g,'·');
     if(!s) return null;
-    // 패턴: 숫자+학년+(구분자)+과목+선택적(반번호)
-    var m = s.match(/^(\d+)학년[\-:]?(.+?)(?:\((\d+)\))?$/);
-    if(!m) return null;
-    var grade = m[1];
-    var subject = m[2];
-    var cls = m[3] || '';
-    if(!grade || !subject) return null;
-    return { grade: grade, cls: cls, subject: subject };
+    // 패턴 1: "1학년-국어(2)" 또는 "1학년-국어"
+    var m = s.match(/^(\d+)학년[\-:\.]?(.+?)(?:\((\d+)\))?$/);
+    if(m){
+      return { grade: m[1], cls: m[3]||'', subject: m[2] };
+    }
+    return null;
   }
 
-  // 4. 데이터 행 순회
-  var aggregated = {}; // 중복 제거용 key: "grade-cls-subject" → {slots:[{day,period}]}
+  var aggregated = {};
   var rowCountFromHeader = 0;
+  var cellSampleLogged = 0;
 
   for(var r=headerIdx+1; r<rows.length; r++){
     var row = rows[r];
     if(!row) continue;
-
-    // 교시 추출
     var perioRaw = String(row[perioCol] || '').replace(/\s+/g,'');
     var perioMatch = perioRaw.match(/(\d+)/);
     if(!perioMatch) continue;
@@ -23079,29 +23145,32 @@ function parseTeacherTimetableGrid(rows){
     if(!period || period < 1 || period > 12) continue;
     rowCountFromHeader++;
 
-    // 각 요일 컬럼 셀 파싱
     Object.keys(dayCols).forEach(function(colStr){
       var col = parseInt(colStr, 10);
       var day = dayCols[col];
-      if(day > 5) return; // 주말 제외
+      if(day > 5) return;
       var cellRaw = row[col];
-      if(cellRaw === undefined || cellRaw === null) return;
+      if(cellRaw === undefined || cellRaw === null || cellRaw === '') return;
 
-      // 셀 안에 줄바꿈으로 여러 항목 있을 수 있음 → split
+      // 샘플 셀 3개만 로그
+      if(cellSampleLogged < 3){
+        console.log('[파서] 셀 샘플 (행'+r+', 열'+col+', 교시'+period+', 요일'+day+'):', JSON.stringify(cellRaw));
+        cellSampleLogged++;
+      }
+
       var parts = String(cellRaw).split(/[\n\r]+/);
       parts.forEach(function(p){
         var entry = parseCellEntry(p);
-        if(!entry) return;
+        if(!entry){
+          if(cellSampleLogged <= 3){
+            console.warn('[파서] 셀 파싱 실패:', JSON.stringify(p));
+          }
+          return;
+        }
         var key = entry.grade + '-' + entry.cls + '-' + entry.subject;
         if(!aggregated[key]){
-          aggregated[key] = {
-            grade: entry.grade,
-            cls: entry.cls,
-            subject: entry.subject,
-            slots: []
-          };
+          aggregated[key] = { grade: entry.grade, cls: entry.cls, subject: entry.subject, slots: [] };
         }
-        // 중복 슬롯 방지
         var dup = aggregated[key].slots.some(function(s){
           return s.day === day && s.period === period;
         });
@@ -23110,15 +23179,16 @@ function parseTeacherTimetableGrid(rows){
     });
   }
 
-  if(rowCountFromHeader === 0){
-    return { error:'교시 행을 찾지 못했어요. 파일 형식을 확인해주세요.' };
-  }
+  console.log('[파서] 데이터 행 처리 수:', rowCountFromHeader);
+  console.log('[파서] 추출된 고유 수업 수:', Object.keys(aggregated).length);
 
+  if(rowCountFromHeader === 0){
+    return { error:'교시 행을 찾지 못했어요. (교시 컬럼: '+perioCol+')' };
+  }
   var entriesArr = Object.keys(aggregated).map(function(k){ return aggregated[k]; });
   if(entriesArr.length === 0){
     return { error:'담당 수업을 찾지 못했어요. 셀 형식이 "N학년-과목명(반)"인지 확인해주세요.' };
   }
-
   return { entries: entriesArr, totalRows: rowCountFromHeader };
 }
 
