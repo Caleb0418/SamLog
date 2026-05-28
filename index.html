@@ -7437,21 +7437,25 @@ window.addEventListener('load', function(){
   <div class="onboarding-card">
     <!-- STEP 1: 환영 + 기본정보 -->
     <div id="onboarding-step-1" class="onboarding-step">
-      <!-- 샘플 체험 카드 -->
-      <button type="button" onclick="startWithSample()" style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;margin-bottom:18px;padding:12px 14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.12s;" onmouseover="this.style.borderColor='var(--accent)';" onmouseout="this.style.borderColor='var(--border-accent)';">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-          <span style="font-size:18px;line-height:1;">💡</span>
-          <div style="min-width:0;">
-            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:2px;">처음이세요?</div>
-            <div style="font-size:12px;color:var(--text-secondary);">쌤로그의 모든 기능을 샘플 데이터로 바로 체험해볼 수 있어요.</div>
-          </div>
-        </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+      <!-- 분기: 샘플 체험 vs 내 학급 시작 (동등 두 갈래) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <button type="button" onclick="startWithSample()" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;background:var(--accent-dim);border:1.5px solid var(--accent);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--accent-hover)';" onmouseout="this.style.borderColor='var(--accent)';">
+          <span style="font-size:20px;line-height:1;">💡</span>
+          <div style="font-size:13px;font-weight:700;color:var(--accent);">샘플로 둘러보기</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;">약 3분 · 입력할 게 없어요<br>가상 학급으로 바로 체험</div>
+          <div style="margin-top:4px;font-size:10px;font-weight:700;background:var(--accent);color:#fff;border-radius:4px;padding:2px 7px;display:inline-block;">추천</div>
+        </button>
+        <button type="button" onclick="document.getElementById('ob-teacher').focus()" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--text-tertiary)';" onmouseout="this.style.borderColor='var(--border)';">
+          <span style="font-size:20px;line-height:1;">🏫</span>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">내 학급으로 시작</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;">명단·시간표 직접 등록<br>처음부터 내 학급 데이터로</div>
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-bottom:18px;line-height:1.6;">모든 데이터는 이 기기에만 저장돼요<br>샘플은 실제 학급과 섞이지 않고 언제든 비울 수 있어요</div>
 
       <div class="onboarding-step-badge">1 / 3</div>
-      <div class="onboarding-title">쌤로그에 오신 걸 환영합니다</div>
-      <div class="onboarding-desc">담당 정보를 알려주세요. 모든 데이터는 이 기기에만 저장됩니다.</div>
+      <div class="onboarding-title">내 학급 정보를 입력해주세요</div>
+      <div class="onboarding-desc">담당 역할과 학급을 알려주세요. 나중에 설정에서 바꿀 수 있어요.</div>
 
       <!-- 담당 역할 -->
       <div class="ob-field-group">
@@ -7800,6 +7804,9 @@ window.addEventListener('load', function(){
         월간 일정
       </button>
     </div>
+
+    <!-- 샘플 모드 띠배너 (샘플 체험 중일 때만 표시) -->
+    <div id="home-sample-banner"></div>
 
     <!-- 시작 가이드 카드 (최상단 — 퀵메모 위) -->
     <div id="home-setup-guide"></div>
@@ -8769,6 +8776,9 @@ window.addEventListener('load', function(){
 
   <!-- 반 선택 칩 -->
   <div id="att-class-bar"></div>
+
+  <!-- 첫 주 루틴 배너 (동적 렌더) -->
+  <div id="att-routine-banner"></div>
 
   <!-- 뷰 토글 -->
   <div class="att-view-tabs">
@@ -11759,6 +11769,21 @@ function renderSidebar(filter){
   var container = document.getElementById('sidebar-content');
   document.getElementById('total-count').textContent = students.length+'명';
 
+  if(students.length === 0){
+    container.innerHTML =
+      '<div style="padding:36px 20px 28px;text-align:center;">'+
+        '<div style="width:48px;height:48px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;">👥</div>'+
+        '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">아직 등록된 학생이 없어요</div>'+
+        '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6;">명단을 불러오거나<br>번호만으로 빈 명단을 만들 수 있어요</div>'+
+        '<div style="display:flex;flex-direction:column;gap:8px;align-items:stretch;">'+
+          '<button type="button" onclick="openRosterReplace()" style="padding:10px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:600;background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:inherit;">명단 가져오기 (엑셀·CSV)</button>'+
+          '<button type="button" onclick="(function(){openRosterReplace();setTimeout(acStartManualEntry,150);})()" style="padding:10px 16px;border-radius:var(--radius-md);font-size:13px;font-weight:600;background:transparent;border:1.5px dashed var(--border-strong);color:var(--text);cursor:pointer;font-family:inherit;">번호만으로 빈 명단 만들기</button>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--text-tertiary);margin-top:16px;">명단은 이 컴퓨터에만 저장돼요</div>'+
+      '</div>';
+    return;
+  }
+
   var filtered = students.filter(function(s){
     return !q || s.name.toLowerCase().includes(q);
   });
@@ -14518,16 +14543,23 @@ function buildStepLocked(n, title){
 function buildStep1Active(){
   var card = document.createElement('div');
   card.className = 'step-card active';
+  var _emptyNote = replyState.message === ''
+    ? '<div style="display:flex;align-items:flex-start;gap:8px;background:var(--success-dim);border:1px solid rgba(27,127,79,0.3);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:14px;">'+
+        '<span style="font-size:15px;line-height:1.4;flex-shrink:0;">🔒</span>'+
+        '<span style="font-size:12px;color:var(--success);line-height:1.6;">학생 이름은 \'학생A\'로 치환되어 전송돼요. 외부 AI는 실제 학생을 알 수 없어요.</span>'+
+      '</div>'
+    : '';
   card.innerHTML =
     '<div class="step-active-body">'+
       '<div class="step-head"><div class="step-num">1</div><div>'+
         '<div class="step-title">받은 메시지를 붙여넣으세요</div>'+
         '<div class="step-sub">학부모에게 받은 문자나 카톡 내용을 그대로 붙여넣으면 돼요</div>'+
       '</div></div>'+
+      _emptyNote+
       '<textarea class="textarea-large" id="reply-message" placeholder="예) 안녕하세요 선생님. 저희 아이가 어제 학교에서 친구와 다툼이 있었다고 하는데...">'+escapeHtml(replyState.message)+'</textarea>'+
       '<div class="field-meta-row">'+
         '<span class="field-hint" id="reply-msg-meta">'+replyState.message.length+'자</span>'+
-        '<button class="btn-primary" id="reply-next-1" disabled>학생 선택 →</button>'+
+        '<button class="btn-primary" id="reply-next-1" disabled>'+(replyState.message === '' ? '✍️ 첫 답장 만들어보기' : '학생 선택 →')+'</button>'+
       '</div>'+
     '</div>';
   setTimeout(function(){
@@ -14537,7 +14569,9 @@ function buildStep1Active(){
     ta.oninput = function(){
       replyState.message = ta.value;
       document.getElementById('reply-msg-meta').textContent = ta.value.length+'자';
-      btn.disabled = ta.value.trim().length < 5;
+      var trimmed = ta.value.trim();
+      btn.disabled = trimmed.length < 5;
+      btn.textContent = trimmed.length > 0 ? '학생 선택 →' : '✍️ 첫 답장 만들어보기';
     };
     btn.onclick = function(){
       replyState.message = ta.value.trim();
@@ -19633,7 +19667,39 @@ function startWithSample(){
   onboardingData.grade         = '2';
   onboardingData.classNum      = '3';
   onboardingData.parsedStudents = sample;
+  try{ localStorage.setItem('ht2_sample_mode','1'); }catch(e){}
   completeOnboarding();
+}
+
+function exitSampleMode(thenSetup){
+  var ok = confirm('샘플 데이터를 비울까요?\n\n샘플로 만든 학급·기록이 사라지고 빈 상태에서 새로 시작해요.\n(샘플은 가상 데이터라 되돌릴 필요가 없어요.)');
+  if(!ok) return;
+  try{
+    // saveAll이 저장하는 전역과 1:1 대응 — 빈 값으로 초기화 후 saveAll로 덮어씀
+    classes = {};
+    classMaster = [];
+    schoolTimetable = {};
+    if(typeof timetableOverrides !== 'undefined') timetableOverrides = {};
+    if(typeof timetableChangeHistory !== 'undefined') timetableChangeHistory = [];
+    if(typeof ttSyncState !== 'undefined') ttSyncState = {};
+    if(typeof adhocSlots !== 'undefined') adhocSlots = [];
+    creativeActivities = [];
+    if(typeof classSchedule !== 'undefined') classSchedule = [];
+    if(typeof attendanceRecords !== 'undefined') attendanceRecords = {};
+    if(typeof schoolSchedule !== 'undefined') schoolSchedule = {};
+    if(typeof userSchedule !== 'undefined') userSchedule = {};
+    currentClassKey = '';
+    if(typeof syncActiveClass === 'function') syncActiveClass();
+    saveAll();
+  }catch(e){ console.error('exitSampleMode 초기화 실패', e); }
+  try{ localStorage.removeItem('ht2_sample_mode'); }catch(e){}
+  if(thenSetup){
+    try{ localStorage.removeItem('ht2_onboarded'); }catch(e){}
+    location.reload();
+  } else {
+    showToast('샘플을 비웠어요. 내 학급으로 시작해보세요.');
+    setTimeout(function(){ location.reload(); }, 1400);
+  }
 }
 
 function loadSampleRoster(){
@@ -19984,6 +20050,7 @@ function completeOnboarding(){
   }catch(e){}
 
   try{ localStorage.setItem('ht2_onboarded','1'); }catch(e){}
+  try{ if(!localStorage.getItem('ht2_onboarded_at')) localStorage.setItem('ht2_onboarded_at', new Date().toISOString()); }catch(e){}
 
   document.getElementById('onboarding-overlay').style.display = 'none';
   updateHeaderClass();
@@ -22021,6 +22088,26 @@ function renderHome(){
   _tmEditMode = false;
   renderTeacherMemoCard();
 
+  // 샘플 모드 띠배너
+  (function(){
+    var isSample = false;
+    try{ isSample = localStorage.getItem('ht2_sample_mode') === '1'; }catch(e){}
+    var mount = document.getElementById('home-sample-banner');
+    if(!mount) return;
+    if(!isSample){ mount.innerHTML = ''; return; }
+    mount.innerHTML =
+      '<div style="display:flex;align-items:center;gap:12px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:14px;">'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--accent);">샘플 둘러보기 중 · 마음껏 눌러보세요</div>'+
+          '<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">가상의 학급이에요. 퀵메모에 @이름을 입력해 기록이 어디로 쌓이는지 따라가 보세요.</div>'+
+        '</div>'+
+        '<button type="button" id="sample-clear-btn" style="flex-shrink:0;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary);cursor:pointer;font-family:inherit;">샘플 비우기</button>'+
+        '<button type="button" id="sample-convert-btn" style="flex-shrink:0;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:inherit;">내 학급 만들기 →</button>'+
+      '</div>';
+    document.getElementById('sample-clear-btn').onclick = function(){ exitSampleMode(false); };
+    document.getElementById('sample-convert-btn').onclick = function(){ exitSampleMode(true); };
+  })();
+
   // 시작 가이드 카드 (신규 사용자)
   var guideContainer = document.getElementById('home-setup-guide');
   if(guideContainer) guideContainer.innerHTML = renderSetupGuideCard();
@@ -23381,7 +23468,26 @@ function saveQuickMemo(){
         }
       }, '되돌리기');
     } else {
-      showToast(toastMsg);
+      // 단일 학생 멘션 → aha-moment 토스트 (기록 보기 CTA)
+      if(matches.matched.length === 1 && allMentionStudents.length === 0){
+        var _ahaSt = matches.matched[0];
+        var _ahaKey = _ahaSt._classKey;
+        showToast(
+          '이 메모가 '+savedNames[0]+'의 타임라인에 저장됐어요',
+          function(){
+            if(_ahaKey && _ahaKey !== currentClassKey && typeof switchClassKey === 'function'){
+              switchClassKey(_ahaKey);
+            }
+            switchTab('students');
+            setTimeout(function(){
+              if(typeof selectStudent === 'function') selectStudent(_ahaSt.num);
+            }, 100);
+          },
+          '기록 보기'
+        );
+      } else {
+        showToast(toastMsg);
+      }
     }
   }
   renderHome();  // 통계·최근 메모 갱신
@@ -24167,10 +24273,87 @@ var attCurrentView = 'daily';
 var smvState = { studentNum: null, year: null, month: null };
 var cmmState = { year: null, month: null };
 
+function _isWithinFirstWeek(){
+  try{
+    var at = localStorage.getItem('ht2_onboarded_at');
+    if(!at) return false;
+    return (Date.now() - new Date(at).getTime()) < 7*24*60*60*1000;
+  }catch(e){ return false; }
+}
+
+function _isAttDoneForDate(dateStr){
+  var dayRecs = attendanceRecords[dateStr];
+  if(!dayRecs) return false;
+  if(dayRecs.__confirmed) return true;
+  return Object.keys(dayRecs).some(function(k){
+    return k !== '__confirmed' && (dayRecs[k]||[]).length > 0;
+  });
+}
+
+function _renderAttRoutineBanner(){
+  var mount = document.getElementById('att-routine-banner');
+  if(!mount) return;
+  var dismissed = false;
+  try{ dismissed = localStorage.getItem('ht2_att_routine_banner_dismissed') === '1'; }catch(e){}
+  if(!_isWithinFirstWeek() || dismissed){ mount.innerHTML = ''; return; }
+
+  var today = getTodayDate();
+  var todayObj = new Date(today);
+  var dow = todayObj.getDay();
+  var monday = new Date(todayObj);
+  monday.setDate(todayObj.getDate() - (dow === 0 ? 6 : dow - 1));
+
+  var dayLabels = ['월','화','수','목','금'];
+  var doneDays = 0;
+  var dayChips = '';
+  for(var i = 0; i < 5; i++){
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    var dateStr = formatDateForInput(d);
+    var isToday = dateStr === today;
+    var isFuture = dateStr > today;
+    var isDone = !isFuture && _isAttDoneForDate(dateStr);
+    if(isDone) doneDays++;
+    var bg, color, label, border;
+    if(isToday){
+      bg = 'var(--accent)'; color = '#fff'; label = dayLabels[i]; border = 'none';
+    } else if(isDone){
+      bg = 'var(--success-dim)'; color = 'var(--success)'; label = '✓'; border = '1px solid var(--success)';
+    } else if(isFuture){
+      bg = 'transparent'; color = 'var(--text-tertiary)'; label = dayLabels[i]; border = '1px dashed var(--border)';
+    } else {
+      bg = 'var(--bg-elevated)'; color = 'var(--text-tertiary)'; label = dayLabels[i]; border = '1px solid var(--border)';
+    }
+    dayChips +=
+      '<div style="flex:1;text-align:center;padding:6px 4px;border-radius:6px;font-size:12px;font-weight:600;background:'+bg+';color:'+color+';border:'+border+';">'+label+'</div>';
+  }
+
+  var streakMsg = doneDays > 0
+    ? '이번 주 '+doneDays+'일 기록 중 🔥'
+    : '오늘 출결을 기록해보세요';
+
+  mount.innerHTML =
+    '<div style="background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px;">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'+
+        '<div style="flex:1;font-size:13px;font-weight:700;color:var(--accent);">오늘 출결, 1분이면 끝나요</div>'+
+        '<button type="button" id="att-routine-close-btn" style="background:none;border:none;font-size:16px;color:var(--text-tertiary);cursor:pointer;padding:0 2px;line-height:1;font-family:inherit;">×</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:6px;">'+dayChips+'</div>'+
+      '<div style="font-size:11px;color:var(--text-secondary);margin-top:8px;">'+streakMsg+'</div>'+
+    '</div>';
+
+  document.getElementById('att-routine-close-btn').onclick = function(){
+    try{ localStorage.setItem('ht2_att_routine_banner_dismissed','1'); }catch(e){}
+    mount.innerHTML = '';
+  };
+}
+
 function renderAttendanceTab(){
   // 반 선택 칩 바 (항상 먼저 렌더 — 활성반 없어도 + 반 추가 칩으로 시작 가능)
   var bar = document.getElementById('att-class-bar');
   if(bar) bar.innerHTML = buildClassChipBar(currentClassKey, 'switchClassKey', { showMenu: true });
+
+  _renderAttRoutineBanner();
 
   var c = getActiveClass();
   if(!c || !c.students || c.students.length === 0){
@@ -25709,11 +25892,16 @@ function saveAttSettingsFromModal(){
 }
 
 function renderClassTab(){
-  // 담임반이 시스템에 하나라도 있으면 반시간표 버튼 항상 표시 (currentClassKey와 무관)
-  var _hasPrimary = !!getPrimaryClass();
+  // 담임반 OR 담당 반이 하나라도 있으면 시간표/창체 버튼 표시
+  var _primary = getPrimaryClass();
+  var _hasAnyClass = !!_primary || Object.keys(classes).length > 0;
   var _scheduleBtn = document.getElementById('class-view-btn-schedule');
-  if(_scheduleBtn) _scheduleBtn.style.display = _hasPrimary ? '' : 'none';
-  if(!_hasPrimary && currentClassView === 'schedule'){
+  if(_scheduleBtn){
+    _scheduleBtn.style.display = _hasAnyClass ? '' : 'none';
+    // 담임: '반 시간표' / 교과 담당: '창체 일정 등록'
+    _scheduleBtn.textContent = _primary ? '반 시간표' : '창체 일정';
+  }
+  if(!_hasAnyClass && currentClassView === 'schedule'){
     currentClassView = 'today';
   }
   if(currentClassView === 'schedule'){
@@ -25726,8 +25914,10 @@ function renderClassTab(){
 }
 
 function switchClassView(view){
-  // 담임반이 미지정일 때만 'today'로 보정 (currentClass가 교과 담당이어도 schedule 진입 허용)
-  if(view === 'schedule' && !getPrimaryClass()) view = 'today';
+  // 담당 반이 하나도 없을 때만 'today'로 보정 (교과 담당도 창체 등록을 위해 schedule 진입 가능)
+  if(view === 'schedule' && Object.keys(classes).length === 0) view = 'today';
+  // 교과 담당(담임반 없음)이 schedule 진입 시 창체 서브탭 강제
+  if(view === 'schedule' && !getPrimaryClass()) _csSubTab = 'creative';
   if(view === 'today') currentTodayDate = new Date();
   currentClassView = view;
   document.querySelectorAll('.class-view-btn').forEach(function(b){
@@ -25754,14 +25944,15 @@ function getHomeroomGrade(){
   if(!c || !c.isPrimary) return null;
   return parseInt(c.grade);
 }
-// 반 시간표 뷰 버튼 가시성 갱신 (담임반에서만 노출)
+// 반 시간표 뷰 버튼 가시성·라벨 갱신 (담임: '반 시간표', 교과 담당: '창체 일정 등록')
 function updateClassScheduleBtnVisibility(){
   var btn = document.getElementById('class-view-btn-schedule');
   if(!btn) return;
-  // 담임반이 시스템에 하나라도 존재하면 항상 표시 (currentClassKey와 무관)
-  var hasPrimary = !!getPrimaryClass();
-  btn.style.display = hasPrimary ? '' : 'none';
-  if(!hasPrimary && currentClassView === 'schedule'){
+  var primary = getPrimaryClass();
+  var hasAnyClass = !!primary || Object.keys(classes).length > 0;
+  btn.style.display = hasAnyClass ? '' : 'none';
+  btn.textContent = primary ? '반 시간표' : '창체 일정';
+  if(!hasAnyClass && currentClassView === 'schedule'){
     switchClassView('today');
   }
 }
@@ -25911,14 +26102,27 @@ function renderClassSchedule(){
   var container = document.getElementById('class-view-schedule');
   if(!container) return;
 
-  // 항상 담임반 기준으로 표시 (currentClassKey가 교과 담당반이어도)
+  // 담임반 우선, 없으면 교과 담당 모드: 창체 시간표만 단독 렌더
   var activeClass = getPrimaryClass();
   if(!activeClass){
-    container.innerHTML =
-      '<div style="padding:40px 16px;text-align:center;color:var(--text-tertiary);">' +
-        '<div style="font-size:14px;margin-bottom:6px;">담임반을 지정하세요</div>' +
-        '<div style="font-size:12px;">반 시간표는 담임반 학생들의 주간 시간표·창체 일정을 보여줘요.<br>설정에서 담임반을 지정하거나, 반 추가 시 담임으로 등록하세요.</div>' +
-      '</div>';
+    // 교과 담당: 서브탭 없이 창체만 렌더 (학년 필터링 기준 없음 → 전학년 가상 객체)
+    if(Object.keys(classes).length === 0){
+      container.innerHTML =
+        '<div style="padding:40px 16px;text-align:center;color:var(--text-tertiary);">' +
+          '<div style="font-size:14px;margin-bottom:6px;">담당 반을 먼저 등록하세요</div>' +
+          '<div style="font-size:12px;">창체 일정 등록은 담당 반이 있어야 사용할 수 있어요.</div>' +
+        '</div>';
+      return;
+    }
+    _csSubTab = 'creative';
+    container.innerHTML = '<div id="cs-subtab-content"></div>';
+    // 교과 담당용 가상 컨텍스트: grade는 활성 반 학년을 기본값으로
+    var ac = getActiveClass();
+    var fallbackClass = {
+      grade: (ac && ac.grade) ? ac.grade : '',
+      classNum: (ac && ac.classNum) ? ac.classNum : ''
+    };
+    renderClassScheduleCreativeTab(fallbackClass);
     return;
   }
 
@@ -26259,7 +26463,6 @@ var _csInlineAdd = null;
 var _CS_INLINE_FIELDS = ['date','periods','target','category','originalText'];
 
 function openCsInlineAdd(){
-  if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
   var ac = getActiveClass ? getActiveClass() : null;
   var today = typeof formatDateForInput === 'function' ? formatDateForInput(new Date()) : new Date().toISOString().slice(0,10);
   _csInlineAdd = {
@@ -26361,7 +26564,6 @@ function _csRenderInlineAddRow(){
 }
 
 function openCsFormModal(itemId){
-  if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
   document.getElementById('cs-form-modal').classList.add('show');
   document.getElementById('cs-form-id').value = itemId || '';
 
@@ -26508,9 +26710,11 @@ function closeCsEmptyPrompt(){
 }
 
 function toggleCsOnSchedule(){
-  // 창체 일정이 하나도 없으면, 토글 대신 선택지 팝업 표시
+  // 창체 일정이 하나도 없으면, 안내 후 창체 일정 탭으로 이동
   if(!Array.isArray(classSchedule) || classSchedule.length === 0){
-    openCsEmptyPrompt();
+    showToast('등록된 창체 일정이 없어요. 먼저 창체 일정을 등록해 주세요.');
+    switchClassView('schedule');
+    setTimeout(function(){ switchCsSubTab('creative'); }, 30);
     return;
   }
   _csShowOnSchedule = !_csShowOnSchedule;
@@ -26552,7 +26756,6 @@ function showCsCellInfo(id){
 }
 
 function openCsImportModal(){
-  if(!isHomeroomActive()){ showToast('담임반에서만 이용할 수 있어요'); return; }
   document.getElementById('cs-import-modal').classList.add('show');
   var fileName = document.getElementById('cs-import-file-name');
   if(fileName) fileName.textContent = '';
@@ -27459,11 +27662,10 @@ function renderClassToday(){
     return;
   }
 
-  // 창체 보기 토글 버튼 (담임반에서만)
+  // 창체 보기 토글 버튼 (담임/교과 담당 공통)
   var activeClass = getActiveClass();
-  var _hasPrimary = activeClass && activeClass.isPrimary;
-  var _csToggleHtml = _hasPrimary ?
-    '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' + _csToggleBtnHtml([viewDate]) + '</div>' : '';
+  var _csToggleHtml =
+    '<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">' + _csToggleBtnHtml([viewDate]) + '</div>';
 
   var html = '<div class="class-day-card">';
   html += '<div class="class-day-head">'+
@@ -28019,16 +28221,15 @@ function renderClassWeek(opts){
       '</button>')+
     '</div>';
 
-  // 창체 보기 토글 버튼 (담임반에서만)
-  var _csHasPrimary = activeClassObj && activeClassObj.isPrimary;
+  // 창체 보기 토글 버튼 (담임/교과 담당 공통)
   var _csHintText = (mode === 'primary')
     ? '반 시간표에는 우리 반 전체 창체 시간이 표시됩니다.'
     : '주간 시간표에는 내 담당 수업과 겹치는 창체만 표시돼요. 임장 일정 확인용입니다.';
-  var _csToggleHtml = _csHasPrimary ?
+  var _csToggleHtml =
     '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin:8px 0;">' +
       _csToggleBtnHtml(weekDates) +
       (_csShowOnSchedule ? '<div style="font-size:11px;color:var(--text-tertiary);line-height:1.5;text-align:right;">' + _csHintText + '</div>' : '') +
-    '</div>' : '';
+    '</div>';
 
   // 그리드 HTML
   var html = headerHtml + _csToggleHtml + legendHtml;
