@@ -8598,7 +8598,7 @@ window.addEventListener('load', function(){
           <span class="tour-sub-counter">(<span id="tour-sub-cur">1</span>/<span id="tour-sub-total">3</span>)</span>
         </div>
         <div class="tour-head-right">
-          <span class="tour-total-counter"><span id="tour-cur">1</span>/20</span>
+          <span class="tour-total-counter"><span id="tour-cur">1</span>/21</span>
           <button class="tour-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
         </div>
       </div>
@@ -18111,7 +18111,10 @@ function renderSaenggibuProgressView(){
   var incomplete = [];
   students.forEach(function(s){
     var done = 0;
-    areaCodes.forEach(function(code){ if(matrix[s.num][code]) done++; });
+    var stuMatrix = matrix[ck+'_'+s.num];
+    if(stuMatrix){
+      areaCodes.forEach(function(code){ if(stuMatrix[code]) done++; });
+    }
     if(done < areaCodes.length){
       incomplete.push({ num: s.num, name: getDisplayName(s), done: done, total: areaCodes.length });
     }
@@ -21383,14 +21386,13 @@ var TOUR_STEPS = [
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'오늘 수업·알람·제출 추적',
     desc:'수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에 볼 수 있어요.',
-    highlight:'#home-class-card, .home-class-section',
+    highlight:'#home-class-rows, #home-alerts, #qm-submit-toggle-wrap, #home-submit-widget',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'수업을 등록하면 오늘 수업 카드가 표시돼요.' },
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'월간 일정 — 학사·개인·마감',
     desc:'월간 캘린더로 학사 일정, 개인 일정, 마감을 한 화면에. 날짜를 클릭해 일정을 추가하세요.',
-    highlight:'[onclick*="openMonthlySchedule"], #home-monthly-btn',
-    tryFn:function(){ if(typeof openMonthlySchedule==='function') openMonthlySchedule(); } },
+    highlight:'[onclick*="openMonthlySchedule"], #home-monthly-btn' },
 
   // 2️⃣ 출결 (2)
   { tab:'attendance', subview:{fn:'switchAttView', arg:'daily'}, tabIcon:'✓', tabName:'출결',
@@ -21406,7 +21408,12 @@ var TOUR_STEPS = [
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'데이터가 쌓이면 월간 뷰가 채워져요.' },
 
-  // 3️⃣ 수업 관리 (5)
+  // 3️⃣ 수업 관리 (6)
+  { tab:'class', tabIcon:'📅', tabName:'수업 관리',
+    title:'먼저 담당 수업을 추가하세요',
+    desc:'담당 수업을 추가하면 NEIS 시간표와 자동으로 매칭이 돼요.',
+    highlight:'[onclick*="openClassSettings"]',
+    tryFn:function(){ if(typeof openClassSettings==='function') openClassSettings(); } },
   { tab:'class', subview:{fn:'switchClassView', arg:'today'}, tabIcon:'📅', tabName:'수업 관리',
     title:'오늘 수업 카드 + 차시 메모',
     desc:'수업이 끝나면 진도·반 특이사항·학생 멘션을 종소리 직후 한 줄로.',
@@ -21440,23 +21447,45 @@ var TOUR_STEPS = [
     title:'학생 선택 → 통합 타임라인',
     desc:'학생 한 명을 누르면 관찰·상담·생활·학부모·출결·생기부 기록이 한 타임라인에 모여요.',
     highlight:'#sidebar-content',
-    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-item'); return els.length===0; },
+    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-row'); return els.length===0; },
     emptyHint:'수업이 등록되면 학생이 자동으로 추가돼요.' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'5색 메모 분류',
     desc:'관찰·상담·생활·학부모·미분류 — 색상 필터로 빠른 정리가 가능해요.',
-    highlight:'.sgt-color-filter, [data-color-filter], .color-filter',
-    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-item'); return els.length===0; },
-    emptyHint:'학생을 선택하면 색상 필터가 활성화돼요.' },
+    highlight:'#filter-group, .record-filter-group',
+    emptyCheck:function(){
+      var hasStudents = document.querySelectorAll('#sidebar-content .student-row').length > 0;
+      var filterVisible = document.querySelector('#filter-group');
+      return !hasStudents || !filterVisible;
+    },
+    emptyHint:'좌측에서 학생을 한 명 선택하면 색상 필터가 활성화돼요.' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
-    title:'태그·검색으로 빠르게 찾기',
-    desc:'자주 쓰는 태그를 미리 등록하면 입력 속도와 검색 모두 향상돼요.',
-    highlight:'#sidebar-search, .student-search, #sidebar-content input' },
+    title:'검색으로 학생 빠르게 찾기',
+    desc:'사이드바 상단 검색창에 이름을 입력하면 즉시 필터링돼요.',
+    highlight:'#search-input, .search-wrap',
+    tryFocus:'#search-input' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'태그 관리 — 추가·삭제·수정',
-    desc:'자주 쓰는 태그를 직접 추가하고, 더 이상 안 쓰는 태그는 삭제할 수 있어요.',
-    highlight:'[onclick*="openTagManager"], .tag-mgr-link',
-    tryFn:function(){ if(typeof openTagManager==='function') openTagManager(); } },
+    desc:'관찰 분류로 자동 진입했어요. 폼 안의 "태그 관리" 버튼을 누르면 자주 쓰는 태그를 직접 추가·삭제할 수 있어요.',
+    highlight:'[onclick*="openTagManager"], .tag-manage-link',
+    setupFn:function(){
+      // 학생 자동 선택 (currentStudent 없으면 첫 학생)
+      if(typeof currentStudent === 'undefined' || !currentStudent){
+        var firstRow = document.querySelector('#sidebar-content .student-row');
+        if(firstRow && firstRow.dataset.num && typeof selectStudent === 'function'){
+          selectStudent(firstRow.dataset.num);
+        }
+      }
+      // 관찰 기록 폼 자동 열기 → 폼 안의 "태그 관리" 버튼이 보이게 됨
+      if(typeof openRecordForm === 'function'){
+        setTimeout(function(){ try{ openRecordForm('observation'); }catch(e){} }, 120);
+      }
+    },
+    emptyCheck:function(){
+      var hasStudents = document.querySelectorAll('#sidebar-content .student-row').length > 0;
+      return !hasStudents;
+    },
+    emptyHint:'학생이 등록되면 태그 관리를 사용할 수 있어요.' },
 
   // 5️⃣ 생기부 (3)
   { tab:'saenggibu', subview:{fn:'switchSaenggibuView', arg:'write'}, tabIcon:'📄', tabName:'생기부',
@@ -21591,16 +21620,28 @@ function _tourRender(){
   if(prevBtn) prevBtn.style.display = _tourIdx > 0 ? '' : 'none';
   if(nextBtn) nextBtn.textContent = _tourIdx === TOUR_STEPS.length-1 ? '완료' : '다음 →';
 
-  // 7) 글로우 효과 — 탭/서브뷰 렌더링 후
+  // 7) setupFn 호출 (학생 자동 선택 + 폼 자동 열기 등 사전 준비)
+  if(!isEmpty && typeof step.setupFn === 'function'){
+    try{ step.setupFn(); }catch(e){}
+  }
+
+  // 8) 글로우 효과 — 탭/서브뷰 + setupFn 처리 후 (콤마 selector의 모든 매칭 element에 적용)
+  if(window._tourHighlightTimer){ clearTimeout(window._tourHighlightTimer); window._tourHighlightTimer = null; }
   _tourClearHighlight();
-  setTimeout(function(){
+  var highlightDelay = step.setupFn ? 400 : 250;  // setupFn 있으면 폼 렌더링 대기
+  window._tourHighlightTimer = setTimeout(function(){
     if(isEmpty || !step.highlight) return;
-    var el = document.querySelector(step.highlight);
-    if(el){
-      el.classList.add('tour-spotlight');
-      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    var els = document.querySelectorAll(step.highlight);
+    var firstVisible = null;
+    for(var i = 0; i < els.length; i++){
+      var el = els[i];
+      if(el && el.offsetParent !== null){
+        el.classList.add('tour-spotlight');
+        if(!firstVisible) firstVisible = el;
+      }
     }
-  }, 250);
+    if(firstVisible) firstVisible.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, highlightDelay);
 }
 
 function _tourClearHighlight(){
