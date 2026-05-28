@@ -6965,186 +6965,127 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .tt-change-confirm-btn:hover{filter:brightness(1.08);}
 [data-theme="dark"] .tt-change-modal{box-shadow:0 8px 32px rgba(0,0,0,0.45);}
 
-/* ─── 시작 가이드 카드 ─── */
-.setup-guide-card{
-  background:var(--bg-surface);border:1px solid var(--border-accent);
-  border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px;
-  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+/* ─── 플로팅 코치마크 튜토리얼 ─── */
+@keyframes tourPulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--accent-dim), 0 0 0 6px transparent; }
+  50%      { box-shadow: 0 0 0 4px var(--accent), 0 0 0 10px var(--accent-dim); }
 }
-.setup-guide-title{
-  font-size:13px;font-weight:700;color:var(--accent);
-  margin-bottom:12px;display:flex;align-items:center;gap:6px;
-  flex-wrap:wrap;
+.tour-spotlight {
+  animation: tourPulse 1.8s ease-in-out infinite;
+  border-radius: 8px;
+  position: relative;
+  z-index: 5;
+  scroll-margin: 80px;
 }
-.setup-guide-title-sub{
-  font-size:11px;font-weight:400;color:var(--text-tertiary);margin-left:2px;
+@keyframes tourSlideIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.setup-guide-steps{display:flex;flex-direction:column;gap:8px;}
-.setup-guide-step{
-  display:flex;align-items:center;gap:10px;padding:9px 12px;
-  border:1px solid var(--border);border-radius:8px;
-  background:var(--bg-elevated);cursor:pointer;transition:all 0.12s;
-  text-decoration:none;
+.tour-panel{
+  position:fixed; right:24px; bottom:24px; width:340px;
+  background:var(--bg-surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.18), 0 0 0 1px rgba(127,119,221,0.1);
+  z-index:1000; overflow:hidden;
+  animation:tourSlideIn 0.32s cubic-bezier(0.22,1,0.36,1);
+  display:none;
 }
-.setup-guide-step:hover{border-color:var(--accent);background:var(--accent-dim);}
-.setup-guide-step.done{
-  border-color:var(--success-border,#bbf7d0);background:var(--success-dim,#f0fdf4);
-  cursor:default;opacity:0.7;
+.tour-panel.show{display:block;}
+.tour-panel-head{padding:14px 16px 12px;border-bottom:1px solid var(--border);}
+.tour-head-row{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
 }
-.setup-guide-step-num{
-  width:22px;height:22px;border-radius:50%;background:var(--accent);
-  color:#fff;font-size:11px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+.tour-tab-label{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:700;color:var(--text);letter-spacing:-0.02em;
 }
-.setup-guide-step.done .setup-guide-step-num{background:#22c55e;}
-.setup-guide-step-text{flex:1;}
-.setup-guide-step-label{font-size:13px;font-weight:600;color:var(--text);}
-.setup-guide-step-sub{font-size:11px;color:var(--text-secondary);}
-.setup-guide-step.done .setup-guide-step-label{color:#15803d;}
-.setup-guide-dismiss{
-  width:100%;margin-top:10px;padding:6px;
-  font-size:11px;color:var(--text-tertiary);background:none;border:none;
-  cursor:pointer;font-family:inherit;
+.tour-tab-icon{font-size:16px;}
+.tour-sub-counter{
+  font-size:11px;color:var(--text-tertiary);font-weight:500;margin-left:2px;
 }
-.setup-guide-dismiss:hover{color:var(--text-secondary);}
-
-/* ─── 시작 가이드 카드 하단 헬프 링크 ─── */
-.setup-guide-help-link{
-  margin-top:6px;text-align:center;font-size:11px;color:var(--text-tertiary);
+.tour-head-right{display:flex;align-items:center;gap:6px;}
+.tour-total-counter{
+  font-size:11px;font-weight:600;color:var(--text-tertiary);
+  padding:3px 8px;background:var(--bg-elevated);border-radius:10px;
+  letter-spacing:0.02em;
 }
-.setup-guide-help-link button{
-  background:none;border:none;color:var(--accent);
-  font-size:11px;font-family:inherit;cursor:pointer;padding:0;font-weight:500;
+.tour-close{
+  width:24px;height:24px;border:none;background:none;cursor:pointer;
+  color:var(--text-tertiary);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-family:inherit;line-height:1;
 }
-.setup-guide-help-link button:hover{text-decoration:underline;}
-
-/* ─── 둘러보기 모달 오버레이 ─── */
-.intro-modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.45);
-  display:none;align-items:center;justify-content:center;
-  z-index:1000;padding:20px;
+.tour-close:hover{background:var(--bg-elevated);color:var(--text);}
+.tour-progress-bar{
+  height:4px;background:var(--bg-elevated);border-radius:2px;
+  overflow:hidden;margin-bottom:8px;
 }
-.intro-modal-overlay.show{display:flex;animation:introFadeIn 0.2s ease;}
-@keyframes introFadeIn{from{opacity:0;}to{opacity:1;}}
-
-.intro-modal{
-  background:var(--bg-surface);border-radius:14px;
-  width:100%;max-width:720px;max-height:85vh;
-  display:flex;flex-direction:column;
-  box-shadow:0 20px 60px rgba(0,0,0,0.25);
-  animation:introSlideUp 0.25s ease;
+.tour-progress-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-hover));
+  border-radius:2px;transition:width 0.35s cubic-bezier(0.22,1,0.36,1);
 }
-@keyframes introSlideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-
-.intro-modal-head{
-  padding:22px 26px 16px;border-bottom:1px solid var(--border);
-  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+.tour-sub-dots{display:flex;gap:5px;justify-content:center;}
+.tour-sub-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--border-strong);transition:all 0.2s;
 }
-.intro-modal-head-text{flex:1;min-width:0;}
-.intro-modal-eyebrow{
-  font-size:11px;color:var(--accent);font-weight:700;
-  letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px;
+.tour-sub-dot.active{background:var(--accent);width:16px;border-radius:3px;}
+.tour-panel-body{
+  padding:16px 16px 12px;display:flex;flex-direction:column;gap:10px;
 }
-.intro-modal-title{
-  font-size:20px;font-weight:700;color:var(--text);
-  letter-spacing:-0.02em;margin-bottom:4px;
+.tour-title{
+  font-size:15px;font-weight:700;color:var(--text);
+  letter-spacing:-0.02em;line-height:1.35;
 }
-.intro-modal-sub{
-  font-size:13px;color:var(--text-secondary);line-height:1.5;
+.tour-desc{
+  font-size:12.5px;color:var(--text-secondary);line-height:1.55;
 }
-.intro-modal-close{
-  width:30px;height:30px;border:none;background:none;cursor:pointer;
-  color:var(--text-tertiary);border-radius:6px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:20px;
-  font-family:inherit;
+.tour-empty-hint{
+  font-size:12px;color:var(--text-tertiary);
+  padding:10px 12px;background:var(--bg-elevated);
+  border-radius:7px;border-left:3px solid var(--border-strong);
+  line-height:1.5;font-style:italic;
 }
-.intro-modal-close:hover{background:var(--bg-elevated);color:var(--text);}
-
-.intro-modal-body{
-  padding:18px 26px;overflow-y:auto;flex:1;
+.tour-btn-try{
+  padding:9px 14px;border-radius:8px;
+  border:1.5px dashed var(--border-accent);background:var(--accent-dim);
+  color:var(--accent);font-size:12px;font-weight:600;font-family:inherit;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:6px;transition:all 0.12s;margin-top:2px;
 }
-
-.intro-highlights{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-  margin-bottom:22px;
+.tour-btn-try:hover{
+  background:var(--accent);color:#fff;border-color:var(--accent);border-style:solid;
 }
-@media(max-width:600px){.intro-highlights{grid-template-columns:1fr;}}
-.intro-hl-card{
-  border:1.5px solid var(--border-accent);border-radius:10px;
-  padding:14px;background:var(--accent-dim);
-  cursor:pointer;transition:all 0.15s;
-  display:flex;flex-direction:column;gap:6px;
+.tour-panel-foot{
+  padding:10px 16px 14px;display:flex;align-items:center;gap:6px;
 }
-.intro-hl-card:hover{
-  transform:translateY(-1px);
-  box-shadow:0 4px 12px rgba(127,119,221,0.15);
-  border-color:var(--accent);
-}
-.intro-hl-badge{
-  font-size:10px;color:var(--accent);font-weight:700;
-  letter-spacing:0.04em;text-transform:uppercase;
-}
-.intro-hl-title{font-size:13px;font-weight:600;color:var(--text);}
-.intro-hl-desc{font-size:11px;color:var(--text-secondary);line-height:1.45;}
-.intro-hl-cta{
-  margin-top:4px;font-size:11px;color:var(--accent);font-weight:600;
-  display:flex;align-items:center;gap:3px;
-}
-
-.intro-cat{margin-bottom:18px;}
-.intro-cat-title{
-  font-size:12px;font-weight:700;color:var(--text);
-  margin-bottom:8px;display:flex;align-items:center;gap:6px;
-  letter-spacing:-0.01em;
-}
-.intro-cat-icon{font-size:14px;}
-.intro-cat-items{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-}
-@media(max-width:600px){.intro-cat-items{grid-template-columns:1fr;}}
-.intro-item{
-  border:1px solid var(--border);border-radius:8px;
-  padding:10px 12px;background:var(--bg-surface);
-  cursor:pointer;transition:all 0.12s;
-  display:flex;flex-direction:column;gap:3px;
-}
-.intro-item:hover{
-  border-color:var(--border-accent);background:var(--bg-elevated);
-}
-.intro-item-name{
-  font-size:12px;font-weight:600;color:var(--text);
-  display:flex;align-items:center;gap:4px;
-}
-.intro-item-desc{font-size:11px;color:var(--text-tertiary);line-height:1.4;}
-
-.intro-footer-note{
-  padding:12px 14px;background:var(--bg-elevated);
-  border-radius:8px;margin-top:8px;
-  font-size:11px;color:var(--text-secondary);line-height:1.55;
-}
-.intro-footer-note strong{color:var(--text);font-weight:600;}
-
-.intro-modal-foot{
-  padding:14px 26px;border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-}
-.intro-foot-hint{
-  font-size:11px;color:var(--text-tertiary);
-}
-.intro-foot-btns{display:flex;gap:8px;}
-.intro-btn-primary{
-  padding:8px 18px;border-radius:7px;border:none;cursor:pointer;
-  background:var(--accent);color:#fff;
-  font-size:13px;font-weight:600;font-family:inherit;
-}
-.intro-btn-primary:hover{background:var(--accent-hover);}
-.intro-btn-secondary{
-  padding:8px 14px;border-radius:7px;
+.tour-btn-prev{
+  padding:7px 12px;border-radius:7px;
   border:1px solid var(--border);background:var(--bg-surface);
-  color:var(--text-secondary);
-  font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;
+  color:var(--text-secondary);font-size:12px;font-weight:500;
+  font-family:inherit;cursor:pointer;transition:all 0.1s;
 }
-.intro-btn-secondary:hover{background:var(--bg-elevated);}
+.tour-btn-prev:hover{background:var(--bg-elevated);color:var(--text);}
+.tour-btn-skip{
+  padding:7px 10px;border:none;background:none;
+  color:var(--text-tertiary);font-size:11.5px;font-family:inherit;
+  cursor:pointer;transition:color 0.1s;
+}
+.tour-btn-skip:hover{color:var(--text-secondary);}
+.tour-btn-next{
+  padding:8px 16px;border:none;border-radius:7px;
+  background:var(--accent);color:#fff;
+  font-size:12.5px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:background 0.1s;
+}
+.tour-btn-next:hover{background:var(--accent-hover);}
+@media(max-width:600px){
+  .tour-panel{
+    right:0;bottom:0;left:0;width:100%;
+    border-radius:14px 14px 0 0;
+  }
+}
 
 /* ─── 홈 2컬럼 레이아웃 ─── */
 .home-split{
@@ -7840,8 +7781,6 @@ window.addEventListener('load', function(){
     <!-- 샘플 모드 띠배너 (샘플 체험 중일 때만 표시) -->
     <div id="home-sample-banner"></div>
 
-    <!-- 시작 가이드 카드 (최상단 — 퀵메모 위) -->
-    <div id="home-setup-guide"></div>
     <div id="home-discovery-nudge"></div>
 
     <!-- 퀵 메모 — 항상 고정 위치 -->
@@ -8373,16 +8312,6 @@ window.addEventListener('load', function(){
           <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
               <div style="min-width:0;flex:1;">
-                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">시작 가이드 다시 보기</div>
-                <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">홈 화면의 4단계 시작 가이드 카드를 다시 표시해요.</div>
-              </div>
-              <button class="btn-small secondary" onclick="restoreSetupGuide()" style="flex-shrink:0;">다시 표시</button>
-            </div>
-          </div>
-
-          <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg-surface);">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-              <div style="min-width:0;flex:1;">
                 <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">샘플 데이터로 체험</div>
                 <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">샘플 학생·시간표·메모로 모든 기능을 미리 써볼 수 있어요.</div>
               </div>
@@ -8406,124 +8335,35 @@ window.addEventListener('load', function(){
   </div>
 
   <!-- ═══════════════════════════════════════════
-       둘러보기 모달 (Intro Modal)
+       플로팅 코치마크 튜토리얼 (Tour Panel)
   ═══════════════════════════════════════════ -->
-  <div class="intro-modal-overlay" id="intro-modal" onclick="if(event.target===this)closeIntroModal()">
-    <div class="intro-modal">
-      <div class="intro-modal-head">
-        <div class="intro-modal-head-text">
-          <div class="intro-modal-eyebrow">쌤로그 둘러보기</div>
-          <div class="intro-modal-title">쌤로그로 할 수 있는 것들</div>
-          <div class="intro-modal-sub">한 번만 훑어보세요. 다음부터는 사이드바 도움말에서 다시 열 수 있어요.</div>
+  <div class="tour-panel" id="tour-panel">
+    <div class="tour-panel-head">
+      <div class="tour-head-row">
+        <div class="tour-tab-label">
+          <span class="tour-tab-icon" id="tour-tab-icon">🏠</span>
+          <span id="tour-tab-name">홈</span>
+          <span class="tour-sub-counter">(<span id="tour-sub-cur">1</span>/<span id="tour-sub-total">3</span>)</span>
         </div>
-        <button class="intro-modal-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
-      </div>
-
-      <div class="intro-modal-body">
-
-        <!-- 매일 한 줄 기록 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📝</span> 매일 한 줄 기록</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('home')">
-              <div class="intro-item-name">퀵 메모 + @멘션·@전체</div>
-              <div class="intro-item-desc">홈에서 한 줄. @이름은 학생에, @전체는 반 공지로 자동 연결</div>
-            </div>
-            <div class="intro-item" onclick="introGo('class')">
-              <div class="intro-item-name">수업 후 빠른 메모</div>
-              <div class="intro-item-desc">오늘 수업 카드에서 진도·반 특이사항·학생 멘션을 종소리 직후</div>
-            </div>
-            <div class="intro-item" onclick="introGo('home')">
-              <div class="intro-item-name">오늘 수업 알람 &amp; 제출 추적</div>
-              <div class="intro-item-desc">수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 학생 한 명 깊이 보기 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">👥</span> 학생 한 명 깊이 보기</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('students')">
-              <div class="intro-item-name">학생 타임라인</div>
-              <div class="intro-item-desc">관찰·상담·생활·학부모·출결·생기부가 학생별로 자동 누적</div>
-            </div>
-            <div class="intro-item" onclick="introGo('students')">
-              <div class="intro-item-name">5색 메모 분류</div>
-              <div class="intro-item-desc">관찰/상담/생활/학부모/미분류 — 색상 필터로 빠른 정리</div>
-            </div>
-            <div class="intro-item" onclick="introGo('students')">
-              <div class="intro-item-name">태그로 빠르게 찾기</div>
-              <div class="intro-item-desc">자주 쓰는 태그 미리 등록 — 입력 속도와 검색 모두 향상</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 수업·출결 관리 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">🏫</span> 수업·출결 관리</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('class')">
-              <div class="intro-item-name">담당 시간표 + NEIS 자동 매칭</div>
-              <div class="intro-item-desc">내 담당 수업만 등록하면 차시 카운팅과 휴강 자동 제외까지</div>
-            </div>
-            <div class="intro-item" onclick="introGo('attendance')">
-              <div class="intro-item-name">출결 체크</div>
-              <div class="intro-item-desc">일일·학생별 월간·반 전체 월간 뷰로 누락 없이 관리</div>
-            </div>
-            <div class="intro-item" onclick="introGo('class')">
-              <div class="intro-item-name">반 시간표·창체 활동</div>
-              <div class="intro-item-desc">담임반 창체·특별 일정을 등록해두면 생기부 자율활동에 자동 연결</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 학부모 상담 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📞</span> 학부모 상담</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('reply-answer')">
-              <div class="intro-item-name">받은 메시지 답장</div>
-              <div class="intro-item-desc">6단계로 익명화 프롬프트 자동 완성 — 답장 초안까지</div>
-            </div>
-            <div class="intro-item" onclick="introGo('reply-prepare')">
-              <div class="intro-item-name">전화·상담 전 준비</div>
-              <div class="intro-item-desc">학생 누적 기록으로 자동 브리핑 + 통화 가이드 생성</div>
-            </div>
-            <div class="intro-item" onclick="introGo('reply-prepare')">
-              <div class="intro-item-name">통화 후 결과 메모</div>
-              <div class="intro-item-desc">통화 메모가 학생 타임라인에 자동 누적 — 다음 상담의 토대</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 학기말 생기부 -->
-        <div class="intro-cat">
-          <div class="intro-cat-title"><span class="intro-cat-icon">📄</span> 학기말 생기부</div>
-          <div class="intro-cat-items">
-            <div class="intro-item" onclick="introGo('saenggibu-write')">
-              <div class="intro-item-name">작성 모드</div>
-              <div class="intro-item-desc">영역별 프롬프트 + 학생 메모 자동 결합으로 초안 생성</div>
-            </div>
-            <div class="intro-item" onclick="introGo('saenggibu-matrix')">
-              <div class="intro-item-name">한눈에 보기</div>
-              <div class="intro-item-desc">반 전체 × 영역 매트릭스로 진행 상황을 한 화면에</div>
-            </div>
-            <div class="intro-item" onclick="introGo('saenggibu-progress')">
-              <div class="intro-item-name">진행률 뷰</div>
-              <div class="intro-item-desc">어디까지 썼는지 학생·영역별로 추적</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="intro-footer-note">
-          <strong>🔒 모든 데이터는 이 기기에만 저장돼요.</strong> 학부모 상담 기능은 학생 이름을 자동 익명화해서 AI에 전달해요.
+        <div class="tour-head-right">
+          <span class="tour-total-counter"><span id="tour-cur">1</span>/20</span>
+          <button class="tour-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
         </div>
       </div>
-
-      <div class="intro-modal-foot">
-        <button class="intro-btn-primary" onclick="closeIntroModal()">닫기</button>
-      </div>
+      <div class="tour-progress-bar"><div class="tour-progress-bar-fill" id="tour-bar" style="width:5%"></div></div>
+      <div class="tour-sub-dots" id="tour-sub-dots"></div>
+    </div>
+    <div class="tour-panel-body">
+      <div class="tour-title" id="tour-title"></div>
+      <div class="tour-desc" id="tour-desc"></div>
+      <div class="tour-empty-hint" id="tour-empty-hint" style="display:none"></div>
+      <button class="tour-btn-try" id="tour-try-btn" onclick="_tourTry()">✏️ 직접 해보기</button>
+    </div>
+    <div class="tour-panel-foot">
+      <button class="tour-btn-prev" id="tour-prev" onclick="_tourGo(-1)" style="display:none">← 이전</button>
+      <div style="flex:1"></div>
+      <button class="tour-btn-skip" onclick="closeIntroModal()">닫기</button>
+      <button class="tour-btn-next" id="tour-next" onclick="_tourGo(1)">다음 →</button>
     </div>
   </div>
 
@@ -21265,149 +21105,242 @@ function renderSubmitModal(groupId, tab){
   document.getElementById('sm-list').innerHTML = html;
 }
 
-/* ─── 시작 가이드 카드 ─── */
-function getSetupSteps(){
-  // 1) 담당 시간표 등록 완료 여부
-  var hasClass = !!(classMaster && classMaster.length > 0);
-  // 2) 퀵 메모로 첫 기록 — 어느 반이든 학생 records에 메모 1개 이상
-  var hasMemo = false;
-  Object.keys(classes).forEach(function(ck){
-    var cls = classes[ck];
-    if(!cls || !cls.records) return;
-    Object.keys(cls.records).forEach(function(num){
-      if((cls.records[num] || []).length > 0) hasMemo = true;
-    });
-  });
-  // 3) 학생 메모 + 태그 — 메모 중 tags 길이 ≥1인 게 1개라도 있으면 완료
-  var hasTagged = false;
-  Object.keys(classes).forEach(function(ck){
-    var cls = classes[ck];
-    if(!cls || !cls.records || hasTagged) return;
-    Object.keys(cls.records).forEach(function(num){
-      (cls.records[num] || []).forEach(function(r){
-        if(r && r.tags && r.tags.length > 0) hasTagged = true;
-      });
-    });
-  });
-  // 4) 출결 입력 — 학생별 출결 기록 1개 이상 OR 하루라도 __confirmed=true(이슈 없는 학생 출석 처리)
-  var hasAttendance = false;
-  Object.keys(attendanceRecords).forEach(function(date){
-    var dateRecs = attendanceRecords[date];
-    if(!dateRecs) return;
-    if(dateRecs.__confirmed){ hasAttendance = true; return; }
-    Object.keys(dateRecs).forEach(function(num){
-      if(num === '__confirmed') return;
-      if((dateRecs[num] || []).length > 0) hasAttendance = true;
-    });
-  });
-  return [
-    {
-      id:'register_class',
-      label:'담당 과목 등록',
-      sub:'담당 수업을 등록하면 NEIS에서 교사 시간표를 불러올 수 있어요',
-      done: hasClass,
-      action:"openClassSettings()"
-    },
-    {
-      id:'first_quick_memo',
-      label:'퀵 메모로 첫 기록 남기기',
-      sub:'홈 화면에서 @이름 또는 @전체로 학생에 자동 연결돼요',
-      done: hasMemo,
-      action:"highlightQuickMemo()"
-    },
-    {
-      id:'student_memo_tag',
-      label:'학생 메모 + 태그 만들기',
-      sub:'5색 분류와 태그로 학기말 생기부의 토대를 쌓아요',
-      done: hasTagged,
-      action:"switchTab('students')"
-    },
-    {
-      id:'try_attendance',
-      label:'오늘 출결 체크',
-      sub:'매일 쓰는 핵심 루틴이에요. 일일·월간 뷰로 누락 없이 관리',
-      done: hasAttendance,
-      action:"switchTab('attendance')"
-    }
-  ];
-}
-function renderSetupGuideCard(){
-  // "다시 보기" 버튼으로 강제 표시 중인지 확인
-  var forceShow = false;
-  try{ forceShow = localStorage.getItem('ht2_setup_guide_force_show') === '1'; }catch(e){}
-  // 영구 완료 플래그: 한 번 완료되면 다시 안 뜸 (force_show 중엔 무시)
-  var permaDone = false;
-  try{ permaDone = localStorage.getItem('ht2_setup_guide_done') === '1'; }catch(e){}
-  if(permaDone && !forceShow) return '';
-  // "다음에 할게요" 누른 경우 — 1주일 후 다시 뜨는 기존 동작 유지 (force_show 중엔 무시)
-  var dismissedAt = parseInt(localStorage.getItem('ht2_setup_guide_dismissed_at')||'0', 10);
-  var ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-  if(!forceShow && dismissedAt && (Date.now() - dismissedAt) < ONE_WEEK){
-    return '';
-  }
-  var steps = getSetupSteps();
-  var allDone = steps.every(function(s){ return s.done; });
-  if(allDone && !forceShow){
-    // 모든 단계 완료 → 영구 숨김 플래그 저장 (force_show 중엔 건너뜀)
-    try{ localStorage.setItem('ht2_setup_guide_done', '1'); }catch(e){}
-    return '';
-  }
-  var stepsHtml = steps.map(function(s, i){
-    if(s.done){
-      return '<div class="setup-guide-step done">'+
-        '<div class="setup-guide-step-num">✓</div>'+
-        '<div class="setup-guide-step-text">'+
-          '<div class="setup-guide-step-label">'+s.label+'</div>'+
-        '</div>'+
-      '</div>';
-    }
-    return '<div class="setup-guide-step" onclick="'+s.action+'">'+
-      '<div class="setup-guide-step-num">'+(i+1)+'</div>'+
-      '<div class="setup-guide-step-text">'+
-        '<div class="setup-guide-step-label">'+s.label+' →</div>'+
-        '<div class="setup-guide-step-sub">'+s.sub+'</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-  return '<div class="setup-guide-card">'+
-    '<div class="setup-guide-title">'+
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+
-      '시작 가이드'+
-      '<span class="setup-guide-title-sub">· 모두 완료하면 자동으로 사라져요</span>'+
-    '</div>'+
-    '<div class="setup-guide-steps">'+stepsHtml+'</div>'+
-    '<button class="setup-guide-dismiss" onclick="dismissSetupGuide()">다음에 할게요</button>'+
-    '<div class="setup-guide-help-link">'+
-      '쌤로그가 뭘 할 수 있는지 궁금하다면 '+
-      '<button onclick="openIntroModal()">전체 기능 둘러보기 →</button>'+
-    '</div>'+
-  '</div>';
-}
-function dismissSetupGuide(){
-  try{
-    localStorage.setItem('ht2_setup_guide_dismissed_at', String(Date.now()));
-    localStorage.removeItem('ht2_setup_guide_dismissed');
-    localStorage.removeItem('ht2_setup_guide_force_show');
-  }catch(e){}
-  renderHome();
-}
+/* ─── 플로팅 코치마크 튜토리얼 (20단계) ─── */
+var _tourIdx = 0;
+var _tourCsAutoEnabled = false;  // 창체 토글 자동 ON 추적
 
-/* ─── 둘러보기 모달 핸들러 ─── */
+var TOUR_STEPS = [
+  // 1️⃣ 홈 (3)
+  { tab:'home', tabIcon:'🏠', tabName:'홈',
+    title:'퀵 메모 + @멘션으로 학생·반 자동 연결',
+    desc:'오늘 있었던 일을 한 줄로 남겨보세요. @이름은 학생 기록에, @전체는 반 공지로 자동 연결돼요.',
+    highlight:'.quick-memo-card', tryFocus:'#quick-memo-input' },
+  { tab:'home', tabIcon:'🏠', tabName:'홈',
+    title:'오늘 수업·알람·제출 추적',
+    desc:'수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에 볼 수 있어요.',
+    highlight:'#home-class-card, .home-class-section',
+    emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
+    emptyHint:'수업을 등록하면 오늘 수업 카드가 표시돼요.' },
+  { tab:'home', tabIcon:'🏠', tabName:'홈',
+    title:'월간 일정 — 학사·개인·마감',
+    desc:'월간 캘린더로 학사 일정, 개인 일정, 마감을 한 화면에. 날짜를 클릭해 일정을 추가하세요.',
+    highlight:'[onclick*="openMonthlySchedule"], #home-monthly-btn',
+    tryFn:function(){ if(typeof openMonthlySchedule==='function') openMonthlySchedule(); } },
+
+  // 2️⃣ 출결 (2)
+  { tab:'attendance', subview:{fn:'switchAttView', arg:'daily'}, tabIcon:'✓', tabName:'출결',
+    title:'일일 출결 체크',
+    desc:'오늘 출결을 체크하면 NEIS 동일 형식으로 자동 관리돼요.',
+    highlight:'#att-view-daily',
+    emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
+    emptyHint:'수업이 등록되면 학생별 출결표가 나타나요.' },
+  { tab:'attendance', subview:{fn:'switchAttView', arg:'student-monthly'}, tabIcon:'✓', tabName:'출결',
+    title:'학생별·반 전체 월간 뷰',
+    desc:'한 달 누락 없이 관리할 수 있어요. 학생별/반 전체 두 가지 뷰가 있어요.',
+    highlight:'#att-view-student-monthly',
+    emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
+    emptyHint:'데이터가 쌓이면 월간 뷰가 채워져요.' },
+
+  // 3️⃣ 수업 관리 (5)
+  { tab:'class', subview:{fn:'switchClassView', arg:'today'}, tabIcon:'📅', tabName:'수업 관리',
+    title:'오늘 수업 카드 + 차시 메모',
+    desc:'수업이 끝나면 진도·반 특이사항·학생 멘션을 종소리 직후 한 줄로.',
+    highlight:'#class-view-today',
+    emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
+    emptyHint:'내 수업을 등록하면 오늘 카드가 채워져요.' },
+  { tab:'class', subview:{fn:'switchClassView', arg:'week'}, tabIcon:'📅', tabName:'수업 관리',
+    title:'주간 시간표 + NEIS 자동 매칭',
+    desc:'담당 수업만 등록하면 차시 카운팅과 휴강 자동 제외까지 처리돼요.',
+    highlight:'#class-view-week',
+    emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
+    emptyHint:'수업을 등록하면 주간 시간표가 보여요.' },
+  { tab:'class', subview:{fn:'switchClassView', arg:'schedule'}, tabIcon:'📅', tabName:'수업 관리',
+    title:'반 시간표 + 창체 시간표 등록',
+    desc:'담임은 반 시간표와 창체 시간표를 함께 관리해요. 교과 선생님은 창체 일정만 관리해요.',
+    highlight:'#class-view-schedule' },
+  { tab:'class', subview:{fn:'switchClassView', arg:'today'}, tabIcon:'📅', tabName:'수업 관리',
+    title:'창체 ON/OFF로 임장 놓치지 않기',
+    desc:'창체 표시를 켜면 오늘·주간 시간표에 겹치는 창체가 배지로 표시돼요. 임장 누락을 막아줘요.',
+    highlight:'[onclick*="toggleCsOnSchedule"]',
+    tryFn:function(){ if(typeof toggleCsOnSchedule==='function') toggleCsOnSchedule(); } },
+  { tab:'class', subview:{fn:'switchClassView', arg:'records'}, tabIcon:'📅', tabName:'수업 관리',
+    title:'차시 기록 뷰',
+    desc:'누적된 차시 메모와 진도를 한눈에 확인할 수 있어요.',
+    highlight:'#class-view-records',
+    emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
+    emptyHint:'차시 메모가 쌓이면 기록 뷰가 채워져요.' },
+
+  // 4️⃣ 학생 관리 (4)
+  { tab:'students', tabIcon:'👥', tabName:'학생 관리',
+    title:'학생 선택 → 통합 타임라인',
+    desc:'학생 한 명을 누르면 관찰·상담·생활·학부모·출결·생기부 기록이 한 타임라인에 모여요.',
+    highlight:'#sidebar-content',
+    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-item'); return els.length===0; },
+    emptyHint:'수업이 등록되면 학생이 자동으로 추가돼요.' },
+  { tab:'students', tabIcon:'👥', tabName:'학생 관리',
+    title:'5색 메모 분류',
+    desc:'관찰·상담·생활·학부모·미분류 — 색상 필터로 빠른 정리가 가능해요.',
+    highlight:'.sgt-color-filter, [data-color-filter], .color-filter',
+    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-item'); return els.length===0; },
+    emptyHint:'학생을 선택하면 색상 필터가 활성화돼요.' },
+  { tab:'students', tabIcon:'👥', tabName:'학생 관리',
+    title:'태그·검색으로 빠르게 찾기',
+    desc:'자주 쓰는 태그를 미리 등록하면 입력 속도와 검색 모두 향상돼요.',
+    highlight:'#sidebar-search, .student-search, #sidebar-content input' },
+  { tab:'students', tabIcon:'👥', tabName:'학생 관리',
+    title:'태그 관리 — 추가·삭제·수정',
+    desc:'자주 쓰는 태그를 직접 추가하고, 더 이상 안 쓰는 태그는 삭제할 수 있어요.',
+    highlight:'[onclick*="openTagManager"], .tag-mgr-link',
+    tryFn:function(){ if(typeof openTagManager==='function') openTagManager(); } },
+
+  // 5️⃣ 생기부 (3)
+  { tab:'saenggibu', subview:{fn:'switchSaenggibuView', arg:'write'}, tabIcon:'📄', tabName:'생기부',
+    title:'작성 모드 — 학생 클릭 → AI 초안 모달',
+    desc:'학생 리스트에서 클릭하면 영역별 프롬프트 + 누적 메모가 자동 결합돼 AI 초안 모달이 열려요.',
+    highlight:'#sgt-view-write' },
+  { tab:'saenggibu', subview:{fn:'switchSaenggibuView', arg:'matrix'}, tabIcon:'📄', tabName:'생기부',
+    title:'한눈에 보기 — 반×영역 매트릭스',
+    desc:'반 전체 × 영역 매트릭스로 진행 상황을 한 화면에 파악할 수 있어요.',
+    highlight:'#sgt-view-matrix' },
+  { tab:'saenggibu', subview:{fn:'switchSaenggibuView', arg:'progress'}, tabIcon:'📄', tabName:'생기부',
+    title:'진행률 뷰 — 영역 카드 + 미완료 + 중복 의심',
+    desc:'영역별 작성률, 미완료 학생 목록, 중복 의심 쌍을 한 화면에서 확인할 수 있어요.',
+    highlight:'#sgt-view-progress' },
+
+  // 6️⃣ 학부모 상담 (3)
+  { tab:'reply', subview:{fn:'switchReplySub', arg:'answer'}, tabIcon:'💬', tabName:'학부모 상담',
+    title:'받은 메시지 답장 — 6단계 익명화 위저드',
+    desc:'6단계로 익명화 프롬프트가 자동 완성되고 답장 초안까지 생성돼요. 학생 이름은 자동 익명화돼서 AI에 전달됩니다.',
+    highlight:'#reply-panel-answer' },
+  { tab:'reply', subview:{fn:'switchReplySub', arg:'prepare'}, tabIcon:'💬', tabName:'학부모 상담',
+    title:'전화·상담 전 자동 브리핑',
+    desc:'학생 누적 기록으로 자동 브리핑 + 통화 가이드를 생성해 줘요.',
+    highlight:'#reply-panel-prepare' },
+  { tab:'reply', subview:{fn:'switchReplySub', arg:'prepare'}, tabIcon:'💬', tabName:'학부모 상담',
+    title:'통화 후 결과 메모 → 타임라인 누적',
+    desc:'통화 메모가 학생 타임라인에 자동 누적되어 다음 상담의 토대가 돼요.',
+    highlight:'#reply-panel-prepare' }
+];
+
 function openIntroModal(){
-  var modal = document.getElementById('intro-modal');
-  if(modal){
-    modal.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
+  _tourIdx = 0;
+  _tourCsAutoEnabled = false;
+  var p = document.getElementById('tour-panel');
+  if(p){ p.classList.add('show'); }
+  _tourRender();
 }
 
 function closeIntroModal(){
-  var modal = document.getElementById('intro-modal');
-  if(modal){
-    modal.classList.remove('show');
-    document.body.style.overflow = '';
-  }
+  _tourClearHighlight();
+  var p = document.getElementById('tour-panel');
+  if(p){ p.classList.remove('show'); }
   try{ localStorage.setItem('ht2_intro_modal_seen', '1'); }catch(e){}
+}
+
+function _tourGo(dir){
+  var next = _tourIdx + dir;
+  if(next < 0) return;
+  if(next >= TOUR_STEPS.length){ closeIntroModal(); return; }
+  _tourIdx = next;
+  _tourRender();
+}
+
+function _tourGroupInfo(idx){
+  var tab = TOUR_STEPS[idx].tab;
+  var first = idx, last = idx;
+  while(first > 0 && TOUR_STEPS[first-1].tab === tab) first--;
+  while(last < TOUR_STEPS.length-1 && TOUR_STEPS[last+1].tab === tab) last++;
+  return { first:first, last:last, total:last-first+1, pos:idx-first+1 };
+}
+
+function _tourRender(){
+  var step = TOUR_STEPS[_tourIdx];
+  var grp = _tourGroupInfo(_tourIdx);
+
+  // 1) 탭 + 서브뷰 전환
+  if(typeof switchTab === 'function') switchTab(step.tab);
+  if(step.subview && typeof window[step.subview.fn] === 'function'){
+    setTimeout(function(){ window[step.subview.fn](step.subview.arg); }, 80);
+  }
+
+  // 1.5) 창체 ON/OFF 단계 진입 시 토글 자동 ON (한 번만)
+  if(step.title && step.title.indexOf('창체 ON/OFF') !== -1){
+    if(!_tourCsAutoEnabled && typeof _csShowOnSchedule !== 'undefined' && !_csShowOnSchedule && typeof toggleCsOnSchedule === 'function'){
+      setTimeout(function(){ toggleCsOnSchedule(); _tourCsAutoEnabled = true; }, 200);
+    }
+  }
+
+  // 2) 헤더 갱신
+  var setTxt = function(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; };
+  setTxt('tour-tab-icon', step.tabIcon);
+  setTxt('tour-tab-name', step.tabName);
+  setTxt('tour-sub-cur', String(grp.pos));
+  setTxt('tour-sub-total', String(grp.total));
+  setTxt('tour-cur', String(_tourIdx + 1));
+  var bar = document.getElementById('tour-bar');
+  if(bar) bar.style.width = ((_tourIdx+1)/TOUR_STEPS.length*100) + '%';
+
+  // 3) 서브 도트
+  var dotsEl = document.getElementById('tour-sub-dots');
+  if(dotsEl){
+    dotsEl.innerHTML = '';
+    for(var i = 0; i < grp.total; i++){
+      var dot = document.createElement('div');
+      dot.className = 'tour-sub-dot' + (i === grp.pos-1 ? ' active' : '');
+      dotsEl.appendChild(dot);
+    }
+  }
+
+  // 4) 본문
+  setTxt('tour-title', step.title);
+  setTxt('tour-desc', step.desc);
+
+  // 5) 빈 상태 분기
+  var isEmpty = step.emptyCheck && step.emptyCheck();
+  var tryBtn = document.getElementById('tour-try-btn');
+  var emptyEl = document.getElementById('tour-empty-hint');
+  if(isEmpty && step.emptyHint){
+    if(tryBtn) tryBtn.style.display = 'none';
+    if(emptyEl){ emptyEl.textContent = step.emptyHint; emptyEl.style.display = ''; }
+  } else {
+    if(emptyEl) emptyEl.style.display = 'none';
+    if(tryBtn) tryBtn.style.display = (step.tryFocus || step.tryFn) ? '' : 'none';
+  }
+
+  // 6) 푸터 버튼
+  var prevBtn = document.getElementById('tour-prev');
+  var nextBtn = document.getElementById('tour-next');
+  if(prevBtn) prevBtn.style.display = _tourIdx > 0 ? '' : 'none';
+  if(nextBtn) nextBtn.textContent = _tourIdx === TOUR_STEPS.length-1 ? '완료' : '다음 →';
+
+  // 7) 글로우 효과 — 탭/서브뷰 렌더링 후
+  _tourClearHighlight();
+  setTimeout(function(){
+    if(isEmpty || !step.highlight) return;
+    var el = document.querySelector(step.highlight);
+    if(el){
+      el.classList.add('tour-spotlight');
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }, 250);
+}
+
+function _tourClearHighlight(){
+  document.querySelectorAll('.tour-spotlight').forEach(function(el){
+    el.classList.remove('tour-spotlight');
+  });
+}
+
+function _tourTry(){
+  var step = TOUR_STEPS[_tourIdx];
+  if(step.tryFn){ try{ step.tryFn(); }catch(e){} return; }
+  if(step.tryFocus){
+    var el = document.querySelector(step.tryFocus);
+    if(el){
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+      if(typeof el.focus === 'function') el.focus();
+    }
+  }
 }
 
 // 시작 가이드 "첫 메모 남기기" — 홈으로 이동 후 퀵 메모 하이라이트
@@ -21509,20 +21442,6 @@ function introGo(target){
         break;
     }
   }, 150);
-}
-
-function restoreSetupGuide(){
-  try{
-    localStorage.removeItem('ht2_setup_guide_dismissed_at');
-    localStorage.removeItem('ht2_setup_guide_dismissed');
-    localStorage.removeItem('ht2_setup_guide_done');
-    localStorage.setItem('ht2_setup_guide_force_show', '1');
-  }catch(e){}
-  if(typeof closeSettings === 'function') closeSettings();
-  setTimeout(function(){
-    if(typeof switchTab === 'function') switchTab('home');
-    if(typeof showToast === 'function') showToast('시작 가이드를 다시 표시했어요.');
-  }, 200);
 }
 
 function maybeShowIntroModalOnce(){
@@ -22162,9 +22081,6 @@ function renderHome(){
     document.getElementById('sample-convert-btn').onclick = function(){ exitSampleMode(true); };
   })();
 
-  // 시작 가이드 카드 (신규 사용자)
-  var guideContainer = document.getElementById('home-setup-guide');
-  if(guideContainer) guideContainer.innerHTML = renderSetupGuideCard();
   renderDiscoveryNudge();
 
   // 첫 방문 시 둘러보기 모달 자동 노출 (1회)
