@@ -7803,6 +7803,7 @@ window.addEventListener('load', function(){
 
     <!-- 시작 가이드 카드 (최상단 — 퀵메모 위) -->
     <div id="home-setup-guide"></div>
+    <div id="home-discovery-nudge"></div>
 
     <!-- 퀵 메모 — 항상 고정 위치 -->
     <div class="quick-memo-card">
@@ -22023,6 +22024,7 @@ function renderHome(){
   // 시작 가이드 카드 (신규 사용자)
   var guideContainer = document.getElementById('home-setup-guide');
   if(guideContainer) guideContainer.innerHTML = renderSetupGuideCard();
+  renderDiscoveryNudge();
 
   // 첫 방문 시 둘러보기 모달 자동 노출 (1회)
   maybeShowIntroModalOnce();
@@ -24980,6 +24982,162 @@ function dismissAttMultiHint(){
   localStorage.setItem('ht2_att_multi_hint_dismissed', '1');
   var el = document.getElementById('att-multi-hint');
   if(el) el.style.display = 'none';
+}
+
+/* ───────────────────────────────────────────────
+   점진적 발견 엔진 (Progressive Discovery)
+   - renderHome()에서 renderDiscoveryNudge() 1회 호출
+   - 규칙 테이블 평가 → 피로도 게이트 → 우선순위 1개 → 가치 메시지
+─────────────────────────────────────────────── */
+var DISCOVERY_IGNORE_LIMIT = 3;
+var DISCOVERY_SNOOZE_DAYS = 7;
+
+function _discoveryState(){
+  // records는 학생번호 키 객체 — 각 값이 기록 배열
+  function cnt(type){
+    var total = 0;
+    if(typeof records === 'object' && records !== null){
+      Object.keys(records).forEach(function(k){
+        var arr = records[k];
+        if(Array.isArray(arr)){
+          total += arr.filter(function(r){ return r.type === type; }).length;
+        }
+      });
+    }
+    return total;
+  }
+  var isHomeroom = false;
+  try{
+    isHomeroom = (typeof onboardingData !== 'undefined' && onboardingData.role === 'homeroom');
+    if(!isHomeroom && typeof classes === 'object'){
+      isHomeroom = Object.keys(classes).some(function(k){ return classes[k] && classes[k].isPrimary === true; });
+    }
+  }catch(e){}
+  var hasClassMaster = false;
+  try{ hasClassMaster = (typeof classMaster !== 'undefined' && Array.isArray(classMaster)) && classMaster.length > 0; }catch(e){}
+  var creativeCount = 0;
+  try{ creativeCount = (typeof creativeActivities !== 'undefined' && Array.isArray(creativeActivities)) ? creativeActivities.length : 0; }catch(e){}
+  return {
+    isHomeroom:    isHomeroom,
+    hasClassMaster: hasClassMaster,
+    creativeCount: creativeCount,
+    memo:   cnt('unsorted'),
+    att:    cnt('attendance'),
+    parent: cnt('parent'),
+    sg:     cnt('saenggibu')
+  };
+}
+
+var DISCOVERY_RULES = [
+  {
+    id: 'creative_timetable',
+    priority: 1,
+    when: function(s){ return s.isHomeroom && s.hasClassMaster && s.creativeCount === 0; },
+    msg: '창체 일정도 등록해보세요. 내 담당 수업과 겹치는 창체가 주간 시간표에 함께 표시돼요.',
+    cta: { label: '창체 등록하기', run: function(){ switchTab('class'); if(typeof switchClassView==='function') switchClassView('schedule'); } }
+  },
+  {
+    id: 'timeline',
+    priority: 2,
+    when: function(s){ return s.memo >= 5 && s.parent === 0; },
+    msg: '지금까지 메모 {n}개가 학생 타임라인에 쌓이고 있어요. 학생 관리에서 확인해보세요.',
+    nField: 'memo',
+    cta: { label: '타임라인 보기', run: function(){ switchTab('students'); } }
+  },
+  {
+    id: 'monthly_att',
+    priority: 3,
+    when: function(s){ return s.att >= 5; },
+    msg: '출결이 {n}일 쌓였어요. 월간 뷰에서 패턴을 한눈에 볼 수 있어요.',
+    nField: 'att',
+    cta: { label: '월간 출결 보기', run: function(){
+      switchTab('attendance');
+      if(typeof switchAttView === 'function') switchAttView('class-monthly');
+    } }
+  },
+  {
+    id: 'parent_reply',
+    priority: 4,
+    when: function(s){ return s.memo >= 10; },
+    msg: '지금까지 쌓은 기록 {n}개가 학부모 응대 때 자동으로 엮여요.',
+    nField: 'memo',
+    cta: { label: '학부모 응대 보기', run: function(){ switchTab('reply'); } }
+  },
+  {
+    id: 'saenggibu',
+    priority: 5,
+    when: function(s){ return (s.memo + s.parent) >= 15 && s.sg === 0; },
+    msg: '쌓인 기록이 충분해요. 생기부 작성 때 자료로 자동 변환돼요.',
+    cta: { label: '생기부 열기', run: function(){ switchTab('saenggibu'); } }
+  }
+];
+
+function _discoverySeenKey(id){ return 'ht2_nudge_' + id + '_state'; }
+
+function _discoveryGetMeta(id){
+  try{ return JSON.parse(localStorage.getItem(_discoverySeenKey(id)) || '{}'); }
+  catch(e){ return {}; }
+}
+
+function _discoverySetMeta(id, meta){
+  localStorage.setItem(_discoverySeenKey(id), JSON.stringify(meta));
+}
+
+function _discoveryPassesFatigue(rule){
+  var m = _discoveryGetMeta(rule.id);
+  if(m.dismissed) return false;
+  if((m.ignores || 0) >= DISCOVERY_IGNORE_LIMIT) return false;
+  if(m.snoozeUntil && new Date(m.snoozeUntil) > new Date()) return false;
+  return true;
+}
+
+function _pickDiscoveryNudge(){
+  var s = _discoveryState();
+  var today = new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('ht2_nudge_shown_date') === today) return null;
+  var candidates = DISCOVERY_RULES
+    .filter(function(r){ try{ return r.when(s); }catch(e){ return false; } })
+    .filter(_discoveryPassesFatigue)
+    .sort(function(a,b){ return a.priority - b.priority; });
+  if(!candidates.length) return null;
+  var chosen = candidates[0];
+  var n = chosen.nField ? s[chosen.nField] : null;
+  return { rule: chosen, n: n };
+}
+
+function renderDiscoveryNudge(){
+  var mount = document.getElementById('home-discovery-nudge');
+  if(!mount) return;
+  mount.innerHTML = '';
+  var picked = _pickDiscoveryNudge();
+  if(!picked) return;
+  var rule = picked.rule;
+  var msg  = picked.n != null ? rule.msg.replace('{n}', String(picked.n)) : rule.msg;
+  localStorage.setItem('ht2_nudge_shown_date', new Date().toISOString().slice(0,10));
+  mount.innerHTML =
+    '<div class="discovery-nudge" style="display:flex;align-items:center;gap:12px;'+
+    'background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-lg);'+
+    'padding:12px 14px;margin-bottom:14px;">'+
+      '<div style="flex:1;min-width:0;font-size:13px;color:var(--text);line-height:1.5;">'+ msg +'</div>'+
+      '<button type="button" class="discovery-nudge-cta" '+
+        'style="flex-shrink:0;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:700;'+
+        'background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:inherit;">'+ rule.cta.label +'</button>'+
+      '<button type="button" class="discovery-nudge-x" aria-label="닫기" '+
+        'style="flex-shrink:0;background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:16px;padding:2px 4px;">×</button>'+
+    '</div>';
+  mount.querySelector('.discovery-nudge-cta').onclick = function(){
+    _discoverySetMeta(rule.id, { dismissed: true });
+    try{ rule.cta.run(); }catch(e){}
+  };
+  mount.querySelector('.discovery-nudge-x').onclick = function(){
+    var m = _discoveryGetMeta(rule.id);
+    m.ignores = (m.ignores || 0) + 1;
+    var snooze = new Date(); snooze.setDate(snooze.getDate() + DISCOVERY_SNOOZE_DAYS);
+    m.snoozeUntil = snooze.toISOString();
+    if(m.ignores >= DISCOVERY_IGNORE_LIMIT) m.dismissed = true;
+    _discoverySetMeta(rule.id, m);
+    mount.innerHTML = '';
+  };
 }
 
 function setupAttModalForStudent(stu){
