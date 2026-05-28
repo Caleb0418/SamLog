@@ -7435,23 +7435,55 @@ window.addEventListener('load', function(){
 
 <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
   <div class="onboarding-card">
-    <!-- STEP 1: 환영 + 기본정보 -->
-    <div id="onboarding-step-1" class="onboarding-step">
-      <!-- 분기: 샘플 체험 vs 내 학급 시작 (동등 두 갈래) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <button type="button" onclick="startWithSample()" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;background:var(--accent-dim);border:1.5px solid var(--accent);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--accent-hover)';" onmouseout="this.style.borderColor='var(--accent)';">
-          <span style="font-size:20px;line-height:1;">💡</span>
-          <div style="font-size:13px;font-weight:700;color:var(--accent);">샘플로 둘러보기</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;">약 3분 · 입력할 게 없어요<br>가상 학급으로 바로 체험</div>
-          <div style="margin-top:4px;font-size:10px;font-weight:700;background:var(--accent);color:#fff;border-radius:4px;padding:2px 7px;display:inline-block;">추천</div>
-        </button>
-        <button type="button" onclick="document.getElementById('ob-teacher').focus()" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--text-tertiary)';" onmouseout="this.style.borderColor='var(--border)';">
-          <span style="font-size:20px;line-height:1;">🏫</span>
-          <div style="font-size:13px;font-weight:700;color:var(--text);">내 학급으로 시작</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;">명단·시간표 직접 등록<br>처음부터 내 학급 데이터로</div>
+    <!-- STEP FORK: 갈림길 — 샘플 vs 내 학급 -->
+    <div id="onboarding-step-fork" class="onboarding-step">
+      <!-- 브랜드 마크 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></span>
+        <span style="font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.01em;">쌤로그</span>
+        <span style="font-size:12px;color:var(--text-tertiary);">· 선생님의 모든 기록이 학생별로 모입니다</span>
+      </div>
+
+      <!-- 타이틀 -->
+      <div style="font-size:26px;font-weight:800;color:var(--text);line-height:1.25;letter-spacing:-0.02em;margin-bottom:10px;">어떻게 시작할까요?</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:22px;">쌤로그가 처음이라면 샘플로 먼저 둘러보는 걸 추천해요.<br>마음에 들면 그때 내 학급을 만들어도 늦지 않아요.</div>
+
+      <!-- 추천 카드: 샘플 -->
+      <div style="position:relative;margin-top:14px;margin-bottom:12px;">
+        <span style="position:absolute;top:-9px;left:14px;background:var(--bg-surface);padding:0 8px;font-size:10px;font-weight:700;color:var(--accent);letter-spacing:0.02em;border:1px solid var(--border-accent);border-radius:4px;">처음이라면 추천</span>
+        <button type="button" onclick="startWithSample()" style="display:flex;align-items:center;gap:14px;width:100%;padding:18px 16px;background:var(--accent-dim);border:1.5px solid var(--accent);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--accent-hover, var(--accent))';" onmouseout="this.style.borderColor='var(--accent)';">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--border-accent);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💡</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <span style="font-size:15px;font-weight:700;color:var(--accent);">샘플로 둘러보기</span>
+              <span style="font-size:10px;font-weight:700;background:var(--bg-surface);color:var(--accent);border:1px solid var(--border-accent);border-radius:10px;padding:2px 8px;">약 3분</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.55;">가상의 학급 데이터로 <strong style="color:var(--text);font-weight:700;">퀵메모·학생 타임라인·학부모 응대</strong>가 어떻게 한곳에 모이는지 바로 체험해요. <strong style="color:var(--text);font-weight:700;">입력할 게 없어요.</strong></div>
+          </div>
+          <span style="flex-shrink:0;color:var(--accent);font-size:20px;line-height:1;">›</span>
         </button>
       </div>
-      <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-bottom:18px;line-height:1.6;">모든 데이터는 이 기기에만 저장돼요<br>샘플은 실제 학급과 섞이지 않고 언제든 비울 수 있어요</div>
+
+      <!-- 일반 카드: 내 학급 -->
+      <button type="button" onclick="goToOnboardingForm()" style="display:flex;align-items:center;gap:14px;width:100%;padding:18px 16px;background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;margin-bottom:18px;" onmouseover="this.style.borderColor='var(--text-tertiary)';" onmouseout="this.style.borderColor='var(--border)';">
+        <div style="width:44px;height:44px;border-radius:10px;background:var(--bg-elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏫</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">내 학급으로 바로 시작</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.55;">담당 정보와 학생 명단을 등록하고 실제로 사용해요. <strong style="color:var(--text);font-weight:700;">명단은 나중에 추가해도 돼요.</strong></div>
+        </div>
+        <span style="flex-shrink:0;color:var(--text-tertiary);font-size:20px;line-height:1;">›</span>
+      </button>
+
+      <!-- 푸터 -->
+      <div style="border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:flex-start;gap:8px;">
+        <span style="font-size:13px;line-height:1.5;flex-shrink:0;">🔒</span>
+        <div style="font-size:11px;color:var(--text-tertiary);line-height:1.65;">모든 데이터는 <strong style="color:var(--text-secondary);font-weight:600;">이 컴퓨터에만</strong> 저장돼요. 샘플 데이터는 실제 학급과 섞이지 않고 언제든 깨끗이 비울 수 있어요.</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: 환영 + 기본정보 -->
+    <div id="onboarding-step-1" class="onboarding-step" style="display:none;">
+      <button type="button" onclick="backToOnboardingFork()" style="background:none;border:none;padding:4px 0;margin-bottom:10px;font-size:12px;color:var(--text-tertiary);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;">← 시작 화면으로</button>
 
       <div class="onboarding-step-badge">1 / 3</div>
       <div class="onboarding-title">내 학급 정보를 입력해주세요</div>
@@ -18898,9 +18930,31 @@ function skipOnboardingStep1(){
   switchTab('home');
 }
 
+function goToOnboardingForm(){
+  var fork = document.getElementById('onboarding-step-fork');
+  if(fork) fork.style.display = 'none';
+  document.getElementById('onboarding-step-1').style.display = 'block';
+  document.getElementById('onboarding-step-2').style.display = 'none';
+  document.getElementById('onboarding-step-3').style.display = 'none';
+  setTimeout(function(){
+    var t = document.getElementById('ob-teacher');
+    if(t) t.focus();
+  }, 60);
+}
+
+function backToOnboardingFork(){
+  document.getElementById('onboarding-step-1').style.display = 'none';
+  document.getElementById('onboarding-step-2').style.display = 'none';
+  document.getElementById('onboarding-step-3').style.display = 'none';
+  var fork = document.getElementById('onboarding-step-fork');
+  if(fork) fork.style.display = 'block';
+}
+
 function showOnboarding(){
   document.getElementById('onboarding-overlay').style.display = 'flex';
-  document.getElementById('onboarding-step-1').style.display = 'block';
+  var fork = document.getElementById('onboarding-step-fork');
+  if(fork) fork.style.display = 'block';
+  document.getElementById('onboarding-step-1').style.display = 'none';
   document.getElementById('onboarding-step-2').style.display = 'none';
   document.getElementById('onboarding-step-3').style.display = 'none';
 
@@ -19043,6 +19097,8 @@ function onboardingNext(stepNum){
     renderDedupeBanner();
     refreshObBackupCard(); // 백업 카드 상태 초기화
   }
+  var _fork = document.getElementById('onboarding-step-fork');
+  if(_fork) _fork.style.display = 'none';
   document.getElementById('onboarding-step-1').style.display = stepNum === 1 ? 'block' : 'none';
   document.getElementById('onboarding-step-2').style.display = stepNum === 2 ? 'block' : 'none';
   document.getElementById('onboarding-step-3').style.display = stepNum === 3 ? 'block' : 'none';
@@ -22099,12 +22155,10 @@ function renderHome(){
       '<div style="display:flex;align-items:center;gap:12px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:14px;">'+
         '<div style="flex:1;min-width:0;">'+
           '<div style="font-size:13px;font-weight:700;color:var(--accent);">샘플 둘러보기 중 · 마음껏 눌러보세요</div>'+
-          '<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">가상의 학급이에요. 퀵메모에 @이름을 입력해 기록이 어디로 쌓이는지 따라가 보세요.</div>'+
+          '<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">이건 가상의 학급이에요. 퀵메모에 <strong style="color:var(--text);font-weight:700;">@학생이름</strong>을 입력해 기록이 어디로 쌓이는지 따라가 보세요.</div>'+
         '</div>'+
-        '<button type="button" id="sample-clear-btn" style="flex-shrink:0;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary);cursor:pointer;font-family:inherit;">샘플 비우기</button>'+
         '<button type="button" id="sample-convert-btn" style="flex-shrink:0;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:inherit;">내 학급 만들기 →</button>'+
       '</div>';
-    document.getElementById('sample-clear-btn').onclick = function(){ exitSampleMode(false); };
     document.getElementById('sample-convert-btn').onclick = function(){ exitSampleMode(true); };
   })();
 
