@@ -8598,7 +8598,6 @@ window.addEventListener('load', function(){
               <button class="filter-chip" data-filter="life" onclick="setFilter('life')">생활</button>
               <button class="filter-chip" data-filter="parent" onclick="setFilter('parent')">학부모</button>
               <button class="filter-chip" data-filter="bulk" onclick="setFilter('bulk')">공지</button>
-              <button class="filter-chip" data-filter="attendance" onclick="setFilter('attendance')">출결</button>
               <button class="filter-chip" data-filter="unsorted" onclick="setFilter('unsorted')">미분류</button>
             </div>
           </div>
@@ -11987,9 +11986,11 @@ function renderTimeline(){
   if(!currentStudent) return;
   var recs = getStudentRecords(currentStudent);
 
-  // 필터 적용
+  // 필터 적용 (출결 메모는 학생 관리에서 표시하지 않음 — 생기부 탭에서만 활용)
   if(currentFilter !== 'all'){
     recs = recs.filter(function(r){return r.type === currentFilter;});
+  } else {
+    recs = recs.filter(function(r){return r.type !== 'attendance';});
   }
 
   // 미분류 우선, 그 다음 최신순
