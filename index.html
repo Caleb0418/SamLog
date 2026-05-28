@@ -3831,6 +3831,15 @@ textarea.as-input{resize:vertical;min-height:50px;}
 .neis-school-result-name{font-weight:600;color:var(--text);}
 .neis-school-result-meta{font-size:10px;color:var(--text-tertiary);margin-top:2px;}
 .neis-school-result-code{font-size:10px;color:var(--text-tertiary);font-family:monospace;flex-shrink:0;}
+.neis-school-result-pick{
+  flex-shrink:0;font-size:11px;font-weight:700;color:var(--accent);
+  background:var(--accent-dim);border:1px solid var(--border-accent);
+  padding:4px 10px;border-radius:999px;letter-spacing:-0.01em;
+  transition:all 0.12s ease;
+}
+.neis-school-result:hover .neis-school-result-pick{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
 .neis-confirm-card{
   background:var(--success-dim,#f0fdf4);border:1px solid var(--success,#22c55e);
   border-radius:6px;padding:12px 14px;
@@ -7454,10 +7463,7 @@ window.addEventListener('load', function(){
         <button type="button" onclick="startWithSample()" style="display:flex;align-items:center;gap:14px;width:100%;padding:18px 16px;background:var(--accent-dim);border:1.5px solid var(--accent);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;transition:border-color 0.12s;" onmouseover="this.style.borderColor='var(--accent-hover, var(--accent))';" onmouseout="this.style.borderColor='var(--accent)';">
           <div style="width:44px;height:44px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--border-accent);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💡</div>
           <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <span style="font-size:15px;font-weight:700;color:var(--accent);">샘플로 둘러보기</span>
-              <span style="font-size:10px;font-weight:700;background:var(--bg-surface);color:var(--accent);border:1px solid var(--border-accent);border-radius:10px;padding:2px 8px;">약 3분</span>
-            </div>
+            <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:4px;">샘플로 둘러보기</div>
             <div style="font-size:12px;color:var(--text-secondary);line-height:1.55;">가상의 학급 데이터로 <strong style="color:var(--text);font-weight:700;">퀵메모·학생 타임라인·학부모 응대</strong>가 어떻게 한곳에 모이는지 바로 체험해요. <strong style="color:var(--text);font-weight:700;">입력할 게 없어요.</strong></div>
           </div>
           <span style="flex-shrink:0;color:var(--accent);font-size:20px;line-height:1;">›</span>
@@ -7483,8 +7489,6 @@ window.addEventListener('load', function(){
 
     <!-- STEP 1: 환영 + 기본정보 -->
     <div id="onboarding-step-1" class="onboarding-step" style="display:none;">
-      <button type="button" onclick="backToOnboardingFork()" style="background:none;border:none;padding:4px 0;margin-bottom:10px;font-size:12px;color:var(--text-tertiary);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;">← 시작 화면으로</button>
-
       <div class="onboarding-step-badge">1 / 3</div>
       <div class="onboarding-title">내 학급 정보를 입력해주세요</div>
       <div class="onboarding-desc">담당 역할과 학급을 알려주세요. 나중에 설정에서 바꿀 수 있어요.</div>
@@ -7543,9 +7547,12 @@ window.addEventListener('load', function(){
         </div>
       </div>
 
-      <div class="onboarding-actions" style="justify-content:flex-end;">
-        <button class="btn-text" onclick="skipOnboardingStep1()" style="font-size:12px;color:var(--text-tertiary);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 8px;">나중에 설정할게요</button>
-        <button class="btn-primary" id="ob-next-1" disabled onclick="onboardingNext(2)">다음 →</button>
+      <div class="onboarding-actions" style="justify-content:space-between;">
+        <button type="button" onclick="backToOnboardingFork()" style="background:none;border:none;padding:4px 0;font-size:12px;color:var(--text-tertiary);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;">← 시작 화면으로</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn-text" onclick="skipOnboardingStep1()" style="font-size:12px;color:var(--text-tertiary);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 8px;">나중에 설정할게요</button>
+          <button class="btn-primary" id="ob-next-1" disabled onclick="onboardingNext(2)">다음 →</button>
+        </div>
       </div>
     </div>
 
@@ -13895,10 +13902,11 @@ function searchNeisSchool(){
       html += '<div class="neis-school-result-name">'+escapeHtml(r.SCHUL_NM||'')+'</div>';
       html += '<div class="neis-school-result-meta">'+escapeHtml(r.ATPT_OFCDC_SC_NM||'')+' · '+escapeHtml(kindLabel)+'</div>';
       html += '</div>';
-      html += '<div class="neis-school-result-code">'+r.ATPT_OFCDC_SC_CODE+'/'+r.SD_SCHUL_CODE+'</div>';
+      html += '<span class="neis-school-result-pick">선택 →</span>';
       html += '</div>';
     });
-    resultsEl.innerHTML = html;
+    var hint = '<div style="font-size:11px;color:var(--text-tertiary);margin:8px 0 4px;">학교를 선택해 주세요 ('+res.rows.length+'개)</div>';
+    resultsEl.innerHTML = hint + html;
     var _rows = res.rows;
     Array.prototype.forEach.call(resultsEl.querySelectorAll('.neis-school-result'), function(el){
       el.onclick = function(){
@@ -14055,9 +14063,11 @@ function obSearchNeisSchool(){
           '<div class="neis-school-result-name">'+escapeHtml(row.SCHUL_NM||'')+'</div>' +
           '<div class="neis-school-result-meta">'+escapeHtml(meta)+'</div>' +
         '</div>' +
+        '<span class="neis-school-result-pick">선택 →</span>' +
         '</div>';
     });
-    resultsEl.innerHTML = html;
+    var hint = '<div style="font-size:11px;color:var(--text-tertiary);margin:8px 0 4px;">학교를 선택해 주세요 ('+res.rows.length+'개)</div>';
+    resultsEl.innerHTML = hint + html;
   });
 }
 
@@ -20910,25 +20920,39 @@ function saveAddClass(){
           }
           return;
         }
-        var subjectListAfterSync = getAcSubjectsForClass(g, c);
-        if(subjectListAfterSync.length > 0){
-          showAcSubjectStep(key, g, c, subjectListAfterSync);
-        } else {
-          // 시간표 동기화 성공했지만 해당 반 과목이 없음 — 명확한 안내 표시
-          if(_stepEl){
-            _stepEl.innerHTML =
-              '<div style="text-align:center;padding:20px 0 12px;">'
-              +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 10px;color:var(--text-tertiary);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-              +'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">시간표는 불러왔지만 등록된 과목이 없어요</div>'
-              +'<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">NEIS에 '+g+'학년 '+c+'반 시간표가 아직 없거나, 시험·휴업으로만 채워져 있어요.<br>나중에 시간표·수업 설정에서 직접 추가할 수 있어요.</div>'
-              +'</div>';
-          }
-          if(_saveBtn){
-            _saveBtn.disabled = false;
-            _saveBtn.textContent = '확인';
-            _saveBtn.onclick = function(){ closeAddClass(); switchClassKey(key); showToast(g+'학년 '+c+'반이 추가됐어요'); };
-          }
+
+        // 성공 → "시간표를 불러왔습니다" 완료 표시 후 다음 단계로 전환
+        if(_stepEl){
+          _stepEl.innerHTML =
+            '<div style="text-align:center;padding:24px 0 18px;">'
+            +'<div style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--success-dim,#E8F5EE);margin-bottom:10px;">'
+            +'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success,#1B7F4F)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+            +'</div>'
+            +'<div style="font-size:13px;font-weight:700;color:var(--success,#1B7F4F);">시간표를 불러왔습니다</div>'
+            +'</div>';
         }
+
+        setTimeout(function(){
+          var subjectListAfterSync = getAcSubjectsForClass(g, c);
+          if(subjectListAfterSync.length > 0){
+            showAcSubjectStep(key, g, c, subjectListAfterSync);
+          } else {
+            // 시간표 동기화 성공했지만 해당 반 과목이 없음 — 명확한 안내 표시
+            if(_stepEl){
+              _stepEl.innerHTML =
+                '<div style="text-align:center;padding:20px 0 12px;">'
+                +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 10px;color:var(--text-tertiary);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+                +'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">시간표는 불러왔지만 등록된 과목이 없어요</div>'
+                +'<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">NEIS에 '+g+'학년 '+c+'반 시간표가 아직 없거나, 시험·휴업으로만 채워져 있어요.<br>나중에 시간표·수업 설정에서 직접 추가할 수 있어요.</div>'
+                +'</div>';
+            }
+            if(_saveBtn){
+              _saveBtn.disabled = false;
+              _saveBtn.textContent = '확인';
+              _saveBtn.onclick = function(){ closeAddClass(); switchClassKey(key); showToast(g+'학년 '+c+'반이 추가됐어요'); };
+            }
+          }
+        }, 700);
       }).catch(function(err){
         console.error('NEIS sync failed:', err);
         if(_stepEl){
