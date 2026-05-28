@@ -21201,10 +21201,26 @@ var TOUR_STEPS = [
     tryFocus:'#search-input' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'태그 관리 — 추가·삭제·수정',
-    desc:'메모 작성/편집 폼에서 "태그 관리" 버튼을 누르면 자주 쓰는 태그를 직접 추가·삭제할 수 있어요.',
+    desc:'관찰 분류로 자동 진입했어요. 폼 안의 "태그 관리" 버튼을 누르면 자주 쓰는 태그를 직접 추가·삭제할 수 있어요.',
     highlight:'[onclick*="openTagManager"], .tag-manage-link',
-    emptyCheck:function(){ return !document.querySelector('[onclick*="openTagManager"], .tag-manage-link'); },
-    emptyHint:'학생을 선택하고 "+ 기록 추가"를 누르면 폼 안에서 태그 관리 버튼이 보여요.' },
+    setupFn:function(){
+      // 학생 자동 선택 (currentStudent 없으면 첫 학생)
+      if(typeof currentStudent === 'undefined' || !currentStudent){
+        var firstRow = document.querySelector('#sidebar-content .student-row');
+        if(firstRow && firstRow.dataset.num && typeof selectStudent === 'function'){
+          selectStudent(firstRow.dataset.num);
+        }
+      }
+      // 관찰 기록 폼 자동 열기 → 폼 안의 "태그 관리" 버튼이 보이게 됨
+      if(typeof openRecordForm === 'function'){
+        setTimeout(function(){ try{ openRecordForm('observation'); }catch(e){} }, 120);
+      }
+    },
+    emptyCheck:function(){
+      var hasStudents = document.querySelectorAll('#sidebar-content .student-row').length > 0;
+      return !hasStudents;
+    },
+    emptyHint:'학생이 등록되면 태그 관리를 사용할 수 있어요.' },
 
   // 5️⃣ 생기부 (3)
   { tab:'saenggibu', subview:{fn:'switchSaenggibuView', arg:'write'}, tabIcon:'📄', tabName:'생기부',
@@ -21339,9 +21355,15 @@ function _tourRender(){
   if(prevBtn) prevBtn.style.display = _tourIdx > 0 ? '' : 'none';
   if(nextBtn) nextBtn.textContent = _tourIdx === TOUR_STEPS.length-1 ? '완료' : '다음 →';
 
-  // 7) 글로우 효과 — 탭/서브뷰 렌더링 후 (콤마 selector의 모든 매칭 element에 적용)
+  // 7) setupFn 호출 (학생 자동 선택 + 폼 자동 열기 등 사전 준비)
+  if(!isEmpty && typeof step.setupFn === 'function'){
+    try{ step.setupFn(); }catch(e){}
+  }
+
+  // 8) 글로우 효과 — 탭/서브뷰 + setupFn 처리 후 (콤마 selector의 모든 매칭 element에 적용)
   if(window._tourHighlightTimer){ clearTimeout(window._tourHighlightTimer); window._tourHighlightTimer = null; }
   _tourClearHighlight();
+  var highlightDelay = step.setupFn ? 400 : 250;  // setupFn 있으면 폼 렌더링 대기
   window._tourHighlightTimer = setTimeout(function(){
     if(isEmpty || !step.highlight) return;
     var els = document.querySelectorAll(step.highlight);
@@ -21354,7 +21376,7 @@ function _tourRender(){
       }
     }
     if(firstVisible) firstVisible.scrollIntoView({ behavior:'smooth', block:'center' });
-  }, 250);
+  }, highlightDelay);
 }
 
 function _tourClearHighlight(){
