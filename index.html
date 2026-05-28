@@ -21121,14 +21121,13 @@ var TOUR_STEPS = [
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'오늘 수업·알람·제출 추적',
     desc:'수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에 볼 수 있어요.',
-    highlight:'#home-class-card, .home-class-section',
+    highlight:'#home-class-rows, #home-alerts, #qm-submit-toggle-wrap, #home-submit-widget',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'수업을 등록하면 오늘 수업 카드가 표시돼요.' },
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'월간 일정 — 학사·개인·마감',
     desc:'월간 캘린더로 학사 일정, 개인 일정, 마감을 한 화면에. 날짜를 클릭해 일정을 추가하세요.',
-    highlight:'[onclick*="openMonthlySchedule"], #home-monthly-btn',
-    tryFn:function(){ if(typeof openMonthlySchedule==='function') openMonthlySchedule(); } },
+    highlight:'[onclick*="openMonthlySchedule"], #home-monthly-btn' },
 
   // 2️⃣ 출결 (2)
   { tab:'attendance', subview:{fn:'switchAttView', arg:'daily'}, tabIcon:'✓', tabName:'출결',
@@ -21340,15 +21339,21 @@ function _tourRender(){
   if(prevBtn) prevBtn.style.display = _tourIdx > 0 ? '' : 'none';
   if(nextBtn) nextBtn.textContent = _tourIdx === TOUR_STEPS.length-1 ? '완료' : '다음 →';
 
-  // 7) 글로우 효과 — 탭/서브뷰 렌더링 후
+  // 7) 글로우 효과 — 탭/서브뷰 렌더링 후 (콤마 selector의 모든 매칭 element에 적용)
+  if(window._tourHighlightTimer){ clearTimeout(window._tourHighlightTimer); window._tourHighlightTimer = null; }
   _tourClearHighlight();
-  setTimeout(function(){
+  window._tourHighlightTimer = setTimeout(function(){
     if(isEmpty || !step.highlight) return;
-    var el = document.querySelector(step.highlight);
-    if(el){
-      el.classList.add('tour-spotlight');
-      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    var els = document.querySelectorAll(step.highlight);
+    var firstVisible = null;
+    for(var i = 0; i < els.length; i++){
+      var el = els[i];
+      if(el && el.offsetParent !== null){
+        el.classList.add('tour-spotlight');
+        if(!firstVisible) firstVisible = el;
+      }
     }
+    if(firstVisible) firstVisible.scrollIntoView({ behavior:'smooth', block:'center' });
   }, 250);
 }
 
