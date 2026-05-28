@@ -21494,6 +21494,12 @@ var TOUR_STEPS = [
 ];
 
 function openIntroModal(){
+  // 가드: 온보딩/모달 진행 중이면 투어 열지 않음 (onboarding-overlay 클래스를 가진 모달은 모두 차단)
+  var blockers = document.querySelectorAll('.onboarding-overlay');
+  for(var i = 0; i < blockers.length; i++){
+    var b = blockers[i];
+    if(b && b.style.display && b.style.display !== 'none') return;
+  }
   _tourIdx = 0;
   _tourCsAutoEnabled = false;
   var p = document.getElementById('tour-panel');
