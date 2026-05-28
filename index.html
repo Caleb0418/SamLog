@@ -17859,7 +17859,10 @@ function renderSaenggibuProgressView(){
   var incomplete = [];
   students.forEach(function(s){
     var done = 0;
-    areaCodes.forEach(function(code){ if(matrix[s.num][code]) done++; });
+    var stuMatrix = matrix[ck+'_'+s.num];
+    if(stuMatrix){
+      areaCodes.forEach(function(code){ if(stuMatrix[code]) done++; });
+    }
     if(done < areaCodes.length){
       incomplete.push({ num: s.num, name: getDisplayName(s), done: done, total: areaCodes.length });
     }
@@ -21180,23 +21183,29 @@ var TOUR_STEPS = [
     title:'학생 선택 → 통합 타임라인',
     desc:'학생 한 명을 누르면 관찰·상담·생활·학부모·출결·생기부 기록이 한 타임라인에 모여요.',
     highlight:'#sidebar-content',
-    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-item'); return els.length===0; },
+    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-row'); return els.length===0; },
     emptyHint:'수업이 등록되면 학생이 자동으로 추가돼요.' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'5색 메모 분류',
     desc:'관찰·상담·생활·학부모·미분류 — 색상 필터로 빠른 정리가 가능해요.',
-    highlight:'.sgt-color-filter, [data-color-filter], .color-filter',
-    emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-item'); return els.length===0; },
-    emptyHint:'학생을 선택하면 색상 필터가 활성화돼요.' },
+    highlight:'#filter-group, .record-filter-group',
+    emptyCheck:function(){
+      var hasStudents = document.querySelectorAll('#sidebar-content .student-row').length > 0;
+      var filterVisible = document.querySelector('#filter-group');
+      return !hasStudents || !filterVisible;
+    },
+    emptyHint:'좌측에서 학생을 한 명 선택하면 색상 필터가 활성화돼요.' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
-    title:'태그·검색으로 빠르게 찾기',
-    desc:'자주 쓰는 태그를 미리 등록하면 입력 속도와 검색 모두 향상돼요.',
-    highlight:'#sidebar-search, .student-search, #sidebar-content input' },
+    title:'검색으로 학생 빠르게 찾기',
+    desc:'사이드바 상단 검색창에 이름을 입력하면 즉시 필터링돼요.',
+    highlight:'#search-input, .search-wrap',
+    tryFocus:'#search-input' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'태그 관리 — 추가·삭제·수정',
-    desc:'자주 쓰는 태그를 직접 추가하고, 더 이상 안 쓰는 태그는 삭제할 수 있어요.',
-    highlight:'[onclick*="openTagManager"], .tag-mgr-link',
-    tryFn:function(){ if(typeof openTagManager==='function') openTagManager(); } },
+    desc:'메모 작성/편집 폼에서 "태그 관리" 버튼을 누르면 자주 쓰는 태그를 직접 추가·삭제할 수 있어요.',
+    highlight:'[onclick*="openTagManager"], .tag-manage-link',
+    emptyCheck:function(){ return !document.querySelector('[onclick*="openTagManager"], .tag-manage-link'); },
+    emptyHint:'학생을 선택하고 "+ 기록 추가"를 누르면 폼 안에서 태그 관리 버튼이 보여요.' },
 
   // 5️⃣ 생기부 (3)
   { tab:'saenggibu', subview:{fn:'switchSaenggibuView', arg:'write'}, tabIcon:'📄', tabName:'생기부',
