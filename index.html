@@ -8346,7 +8346,7 @@ window.addEventListener('load', function(){
           <span class="tour-sub-counter">(<span id="tour-sub-cur">1</span>/<span id="tour-sub-total">3</span>)</span>
         </div>
         <div class="tour-head-right">
-          <span class="tour-total-counter"><span id="tour-cur">1</span>/20</span>
+          <span class="tour-total-counter"><span id="tour-cur">1</span>/21</span>
           <button class="tour-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
         </div>
       </div>
@@ -21141,7 +21141,12 @@ var TOUR_STEPS = [
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'데이터가 쌓이면 월간 뷰가 채워져요.' },
 
-  // 3️⃣ 수업 관리 (5)
+  // 3️⃣ 수업 관리 (6)
+  { tab:'class', tabIcon:'📅', tabName:'수업 관리',
+    title:'먼저 담당 수업을 추가하세요',
+    desc:'담당 수업을 추가하면 NEIS 시간표와 자동으로 매칭이 돼요.',
+    highlight:'[onclick*="openClassSettings"]',
+    tryFn:function(){ if(typeof openClassSettings==='function') openClassSettings(); } },
   { tab:'class', subview:{fn:'switchClassView', arg:'today'}, tabIcon:'📅', tabName:'수업 관리',
     title:'오늘 수업 카드 + 차시 메모',
     desc:'수업이 끝나면 진도·반 특이사항·학생 멘션을 종소리 직후 한 줄로.',
