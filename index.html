@@ -7820,6 +7820,9 @@ window.addEventListener('load', function(){
 
 <div class="wrap">
 
+  <!-- 전역 샘플 모드 띠배너 — 모든 탭 상단 (샘플 체험 중일 때만 표시) -->
+  <div id="global-sample-banner" style="display:none;"></div>
+
   <!-- ═══════════════════════════════════════════
        홈 탭 — 퀵 메모
   ═══════════════════════════════════════════ -->
@@ -7841,9 +7844,6 @@ window.addEventListener('load', function(){
         월간 일정
       </button>
     </div>
-
-    <!-- 샘플 모드 띠배너 (샘플 체험 중일 때만 표시) -->
-    <div id="home-sample-banner"></div>
 
     <div id="home-discovery-nudge"></div>
 
@@ -12701,6 +12701,8 @@ function switchTab(tab){
       return;
     }
   }
+  // 전역 샘플 모드 띠배너 — 모든 탭에서 노출 보장
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
   // 기존 상단 nav-tab (하위 호환)
   document.querySelectorAll('.nav-tab').forEach(function(b){
     b.classList.toggle('active', b.dataset.tab === tab);
@@ -19608,6 +19610,8 @@ function applyHelpSample(){
 }
 
 function startWithSample(){
+  // 샘플로 새로 시작하면 인트로 투어를 다시 자동 노출
+  try{ localStorage.removeItem('ht2_intro_modal_seen'); }catch(e){}
   var sample = [
     {num:'01',name:'강도윤',gender:'남'},{num:'02',name:'강서영',gender:'여'},
     {num:'03',name:'김민서',gender:'여'},{num:'04',name:'김태현',gender:'남'},
@@ -19629,6 +19633,48 @@ function startWithSample(){
   onboardingData.parsedStudents = sample;
   try{ localStorage.setItem('ht2_sample_mode','1'); }catch(e){}
   completeOnboarding();
+}
+
+function convertSampleToReal(){
+  if(!confirm('샘플 데이터를 비우고 내 학급 정보를 입력할게요.\n\n샘플로 만든 학급·기록이 사라집니다. (가상 데이터라 되돌릴 필요 없어요.) 계속할까요?')) return;
+  try{
+    classes = {};
+    classMaster = [];
+    schoolTimetable = {};
+    if(typeof timetableOverrides !== 'undefined') timetableOverrides = {};
+    if(typeof timetableChangeHistory !== 'undefined') timetableChangeHistory = [];
+    if(typeof ttSyncState !== 'undefined') ttSyncState = {};
+    if(typeof adhocSlots !== 'undefined') adhocSlots = [];
+    creativeActivities = [];
+    if(typeof classSchedule !== 'undefined') classSchedule = [];
+    if(typeof attendanceRecords !== 'undefined') attendanceRecords = {};
+    if(typeof schoolSchedule !== 'undefined') schoolSchedule = {};
+    if(typeof userSchedule !== 'undefined') userSchedule = {};
+    currentClassKey = '';
+    if(typeof syncActiveClass === 'function') syncActiveClass();
+    saveAll();
+  }catch(e){ console.error('convertSampleToReal 초기화 실패', e); }
+  try{ localStorage.removeItem('ht2_sample_mode'); }catch(e){}
+  try{ localStorage.removeItem('ht2_onboarded'); }catch(e){}
+  // 폼 사전입력에 샘플 값이 남지 않도록 전역 초기화
+  TEACHER_NAME = '';
+  SCHOOL_GRADE = '';
+  SCHOOL_CLASS = '';
+  if(typeof onboardingData === 'object' && onboardingData){
+    onboardingData.isSample = false;
+    onboardingData.teacher = '';
+    onboardingData.grade = '';
+    onboardingData.classNum = '';
+    onboardingData.parsedStudents = [];
+  }
+  // 인트로 투어 떠 있으면 닫기
+  var tour = document.getElementById('tour-panel');
+  if(tour) tour.classList.remove('show');
+  // 전역 띠배너 갱신 (이제 숨김)
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
+  // 가치 온보딩 5화면은 건너뛰고 내 학급 정보 입력 폼으로 바로 진입
+  if(typeof showOnboarding === 'function') showOnboarding();
+  if(typeof goToOnboardingForm === 'function') goToOnboardingForm();
 }
 
 function exitSampleMode(thenSetup){
@@ -19653,6 +19699,7 @@ function exitSampleMode(thenSetup){
     saveAll();
   }catch(e){ console.error('exitSampleMode 초기화 실패', e); }
   try{ localStorage.removeItem('ht2_sample_mode'); }catch(e){}
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
   if(thenSetup){
     try{ localStorage.removeItem('ht2_onboarded'); }catch(e){}
     location.reload();
@@ -19998,8 +20045,8 @@ function completeOnboarding(){
   if(sgLevelEl) sgLevelEl.value = levelMap[SCHOOL_LEVEL] || '중';
 
   saveSettings();
-  saveAll();
   if(onboardingData.isSample) applySampleData();
+  saveAll();
 
   // 신규 사용자 기본값: 자동 백업 매일 (이미 weekly 등 명시 설정한 경우 유지)
   try{
@@ -20015,6 +20062,7 @@ function completeOnboarding(){
   document.getElementById('onboarding-overlay').style.display = 'none';
   updateHeaderClass();
   switchTab('home');
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
 
   if(!onboardingData.isSample && neisSettings.apiKey && neisSettings.atptCode && Object.keys(classes).length > 0){
     setTimeout(function(){
@@ -21580,6 +21628,35 @@ function introGo(target){
   }, 150);
 }
 
+function renderGlobalSampleBanner(){
+  var mount = document.getElementById('global-sample-banner');
+  if(!mount) return;
+  var isSample = false;
+  try{ isSample = localStorage.getItem('ht2_sample_mode') === '1'; }catch(e){}
+  if(!isSample){
+    mount.style.display = 'none';
+    mount.innerHTML = '';
+    return;
+  }
+  mount.style.display = 'block';
+  mount.innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px;background:var(--accent-dim);border-bottom:1px solid var(--border-accent);box-shadow:inset 3px 0 0 var(--accent);padding:7px 20px;">'+
+      '<span style="font-size:10px;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:999px;background:var(--accent);color:#fff;flex-shrink:0;">SAMPLE</span>'+
+      '<span style="font-size:12.5px;font-weight:600;color:var(--text);flex-shrink:0;">샘플 데이터로 둘러보는 중</span>'+
+      '<span style="font-size:11.5px;color:var(--text-secondary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">· 실제 기록과 분리돼요</span>'+
+      '<span style="flex:1;"></span>'+
+      '<button type="button" id="global-sample-convert-btn" '+
+              'onmouseover="this.style.background=\'var(--accent-hover)\';this.style.transform=\'translateY(-1px)\'" '+
+              'onmouseout="this.style.background=\'var(--accent)\';this.style.transform=\'none\'" '+
+              'style="display:inline-flex;align-items:center;gap:5px;flex-shrink:0;padding:5px 11px 5px 13px;border-radius:999px;font-size:11.5px;font-weight:700;font-family:inherit;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background .15s, transform .15s;">'+
+        '내 학급으로 시작하기'+
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'+
+      '</button>'+
+    '</div>';
+  var btn = document.getElementById('global-sample-convert-btn');
+  if(btn) btn.onclick = function(){ convertSampleToReal(); };
+}
+
 function maybeShowIntroModalOnce(){
   try{
     var seen = localStorage.getItem('ht2_intro_modal_seen') === '1';
@@ -21838,27 +21915,8 @@ function renderHome(){
     }
   };
 
-  // 오늘 업무 메모
-  _tmEditMode = false;
-  renderTeacherMemoCard();
-
-  // 샘플 모드 띠배너
-  (function(){
-    var isSample = false;
-    try{ isSample = localStorage.getItem('ht2_sample_mode') === '1'; }catch(e){}
-    var mount = document.getElementById('home-sample-banner');
-    if(!mount) return;
-    if(!isSample){ mount.innerHTML = ''; return; }
-    mount.innerHTML =
-      '<div style="display:flex;align-items:center;gap:12px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:14px;">'+
-        '<div style="flex:1;min-width:0;">'+
-          '<div style="font-size:13px;font-weight:700;color:var(--accent);">샘플 둘러보기 중 · 마음껏 눌러보세요</div>'+
-          '<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">이건 가상의 학급이에요. 퀵메모에 <strong style="color:var(--text);font-weight:700;">@학생이름</strong>을 입력해 기록이 어디로 쌓이는지 따라가 보세요.</div>'+
-        '</div>'+
-        '<button type="button" id="sample-convert-btn" style="flex-shrink:0;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:inherit;">내 학급 만들기 →</button>'+
-      '</div>';
-    document.getElementById('sample-convert-btn').onclick = function(){ exitSampleMode(true); };
-  })();
+  // 전역 샘플 모드 띠배너 동기화 (모든 탭 상단)
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
 
   renderDiscoveryNudge();
 
@@ -29841,6 +29899,7 @@ function init(){
 
   updateHeaderClass();
   switchTab('home');
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
 
   // 1분마다 알람 갱신 — 홈 탭이면 렌더링, 다른 탭이면 브라우저 알림만 발송
   setInterval(function(){
