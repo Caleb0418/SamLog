@@ -7058,6 +7058,118 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 .ac-info .hac-meta{color:var(--accent);}
 .ac-neutral .hac-meta{color:var(--text-secondary);}
 /* P2-5: SVG stroke 통일 — skip to avoid breaking existing icons */
+
+/* ═══════════ 가치 온보딩 (5화면 인트로) ═══════════ */
+.vob-overlay{position:fixed;inset:0;z-index:550;background:radial-gradient(1200px 600px at 85% -10%,rgba(127,119,221,.07),transparent 60%),radial-gradient(900px 500px at -5% 110%,rgba(127,119,221,.05),transparent 55%),var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+.vob-card{width:100%;max-width:440px;background:var(--bg-surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:flex;flex-direction:column;min-height:632px;overflow:hidden;}
+.vob-top{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 0;}
+.vob-dots{display:flex;gap:6px;}
+.vob-dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong);opacity:.45;transition:all .35s cubic-bezier(.4,0,.2,1);}
+.vob-dot.active{width:22px;border-radius:4px;background:var(--accent);opacity:1;}
+.vob-dot.done{background:var(--accent);opacity:.55;}
+.vob-skip{background:none;border:none;cursor:pointer;font-family:inherit;font-size:13px;color:var(--text-tertiary);padding:4px 6px;}
+.vob-skip:hover{color:var(--text-secondary);}
+.vob-body{flex:1;position:relative;overflow:hidden;}
+.vob-screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:28px 32px 8px;opacity:0;transform:translateX(28px);pointer-events:none;transition:opacity .4s ease,transform .45s cubic-bezier(.4,0,.2,1);}
+.vob-screen.active{opacity:1;transform:translateX(0);pointer-events:auto;}
+.vob-screen.left{transform:translateX(-28px);}
+.vob-visual{flex:1;display:flex;align-items:center;justify-content:center;min-height:248px;}
+.vob-copy{padding:6px 2px 0;}
+.vob-eyebrow{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--accent);background:var(--accent-dim);border-radius:20px;padding:4px 11px;margin-bottom:13px;}
+.vob-title{font-size:23px;font-weight:800;line-height:1.32;letter-spacing:-.03em;color:var(--text);margin-bottom:9px;}
+.vob-sub{font-size:14.5px;line-height:1.6;color:var(--text-secondary);font-weight:500;}
+.vob-foot{padding:16px 32px 26px;}
+.vob-btn{width:100%;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;border-radius:8px;padding:14px;background:var(--accent);color:#fff;transition:all .15s;box-shadow:0 2px 8px rgba(127,119,221,.28);}
+.vob-btn:hover{background:var(--accent-hover);transform:translateY(-1px);}
+.vob-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:8px;padding:5px 10px;border:1px solid;}
+.vob-chip .dot{width:7px;height:7px;border-radius:50%;}
+.vob-chip.obs{color:var(--memo-observation);background:var(--memo-observation-dim);border-color:var(--memo-observation);}
+.vob-chip.obs .dot{background:var(--memo-observation);}
+.vob-chip.con{color:var(--memo-consultation);background:var(--memo-consultation-dim);border-color:var(--memo-consultation);}
+.vob-chip.con .dot{background:var(--memo-consultation);}
+.vob-chip.life{color:var(--memo-life);background:var(--memo-life-dim);border-color:var(--memo-life);}
+.vob-chip.life .dot{background:var(--memo-life);}
+.vob-chip.picked{box-shadow:0 0 0 3px var(--memo-observation-dim);transform:scale(1.04);}
+.vob-chip.dimmed{opacity:.45;}
+.s1-wrap{display:flex;flex-direction:column;align-items:center;width:100%;}
+.s1-memo{max-width:292px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:14px;color:var(--text);line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.05);position:relative;}
+.s1-memo .mention{color:var(--accent);font-weight:700;}
+.s1-memo .enter{position:absolute;right:11px;bottom:-11px;font-size:10px;font-weight:700;color:#fff;background:var(--accent);border-radius:5px;padding:2px 7px;}
+.s1-quicktag{font-size:11px;color:var(--text-tertiary);font-weight:600;margin:17px 0 8px;}
+.s1-branch{width:2px;height:18px;background:linear-gradient(var(--border-strong),var(--border));margin:0 0 9px;}
+.s1-chips{display:flex;gap:8px;justify-content:center;}
+.s2-wrap{display:flex;flex-direction:column;align-items:center;width:100%;gap:8px;}
+.s2-records{width:100%;max-width:320px;display:flex;flex-direction:column;gap:4px;}
+.s2-rec{display:flex;align-items:center;gap:8px;background:var(--bg-surface);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--text-secondary);}
+.s2-rec .b{font-size:9.5px;font-weight:700;border-radius:5px;padding:1px 6px;flex-shrink:0;}
+.s2-rec .b.obs{color:var(--memo-observation);background:var(--memo-observation-dim);}
+.s2-rec .b.con{color:var(--memo-consultation);background:var(--memo-consultation-dim);}
+.s2-rec .b.par{color:var(--memo-parent);background:var(--memo-parent-dim);}
+.s2-rec .date{color:var(--text-tertiary);flex-shrink:0;}
+.s2-rec .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.s2-arrow{font-size:15px;color:var(--accent);}
+.s2-prompt{width:100%;max-width:320px;background:var(--bg-surface);border:1px solid var(--border-accent);border-radius:12px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.09);}
+.s2-phead{display:flex;align-items:center;gap:7px;padding:9px 13px;background:var(--memo-consultation-dim);border-bottom:1px solid var(--border);}
+.s2-phead .lock{display:flex;color:var(--memo-consultation);}
+.s2-phead .ttl{font-size:11.5px;font-weight:700;color:var(--memo-consultation);}
+.s2-phead .risk{margin-left:auto;font-size:9.5px;font-weight:700;color:var(--danger);background:var(--danger-dim);border-radius:5px;padding:2px 7px;}
+.s2-pbody{padding:11px 13px;display:flex;flex-direction:column;gap:8px;}
+.s2-plabel{font-size:9.5px;font-weight:700;color:var(--accent);letter-spacing:.03em;display:flex;align-items:center;gap:4px;margin-bottom:4px;}
+.s2-plabel::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px;}
+.s2-pline{font-size:11px;line-height:1.55;color:var(--text-secondary);}
+.s2-pline .tk{color:var(--accent);background:var(--accent-dim);border-radius:4px;padding:0 4px;font-weight:700;font-size:10px;}
+.s2-pline b{color:var(--text);font-weight:600;}
+.s2-steps{display:flex;flex-direction:column;gap:2px;}
+.s2-step{display:flex;gap:6px;font-size:10.5px;color:var(--text-secondary);line-height:1.5;}
+.s2-step .n{color:var(--memo-consultation);font-weight:700;}
+.s2-pline.forbid{font-size:10px;color:var(--danger);}
+.s2-pline.legal{font-size:10px;color:var(--text-tertiary);}
+.s3-wrap{display:flex;flex-direction:column;align-items:center;width:100%;gap:13px;}
+.s3-stack{position:relative;width:236px;height:96px;}
+.s3-rec{position:absolute;left:50%;width:208px;background:var(--bg-surface);border:1px solid var(--border);border-radius:9px;padding:7px 12px;font-size:11px;color:var(--text-secondary);box-shadow:0 2px 7px rgba(0,0,0,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.s3-rec b{color:var(--text);}
+.s3-rec:nth-child(1){transform:translateX(-50%) rotate(-3deg);z-index:1;}
+.s3-rec:nth-child(2){transform:translateX(-50%) translateY(7px) rotate(2deg);z-index:2;}
+.s3-rec:nth-child(3){transform:translateX(-50%) translateY(14px) rotate(-1.5deg);z-index:3;}
+.s3-rec:nth-child(4){transform:translateX(-50%) translateY(21px) rotate(1deg);z-index:4;}
+.s3-rec:nth-child(5){transform:translateX(-50%) translateY(28px) rotate(-.5deg);z-index:5;}
+.s3-arrow{font-size:18px;color:var(--accent);}
+.s3-doc{width:236px;background:var(--accent-dim);border:1.5px solid var(--border-accent);border-radius:11px;padding:13px 15px;}
+.s3-tabs{display:flex;gap:6px;margin-bottom:9px;}
+.s3-tab{font-size:10.5px;font-weight:700;color:var(--accent);background:var(--bg-surface);border:1px solid var(--border-accent);border-radius:6px;padding:2px 8px;}
+.s3-line{height:6px;border-radius:3px;background:var(--accent);opacity:.22;margin-bottom:6px;}
+.s3-line:nth-child(2){width:100%;}.s3-line:nth-child(3){width:88%;}.s3-line:nth-child(4){width:94%;margin-bottom:0;}
+.s4-shield{width:78px;height:78px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(127,119,221,.35);margin-bottom:22px;}
+.s4-rows{display:flex;flex-direction:column;gap:10px;width:100%;max-width:312px;}
+.s4-row{display:flex;align-items:center;gap:11px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
+.s4-ico{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--accent-dim);color:var(--accent);}
+.s4-txt{font-size:12.5px;color:var(--text-secondary);line-height:1.4;}
+.s4-txt b{color:var(--text);font-weight:700;}
+.s5-block{display:flex;flex-direction:column;align-items:center;width:100%;}
+.s5-logo{display:flex;align-items:center;gap:10px;margin-bottom:30px;}
+.s5-mark{width:40px;height:40px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 16px rgba(127,119,221,.32);}
+.s5-name{font-size:21px;font-weight:800;letter-spacing:-.03em;}
+.s5-title{font-size:20px;font-weight:800;letter-spacing:-.03em;color:var(--text);text-align:center;margin-bottom:26px;}
+.s5-wrap{display:flex;flex-direction:column;gap:13px;width:100%;max-width:330px;}
+.s5-opt{display:flex;align-items:center;gap:14px;cursor:pointer;background:var(--bg-surface);border:1.5px solid var(--border);border-radius:13px;padding:17px 18px;font-family:inherit;transition:all .15s;width:100%;}
+.s5-opt:hover{border-color:var(--accent);background:var(--accent-dim);transform:translateY(-1px);}
+.s5-ico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:21px;background:var(--accent-dim);}
+.s5-main{font-size:15px;font-weight:700;color:var(--text);}
+.s5-opt .arr{margin-left:auto;color:var(--text-tertiary);font-size:19px;}
+.s5-opt:hover .arr{color:var(--accent);}
+.vob-stagger>*{opacity:0;}
+@keyframes vobFloat{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.vob-screen.active .vob-visual>*{animation:vobFloat .5s .05s both;}
+.vob-screen.active .vob-eyebrow{animation:vobFloat .45s .12s both;}
+.vob-screen.active .vob-title{animation:vobFloat .45s .18s both;}
+.vob-screen.active .vob-sub{animation:vobFloat .45s .24s both;}
+.vob-screen.active .vob-stagger>*{animation:vobFloat .5s both;}
+.vob-screen.active .vob-stagger>*:nth-child(1){animation-delay:.16s;}
+.vob-screen.active .vob-stagger>*:nth-child(2){animation-delay:.24s;}
+.vob-screen.active .vob-stagger>*:nth-child(3){animation-delay:.32s;}
+.vob-screen.active .vob-stagger>*:nth-child(4){animation-delay:.40s;}
+.vob-screen.active .vob-stagger>*:nth-child(5){animation-delay:.48s;}
+[data-theme="dark"] .vob-card{box-shadow:0 12px 48px rgba(0,0,0,.5);}
 </style>
 <script>
 window.addEventListener('load', function(){
@@ -7074,6 +7186,122 @@ window.addEventListener('load', function(){
 </script>
 </head>
 <body>
+
+<!-- ═══ 가치 온보딩 (5화면 인트로) ═══ -->
+<div id="vob-overlay" class="vob-overlay" style="display:none;">
+  <div class="vob-card">
+    <div class="vob-top">
+      <div class="vob-dots" id="vob-dots"></div>
+      <button class="vob-skip" id="vob-skip" onclick="vobFinish()">건너뛰기</button>
+    </div>
+    <div class="vob-body">
+      <!-- 1 기록 -->
+      <section class="vob-screen active" data-i="0">
+        <div class="vob-visual"><div class="s1-wrap vob-stagger">
+          <div class="s1-memo"><span class="mention">@홍길동</span> 끝까지 차분하게 모둠활동 진행<span class="enter">↵ Enter</span></div>
+          <div class="s1-quicktag">엔터 한 번으로 적고, 태그만 톡</div>
+          <div class="s1-branch"></div>
+          <div class="s1-chips">
+            <span class="vob-chip obs picked"><span class="dot"></span>관찰</span>
+            <span class="vob-chip con dimmed"><span class="dot"></span>상담</span>
+            <span class="vob-chip life dimmed"><span class="dot"></span>생활</span>
+          </div>
+        </div></div>
+        <div class="vob-copy"><span class="vob-eyebrow">기록</span>
+          <h2 class="vob-title">쉽게 기록하고, 손쉽게 태그로</h2>
+          <p class="vob-sub">엔터 한 번으로 입력한 기록을 편하게 분류하세요.</p>
+        </div>
+      </section>
+      <!-- 2 상담 -->
+      <section class="vob-screen" data-i="1">
+        <div class="vob-visual"><div class="s2-wrap vob-stagger">
+          <div class="s2-records">
+            <div class="s2-rec"><span class="b obs">관찰</span><span class="date">5/03</span><span class="txt">모둠활동 적극성 향상</span></div>
+            <div class="s2-rec"><span class="b con">상담</span><span class="date">5/12</span><span class="txt">진로 고민 — 본인 상담 요청</span></div>
+            <div class="s2-rec"><span class="b par">학부모</span><span class="date">5/20</span><span class="txt">가정 학습 습관 문의</span></div>
+          </div>
+          <div class="s2-arrow">↓</div>
+          <div class="s2-prompt">
+            <div class="s2-phead">
+              <span class="lock"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <span class="ttl">익명화된 상담 준비 프롬프트</span>
+              <span class="risk">위험도 2/5</span>
+            </div>
+            <div class="s2-pbody">
+              <div><div class="s2-plabel">사안 분석</div>
+                <div class="s2-pline"><span class="tk">[학생]</span> · <span class="tk">[학년][반]</span> · 유형 <b>우려·호소</b> · 누적기록 3건 반영</div></div>
+              <div><div class="s2-plabel">작성 지침 · 4단계</div>
+                <div class="s2-steps">
+                  <div class="s2-step"><span class="n">1</span>시작 — 공감 도입 멘트</div>
+                  <div class="s2-step"><span class="n">2</span>본론 — 강점·사실 기반 3포인트</div>
+                  <div class="s2-step"><span class="n">3</span>분기 — 학부모 반응별 대응</div>
+                  <div class="s2-step"><span class="n">4</span>마무리 — 협력·후속 재확인</div>
+                </div></div>
+              <div><div class="s2-plabel">규정 가드</div>
+                <div class="s2-pline forbid">⛔ 진단·약속·타학생 정보 언급 금지</div>
+                <div class="s2-pline legal">§ 개인정보 보호 규정 자동 반영</div></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="vob-copy"><span class="vob-eyebrow">상담</span>
+          <h2 class="vob-title">준비는 맡기고, 대화에 집중하세요</h2>
+          <p class="vob-sub">매뉴얼과 상담 양식에 맞춘 익명 프롬프트를 만들어 드립니다.</p>
+        </div>
+      </section>
+      <!-- 3 생기부 -->
+      <section class="vob-screen" data-i="2">
+        <div class="vob-visual"><div class="s3-wrap vob-stagger">
+          <div class="s3-stack">
+            <div class="s3-rec">3/12 <b>관찰</b> · 모둠 토론 리더 역할</div>
+            <div class="s3-rec">3/28 <b>관찰</b> · 학급 1인 1역 성실 수행</div>
+            <div class="s3-rec">4/08 <b>관찰</b> · 과학 실험 보고서 우수</div>
+            <div class="s3-rec">4/30 <b>상담</b> · 독서 토론 적극 참여</div>
+            <div class="s3-rec">5/21 <b>상담</b> · 진로 희망 구체화</div>
+          </div>
+          <div class="s3-arrow">↓</div>
+          <div class="s3-doc">
+            <div class="s3-tabs"><span class="s3-tab">창체</span><span class="s3-tab">과세특</span><span class="s3-tab">행발</span></div>
+            <div class="s3-line"></div><div class="s3-line"></div><div class="s3-line"></div>
+          </div>
+        </div></div>
+        <div class="vob-copy"><span class="vob-eyebrow">생기부</span>
+          <h2 class="vob-title">기록은 이미 쌓여 있습니다</h2>
+          <p class="vob-sub">기재요령에 맞춰 창체·과세특·행발 초안이 됩니다.</p>
+        </div>
+      </section>
+      <!-- 4 안심 -->
+      <section class="vob-screen" data-i="3">
+        <div class="vob-visual"><div style="display:flex;flex-direction:column;align-items:center;width:100%;" class="vob-stagger">
+          <div class="s4-shield"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <div class="s4-rows">
+            <div class="s4-row"><div class="s4-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div class="s4-txt"><b>이름은 익명 토큰</b>으로 치환해 AI에 전달</div></div>
+            <div class="s4-row"><div class="s4-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg></div><div class="s4-txt"><b>기재 금지어</b>를 미리 걸러 냅니다</div></div>
+            <div class="s4-row"><div class="s4-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div><div class="s4-txt"><b>모든 기록은 이 기기에만</b> 저장됩니다</div></div>
+          </div>
+        </div></div>
+        <div class="vob-copy"><span class="vob-eyebrow">안심</span>
+          <h2 class="vob-title">규정도, 학생 정보도 지킵니다</h2>
+          <p class="vob-sub">모든 기록은 익명화되어 이 기기에만 남습니다.</p>
+        </div>
+      </section>
+      <!-- 5 시작 -->
+      <section class="vob-screen" data-i="4">
+        <div class="vob-visual"><div class="s5-block">
+          <div class="s5-logo">
+            <div class="s5-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+            <span class="s5-name">쌤로그</span>
+          </div>
+          <div class="s5-title">선생님의 방식으로 시작하세요</div>
+          <div class="s5-wrap vob-stagger">
+            <button class="s5-opt" onclick="vobStartSample()"><div class="s5-ico">💡</div><div class="s5-main">샘플로 둘러보기</div><span class="arr">›</span></button>
+            <button class="s5-opt" onclick="vobStartReal()"><div class="s5-ico">🏫</div><div class="s5-main">내 학급으로 시작</div><span class="arr">›</span></button>
+          </div>
+        </div></div>
+      </section>
+    </div>
+    <div class="vob-foot" id="vob-foot"><button class="vob-btn" id="vob-next" onclick="vobNext()">다음</button></div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════
      NEIS 설정 모달
@@ -7214,7 +7442,7 @@ window.addEventListener('load', function(){
 <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
   <div class="onboarding-card">
     <!-- STEP FORK: 갈림길 — 샘플 vs 내 학급 -->
-    <div id="onboarding-step-fork" class="onboarding-step">
+    <div id="onboarding-step-fork" class="onboarding-step" style="display:none;">
       <!-- 브랜드 마크 -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;">
         <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></span>
@@ -7322,7 +7550,6 @@ window.addEventListener('load', function(){
       </div>
 
       <div class="onboarding-actions" style="justify-content:flex-end;">
-        <button class="btn-text" onclick="skipOnboardingStep1()" style="font-size:12px;color:var(--text-tertiary);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 8px;">나중에 설정할게요</button>
         <button class="btn-primary" id="ob-next-1" disabled onclick="onboardingNext(2)">다음 →</button>
       </div>
     </div>
@@ -18617,17 +18844,20 @@ function goToOnboardingForm(){
 }
 
 function backToOnboardingFork(){
+  document.getElementById('onboarding-overlay').style.display = 'none';
   document.getElementById('onboarding-step-1').style.display = 'none';
   document.getElementById('onboarding-step-2').style.display = 'none';
   document.getElementById('onboarding-step-3').style.display = 'none';
-  var fork = document.getElementById('onboarding-step-fork');
-  if(fork) fork.style.display = 'block';
+  vobInitDots();
+  vobCur = VOB_TOTAL - 1;
+  vobRender();
+  document.getElementById('vob-overlay').style.display = 'flex';
 }
 
 function showOnboarding(){
   document.getElementById('onboarding-overlay').style.display = 'flex';
   var fork = document.getElementById('onboarding-step-fork');
-  if(fork) fork.style.display = 'block';
+  if(fork) fork.style.display = 'none';
   document.getElementById('onboarding-step-1').style.display = 'none';
   document.getElementById('onboarding-step-2').style.display = 'none';
   document.getElementById('onboarding-step-3').style.display = 'none';
@@ -29595,7 +29825,7 @@ function init(){
 
   var classKeys = Object.keys(classes);
   if(!onboarded || classKeys.length === 0){
-    showOnboarding();
+    showValueOnboarding();
     return;
   }
 
@@ -30045,6 +30275,77 @@ function toggleSessionBadgeVisibility(){
   localStorage.setItem('ht2_class_view_settings', JSON.stringify(classViewSettings));
   renderClassWeek();
 }
+
+/* ═══════════ 가치 온보딩 컨트롤러 ═══════════ */
+var VOB_TOTAL = 5;
+var vobCur = 0;
+function vobInitDots(){
+  var w = document.getElementById('vob-dots');
+  if(w.childElementCount) return;
+  for(var i=0;i<VOB_TOTAL;i++){
+    var d = document.createElement('div');
+    d.className = 'vob-dot' + (i===0?' active':'');
+    w.appendChild(d);
+  }
+}
+function vobRender(){
+  document.querySelectorAll('#vob-overlay .vob-screen').forEach(function(s){
+    var idx = +s.dataset.i;
+    s.classList.remove('active','left');
+    if(idx===vobCur) s.classList.add('active');
+    else if(idx<vobCur) s.classList.add('left');
+  });
+  document.querySelectorAll('#vob-dots .vob-dot').forEach(function(d,idx){
+    d.classList.remove('active','done');
+    if(idx===vobCur) d.classList.add('active');
+    else if(idx<vobCur) d.classList.add('done');
+  });
+  var foot = document.getElementById('vob-foot');
+  var skip = document.getElementById('vob-skip');
+  var next = document.getElementById('vob-next');
+  if(vobCur===VOB_TOTAL-1){
+    foot.style.display='none'; skip.style.visibility='hidden';
+  } else {
+    foot.style.display='block'; skip.style.visibility='visible';
+    next.textContent = (vobCur===VOB_TOTAL-2) ? '시작하기' : '다음';
+  }
+}
+function vobNext(){ if(vobCur<VOB_TOTAL-1){ vobCur++; vobRender(); } }
+function vobFinish(){ vobCur=VOB_TOTAL-1; vobRender(); }
+function showValueOnboarding(){
+  vobInitDots(); vobCur=0; vobRender();
+  document.getElementById('vob-overlay').style.display='flex';
+}
+function hideValueOnboarding(){
+  document.getElementById('vob-overlay').style.display='none';
+}
+function vobStartSample(){
+  hideValueOnboarding();
+  startWithSample();
+}
+function vobStartReal(){
+  hideValueOnboarding();
+  document.getElementById('onboarding-overlay').style.display='flex';
+  goToOnboardingForm();
+}
+document.addEventListener('keydown', function(e){
+  var ov = document.getElementById('vob-overlay');
+  if(ov && ov.style.display!=='none'){
+    if(e.key==='ArrowRight') vobNext();
+    if(e.key==='ArrowLeft' && vobCur>0){ vobCur--; vobRender(); }
+    return;
+  }
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){
+    var onbOv = document.getElementById('onboarding-overlay');
+    if(!onbOv || onbOv.style.display==='none') return;
+    var s1=document.getElementById('onboarding-step-1');
+    var s2=document.getElementById('onboarding-step-2');
+    var s3=document.getElementById('onboarding-step-3');
+    if(s1&&s1.style.display!=='none'){ var b1=document.getElementById('ob-next-1'); if(b1&&!b1.disabled){ e.preventDefault(); onboardingNext(2); } }
+    else if(s2&&s2.style.display!=='none'){ e.preventDefault(); onboardingNext(3); }
+    else if(s3&&s3.style.display!=='none'){ e.preventDefault(); completeOnboarding(); }
+  }
+});
 </script>
 
 <!-- ═══════════════════════════════════════════
