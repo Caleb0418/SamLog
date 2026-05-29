@@ -7633,7 +7633,7 @@ window.addEventListener('load', function(){
 <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
   <div class="onboarding-card">
     <!-- STEP FORK: 갈림길 — 샘플 vs 내 학급 -->
-    <div id="onboarding-step-fork" class="onboarding-step">
+    <div id="onboarding-step-fork" class="onboarding-step" style="display:none;">
       <!-- 브랜드 마크 -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;">
         <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></span>
@@ -19038,17 +19038,20 @@ function goToOnboardingForm(){
 }
 
 function backToOnboardingFork(){
+  document.getElementById('onboarding-overlay').style.display = 'none';
   document.getElementById('onboarding-step-1').style.display = 'none';
   document.getElementById('onboarding-step-2').style.display = 'none';
   document.getElementById('onboarding-step-3').style.display = 'none';
-  var fork = document.getElementById('onboarding-step-fork');
-  if(fork) fork.style.display = 'block';
+  vobInitDots();
+  vobCur = VOB_TOTAL - 1;
+  vobRender();
+  document.getElementById('vob-overlay').style.display = 'flex';
 }
 
 function showOnboarding(){
   document.getElementById('onboarding-overlay').style.display = 'flex';
   var fork = document.getElementById('onboarding-step-fork');
-  if(fork) fork.style.display = 'block';
+  if(fork) fork.style.display = 'none';
   document.getElementById('onboarding-step-1').style.display = 'none';
   document.getElementById('onboarding-step-2').style.display = 'none';
   document.getElementById('onboarding-step-3').style.display = 'none';
