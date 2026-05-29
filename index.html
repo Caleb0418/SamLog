@@ -19635,6 +19635,48 @@ function startWithSample(){
   completeOnboarding();
 }
 
+function convertSampleToReal(){
+  if(!confirm('샘플 데이터를 비우고 내 학급 정보를 입력할게요.\n\n샘플로 만든 학급·기록이 사라집니다. (가상 데이터라 되돌릴 필요 없어요.) 계속할까요?')) return;
+  try{
+    classes = {};
+    classMaster = [];
+    schoolTimetable = {};
+    if(typeof timetableOverrides !== 'undefined') timetableOverrides = {};
+    if(typeof timetableChangeHistory !== 'undefined') timetableChangeHistory = [];
+    if(typeof ttSyncState !== 'undefined') ttSyncState = {};
+    if(typeof adhocSlots !== 'undefined') adhocSlots = [];
+    creativeActivities = [];
+    if(typeof classSchedule !== 'undefined') classSchedule = [];
+    if(typeof attendanceRecords !== 'undefined') attendanceRecords = {};
+    if(typeof schoolSchedule !== 'undefined') schoolSchedule = {};
+    if(typeof userSchedule !== 'undefined') userSchedule = {};
+    currentClassKey = '';
+    if(typeof syncActiveClass === 'function') syncActiveClass();
+    saveAll();
+  }catch(e){ console.error('convertSampleToReal 초기화 실패', e); }
+  try{ localStorage.removeItem('ht2_sample_mode'); }catch(e){}
+  try{ localStorage.removeItem('ht2_onboarded'); }catch(e){}
+  // 폼 사전입력에 샘플 값이 남지 않도록 전역 초기화
+  TEACHER_NAME = '';
+  SCHOOL_GRADE = '';
+  SCHOOL_CLASS = '';
+  if(typeof onboardingData === 'object' && onboardingData){
+    onboardingData.isSample = false;
+    onboardingData.teacher = '';
+    onboardingData.grade = '';
+    onboardingData.classNum = '';
+    onboardingData.parsedStudents = [];
+  }
+  // 인트로 투어 떠 있으면 닫기
+  var tour = document.getElementById('tour-panel');
+  if(tour) tour.classList.remove('show');
+  // 전역 띠배너 갱신 (이제 숨김)
+  if(typeof renderGlobalSampleBanner === 'function') renderGlobalSampleBanner();
+  // 가치 온보딩 5화면은 건너뛰고 내 학급 정보 입력 폼으로 바로 진입
+  if(typeof showOnboarding === 'function') showOnboarding();
+  if(typeof goToOnboardingForm === 'function') goToOnboardingForm();
+}
+
 function exitSampleMode(thenSetup){
   var ok = confirm('샘플 데이터를 비울까요?\n\n샘플로 만든 학급·기록이 사라지고 빈 상태에서 새로 시작해요.\n(샘플은 가상 데이터라 되돌릴 필요가 없어요.)');
   if(!ok) return;
@@ -21612,7 +21654,7 @@ function renderGlobalSampleBanner(){
       '</button>'+
     '</div>';
   var btn = document.getElementById('global-sample-convert-btn');
-  if(btn) btn.onclick = function(){ exitSampleMode(true); };
+  if(btn) btn.onclick = function(){ convertSampleToReal(); };
 }
 
 function maybeShowIntroModalOnce(){
