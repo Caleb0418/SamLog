@@ -8347,7 +8347,7 @@ window.addEventListener('load', function(){
           <span class="tour-sub-counter">(<span id="tour-sub-cur">1</span>/<span id="tour-sub-total">3</span>)</span>
         </div>
         <div class="tour-head-right">
-          <span class="tour-total-counter"><span id="tour-cur">1</span>/20</span>
+          <span class="tour-total-counter"><span id="tour-cur">1</span>/21</span>
           <button class="tour-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
         </div>
       </div>
@@ -21117,9 +21117,13 @@ var TOUR_STEPS = [
     desc:'오늘 있었던 일을 한 줄로 남겨보세요.\n@이름은 학생 기록에, @전체는 반 공지로 자동 연결돼요.',
     highlight:'.quick-memo-card', tryFocus:'#quick-memo-input' },
   { tab:'home', tabIcon:'🏠', tabName:'홈',
-    title:'오늘 수업·알람·제출 추적',
-    desc:'수업 3분 전 알람과 학생별 제출 현황을 홈에서 한눈에 볼 수 있어요.',
-    highlight:'#home-class-rows, #home-alerts, #qm-submit-toggle-wrap, #home-submit-widget',
+    title:'제출 추적',
+    desc:'퀵메모를 작성하고 제출 추적을 켠 뒤 저장하면\n학생별 제출 현황을 관리할 수 있어요.',
+    highlight:'#qm-submit-toggle-wrap, #home-submit-widget' },
+  { tab:'home', tabIcon:'🏠', tabName:'홈',
+    title:'오늘 수업·알람',
+    desc:'오늘 수업과 챙길 알림을 한눈에 모아 봐요.',
+    highlight:'#home-class-rows, #home-alerts',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'수업을 등록하면 오늘 수업 카드가 표시돼요.' },
   { tab:'home', tabIcon:'🏠', tabName:'홈',
