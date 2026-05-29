@@ -30721,10 +30721,24 @@ function vobStartReal(){
 }
 
 document.addEventListener('keydown', function(e){
+  // 가치 온보딩 좌우 화살표
   var ov = document.getElementById('vob-overlay');
-  if(!ov || ov.style.display==='none') return;
-  if(e.key==='ArrowRight') vobNext();
-  if(e.key==='ArrowLeft' && vobCur>0){ vobCur--; vobRender(); }
+  if(ov && ov.style.display!=='none'){
+    if(e.key==='ArrowRight') vobNext();
+    if(e.key==='ArrowLeft' && vobCur>0){ vobCur--; vobRender(); }
+    return;
+  }
+  // 정보입력 온보딩 Ctrl+Enter → 다음
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){
+    var onbOv = document.getElementById('onboarding-overlay');
+    if(!onbOv || onbOv.style.display==='none') return;
+    var s1 = document.getElementById('onboarding-step-1');
+    var s2 = document.getElementById('onboarding-step-2');
+    var s3 = document.getElementById('onboarding-step-3');
+    if(s1 && s1.style.display!=='none'){ var b1=document.getElementById('ob-next-1'); if(b1&&!b1.disabled){ e.preventDefault(); onboardingNext(2); } }
+    else if(s2 && s2.style.display!=='none'){ e.preventDefault(); onboardingNext(3); }
+    else if(s3 && s3.style.display!=='none'){ e.preventDefault(); completeOnboarding(); }
+  }
 });
 </script>
 
