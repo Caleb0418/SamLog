@@ -7040,6 +7040,7 @@ textarea.memo-input{resize:vertical;line-height:1.7;min-height:60px;}
 }
 .tour-desc{
   font-size:12.5px;color:var(--text-secondary);line-height:1.55;
+  white-space:pre-line;
 }
 .tour-empty-hint{
   font-size:12px;color:var(--text-tertiary);
@@ -8346,7 +8347,7 @@ window.addEventListener('load', function(){
           <span class="tour-sub-counter">(<span id="tour-sub-cur">1</span>/<span id="tour-sub-total">3</span>)</span>
         </div>
         <div class="tour-head-right">
-          <span class="tour-total-counter"><span id="tour-cur">1</span>/21</span>
+          <span class="tour-total-counter"><span id="tour-cur">1</span>/20</span>
           <button class="tour-close" onclick="closeIntroModal()" aria-label="닫기">×</button>
         </div>
       </div>
@@ -21113,7 +21114,7 @@ var TOUR_STEPS = [
   // 1️⃣ 홈 (3)
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'퀵 메모 + @멘션으로 학생·반 자동 연결',
-    desc:'오늘 있었던 일을 한 줄로 남겨보세요. @이름은 학생 기록에, @전체는 반 공지로 자동 연결돼요.',
+    desc:'오늘 있었던 일을 한 줄로 남겨보세요.\n@이름은 학생 기록에, @전체는 반 공지로 자동 연결돼요.',
     highlight:'.quick-memo-card', tryFocus:'#quick-memo-input' },
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'오늘 수업·알람·제출 추적',
@@ -21123,7 +21124,7 @@ var TOUR_STEPS = [
     emptyHint:'수업을 등록하면 오늘 수업 카드가 표시돼요.' },
   { tab:'home', tabIcon:'🏠', tabName:'홈',
     title:'월간 일정 — 학사·개인·마감',
-    desc:'월간 캘린더로 학사 일정, 개인 일정, 마감을 한 화면에. 날짜를 클릭해 일정을 추가하세요.',
+    desc:'월간 캘린더로 학사·개인·마감 일정을 한 화면에 모아 봐요.\n날짜를 클릭해 일정을 추가하세요.',
     highlight:'[onclick*="openMonthlySchedule"], #home-monthly-btn' },
 
   // 2️⃣ 출결 (2)
@@ -21132,10 +21133,10 @@ var TOUR_STEPS = [
     desc:'오늘 출결을 체크하면 NEIS 동일 형식으로 자동 관리돼요.',
     highlight:'#att-view-daily',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
-    emptyHint:'수업이 등록되면 학생별 출결표가 나타나요.' },
+    emptyHint:'학생 행을 누르면 결시 사유와 메모를 함께 입력할 수 있어요.' },
   { tab:'attendance', subview:{fn:'switchAttView', arg:'student-monthly'}, tabIcon:'✓', tabName:'출결',
     title:'학생별·반 전체 월간 뷰',
-    desc:'한 달 누락 없이 관리할 수 있어요. 학생별/반 전체 두 가지 뷰가 있어요.',
+    desc:'한 달 누락 없이 관리할 수 있어요.\n학생별 / 반 전체 두 가지 뷰를 제공해요.',
     highlight:'#att-view-student-monthly',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'데이터가 쌓이면 월간 뷰가 채워져요.' },
@@ -21147,58 +21148,70 @@ var TOUR_STEPS = [
     highlight:'[onclick*="openClassSettings"]',
     tryFn:function(){ if(typeof openClassSettings==='function') openClassSettings(); } },
   { tab:'class', subview:{fn:'switchClassView', arg:'today'}, tabIcon:'📅', tabName:'수업 관리',
-    title:'오늘 수업 카드 + 차시 메모',
-    desc:'수업이 끝나면 진도·반 특이사항·학생 멘션을 종소리 직후 한 줄로.',
+    title:'오늘 수업 카드 + 수업 메모',
+    desc:'수업 카드에 진도·특이사항·학생 멘션을 한 줄로 메모해요.',
     highlight:'#class-view-today',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'내 수업을 등록하면 오늘 카드가 채워져요.' },
   { tab:'class', subview:{fn:'switchClassView', arg:'week'}, tabIcon:'📅', tabName:'수업 관리',
     title:'주간 시간표 + NEIS 자동 매칭',
-    desc:'담당 수업만 등록하면 차시 카운팅과 휴강 자동 제외까지 처리돼요.',
+    desc:'수업 차시별 카운팅과 학사일정이 자동으로 매칭돼요.',
     highlight:'#class-view-week',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
     emptyHint:'수업을 등록하면 주간 시간표가 보여요.' },
   { tab:'class', subview:{fn:'switchClassView', arg:'schedule'}, tabIcon:'📅', tabName:'수업 관리',
     title:'반 시간표 + 창체 시간표 등록',
-    desc:'담임은 반 시간표와 창체 시간표를 함께 관리해요. 교과 선생님은 창체 일정만 관리해요.',
+    desc:'담임은 반 시간표와 창체 시간표를 함께 관리해요.\n교과 선생님은 창체 일정만 관리해요.',
     highlight:'#class-view-schedule' },
   { tab:'class', subview:{fn:'switchClassView', arg:'today'}, tabIcon:'📅', tabName:'수업 관리',
     title:'창체 ON/OFF로 임장 놓치지 않기',
-    desc:'창체 표시를 켜면 오늘·주간 시간표에 겹치는 창체가 배지로 표시돼요. 임장 누락을 막아줘요.',
+    desc:'창체 표시를 켜면 오늘·주간 시간표에 겹치는 창체가 배지로 표시돼요.\n임장 누락을 막아줘요.',
     highlight:'[onclick*="toggleCsOnSchedule"]',
     tryFn:function(){ if(typeof toggleCsOnSchedule==='function') toggleCsOnSchedule(); } },
   { tab:'class', subview:{fn:'switchClassView', arg:'records'}, tabIcon:'📅', tabName:'수업 관리',
-    title:'차시 기록 뷰',
-    desc:'누적된 차시 메모와 진도를 한눈에 확인할 수 있어요.',
+    title:'누적 기록 뷰',
+    desc:'누적된 수업 메모와 진도를 한눈에 확인할 수 있어요.',
     highlight:'#class-view-records',
     emptyCheck:function(){ return !(typeof classMaster!=='undefined' && classMaster && classMaster.length>0); },
-    emptyHint:'차시 메모가 쌓이면 기록 뷰가 채워져요.' },
+    emptyHint:'수업 메모가 쌓이면 기록 뷰가 채워져요.' },
 
-  // 4️⃣ 학생 관리 (4)
+  // 4️⃣ 학생 관리 (3) — 검색 단계 제거됨
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'학생 선택 → 통합 타임라인',
-    desc:'학생 한 명을 누르면 관찰·상담·생활·학부모·출결·생기부 기록이 한 타임라인에 모여요.',
-    highlight:'#sidebar-content',
+    desc:'학생 한 명을 누르면 관찰·상담·생활·학부모·출결·생기부 기록이\n한 타임라인에 모여요.',
+    highlight:'#sidebar-content .student-row.active, #sidebar-content .student-row:first-child',
+    setupFn:function(){
+      // 첫 학생 자동 선택 — 글로우가 명확히 한 row에 들어가도록
+      if(typeof currentStudent === 'undefined' || !currentStudent){
+        var firstRow = document.querySelector('#sidebar-content .student-row');
+        if(firstRow && firstRow.dataset.num && typeof selectStudent === 'function'){
+          selectStudent(firstRow.dataset.num);
+        }
+      }
+    },
     emptyCheck:function(){ var els=document.querySelectorAll('#sidebar-content .student-row'); return els.length===0; },
     emptyHint:'수업이 등록되면 학생이 자동으로 추가돼요.' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'5색 메모 분류',
-    desc:'관찰·상담·생활·학부모·미분류 — 색상 필터로 빠른 정리가 가능해요.',
-    highlight:'#filter-group, .record-filter-group',
+    desc:'관찰·상담·생활·학부모·미분류 색상으로 메모를 추가·필터링해요.',
+    highlight:'.record-add-group, #filter-group',
+    setupFn:function(){
+      // 학생 자동 선택 (5색 분류는 학생 선택 후에만 보임)
+      if(typeof currentStudent === 'undefined' || !currentStudent){
+        var firstRow = document.querySelector('#sidebar-content .student-row');
+        if(firstRow && firstRow.dataset.num && typeof selectStudent === 'function'){
+          selectStudent(firstRow.dataset.num);
+        }
+      }
+    },
     emptyCheck:function(){
       var hasStudents = document.querySelectorAll('#sidebar-content .student-row').length > 0;
-      var filterVisible = document.querySelector('#filter-group');
-      return !hasStudents || !filterVisible;
+      return !hasStudents;
     },
-    emptyHint:'좌측에서 학생을 한 명 선택하면 색상 필터가 활성화돼요.' },
-  { tab:'students', tabIcon:'👥', tabName:'학생 관리',
-    title:'검색으로 학생 빠르게 찾기',
-    desc:'사이드바 상단 검색창에 이름을 입력하면 즉시 필터링돼요.',
-    highlight:'#search-input, .search-wrap',
-    tryFocus:'#search-input' },
+    emptyHint:'학생이 등록되면 5색 메모 분류를 사용할 수 있어요.' },
   { tab:'students', tabIcon:'👥', tabName:'학생 관리',
     title:'태그 관리 — 추가·삭제·수정',
-    desc:'관찰 분류로 자동 진입했어요. 폼 안의 "태그 관리" 버튼을 누르면 자주 쓰는 태그를 직접 추가·삭제할 수 있어요.',
+    desc:'관찰 분류로 자동 진입했어요.\n폼 안의 "태그 관리" 버튼으로 자주 쓰는 태그를 추가·삭제할 수 있어요.',
     highlight:'[onclick*="openTagManager"], .tag-manage-link',
     setupFn:function(){
       // 학생 자동 선택 (currentStudent 없으면 첫 학생)
